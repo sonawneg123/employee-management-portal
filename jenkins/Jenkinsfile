@@ -1,0 +1,89 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_REGISTRY = 'ghcr.io/your-org'
+        IMAGE_BACKEND   = "${DOCKER_REGISTRY}/emp-backend"
+        IMAGE_FRONTEND  = "${DOCKER_REGISTRY}/emp-frontend"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+
+        stage('Backend — Build & Test') {
+            steps {
+                dir('backend') {
+                    sh 'mvn clean verify -B'
+                }
+            }
+        }
+
+        stage('Frontend — Install & Build') {
+            steps {
+                dir('frontend') {
+                    sh 'npm ci'
+                    sh 'npm run lint'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            parallel {
+                stage('Backend image') {
+                    steps {
+                        dir('backend') {
+                            sh "docker build -t ${IMAGE_BACKEND}:${GIT_COMMIT} ."
+                        }
+                    }
+                }
+                stage('Frontend image') {
+                    steps {
+                        dir('frontend') {
+                            sh "docker build -t ${IMAGE_FRONTEND}:${GIT_COMMIT} ."
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Push to Registry') {
+            when { branch 'main' }
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'ghcr-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login ghcr.io -u $DOCKER_USER --password-stdin'
+                    sh "docker push ${IMAGE_BACKEND}:${GIT_COMMIT}"
+                    sh "docker push ${IMAGE_FRONTEND}:${GIT_COMMIT}"
+                }
+            }
+        }
+
+        stage('Deploy to EC2') {
+            when { branch 'main' }
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ec2-user@\$EC2_HOST '
+                            cd /opt/emp-portal &&
+                            docker compose pull &&
+                            docker compose up -d --remove-orphans
+                        '
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always  { cleanWs() }
+        success { echo 'Pipeline succeeded.' }
+        failure { echo 'Pipeline FAILED.' }
+    }
+}

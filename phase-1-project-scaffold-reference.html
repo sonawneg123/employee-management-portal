@@ -1,0 +1,358 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Phase 1 — Employee Management Portal</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px; line-height: 1.6;
+    background: #ffffff; color: #1f2328;
+    padding: 32px 16px 48px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; font-size: 13px; margin-bottom: 32px; }
+  h2 { font-size: 15px; font-weight: 700; margin: 32px 0 10px;
+       padding-bottom: 5px; border-bottom: 1px solid #e5e7eb; color: #1f2328; }
+  h3 { font-size: 13px; font-weight: 600; margin: 18px 0 6px; color: #3b82d4; }
+  p  { margin-bottom: 8px; }
+
+  /* badges */
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 1px 7px; border-radius: 10px; margin-right: 4px;
+  }
+  .b-back  { background:#dbeafe; color:#1d4ed8; }
+  .b-front { background:#dcfce7; color:#15803d; }
+  .b-db    { background:#fef9c3; color:#92400e; }
+  .b-devop { background:#ede9fe; color:#6d28d9; }
+
+  /* folder tree */
+  .tree { background:#f7f8fa; border:1px solid #e5e7eb; border-radius:6px;
+          padding:16px 20px; font-family: "Cascadia Code","Fira Mono","Consolas",monospace;
+          font-size:12.5px; line-height:1.8; overflow-x:auto; }
+  .tree .dir  { color:#1d4ed8; font-weight:600; }
+  .tree .file { color:#1f2328; }
+  .tree .note { color:#57606a; font-style:italic; }
+
+  /* dep table */
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-top:8px; }
+  th { background:#f7f8fa; text-align:left; padding:7px 10px;
+       border:1px solid #e5e7eb; font-weight:600; }
+  td { padding:7px 10px; border:1px solid #e5e7eb; vertical-align:top; }
+  tr:nth-child(even) td { background:#fafafa; }
+  td:first-child { font-family:"Cascadia Code","Fira Mono","Consolas",monospace;
+                   font-size:12px; white-space:nowrap; color:#6d28d9; }
+  td:nth-child(2) { white-space:nowrap; color:#57606a; }
+
+  /* config block */
+  .cfg { background:#f7f8fa; border-left:3px solid #3b82d4; border-radius:4px;
+         padding:10px 14px; font-family:"Cascadia Code","Fira Mono","Consolas",monospace;
+         font-size:11.5px; line-height:1.7; overflow-x:auto; margin-top:6px; color:#1f2328; }
+  .kw  { color:#1d4ed8; }
+  .val { color:#15803d; }
+  .cmt { color:#57606a; font-style:italic; }
+
+  footer { margin-top:48px; padding-top:14px; border-top:1px solid #e5e7eb;
+           text-align:center; font-size:12px; color:#57606a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Employee Management Portal</h1>
+  <p class="subtitle">Phase 1 · Project Scaffold &amp; Dependency Reference  ·  Java 17 · Spring Boot 3 · React 19 · MySQL · Docker</p>
+
+  
+  <h2>📁 Folder Structure</h2>
+  <div class="tree">
+<span class="dir">employee-management-portal/</span>
+├── <span class="dir">backend/</span>                             <span class="note"># Spring Boot 3 application</span>
+│   ├── <span class="file">Dockerfile</span>
+│   ├── <span class="file">pom.xml</span>
+│   └── <span class="dir">src/main/</span>
+│       ├── <span class="dir">java/com/emp/portal/</span>
+│       │   ├── <span class="dir">config/</span>          <span class="note"># SecurityConfig, CorsConfig, etc.</span>
+│       │   ├── <span class="dir">controller/</span>      <span class="note"># REST controllers</span>
+│       │   ├── <span class="dir">dto/</span>             <span class="note"># Request / Response DTOs</span>
+│       │   ├── <span class="dir">entity/</span>          <span class="note"># JPA entities</span>
+│       │   ├── <span class="dir">exception/</span>       <span class="note"># Global exception handler</span>
+│       │   ├── <span class="dir">repository/</span>      <span class="note"># Spring Data JPA repos</span>
+│       │   ├── <span class="dir">security/</span>        <span class="note"># JWT filter, UserDetails, etc.</span>
+│       │   ├── <span class="dir">service/</span>         <span class="note"># Business logic layer</span>
+│       │   └── <span class="dir">util/</span>            <span class="note"># JWT utility, helpers</span>
+│       └── <span class="dir">resources/</span>
+│           ├── <span class="file">application.properties</span>
+│           ├── <span class="file">application-prod.properties</span>
+│           └── <span class="dir">db/migration/</span>
+│               └── <span class="file">V1__init_schema.sql</span>   <span class="note"># Flyway baseline</span>
+│
+├── <span class="dir">frontend/</span>                            <span class="note"># React 19 + Vite application</span>
+│   ├── <span class="file">Dockerfile</span>
+│   ├── <span class="file">package.json</span>
+│   ├── <span class="file">vite.config.js</span>
+│   ├── <span class="file">nginx.conf</span>
+│   ├── <span class="dir">public/</span>
+│   └── <span class="dir">src/</span>
+│       ├── <span class="dir">api/</span>             <span class="note"># Axios instances &amp; API calls</span>
+│       ├── <span class="dir">assets/</span>          <span class="note"># Images, fonts</span>
+│       ├── <span class="dir">components/</span>
+│       │   ├── <span class="dir">common/</span>      <span class="note"># Reusable MUI components</span>
+│       │   └── <span class="dir">layout/</span>      <span class="note"># Navbar, Sidebar, Footer</span>
+│       ├── <span class="dir">context/</span>         <span class="note"># React Context (auth, theme)</span>
+│       ├── <span class="dir">hooks/</span>           <span class="note"># Custom React hooks</span>
+│       ├── <span class="dir">pages/</span>
+│       │   ├── <span class="dir">auth/</span>        <span class="note"># Login, Register</span>
+│       │   ├── <span class="dir">dashboard/</span>   <span class="note"># Home dashboard</span>
+│       │   └── <span class="dir">employee/</span>    <span class="note"># CRUD pages</span>
+│       ├── <span class="dir">router/</span>          <span class="note"># React Router config + guards</span>
+│       ├── <span class="dir">store/</span>           <span class="note"># Zustand global state</span>
+│       └── <span class="dir">utils/</span>           <span class="note"># Token helpers, formatters</span>
+│
+├── <span class="dir">.github/workflows/</span>
+│   └── <span class="file">ci.yml</span>                       <span class="note"># GitHub Actions CI/CD</span>
+├── <span class="dir">jenkins/</span>
+│   └── <span class="file">Jenkinsfile</span>
+├── <span class="dir">docker/</span>                              <span class="note"># Extra Docker files if needed</span>
+├── <span class="dir">nginx/</span>                               <span class="note"># Production Nginx overrides</span>
+├── <span class="dir">scripts/</span>                             <span class="note"># Deploy &amp; helper scripts</span>
+├── <span class="file">docker-compose.yml</span>
+└── <span class="file">.env.example</span>
+  </div>
+
+  
+  <h2>☕ Backend — Maven Dependencies <span class="badge b-back">Spring Boot 3 · Java 17</span></h2>
+
+  <h3>Core Framework</h3>
+  <table>
+    <tr><th>Artifact</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>spring-boot-starter-parent</td><td>3.2.5</td>
+      <td>Parent POM — manages all Spring Boot dependency versions, plugin defaults, and encoding. Inheriting it means you never specify versions for Spring libraries individually.</td>
+    </tr>
+    <tr>
+      <td>spring-boot-starter-web</td><td>managed</td>
+      <td>Bundles Spring MVC, embedded Tomcat, Jackson (JSON), and all the plumbing needed to expose RESTful endpoints. The entry point for every HTTP request the server handles.</td>
+    </tr>
+  </table>
+
+  <h3>Persistence</h3>
+  <table>
+    <tr><th>Artifact</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>spring-boot-starter-data-jpa</td><td>managed</td>
+      <td>Brings in Spring Data JPA + Hibernate ORM. Enables repository interfaces, entity management, JPQL queries, and automatic transaction management against any JPA datasource.</td>
+    </tr>
+    <tr>
+      <td>mysql-connector-j</td><td>managed</td>
+      <td>Official MySQL JDBC 8 driver. Runtime-scoped — only needed when the JVM boots, not during compilation. Connects Hibernate to the MySQL 8 server.</td>
+    </tr>
+  </table>
+
+  <h3>Security &amp; JWT</h3>
+  <table>
+    <tr><th>Artifact</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>spring-boot-starter-security</td><td>managed</td>
+      <td>Spring Security auto-configuration — provides authentication filters, method-level security (<code>@PreAuthorize</code>), CSRF, CORS integration, and password encoding via BCrypt.</td>
+    </tr>
+    <tr>
+      <td>jjwt-api</td><td>0.12.5</td>
+      <td>Java JWT compile-time API (interfaces &amp; builders). Allows creating and parsing signed JWT tokens without coupling to the implementation at compile time.</td>
+    </tr>
+    <tr>
+      <td>jjwt-impl</td><td>0.12.5</td>
+      <td>Runtime implementation of the JJWT API. Handles HMAC-SHA256/512 signing and verification. Runtime-scoped because code depends only on the API artifact.</td>
+    </tr>
+    <tr>
+      <td>jjwt-jackson</td><td>0.12.5</td>
+      <td>Jackson-based JSON serialisation adapter for JJWT. Allows claims to be read/written as standard Jackson objects. Runtime-scoped for the same reason as jjwt-impl.</td>
+    </tr>
+  </table>
+
+  <h3>Validation &amp; DX</h3>
+  <table>
+    <tr><th>Artifact</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>spring-boot-starter-validation</td><td>managed</td>
+      <td>Hibernate Validator (JSR-380). Enables <code>@Valid</code>, <code>@NotBlank</code>, <code>@Email</code>, etc. on request DTOs, triggering automatic 400 responses for invalid payloads.</td>
+    </tr>
+    <tr>
+      <td>lombok</td><td>1.18.32</td>
+      <td>Annotation processor that generates <code>getters</code>, <code>setters</code>, <code>@Builder</code>, <code>@Slf4j</code>, constructors, etc. at compile time. Eliminated from the final jar (optional=true).</td>
+    </tr>
+    <tr>
+      <td>mapstruct</td><td>1.5.5.Final</td>
+      <td>Compile-time DTO ↔ Entity mapper. Generates null-safe, type-safe mapping code without reflection — far faster than ModelMapper at runtime. Works hand-in-hand with Lombok via the annotation processor order in zpom.xml.</td>
+    </tr>
+    <tr>
+      <td>spring-boot-devtools</td><td>managed</td>
+      <td>Automatic class-reload and LiveReload during local development. Runtime + optional — stripped from production builds automatically.</td>
+    </tr>
+    <tr>
+      <td>spring-boot-starter-actuator</td><td>managed</td>
+      <td>Exposes <code>/api/actuator/health</code>, <code>/metrics</code>, <code>/info</code> endpoints. Plugs into Docker/Kubernetes health checks and monitoring tools like Prometheus.</td>
+    </tr>
+  </table>
+
+  <h3>Testing</h3>
+  <table>
+    <tr><th>Artifact</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>spring-boot-starter-test</td><td>managed</td>
+      <td>JUnit 5, Mockito, AssertJ, MockMvc, and Spring Test context loader bundled together. The standard Spring Boot test harness.</td>
+    </tr>
+    <tr>
+      <td>spring-security-test</td><td>managed</td>
+      <td>Adds <code>@WithMockUser</code>, <code>SecurityMockMvcRequestPostProcessors</code>, etc. so you can test secured endpoints without a running server.</td>
+    </tr>
+  </table>
+
+  
+  <h2>⚛️ Frontend — npm Dependencies <span class="badge b-front">React 19 · Vite · MUI</span></h2>
+
+  <h3>Core UI</h3>
+  <table>
+    <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>react + react-dom</td><td>^19.0.0</td>
+      <td>React 19 core. <code>react</code> is the library; <code>react-dom</code> is the DOM renderer. React 19 introduces the new compiler, server components support, and improved concurrent features.</td>
+    </tr>
+    <tr>
+      <td>react-router-dom</td><td>^6.23.1</td>
+      <td>Client-side routing with nested routes, loaders, and <code>&lt;Outlet&gt;</code>. Used to define authenticated vs public route trees and navigate without full-page reloads.</td>
+    </tr>
+    <tr>
+      <td>@mui/material</td><td>^5.15.20</td>
+      <td>Material UI component library — provides Buttons, Tables, Dialogs, Forms, AppBar, Drawer, etc. Built on Emotion for zero-config CSS-in-JS styling.</td>
+    </tr>
+    <tr>
+      <td>@mui/icons-material</td><td>^5.15.20</td>
+      <td>2,000+ Material Design SVG icons as React components, pre-built for use with MUI's <code>SvgIcon</code>.</td>
+    </tr>
+    <tr>
+      <td>@emotion/react + @emotion/styled</td><td>^11.x</td>
+      <td>MUI's CSS-in-JS engine. <code>@emotion/react</code> provides <code>css</code> prop and theme; <code>@emotion/styled</code> enables <code>styled(Component)</code> syntax. Both are peer dependencies of MUI.</td>
+    </tr>
+  </table>
+
+  <h3>Data Fetching &amp; State</h3>
+  <table>
+    <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>axios</td><td>^1.7.2</td>
+      <td>HTTP client with interceptors. Used to attach JWT <code>Authorization</code> headers automatically on every request and to refresh tokens on 401 responses without manual wiring.</td>
+    </tr>
+    <tr>
+      <td>@tanstack/react-query</td><td>^5.45.1</td>
+      <td>Server-state management — caching, background refetching, pagination, optimistic updates. Keeps the UI in sync with the backend without manual loading/error state boilerplate.</td>
+    </tr>
+    <tr>
+      <td>zustand</td><td>^4.5.4</td>
+      <td>Minimal client-state store (auth user, theme preference, UI flags). Much lighter than Redux; no providers or reducers needed.</td>
+    </tr>
+  </table>
+
+  <h3>Forms &amp; Validation</h3>
+  <table>
+    <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>react-hook-form</td><td>^7.51.5</td>
+      <td>Performance-first form library that avoids re-renders on every keystroke. Integrates with MUI inputs via <code>Controller</code>.</td>
+    </tr>
+    <tr>
+      <td>@hookform/resolvers</td><td>^3.4.2</td>
+      <td>Bridge between React Hook Form and schema validators like Yup. Lets you pass a Yup schema as the <code>resolver</code> option.</td>
+    </tr>
+    <tr>
+      <td>yup</td><td>^1.4.0</td>
+      <td>Schema-based validation library. Defines field rules (required, min length, email format, etc.) that are evaluated by the hookform resolver before submission.</td>
+    </tr>
+  </table>
+
+  <h3>Utilities</h3>
+  <table>
+    <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>jwt-decode</td><td>^4.0.0</td>
+      <td>Decodes a JWT payload on the client (no verification — that's the server's job). Used to extract user roles and token expiry without a network call.</td>
+    </tr>
+    <tr>
+      <td>dayjs</td><td>^1.11.11</td>
+      <td>2 kB Moment.js replacement. Used to format dates in tables (date of joining, etc.) and validate date inputs.</td>
+    </tr>
+    <tr>
+      <td>react-toastify</td><td>^10.0.5</td>
+      <td>Non-blocking toast notifications (success / error / info) triggered after API calls. Drop-in with zero MUI coupling.</td>
+    </tr>
+  </table>
+
+  <h3>Dev Dependencies</h3>
+  <table>
+    <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+    <tr>
+      <td>vite</td><td>^5.3.1</td>
+      <td>Next-generation build tool. Native ESM dev server with sub-100ms HMR, and Rollup-based production builds. Replaces Create React App.</td>
+    </tr>
+    <tr>
+      <td>@vitejs/plugin-react</td><td>^4.3.1</td>
+      <td>Vite plugin that enables React fast-refresh (HMR) and JSX transform using Babel/SWC.</td>
+    </tr>
+    <tr>
+      <td>eslint + plugins</td><td>^8.57</td>
+      <td>Static analysis. <code>eslint-plugin-react</code> + <code>react-hooks</code> enforce hooks rules and React best practices. <code>react-refresh</code> plugin prevents HMR pitfalls.</td>
+    </tr>
+  </table>
+
+  
+  <h2>🗄️ Database Schema — V1 Flyway Migration <span class="badge b-db">MySQL 8</span></h2>
+  <table>
+    <tr><th>Table</th><th>Key Columns</th><th>Notes</th></tr>
+    <tr><td>roles</td><td>id, name</td><td>Seed: ROLE_ADMIN, ROLE_HR, ROLE_EMPLOYEE</td></tr>
+    <tr><td>users</td><td>id, email, password, first_name, last_name, is_enabled, is_locked</td><td>BCrypt-hashed password; soft-lock support</td></tr>
+    <tr><td>user_roles</td><td>user_id, role_id</td><td>M:N join — composite PK</td></tr>
+    <tr><td>departments</td><td>id, name, code</td><td>Unique department code</td></tr>
+    <tr><td>employees</td><td>id, user_id, employee_code, department_id, job_title, salary, status</td><td>Status ENUM: ACTIVE / INACTIVE / ON_LEAVE / TERMINATED</td></tr>
+    <tr><td>refresh_tokens</td><td>id, user_id, token, expiry_date</td><td>JWT refresh token store with cascade delete</td></tr>
+  </table>
+
+  
+  <h2>🐳 DevOps Files Generated <span class="badge b-devop">Docker · Jenkins · GitHub Actions</span></h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td>docker-compose.yml</td><td>Orchestrates MySQL + Spring Boot + React/Nginx; env-var driven; named volume for data persistence; health-check dependency chain</td></tr>
+    <tr><td>backend/Dockerfile</td><td>2-stage: Maven builder (eclipse-temurin:17) → slim JRE runtime (eclipse-temurin:17-jre-alpine). Layer-cached dependency download step.</td></tr>
+    <tr><td>frontend/Dockerfile</td><td>2-stage: node:20-alpine builder (npm ci + vite build) → nginx:1.27-alpine serving /dist</td></tr>
+    <tr><td>frontend/nginx.conf</td><td>SPA fallback to index.html; /api/ reverse-proxy to backend:8080; gzip enabled</td></tr>
+    <tr><td>.github/workflows/ci.yml</td><td>Parallel backend (mvn verify) + frontend (lint + build) jobs; Docker image build on main branch push</td></tr>
+    <tr><td>jenkins/Jenkinsfile</td><td>Declarative pipeline: checkout → backend test → frontend build → parallel Docker build → registry push → SSH deploy to EC2</td></tr>
+    <tr><td>.env.example</td><td>Template for all required environment variables — copy to .env for local development</td></tr>
+  </table>
+
+  
+  <h2>⚙️ Key application.properties Settings</h2>
+  <div class="cfg">
+<span class="cmt"># HikariCP pool — production tuned</span>
+<span class="kw">spring.datasource.hikari.maximum-pool-size</span>=<span class="val">20</span>
+
+<span class="cmt"># Flyway manages schema — Hibernate must NOT auto-create</span>
+<span class="kw">spring.jpa.hibernate.ddl-auto</span>=<span class="val">validate</span>
+
+<span class="cmt"># N+1 trap prevention</span>
+<span class="kw">spring.jpa.open-in-view</span>=<span class="val">false</span>
+
+<span class="cmt"># All secrets injected via env vars — never hardcoded in prod</span>
+<span class="kw">app.jwt.secret</span>=<span class="val">${JWT_SECRET}</span>
+<span class="kw">spring.datasource.password</span>=<span class="val">${DB_PASSWORD}</span>
+
+<span class="cmt"># CORS origin whitelist (comma-separated)</span>
+<span class="kw">app.cors.allowed-origins</span>=<span class="val">${CORS_ORIGINS:http://localhost:5173}</span>
+  </div>
+
+  <footer>Made with IBM Bob</footer>
+</div>
+</body>
+</html>

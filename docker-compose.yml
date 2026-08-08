@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+
+  # ── MySQL ─────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: emp_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE:      ${DB_NAME:-emp_portal}
+      MYSQL_USER:          ${DB_USER:-emp_user}
+      MYSQL_PASSWORD:      ${DB_PASSWORD:-root}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - emp_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Spring Boot Backend ───────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: emp_backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST:      mysql
+      DB_PORT:      3306
+      DB_NAME:      ${DB_NAME:-emp_portal}
+      DB_USER:      ${DB_USER:-emp_user}
+      DB_PASSWORD:  ${DB_PASSWORD:-root}
+      JWT_SECRET:   ${JWT_SECRET:-ChangeThisSecretInProduction!!}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:80}
+    ports:
+      - "8080:8080"
+    networks:
+      - emp_network
+
+  # ── React Frontend (served by Nginx) ─────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: emp_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - emp_network
+
+networks:
+  emp_network:
+    driver: bridge
+
+volumes:
+  mysql_data:

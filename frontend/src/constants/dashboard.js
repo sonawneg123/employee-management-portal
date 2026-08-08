@@ -1,0 +1,138 @@
+/**
+ * @fileoverview Dashboard module constants.
+ *
+ * Centralises all magic values used across the dashboard: query keys,
+ * refresh intervals, chart colours, activity icons, and leave status
+ * labels. Import from this module exclusively to avoid duplication.
+ */
+
+import PeopleIcon          from '@mui/icons-material/People';
+import ApartmentIcon       from '@mui/icons-material/Apartment';
+import EventNoteIcon       from '@mui/icons-material/EventNote';
+import AccessTimeIcon      from '@mui/icons-material/AccessTime';
+import TrendingUpIcon      from '@mui/icons-material/TrendingUp';
+import CheckCircleIcon     from '@mui/icons-material/CheckCircle';
+import PendingActionsIcon  from '@mui/icons-material/PendingActions';
+import CancelIcon          from '@mui/icons-material/Cancel';
+
+// ── React Query cache keys ────────────────────────────────────────────────────
+
+/**
+ * React Query key factory for all dashboard queries.
+ * Using factory functions ensures consistent cache key shapes and
+ * enables fine-grained invalidation.
+ *
+ * @readonly
+ */
+export const DASHBOARD_QUERY_KEYS = /** @type {const} */ ({
+  all:      () => ['dashboard'],
+  summary:  () => ['dashboard', 'summary'],
+  activity: () => ['dashboard', 'activity'],
+  charts:   () => ['dashboard', 'charts'],
+});
+
+/**
+ * Auto-refresh interval for dashboard data (5 minutes in milliseconds).
+ *
+ * @type {number}
+ */
+export const DASHBOARD_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
+// ── Chart colour palette ──────────────────────────────────────────────────────
+
+/**
+ * Colour palette for Recharts components.
+ * Values are shared across all charts for visual consistency.
+ * Each sub-array defines [light-mode colour, dark-mode colour].
+ *
+ * @type {string[]}
+ */
+export const CHART_COLORS = [
+  '#1976d2',
+  '#7c3aed',
+  '#2e7d32',
+  '#ed6c02',
+  '#0288d1',
+  '#c62828',
+  '#00796b',
+  '#f57f17',
+];
+
+/**
+ * Employee status colours mapped to EmployeeStatus enum values.
+ *
+ * @type {Record<string, string>}
+ */
+export const EMPLOYEE_STATUS_COLORS = {
+  ACTIVE:     '#2e7d32',
+  INACTIVE:   '#ed6c02',
+  ON_LEAVE:   '#0288d1',
+  TERMINATED: '#c62828',
+};
+
+/**
+ * Leave status colours mapped to LeaveStatus enum values.
+ *
+ * @type {Record<string, string>}
+ */
+export const LEAVE_STATUS_COLORS = {
+  PENDING:   '#ed6c02',
+  APPROVED:  '#2e7d32',
+  REJECTED:  '#c62828',
+  CANCELLED: '#757575',
+};
+
+// ── Activity type metadata ────────────────────────────────────────────────────
+
+/**
+ * @typedef {Object} ActivityTypeMeta
+ * @property {string}      color - MUI colour string for the activity icon chip.
+ * @property {JSX.Element} icon  - MUI icon element.
+ */
+
+/**
+ * Visual metadata for each dashboard activity type.
+ *
+ * @type {Record<string, ActivityTypeMeta>}
+ */
+export const ACTIVITY_TYPE_META = {
+  EMPLOYEE_JOINED:    { color: 'success', icon: PeopleIcon },
+  LEAVE_SUBMITTED:    { color: 'warning', icon: EventNoteIcon },
+  LEAVE_APPROVED:     { color: 'success', icon: CheckCircleIcon },
+  LEAVE_REJECTED:     { color: 'error',   icon: CancelIcon },
+  ATTENDANCE_MARKED:  { color: 'info',    icon: AccessTimeIcon },
+  REVIEW_COMPLETED:   { color: 'primary', icon: TrendingUpIcon },
+  LEAVE_PENDING:      { color: 'warning', icon: PendingActionsIcon },
+};
+
+// ── Stat card metadata ────────────────────────────────────────────────────────
+
+/**
+ * @typedef {Object} StatCardMeta
+ * @property {string} label     - Display label.
+ * @property {string} color     - MUI colour token for the icon background.
+ * @property {string} iconColor - Explicit hex/CSS colour for the icon itself.
+ */
+
+/**
+ * Metadata for the four main summary stat cards.
+ *
+ * @type {Record<string, StatCardMeta>}
+ */
+export const STAT_CARD_META = {
+  totalEmployees:    { label: 'Total Employees',    color: '#e3f2fd', iconColor: '#1976d2', Icon: PeopleIcon },
+  totalDepartments:  { label: 'Departments',        color: '#f3e5f5', iconColor: '#7c3aed', Icon: ApartmentIcon },
+  pendingLeaves:     { label: 'Pending Leaves',     color: '#fff3e0', iconColor: '#ed6c02', Icon: EventNoteIcon },
+  presentToday:      { label: 'Present Today',      color: '#e8f5e9', iconColor: '#2e7d32', Icon: AccessTimeIcon },
+};
+
+// ── Quick action definitions ──────────────────────────────────────────────────
+
+/**
+ * @typedef {Object} QuickAction
+ * @property {string} id      - Unique identifier.
+ * @property {string} label   - Display label.
+ * @property {string} path    - Navigation route.
+ * @property {string} color   - MUI colour token for the button.
+ * @property {string[]} roles - Roles that can see this action.
+ */

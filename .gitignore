@@ -1,0 +1,162 @@
+﻿# ──────────────────────────────────────────────────────────────────────────────
+#  .gitignore — Employee Management Portal
+#  Covers: Java/Maven, React/Node, Docker, IntelliJ, VS Code, macOS, Windows
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+# ── Environment & Secrets ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+*.pem
+*.key
+*.p12
+*.jks
+
+
+# ── Java / Maven ──────────────────────────────────────────────────────────────
+backend/target/
+backend/.mvn/repository/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# Maven wrapper settings (keep the wrapper itself but ignore local cache)
+!backend/.mvn/wrapper/maven-wrapper.jar
+!backend/.mvn/wrapper/maven-wrapper.properties
+
+
+# ── Spring Boot ───────────────────────────────────────────────────────────────
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application-dev.properties
+
+
+# ── Node / npm ────────────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.vite-inspect/
+frontend/coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Lock files — keep package-lock.json; ignore yarn/pnpm variants
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
+
+# Vite / Vitest cache
+frontend/.vitest/
+frontend/.eslintcache
+
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# Keep Dockerfiles and docker-compose.yml but ignore local overrides
+docker-compose.override.yml
+docker-compose.local.yml
+
+
+# ── IntelliJ IDEA ─────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# IntelliJ Spring Boot run configs — auto-generated, not shareable as-is
+.idea/runConfigurations/
+
+
+# ── VS Code ───────────────────────────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+# (Allow sharing recommended extensions and base workspace settings)
+
+
+# ── Eclipse ───────────────────────────────────────────────────────────────────
+.classpath
+.project
+.settings/
+.factorypath
+bin/
+
+
+# ── NetBeans ──────────────────────────────────────────────────────────────────
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+Icon
+
+
+# ── Windows ───────────────────────────────────────────────────────────────────
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+
+# ── Linux ─────────────────────────────────────────────────────────────────────
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+
+# ── Terraform (scripts/) ──────────────────────────────────────────────────────
+scripts/.terraform/
+scripts/.terraform.lock.hcl
+scripts/terraform.tfstate
+scripts/terraform.tfstate.backup
+scripts/*.tfvars
+!scripts/terraform.tfvars.example
+
+
+# ── Jenkins ───────────────────────────────────────────────────────────────────
+jenkins/workspace/
+jenkins/.cache/
+
+
+# ── Postman ───────────────────────────────────────────────────────────────────
+# Keep the collection JSON but ignore environment files with secrets
+postman/*environment*.json
+postman/*globals*.json
+
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+*.rej
+.cache/
