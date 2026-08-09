@@ -26,6 +26,8 @@ import java.util.UUID;
  * @param reviewedAt      timestamp of the review decision, or {@code null} while pending
  * @param createdAt       record creation timestamp
  * @param updatedAt       record last-modified timestamp
+ * @param createdBy       email of the principal who submitted this request, or {@code "SYSTEM"}
+ * @param updatedBy       email of the principal who last modified this request, or {@code "SYSTEM"}
  *
  * @author Employee Management Portal Team
  */
@@ -77,6 +79,14 @@ public record LeaveRequestResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "Record last-modified timestamp")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @Schema(description = "Email of the principal who submitted this request, or SYSTEM",
+                example = "employee@example.com")
+        String createdBy,
+
+        @Schema(description = "Email of the principal who last modified this request, or SYSTEM",
+                example = "hr@example.com")
+        String updatedBy
 ) {
 }

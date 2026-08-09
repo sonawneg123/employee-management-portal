@@ -161,6 +161,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- ── H2 in-memory database — used by @DataJpaTest slices ── -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- ── Jackson JavaTime module (for LocalDate in MockMvc tests) ── -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>

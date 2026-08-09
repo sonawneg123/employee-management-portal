@@ -302,7 +302,7 @@ export default function EmployeeForm({
                   {...field}
                   labelId="status-label"
                   label="Status"
-                  aria-label="Employee status"
+                  inputProps={{ 'aria-label': 'Employee status' }}
                 >
                   {EMPLOYEE_STATUS_OPTIONS.map((opt) => (
                     <MenuItem key={opt.value} value={opt.value}>

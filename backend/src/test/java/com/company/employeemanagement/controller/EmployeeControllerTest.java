@@ -83,7 +83,8 @@ class EmployeeControllerTest {
                 "Software Engineer", null, null,
                 LocalDate.of(2024, 1, 15),
                 new BigDecimal("75000.00"), EmployeeStatus.ACTIVE,
-                LocalDateTime.now(), LocalDateTime.now()
+                LocalDateTime.now(), LocalDateTime.now(),
+                null, null
         );
     }
 

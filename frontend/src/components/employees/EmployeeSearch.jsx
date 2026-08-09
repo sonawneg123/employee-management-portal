@@ -95,8 +95,7 @@ export default function EmployeeSearch({
           ) : null,
         },
       }}
-      aria-label="Search employees"
-      inputProps={{ 'aria-label': 'Employee search input' }}
+      inputProps={{ 'aria-label': 'Search employees' }}
     />
   );
 }

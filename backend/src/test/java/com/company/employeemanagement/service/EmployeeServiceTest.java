@@ -53,13 +53,16 @@ class EmployeeServiceTest {
     @Mock private DepartmentRepository departmentRepository;
     @Mock private UserRepository       userRepository;
     @Mock private EmployeeMapper       employeeMapper;
+    @Mock private com.company.employeemanagement.security.SecurityUtils securityUtils;
 
     private EmployeeServiceImpl employeeService;
 
     @BeforeEach
     void setUp() {
+        // securityUtils is mocked: by default hasRole returns false, so no ownership
+        // restrictions are applied in service-layer unit tests
         employeeService = new EmployeeServiceImpl(
-                employeeRepository, departmentRepository, userRepository, employeeMapper);
+                employeeRepository, departmentRepository, userRepository, employeeMapper, securityUtils);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -92,7 +95,8 @@ class EmployeeServiceTest {
                 "Software Engineer", null, null,
                 LocalDate.of(2024, 1, 15),
                 new BigDecimal("75000.00"), EmployeeStatus.ACTIVE,
-                LocalDateTime.now(), LocalDateTime.now()
+                LocalDateTime.now(), LocalDateTime.now(),
+                null, null
         );
     }
 

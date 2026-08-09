@@ -14,6 +14,8 @@ import java.util.UUID;
  * @param employeeCount  number of employees currently assigned to this department
  * @param createdAt      record creation timestamp
  * @param updatedAt      record last-modified timestamp
+ * @param createdBy      email of the principal who created this department, or {@code "SYSTEM"}
+ * @param updatedBy      email of the principal who last modified this department, or {@code "SYSTEM"}
  *
  * @author Employee Management Portal Team
  */
@@ -37,6 +39,14 @@ public record DepartmentResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "Record last-modified timestamp")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @Schema(description = "Email of the principal who created this department, or SYSTEM",
+                example = "admin@example.com")
+        String createdBy,
+
+        @Schema(description = "Email of the principal who last modified this department, or SYSTEM",
+                example = "hr@example.com")
+        String updatedBy
 ) {
 }

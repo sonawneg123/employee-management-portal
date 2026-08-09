@@ -7,12 +7,14 @@ import com.company.employeemanagement.dto.response.PageResponse;
 import com.company.employeemanagement.entity.Department;
 import com.company.employeemanagement.entity.Employee;
 import com.company.employeemanagement.entity.User;
+import com.company.employeemanagement.exception.AccessDeniedException;
 import com.company.employeemanagement.exception.DuplicateResourceException;
 import com.company.employeemanagement.exception.ResourceNotFoundException;
 import com.company.employeemanagement.mapper.EmployeeMapper;
 import com.company.employeemanagement.repository.DepartmentRepository;
 import com.company.employeemanagement.repository.EmployeeRepository;
 import com.company.employeemanagement.repository.UserRepository;
+import com.company.employeemanagement.security.SecurityUtils;
 import com.company.employeemanagement.service.EmployeeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +41,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
     private final EmployeeMapper employeeMapper;
+    private final SecurityUtils securityUtils;
 
     /**
      * Constructs the service with all required dependencies.
@@ -47,15 +50,18 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param departmentRepository repository for department lookups
      * @param userRepository       repository for optional user account lookups
      * @param employeeMapper       MapStruct mapper for entity-to-DTO conversion
+     * @param securityUtils        helper for current-principal inspection
      */
     public EmployeeServiceImpl(final EmployeeRepository employeeRepository,
-                                final DepartmentRepository departmentRepository,
-                                final UserRepository userRepository,
-                                final EmployeeMapper employeeMapper) {
+                                 final DepartmentRepository departmentRepository,
+                                 final UserRepository userRepository,
+                                 final EmployeeMapper employeeMapper,
+                                 final SecurityUtils securityUtils) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.userRepository = userRepository;
         this.employeeMapper = employeeMapper;
+        this.securityUtils = securityUtils;
     }
 
     /**
@@ -82,12 +88,26 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * {@inheritDoc}
+     *
+     * <p>An EMPLOYEE principal can only retrieve their own employee record.
+     * Attempting to retrieve another employee's record yields a 403.
      */
     @Override
     @Transactional(readOnly = true)
     public EmployeeResponse findById(final UUID id) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee", id));
+
+        if (securityUtils.hasRole("ROLE_EMPLOYEE") && !securityUtils.isPrivileged()) {
+            Employee ownEmployee = securityUtils.getCurrentEmployee()
+                    .orElseThrow(() -> new AccessDeniedException(
+                            "No employee record is linked to your account."));
+            if (!ownEmployee.getId().equals(employee.getId())) {
+                throw new AccessDeniedException(
+                        "You may only access your own employee record.");
+            }
+        }
+
         return employeeMapper.toResponse(employee);
     }
 

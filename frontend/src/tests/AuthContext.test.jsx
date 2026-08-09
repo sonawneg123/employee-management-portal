@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import * as authApi from '@/services/authApi';
+import * as jwtUtils from '@/utils/jwtUtils';
 import { TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from '@/constants/api';
 import { setItem } from '@/utils/localStorage';
 
@@ -98,7 +99,9 @@ describe('AuthContext', () => {
     });
 
     it('is not authenticated when token in localStorage is expired', () => {
-      // A JWT whose exp is in the past
+      // Override the file-level mock to return true (expired) for this test only
+      vi.mocked(jwtUtils.isTokenExpired).mockReturnValueOnce(true);
+
       const expiredToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZXMiOlsiUk9MRV9FTVBMWUVFIl0sImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxNjAwMDAwMDAxfQ.fake';
       const user = { userId: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User', roles: ['ROLE_EMPLOYEE'] };
       setItem(TOKEN_STORAGE_KEY, expiredToken);

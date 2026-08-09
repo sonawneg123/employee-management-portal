@@ -58,6 +58,15 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(normaliseError(error));
     }
 
+    // Redirect to the access-denied page on 403 — do not expose the resource
+    if (status === 403) {
+      const current = window.location.pathname;
+      if (current !== ROUTES.ACCESS_DENIED) {
+        window.location.href = ROUTES.ACCESS_DENIED;
+      }
+      return Promise.reject(normaliseError(error));
+    }
+
     return Promise.reject(normaliseError(error));
   },
 );

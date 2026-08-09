@@ -30,6 +30,7 @@ import StarRateIcon    from '@mui/icons-material/StarRate';
 import PersonIcon      from '@mui/icons-material/Person';
 import SettingsIcon    from '@mui/icons-material/Settings';
 import { ROUTES } from '@/constants/routes';
+import { ROLES } from '@/constants/roles';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
@@ -39,14 +40,55 @@ import { useAuth } from '@/contexts/AuthContext';
  * @property {JSX.Element} icon  - MUI icon element.
  */
 
+/**
+ * @typedef {Object} NavItem
+ * @property {string}      label        - Display label.
+ * @property {string}      path         - Route path.
+ * @property {JSX.Element} icon         - MUI icon element.
+ * @property {string[]}    [allowedRoles] - Roles that can see this item; undefined = all roles.
+ */
+
 /** @type {NavItem[]} */
 const NAV_ITEMS = [
-  { label: 'Dashboard',   path: ROUTES.DASHBOARD,   icon: <DashboardIcon /> },
-  { label: 'Employees',   path: ROUTES.EMPLOYEES,   icon: <PeopleIcon /> },
-  { label: 'Departments', path: ROUTES.DEPARTMENTS, icon: <ApartmentIcon /> },
-  { label: 'Leaves',      path: ROUTES.LEAVES,      icon: <EventNoteIcon /> },
-  { label: 'Attendance',  path: ROUTES.ATTENDANCE,  icon: <AccessTimeIcon /> },
-  { label: 'Reviews',     path: ROUTES.REVIEWS,     icon: <StarRateIcon /> },
+  {
+    label: 'Dashboard',
+    path: ROUTES.DASHBOARD,
+    icon: <DashboardIcon />,
+  },
+  {
+    label: 'Employees',
+    path: ROUTES.EMPLOYEES,
+    icon: <PeopleIcon />,
+    // All authenticated roles can view employees (EMPLOYEE sees own record)
+  },
+  {
+    label: 'Departments',
+    path: ROUTES.DEPARTMENTS,
+    icon: <ApartmentIcon />,
+    // All roles can view departments (read-only for MANAGER/EMPLOYEE)
+  },
+  {
+    label: 'All Leaves',
+    path: ROUTES.LEAVES,
+    icon: <EventNoteIcon />,
+    allowedRoles: [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'My Leaves',
+    path: ROUTES.MY_LEAVES,
+    icon: <EventNoteIcon />,
+    allowedRoles: [ROLES.EMPLOYEE],
+  },
+  {
+    label: 'Attendance',
+    path: ROUTES.ATTENDANCE,
+    icon: <AccessTimeIcon />,
+  },
+  {
+    label: 'Reviews',
+    path: ROUTES.REVIEWS,
+    icon: <StarRateIcon />,
+  },
 ];
 
 /** @type {NavItem[]} */
@@ -68,7 +110,17 @@ const BOTTOM_ITEMS = [
  */
 export default function Sidebar({ open, onClose, width, variant }) {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, hasAnyRole } = useAuth();
+
+  /**
+   * Filters NAV_ITEMS to only those the current user's role is allowed to see.
+   *
+   * @type {NavItem[]}
+   */
+  const visibleNavItems = NAV_ITEMS.filter(({ allowedRoles }) => {
+    if (!allowedRoles) return true;            // no restriction — show to all
+    return hasAnyRole(allowedRoles);
+  });
 
   const content = (
     <Box
@@ -113,7 +165,7 @@ export default function Sidebar({ open, onClose, width, variant }) {
 
       {/* Main navigation */}
       <List sx={{ px: 1.5, py: 1, flexGrow: 1 }}>
-        {NAV_ITEMS.map(({ label, path, icon }) => (
+        {visibleNavItems.map(({ label, path, icon }) => (
           <ListItem key={path} disablePadding sx={{ mb: 0.5 }}>
             <ListItemButton
               component={NavLink}

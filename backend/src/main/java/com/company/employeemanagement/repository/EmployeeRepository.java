@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
+
 /**
  * Spring Data JPA repository for {@link Employee} entities.
  *
@@ -25,6 +26,17 @@ import java.util.UUID;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
         JpaSpecificationExecutor<Employee> {
+
+    /**
+     * Finds the employee record linked to the given portal user ID.
+     *
+     * <p>Used for ownership checks — an EMPLOYEE user can only access
+     * the employee record that is linked to their own {@link com.company.employeemanagement.entity.User}.
+     *
+     * @param userId the UUID of the linked user account
+     * @return an {@link Optional} containing the matching {@link Employee}, or empty if none exists
+     */
+    Optional<Employee> findByUserId(UUID userId);
 
     /**
      * Checks whether an employee with the given code already exists.

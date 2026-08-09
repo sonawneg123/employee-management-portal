@@ -208,9 +208,9 @@ public class LeaveController {
     @PostMapping(value = "/{id}/approve",
                  consumes = MediaType.APPLICATION_JSON_VALUE,
                  produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     @Operation(summary = "Approve leave request",
-               description = "Approves a PENDING leave request. Requires ADMIN or HR role.")
+               description = "Approves a PENDING leave request. Requires ADMIN, HR, or MANAGER role.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Leave request approved",
                     content = @Content(mediaType = "application/json",
@@ -244,9 +244,9 @@ public class LeaveController {
     @PostMapping(value = "/{id}/reject",
                  consumes = MediaType.APPLICATION_JSON_VALUE,
                  produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER')")
     @Operation(summary = "Reject leave request",
-               description = "Rejects a PENDING leave request. Requires ADMIN or HR role.")
+               description = "Rejects a PENDING leave request. Requires ADMIN, HR, or MANAGER role.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Leave request rejected",
                     content = @Content(mediaType = "application/json",

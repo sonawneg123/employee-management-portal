@@ -30,6 +30,8 @@ import java.util.UUID;
  * @param status          current employment status
  * @param createdAt       record creation timestamp
  * @param updatedAt       record last-updated timestamp
+ * @param createdBy       email of the user who created this record, or {@code "SYSTEM"}
+ * @param updatedBy       email of the user who last modified this record, or {@code "SYSTEM"}
  *
  * @author Employee Management Portal Team
  */
@@ -85,6 +87,14 @@ public record EmployeeResponse(
         LocalDateTime createdAt,
 
         @Schema(description = "Record last-modified timestamp")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @Schema(description = "Email of the principal who created this record, or SYSTEM",
+                example = "admin@example.com")
+        String createdBy,
+
+        @Schema(description = "Email of the principal who last modified this record, or SYSTEM",
+                example = "hr@example.com")
+        String updatedBy
 ) {
 }

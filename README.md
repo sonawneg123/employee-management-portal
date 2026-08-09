@@ -132,6 +132,9 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 | Phase 3D | Employee Management Module | ✅ Complete |
 | Phase 3E | Department Management Module | ✅ Complete |
 | Phase 3F | Leave Management Module | ✅ Complete |
+| Loop 2 | RBAC Hardening | ✅ Complete |
+| Loop 3 | JPA Auditing | ✅ Complete |
+| Loop 4 | API Documentation & Consistency | ✅ Complete |
 | Phase 3G | Attendance Module | 🔜 Planned |
 | Phase 3H | Performance Reviews Module | 🔜 Planned |
 
@@ -318,25 +321,26 @@ All endpoints are prefixed with `/api`. JWT required except auth endpoints.
 
 | Method | Endpoint | Description | Roles |
 |---|---|---|---|
-| POST | `/auth/register` | Register new user | Public |
-| POST | `/auth/login` | Login | Public |
-| GET | `/employees` | Paginated employee list | All |
+| POST | `/auth/register` | Register new user (returns JWT) | Public |
+| POST | `/auth/login` | Authenticate, obtain JWT | Public |
+| GET | `/employees` | Paginated employee list | All authenticated |
 | POST | `/employees` | Create employee | ADMIN, HR |
-| GET | `/employees/{id}` | Employee detail | All |
+| GET | `/employees/{id}` | Employee detail (own record only for EMPLOYEE) | All authenticated |
 | PUT | `/employees/{id}` | Update employee | ADMIN, HR |
-| DELETE | `/employees/{id}` | Delete employee | ADMIN, HR |
-| GET | `/departments` | Department list | All |
+| DELETE | `/employees/{id}` | Delete employee | **ADMIN only** |
+| GET | `/departments` | Paginated department list | All authenticated |
+| GET | `/departments/all` | All departments (flat list, for dropdowns) | All authenticated |
+| GET | `/departments/{id}` | Department detail | All authenticated |
 | POST | `/departments` | Create department | ADMIN, HR |
-| GET | `/departments/{id}` | Department detail | All |
 | PUT | `/departments/{id}` | Update department | ADMIN, HR |
-| DELETE | `/departments/{id}` | Delete department | ADMIN, HR |
-| GET | `/leaves` | Paginated leave requests | All |
-| POST | `/leaves` | Submit leave request | All |
-| GET | `/leaves/{id}` | Leave detail | All |
-| PUT | `/leaves/{id}` | Update leave request | All |
-| DELETE | `/leaves/{id}` | Cancel leave request | EMPLOYEE (own) |
-| POST | `/leaves/{id}/approve` | Approve leave | ADMIN, HR, MANAGER |
-| POST | `/leaves/{id}/reject` | Reject leave | ADMIN, HR, MANAGER |
+| DELETE | `/departments/{id}` | Delete department | **ADMIN only** |
+| GET | `/leaves` | Paginated leave requests (own only for EMPLOYEE) | All authenticated |
+| POST | `/leaves` | Submit leave request (own employee only for EMPLOYEE) | All authenticated |
+| GET | `/leaves/{id}` | Leave detail (own only for EMPLOYEE) | All authenticated |
+| PUT | `/leaves/{id}` | Update PENDING leave (own only for EMPLOYEE) | All authenticated |
+| DELETE | `/leaves/{id}` | Cancel PENDING leave (own only for EMPLOYEE) | All authenticated |
+| POST | `/leaves/{id}/approve` | Approve PENDING leave | ADMIN, HR, MANAGER |
+| POST | `/leaves/{id}/reject` | Reject PENDING leave | ADMIN, HR, MANAGER |
 
 ---
 
@@ -367,10 +371,20 @@ cp .env.example .env
 docker-compose up -d
 
 # Access the portal
-# Frontend: http://localhost:3000
+# Frontend:    http://localhost:3000
 # Backend API: http://localhost:8080/api
-# Swagger UI: http://localhost:8080/swagger-ui.html
+# Swagger UI:  http://localhost:8080/api/swagger-ui.html
+# API docs:    http://localhost:8080/api/v3/api-docs
 ```
+
+> **API context path**: All backend routes are served under `/api` (configured via
+> `server.servlet.context-path=/api`). Swagger UI is therefore reachable at
+> `http://localhost:8080/api/swagger-ui.html`.
+>
+> **Quick auth flow in Swagger UI**: call `POST /api/auth/login`, copy the
+> `accessToken` value from the response, click **Authorize** 🔒 at the top of
+> the page, and paste the token. All protected endpoints will then include the
+> `Authorization: Bearer <token>` header automatically.
 
 ---
 
@@ -510,7 +524,16 @@ mvn test
 
 - **JUnit 5** + **Mockito** for unit tests
 - **Testcontainers** (MySQL 8) for integration tests
-- **53 test cases** covering: `JwtService`, `AuthService`, `EmployeeService`, `EmployeeController`, `GlobalExceptionHandler`, integration flow
+- **106 test cases** across 7 test classes:
+  - `JwtServiceTest` — JWT token lifecycle (7 cases)
+  - `AuthServiceTest` — login/register service logic (6 cases)
+  - `EmployeeServiceTest` — CRUD + ownership checks (9 cases)
+  - `EmployeeControllerTest` — HTTP layer (11 cases)
+  - `GlobalExceptionHandlerTest` — error response format (7 cases)
+  - `RbacSecurityTest` — RBAC enforcement (31 cases)
+  - `AuditingIntegrationTest` — JPA auditing (@DataJpaTest, 20 cases)
+  - `ApiDocumentationTest` — OpenAPI availability + 401/403/404/400 (15 cases)
+  - `EmployeeManagementIntegrationTest` — full stack (Testcontainers)
 
 ### Frontend Tests
 
@@ -567,7 +590,32 @@ npm run test:coverage
 
 ## Changelog
 
-### Phase 3F — Leave Management Module *(current)*
+### Development Loop 4 — API Documentation & Consistency *(current)*
+- Expanded `OpenApiConfig.java` description: role table, auth instructions, error format reference
+- Added `springdoc.swagger-ui.try-it-out-enabled=true` and `tags-sorter=alpha` to `application.properties`
+- Fixed README API table: `DELETE /employees/{id}` and `DELETE /departments/{id}` now correctly list **ADMIN only**
+- Added missing `GET /departments/all` entry to API table
+- Corrected Swagger UI URL from `/swagger-ui.html` to `/api/swagger-ui.html` (context-path aware)
+- Added Swagger UI auth flow instructions to README
+- Created `ApiDocumentationTest.java` — 15 WebMvcTest cases covering OpenAPI descriptor availability, structured 401/403/400/404 responses
+
+### Development Loop 3 — JPA Auditing
+- Confirmed `BaseEntity` `createdAt`/`updatedAt` auditing already existed
+- Added `createdBy`/`updatedBy` fields to `EmployeeResponse`, `LeaveRequestResponse`, `DepartmentResponse`
+- Added H2 test dependency to `pom.xml`
+- Created `AuditingIntegrationTest.java` — 20 `@DataJpaTest` cases verifying audit field population
+
+### Development Loop 2 — Role-Based Access Control (RBAC)
+- Created `SecurityUtils` component (`security/SecurityUtils.java`)
+- Added `EmployeeRepository.findByUserId(UUID)` for employee-ownership lookups
+- Updated `SecurityConfig`: JSON `AuthenticationEntryPoint` for 401, MANAGER added to leave approve/reject
+- `LeaveRequestServiceImpl`: full ownership enforcement (findAll scoped, findById/create/update/cancel check ownership)
+- `EmployeeServiceImpl`: ownership check on `findById` for EMPLOYEE role
+- `LeaveController`: `@PreAuthorize` updated to include MANAGER on approve/reject
+- Created `RbacSecurityTest.java` — 31 `@WebMvcTest` cases covering all 4 roles, unauthenticated access, resource-ownership violations
+- Frontend `axiosInstance.js`: 403 interceptor redirecting to `/403`
+
+### Phase 3F — Leave Management Module
 - Added `LeavesPage`, `LeaveDetailsPage`, `MyLeavesPage` with full CRUD
 - Full approval/rejection workflow (HR + Manager roles)
 - Calendar view (monthly grid) and timeline view per employee

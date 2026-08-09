@@ -45,8 +45,31 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Employee Management Portal API")
                         .version("1.0.0")
-                        .description("Enterprise-grade REST API for managing employees, departments, "
-                                + "attendance, leave requests, and performance reviews.")
+                        .description("""
+                                Enterprise-grade REST API for managing employees, departments, \
+                                leave requests, and performance reviews.
+
+                                ## Authentication
+
+                                All protected endpoints require a JWT Bearer token. \
+                                Obtain one via `POST /api/auth/login` or `POST /api/auth/register`, \
+                                then click **Authorize** (🔒) at the top of this page and paste the token.
+
+                                ## Roles
+
+                                | Role | Description |
+                                |------|-------------|
+                                | `ROLE_ADMIN` | Full access to all resources and delete operations |
+                                | `ROLE_HR` | Create/update employees and departments; approve/reject leave |
+                                | `ROLE_MANAGER` | Read employees and departments; approve/reject leave |
+                                | `ROLE_EMPLOYEE` | Read own employee record; submit and manage own leave requests |
+
+                                ## Error responses
+
+                                All error responses use [RFC 7807 ProblemDetail](https://www.rfc-editor.org/rfc/rfc7807) \
+                                with `application/problem+json` content type. \
+                                The body includes `status`, `title`, `detail`, `timestamp`, and `path` fields.
+                                """)
                         .contact(new Contact()
                                 .name("Employee Management Portal Team")
                                 .email("support@company.com"))
@@ -61,7 +84,8 @@ public class OpenApiConfig {
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT")
-                                        .description("Provide the JWT access token obtained from "
-                                                + "/api/auth/login")));
+                                        .description("JWT Bearer token obtained from POST /api/auth/login. "
+                                                + "Paste the value of the `accessToken` field — "
+                                                + "do NOT include the 'Bearer ' prefix here.")));
     }
 }

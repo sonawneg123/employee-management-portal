@@ -1,10 +1,12 @@
 package com.company.employeemanagement.config;
 
 import com.company.employeemanagement.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -17,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -51,6 +54,11 @@ import java.util.List;
  *   <li>{@code GET /actuator/health} — public</li>
  *   <li>All other endpoints require authentication.</li>
  * </ul>
+ *
+ * <p>Fine-grained resource-ownership checks (e.g., EMPLOYEE accessing only their
+ * own record) are enforced via {@code @PreAuthorize} at the controller layer and
+ * ownership logic in the service layer. URL-level rules here restrict by broad role
+ * only.
  *
  * @author Employee Management Portal Team
  */
@@ -89,6 +97,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Return 401 JSON when authentication is missing, not a redirect
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(unauthorizedEntryPoint())
+                )
                 .authorizeHttpRequests(auth -> auth
                         // ── Public endpoints ────────────────────────────
                         .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
@@ -113,7 +125,10 @@ public class SecurityConfig {
                                 .hasAnyRole("ADMIN", "HR")
                         .requestMatchers(HttpMethod.DELETE, "/departments/**")
                                 .hasRole("ADMIN")
-                        // ── Leave request endpoints ──────────────────────
+                        // ── Leave approval / rejection — ADMIN, HR, MANAGER ─
+                        .requestMatchers(HttpMethod.POST, "/leaves/*/approve", "/leaves/*/reject")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // ── Leave request endpoints (create/update/cancel by any auth user) ──
                         .requestMatchers(HttpMethod.GET, "/leaves/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, "/leaves/**")
@@ -129,6 +144,26 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    /**
+     * Returns a custom {@link AuthenticationEntryPoint} that writes a JSON
+     * {@code 401 Unauthorized} response instead of the default HTML redirect.
+     *
+     * <p>This prevents missing/invalid tokens from being swallowed as 302
+     * redirects on REST clients.
+     *
+     * @return the entry point
+     */
+    @Bean
+    public AuthenticationEntryPoint unauthorizedEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write("""
+                    {"status":401,"title":"Unauthorized","detail":"Authentication is required to access this resource."}
+                    """);
+        };
     }
 
     /**

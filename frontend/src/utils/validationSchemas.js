@@ -1,134 +1,133 @@
 /**
- * @fileoverview Shared Zod validation schemas and helper functions.
+ * @fileoverview Shared Zod validation schemas for form components.
  *
- * Centralising schema definitions ensures that the same rules are applied
- * consistently across all React Hook Form forms. Import individual schemas
- * directly into form components.
+ * Centralising schemas here keeps form components free of inline schema
+ * definitions and makes it easy to keep client-side validation in sync
+ * with the backend's Bean Validation constraints.
+ *
+ * Schemas exported:
+ *   {@link employeeSchema}   — CreateEmployeeRequest / UpdateEmployeeRequest
+ *   {@link departmentSchema} — CreateDepartmentRequest / UpdateDepartmentRequest
  */
 
 import { z } from 'zod';
 
-// ─── Reusable field schemas ────────────────────────────────────────────────
+// ── Employee schema ───────────────────────────────────────────────────────────
 
 /**
- * Validates an email address.
+ * Zod schema for the create / update employee form.
  *
- * @type {import('zod').ZodString}
- */
-export const emailSchema = z
-  .string()
-  .min(1, 'Email is required')
-  .email('Please enter a valid email address')
-  .max(150, 'Email must not exceed 150 characters');
-
-/**
- * Validates a password (minimum 8 characters).
+ * Mirrors the backend {@code CreateEmployeeRequest} Bean Validation constraints:
+ *   - firstName, lastName: @NotBlank
+ *   - email: @NotBlank + @Email
+ *   - employeeCode: @NotBlank
+ *   - jobTitle: @NotBlank
+ *   - departmentId: @NotBlank (UUID)
+ *   - dateOfJoining: @NotNull (date string)
+ *   - salary: @NotNull + @PositiveOrZero
+ *   - status: @NotNull (enum)
  *
- * @type {import('zod').ZodString}
- */
-export const passwordSchema = z
-  .string()
-  .min(8, 'Password must be at least 8 characters')
-  .max(100, 'Password must not exceed 100 characters');
-
-/**
- * Validates a non-blank string with configurable max length.
- *
- * @param {string} fieldName  - Human-readable name shown in errors.
- * @param {number} [max=100]  - Maximum allowed length.
- * @returns {import('zod').ZodString}
- */
-export function requiredString(fieldName, max = 100) {
-  return z
-    .string()
-    .min(1, `${fieldName} is required`)
-    .max(max, `${fieldName} must not exceed ${max} characters`);
-}
-
-/**
- * Validates a UUID v4 string.
- *
- * @type {import('zod').ZodString}
- */
-export const uuidSchema = z.string().uuid('Must be a valid UUID');
-
-/**
- * Validates a positive decimal number (salary, etc.).
- *
- * @type {import('zod').ZodNumber}
- */
-export const positiveDecimalSchema = z
-  .number({ invalid_type_error: 'Must be a number' })
-  .min(0, 'Value must be zero or positive');
-
-// ─── Full form schemas ─────────────────────────────────────────────────────
-
-/**
- * Zod schema for the login form.
- *
- * @type {import('zod').ZodObject<any>}
- */
-export const loginSchema = z.object({
-  email:      emailSchema,
-  password:   z.string().min(1, 'Password is required'),
-  rememberMe: z.boolean().optional().default(false),
-});
-
-/**
- * Zod schema for the registration form.
- *
- * @type {import('zod').ZodObject<any>}
- */
-export const registerSchema = z
-  .object({
-    email:           emailSchema,
-    password:        passwordSchema,
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    firstName:       requiredString('First name'),
-    lastName:        requiredString('Last name'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path:    ['confirmPassword'],
-  });
-
-/**
- * Zod schema for the create/update employee form.
- * Covers all required and optional fields sent to the backend.
- *
- * @type {import('zod').ZodObject<any>}
+ * @type {z.ZodObject}
  */
 export const employeeSchema = z.object({
-  // Identity
-  employeeCode:    requiredString('Employee code', 20),
-  firstName:       requiredString('First name', 50),
-  lastName:        requiredString('Last name', 50),
-  email:           emailSchema,
-  // Role
-  jobTitle:        requiredString('Job title', 150),
-  departmentId:    uuidSchema,
-  // Contact
-  phone:           z.string().max(20, 'Phone must not exceed 20 characters').optional().or(z.literal('')),
-  address:         z.string().max(255, 'Address must not exceed 255 characters').optional().or(z.literal('')),
-  // Employment
-  dateOfJoining:   z.string().min(1, 'Date of joining is required'),
-  salary:          positiveDecimalSchema,
-  status:          z.enum(['ACTIVE', 'INACTIVE', 'ON_LEAVE', 'TERMINATED'], {
-    errorMap: () => ({ message: 'Please select a valid status' }),
-  }),
-  // Optional
-  managerId:       z.string().uuid('Must be a valid UUID').optional().or(z.literal('')),
-  profilePhotoUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  firstName: z
+    .string()
+    .min(1, 'First name is required')
+    .max(100, 'First name must not exceed 100 characters'),
+
+  lastName: z
+    .string()
+    .min(1, 'Last name is required')
+    .max(100, 'Last name must not exceed 100 characters'),
+
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
+
+  employeeCode: z
+    .string()
+    .min(1, 'Employee code is required')
+    .max(20, 'Employee code must not exceed 20 characters'),
+
+  jobTitle: z
+    .string()
+    .min(1, 'Job title is required')
+    .max(100, 'Job title must not exceed 100 characters'),
+
+  departmentId: z
+    .string()
+    .min(1, 'Department is required'),
+
+  phone: z
+    .string()
+    .max(30, 'Phone number must not exceed 30 characters')
+    .optional()
+    .or(z.literal('')),
+
+  address: z
+    .string()
+    .max(255, 'Address must not exceed 255 characters')
+    .optional()
+    .or(z.literal('')),
+
+  dateOfJoining: z
+    .string()
+    .min(1, 'Hire date is required'),
+
+  salary: z
+    .union([z.number(), z.string()])
+    .transform((val) => (val === '' ? NaN : Number(val)))
+    .refine((val) => !isNaN(val), { message: 'Salary is required' })
+    .refine((val) => val >= 0, { message: 'Salary must be a positive number' }),
+
+  status: z
+    .enum(
+      ['ACTIVE', 'INACTIVE', 'ON_LEAVE', 'TERMINATED'],
+      { errorMap: () => ({ message: 'Please select a valid status' }) },
+    ),
+
+  managerId: z.string().optional().or(z.literal('')),
+
+  profilePhotoUrl: z
+    .string()
+    .url('Profile photo URL must be a valid URL')
+    .optional()
+    .or(z.literal('')),
 });
 
+// ── Department schema ─────────────────────────────────────────────────────────
+
 /**
- * Zod schema for the create/update department form.
+ * Zod schema for the create / update department form.
  *
- * @type {import('zod').ZodObject<any>}
+ * Mirrors the backend {@code CreateDepartmentRequest} Bean Validation constraints:
+ *   - name: @NotBlank
+ *   - code: @NotBlank
+ *   - description, headName: optional
+ *
+ * @type {z.ZodObject}
  */
 export const departmentSchema = z.object({
-  name:        requiredString('Department name', 100),
-  code:        requiredString('Department code', 20),
-  description: z.string().max(500, 'Description must not exceed 500 characters').optional().or(z.literal('')),
-  headName:    z.string().max(100, 'Head name must not exceed 100 characters').optional().or(z.literal('')),
+  name: z
+    .string()
+    .min(1, 'Department name is required')
+    .max(100, 'Department name must not exceed 100 characters'),
+
+  code: z
+    .string()
+    .min(1, 'Department code is required')
+    .max(20, 'Department code must not exceed 20 characters'),
+
+  description: z
+    .string()
+    .max(500, 'Description must not exceed 500 characters')
+    .optional()
+    .or(z.literal('')),
+
+  headName: z
+    .string()
+    .max(100, 'Head name must not exceed 100 characters')
+    .optional()
+    .or(z.literal('')),
 });
