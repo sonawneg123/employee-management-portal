@@ -17,12 +17,17 @@ import com.company.employeemanagement.repository.UserRepository;
 import com.company.employeemanagement.security.SecurityUtils;
 import com.company.employeemanagement.service.EmployeeService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link EmployeeService} providing full CRUD operations
@@ -67,22 +72,45 @@ public class EmployeeServiceImpl implements EmployeeService {
     /**
      * {@inheritDoc}
      *
-     * <p>When {@code keyword} is non-blank, delegates to
-     * {@link com.company.employeemanagement.repository.EmployeeRepository#searchByKeyword}
-     * for a case-insensitive LIKE search across name and job title. Otherwise
-     * returns all employees.
+     * <p>Uses a two-step query strategy to prevent N+1 selects:
+     * <ol>
+     *   <li>A scalar ID query fetches the correct page of primary keys with
+     *       database-level pagination ({@code LIMIT}/{@code OFFSET}).</li>
+     *   <li>A single {@code JOIN FETCH} query loads all employee entities
+     *       (with their {@code department} and {@code user} associations)
+     *       for those IDs in one round-trip.</li>
+     * </ol>
+     *
+     * <p>When {@code keyword} is non-blank, step 1 delegates to
+     * {@link EmployeeRepository#searchIdsByKeyword}; otherwise to
+     * {@link EmployeeRepository#findAllIds}.
      */
     @Override
     @Transactional(readOnly = true)
     public PageResponse<EmployeeResponse> findAll(final String keyword, final Pageable pageable) {
-        Page<EmployeeResponse> page;
-        if (StringUtils.hasText(keyword)) {
-            page = employeeRepository.searchByKeyword(keyword, pageable)
-                    .map(employeeMapper::toResponse);
-        } else {
-            page = employeeRepository.findAll(pageable)
-                    .map(employeeMapper::toResponse);
+        // Step 1 — paginated ID query (database-level LIMIT/OFFSET)
+        final Page<UUID> idPage = StringUtils.hasText(keyword)
+                ? employeeRepository.searchIdsByKeyword(keyword, pageable)
+                : employeeRepository.findAllIds(pageable);
+
+        if (idPage.isEmpty()) {
+            return PageResponse.from(new PageImpl<>(List.of(), pageable, idPage.getTotalElements()));
         }
+
+        // Step 2 — batch-fetch full entities with associations in one query
+        final List<UUID> ids = idPage.getContent();
+        final Map<UUID, Employee> byId = employeeRepository
+                .findAllWithAssociationsByIds(ids)
+                .stream()
+                .collect(Collectors.toMap(Employee::getId, Function.identity()));
+
+        // Reconstruct the page in the original paginated order
+        final List<EmployeeResponse> content = ids.stream()
+                .filter(byId::containsKey)
+                .map(id -> employeeMapper.toResponse(byId.get(id)))
+                .collect(Collectors.toList());
+
+        Page<EmployeeResponse> page = new PageImpl<>(content, pageable, idPage.getTotalElements());
         return PageResponse.from(page);
     }
 

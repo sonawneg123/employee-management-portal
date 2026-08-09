@@ -1,0 +1,39 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  backend/.dockerignore
+#  Excludes files that must not be sent to the Docker build context.
+#  A smaller context = faster builds and no accidental secret leakage.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Maven build output — the Docker build re-runs Maven inside the container
+target/
+
+# IDE and tooling artefacts
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.factorypath
+
+# Git metadata
+.git/
+.gitignore
+
+# Environment and secrets — never copy these into images
+.env
+.env.*
+*.pem
+*.key
+*.jks
+*.p12
+
+# Maven wrapper local cache (not needed inside the build container)
+.mvn/repository/
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Test reports
+surefire-reports/
+failsafe-reports/

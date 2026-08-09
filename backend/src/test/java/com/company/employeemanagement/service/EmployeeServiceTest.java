@@ -36,6 +36,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -118,9 +119,12 @@ class EmployeeServiceTest {
             EmployeeResponse response = buildEmployeeResponse(empId, deptId);
 
             Pageable pageable = PageRequest.of(0, 20);
-            Page<Employee> page = new PageImpl<>(List.of(emp), pageable, 1);
-
-            when(employeeRepository.findAll(pageable)).thenReturn(page);
+            // Step 1: ID page
+            Page<UUID> idPage = new PageImpl<>(List.of(empId), pageable, 1);
+            // Step 2: fetched entities
+            when(employeeRepository.findAllIds(pageable)).thenReturn(idPage);
+            when(employeeRepository.findAllWithAssociationsByIds(List.of(empId)))
+                    .thenReturn(List.of(emp));
             when(employeeMapper.toResponse(emp)).thenReturn(response);
 
             PageResponse<EmployeeResponse> result = employeeService.findAll(null, pageable);
@@ -131,7 +135,7 @@ class EmployeeServiceTest {
         }
 
         @Test
-        @DisplayName("delegates to searchByKeyword when keyword is non-blank")
+        @DisplayName("delegates to searchIdsByKeyword when keyword is non-blank")
         void delegatesToKeywordSearch() {
             UUID deptId = UUID.randomUUID();
             UUID empId  = UUID.randomUUID();
@@ -140,16 +144,33 @@ class EmployeeServiceTest {
             EmployeeResponse response = buildEmployeeResponse(empId, deptId);
 
             Pageable pageable = PageRequest.of(0, 20);
-            Page<Employee> page = new PageImpl<>(List.of(emp), pageable, 1);
+            Page<UUID> idPage = new PageImpl<>(List.of(empId), pageable, 1);
 
-            when(employeeRepository.searchByKeyword("engineer", pageable)).thenReturn(page);
+            when(employeeRepository.searchIdsByKeyword("engineer", pageable)).thenReturn(idPage);
+            when(employeeRepository.findAllWithAssociationsByIds(List.of(empId)))
+                    .thenReturn(List.of(emp));
             when(employeeMapper.toResponse(emp)).thenReturn(response);
 
             PageResponse<EmployeeResponse> result = employeeService.findAll("engineer", pageable);
 
             assertThat(result.content()).hasSize(1);
-            verify(employeeRepository).searchByKeyword("engineer", pageable);
-            verify(employeeRepository, never()).findAll(any(Pageable.class));
+            verify(employeeRepository).searchIdsByKeyword("engineer", pageable);
+            verify(employeeRepository, never()).findAllIds(any(Pageable.class));
+        }
+
+        @Test
+        @DisplayName("returns empty page when no employees exist")
+        void returnsEmptyPage() {
+            Pageable pageable = PageRequest.of(0, 20);
+            Page<UUID> emptyIdPage = new PageImpl<>(List.of(), pageable, 0);
+
+            when(employeeRepository.findAllIds(pageable)).thenReturn(emptyIdPage);
+
+            PageResponse<EmployeeResponse> result = employeeService.findAll(null, pageable);
+
+            assertThat(result.content()).isEmpty();
+            assertThat(result.totalElements()).isZero();
+            verify(employeeRepository, never()).findAllWithAssociationsByIds(anyList());
         }
     }
 

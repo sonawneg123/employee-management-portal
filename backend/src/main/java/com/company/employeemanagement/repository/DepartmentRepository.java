@@ -37,6 +37,18 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     boolean existsByCode(String code);
 
     /**
+     * Returns the number of employees currently assigned to the given department.
+     *
+     * <p>Executed as a single {@code SELECT COUNT(*)} scalar query — avoids
+     * loading the full {@code employees} collection just to obtain the count.
+     *
+     * @param departmentId the UUID of the department
+     * @return the number of employees in the department
+     */
+    @Query("SELECT COUNT(e) FROM Employee e WHERE e.department.id = :departmentId")
+    long countEmployeesByDepartmentId(@Param("departmentId") UUID departmentId);
+
+    /**
      * Case-insensitive search across department name and code.
      *
      * @param keyword  the search term

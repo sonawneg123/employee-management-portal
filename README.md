@@ -83,10 +83,12 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 ### DevOps
 | Technology | Purpose |
 |---|---|
-| Docker + Docker Compose | Local containerised development |
-| Jenkins | CI/CD pipeline |
-| GitHub Actions | Automated CI on push/PR |
-| AWS EC2 | Production hosting |
+| Docker + Docker Compose | Local containerised development + production deployment |
+| GitHub Actions | CI/CD pipeline (test → build → publish → deploy) |
+| Amazon ECR | Private container registry |
+| Amazon EC2 | Production application host (Amazon Linux 2023) |
+| Amazon RDS MySQL 8 | Production managed database |
+| AWS IAM + OIDC | Keyless authentication between GitHub Actions and AWS |
 | Nginx | Reverse proxy + static serving |
 
 ---
@@ -94,19 +96,34 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        AWS EC2 Instance                     │
-│  ┌─────────────┐    ┌──────────────────────────────────┐   │
-│  │    Nginx    │───▶│   React (Vite Build / Static)    │   │
-│  │  :80 / :443 │    └──────────────────────────────────┘   │
-│  │             │    ┌──────────────────────────────────┐   │
-│  │  /api proxy │───▶│   Spring Boot (Java 21)  :8080   │   │
-│  └─────────────┘    └──────────────────┬─────────────┘    │
-│                                         │                    │
-│                      ┌──────────────────▼──────────────┐   │
-│                      │        MySQL 8.0  :3306          │   │
-│                      └─────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+  GitHub Actions
+       │  OIDC (no static keys)
+       ▼
+  AWS IAM (GitHubActions-ECRPush-Role)
+       │
+       ▼
+  Amazon ECR
+   ├── employee-management-backend:<sha>
+   └── employee-management-frontend:<sha>
+       │  docker pull (EC2 instance role)
+       ▼
+  ┌─────────────────────────────────────────────────────────────┐
+  │                     AWS EC2 Instance                        │
+  │  ┌─────────────────────────────────────────────────────┐   │
+  │  │  Docker Compose (docker-compose.prod.yml)            │   │
+  │  │                                                      │   │
+  │  │  frontend container (Nginx :80)                      │   │
+  │  │    ├── /*        → React SPA (static)                │   │
+  │  │    └── /api/*    → backend:8080 (proxy)              │   │
+  │  │                                                      │   │
+  │  │  backend container (Spring Boot :8080)               │   │
+  │  │    └── SPRING_PROFILES_ACTIVE=prod                   │   │
+  │  └───────────────────────────┬──────────────────────────┘   │
+  └──────────────────────────────│──────────────────────────────┘
+                                 │ SSL/TLS
+                                 ▼
+                       Amazon RDS MySQL 8
+                       (private subnet, not publicly accessible)
 ```
 
 **Key design decisions:**
@@ -135,6 +152,10 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 | Loop 2 | RBAC Hardening | ✅ Complete |
 | Loop 3 | JPA Auditing | ✅ Complete |
 | Loop 4 | API Documentation & Consistency | ✅ Complete |
+| DB Phase | Database & Persistence | ✅ Complete |
+| DevOps 1 | Docker & Docker Compose | ✅ Complete |
+| DevOps 2 | GitHub Actions CI | ✅ Complete |
+| DevOps 3 | AWS ECR + OIDC + EC2 Deployment | ✅ Complete |
 | Phase 3G | Attendance Module | 🔜 Planned |
 | Phase 3H | Performance Reviews Module | 🔜 Planned |
 
@@ -344,64 +365,246 @@ All endpoints are prefixed with `/api`. JWT required except auth endpoints.
 
 ---
 
-## Installation
+## Docker Setup
 
 ### Prerequisites
 
-- Java 21+
-- Node.js 20+
-- npm 10+
-- Maven 3.9+
-- Docker + Docker Compose
-- MySQL 8.0 (or use Docker Compose)
+| Tool | Minimum version |
+|---|---|
+| Docker Desktop | 24+ |
+| Docker Compose v2 | built into Docker Desktop |
 
-### Quick Start (Docker)
+### Architecture
 
-```bash
-# Clone the repository
-git clone https://github.com/your-org/employee-management-portal.git
-cd employee-management-portal
-
-# Copy environment template
-cp .env.example .env
-
-# Edit .env with your values (DB credentials, JWT secret, etc.)
-
-# Start all services
-docker-compose up -d
-
-# Access the portal
-# Frontend:    http://localhost:3000
-# Backend API: http://localhost:8080/api
-# Swagger UI:  http://localhost:8080/api/swagger-ui.html
-# API docs:    http://localhost:8080/api/v3/api-docs
+```
+Browser
+  │
+  ▼  :80
+Nginx  (frontend container)
+  ├── /          →  React SPA (static files)
+  └── /api/*     →  backend:8080  (Spring Boot)
+                            │
+                            ▼
+                      mysql:3306  (MySQL 8)
 ```
 
-> **API context path**: All backend routes are served under `/api` (configured via
-> `server.servlet.context-path=/api`). Swagger UI is therefore reachable at
-> `http://localhost:8080/api/swagger-ui.html`.
->
-> **Quick auth flow in Swagger UI**: call `POST /api/auth/login`, copy the
-> `accessToken` value from the response, click **Authorize** 🔒 at the top of
-> the page, and paste the token. All protected endpoints will then include the
-> `Authorization: Bearer <token>` header automatically.
+All services run on an isolated bridge network (`emp_network`).
+MySQL data is stored in the named volume `mysql_data` and survives `docker compose down`.
+
+### Quick start
+
+```bash
+# 1. Copy the environment template and fill in secrets
+cp .env.example .env
+#    Edit .env — change DB_PASSWORD, MYSQL_ROOT_PASSWORD, and JWT_SECRET
+
+# 2. Build images and start all services
+docker compose up -d --build
+
+# 3. Watch Flyway migrations on first boot
+docker compose logs -f backend
+
+# 4. Verify all services are healthy
+docker compose ps
+```
+
+### Application URLs
+
+| URL | Description |
+|---|---|
+| `http://localhost` | React SPA |
+| `http://localhost/api` | Spring Boot REST API |
+| `http://localhost/api/swagger-ui.html` | Swagger UI |
+| `http://localhost/api/v3/api-docs` | OpenAPI JSON |
+| `http://localhost/api/actuator/health` | Backend health |
+| `http://localhost:8080/api` | Backend direct (127.0.0.1 only) |
+
+### Startup health chain
+
+```
+mysql starts → healthcheck passes
+  └── backend starts → Flyway V1 + V2 migrations → Spring Boot UP
+        └── frontend starts (nginx)
+```
+
+### Managing the stack
+
+```bash
+# Stop containers (data is preserved)
+docker compose down
+
+# Stop AND delete ALL data
+docker compose down -v          # ⚠ DELETES mysql_data volume
+
+# Rebuild after code changes
+docker compose up -d --build
+
+# Stream logs
+docker compose logs -f backend
+docker compose logs -f mysql
+
+# Check status and health
+docker compose ps
+
+# Open a shell in the backend container
+docker compose exec backend sh
+```
+
+### Data persistence
+
+```bash
+docker compose down           # containers stop, mysql_data volume intact
+docker compose up -d          # data still there ✅
+docker compose down -v        # ⚠ DELETES all MySQL data
+```
 
 ---
 
-## Development Setup
+## AWS Deployment (Production)
+
+### Architecture overview
+
+```
+GitHub Actions → OIDC → IAM Role → ECR push
+                                   ↓
+                              ECR repositories
+                                   ↓
+                         EC2 (IAM instance role → ECR pull)
+                                   ↓
+                          docker compose pull
+                          docker compose up -d
+                                   ↓
+                              Health check
+```
+
+### Required AWS resources
+
+| Resource | Name | Type | Bootstrap |
+|---|---|---|---|
+| ECR repository | `employee-management-backend` | Private, IMMUTABLE | Manual |
+| ECR repository | `employee-management-frontend` | Private, IMMUTABLE | Manual |
+| IAM OIDC provider | `token.actions.githubusercontent.com` | OIDC IdP | Manual |
+| IAM role | `GitHubActions-ECRPush-Role` | GitHub Actions push | Manual |
+| IAM policy | `GitHubActions-ECRPush-Policy` | ECR push (least-priv) | Manual |
+| IAM role | `EC2-EmpPortal-InstanceRole` | EC2 ECR pull | Manual |
+| IAM policy | `EC2-EmpPortal-ECRPull-Policy` | ECR pull (least-priv) | Manual |
+| IAM instance profile | `EC2-EmpPortal-InstanceProfile` | Attach to EC2 | Manual |
+| EC2 instance | `emp-portal-prod` | Amazon Linux 2023 | Manual |
+| RDS instance | `emp-portal-db` | MySQL 8.0 | Manual |
+| Security group | `emp-portal-app-sg` | EC2 — ports 22, 80 | Manual |
+| Security group | `emp-portal-db-sg` | RDS — port 3306 from app SG | Manual |
+
+All of the above are **manual bootstrap** resources.
+See `aws/` directory for setup commands and IAM policy JSON files.
+Future: migrate to Terraform.
+
+### Bootstrap sequence
+
+```bash
+# 1. Create ECR repositories (once per account)
+export AWS_REGION=us-east-1
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+bash aws/ecr/bootstrap-ecr.sh
+
+# 2. Create OIDC provider + IAM roles (see aws/iam/iam-setup.md)
+
+# 3. Launch EC2 (Amazon Linux 2023, t3.small or larger)
+#    Attach: IAM instance profile EC2-EmpPortal-InstanceProfile
+#    User data: aws/ec2/bootstrap-ec2.sh
+
+# 4. Create RDS MySQL 8 (private subnet, not publicly accessible)
+#    Create database user and grant privileges
+
+# 5. Configure GitHub repository
+#    Variables:  AWS_ROLE_ARN, AWS_REGION, ECR_REGISTRY, EC2_USER
+#    Secrets:    EC2_HOST, EC2_SSH_KEY
+#    Environment: production (with required reviewers if desired)
+
+# 6. On EC2 — create /opt/emp-portal/.env.production
+cp .env.production.example /opt/emp-portal/.env.production
+# Fill in real RDS endpoint, credentials, JWT_SECRET
+chmod 600 /opt/emp-portal/.env.production
+
+# 7. Push to main — CI/CD pipeline runs automatically
+```
+
+### GitHub Actions secrets and variables
+
+Set in: **Repository → Settings → Secrets and variables → Actions**
+
+| Type | Name | Value |
+|---|---|---|
+| Variable | `AWS_ROLE_ARN` | `arn:aws:iam::ACCOUNT:role/GitHubActions-ECRPush-Role` |
+| Variable | `AWS_REGION` | e.g. `us-east-1` |
+| Variable | `ECR_REGISTRY` | `ACCOUNT.dkr.ecr.REGION.amazonaws.com` |
+| Variable | `EC2_USER` | `ec2-user` |
+| Secret | `EC2_HOST` | EC2 public IP or DNS |
+| Secret | `EC2_SSH_KEY` | Private SSH key (PEM format) |
+
+> No `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` are used anywhere.
+
+### Deployment flow (main branch push)
+
+```
+1. backend-ci    — mvn clean verify (155 tests)
+2. frontend-ci   — npm test (326 tests) + lint + build
+3. docker-build  — validate Dockerfiles build cleanly
+4. compose-validate — validate docker-compose.yml syntax
+5. publish       — OIDC → ECR push, tags: <sha> + main-<sha>
+6. deploy        — SCP compose+scripts → EC2 SSH
+                   → ECR login (instance role)
+                   → docker compose pull
+                   → docker compose up -d
+                   → health-check.sh (actuator + nginx)
+```
+
+### Rollback
+
+```bash
+# On EC2 — rollback to any previous SHA
+export ECR_REGISTRY=<account>.dkr.ecr.<region>.amazonaws.com
+export AWS_REGION=us-east-1
+bash /opt/emp-portal/scripts/rollback.sh <previous-sha>
+
+# Find available SHAs
+aws ecr describe-images \
+  --repository-name employee-management-backend \
+  --query 'sort_by(imageDetails, &imagePushedAt)[-10:].imageTags' \
+  --output table
+```
+
+### Production environment variables
+
+Copy `.env.production.example` → `/opt/emp-portal/.env.production` on EC2.
+Never commit `.env.production` — it is gitignored.
+
+| Variable | Required | Description |
+|---|---|---|
+| `DB_HOST` | Yes | RDS endpoint |
+| `DB_PORT` | No | Default `3306` |
+| `DB_NAME` | Yes | Database name |
+| `DB_USER` | Yes | Database application user |
+| `DB_PASSWORD` | Yes | Database password |
+| `JWT_SECRET` | Yes | HS256 key (≥ 32 chars, `openssl rand -base64 48`) |
+| `CORS_ORIGINS` | Yes | Production frontend URL |
+| `ECR_REGISTRY` | Yes | Injected by deploy step |
+| `IMAGE_TAG` | Yes | Git SHA, injected by deploy step |
+
+---
+
+## Development Setup (without Docker)
 
 ### Backend
 
 ```bash
 cd backend
 
-# Build (skip tests for speed)
+# Requires a running MySQL instance on localhost:3306
 mvn clean install -DskipTests
+mvn spring-boot:run
 
-# Run with development profile
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-
-# The API will be available at http://localhost:8080
+# API:      http://localhost:8080/api
+# Swagger:  http://localhost:8080/api/swagger-ui.html
 ```
 
 ### Frontend
@@ -409,67 +612,42 @@ mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```bash
 cd frontend
 
-# Install dependencies
 npm install
-
-# Start the development server
 npm run dev
 
-# The app will be available at http://localhost:5173
-# Vite proxies /api/* to http://localhost:8080/api
+# App:  http://localhost:5173
+# Vite proxies /api/* → http://localhost:8080 (vite.config.js)
 ```
-
----
-
-## Docker Setup
-
-```bash
-# Build and start all containers
-docker-compose up -d --build
-
-# View logs
-docker-compose logs -f
-
-# Stop all containers
-docker-compose down
-
-# Stop and remove volumes (clean slate)
-docker-compose down -v
-```
-
-### Services
-
-| Service | Port | Description |
-|---|---|---|
-| `frontend` | 3000 | React Vite build served by Nginx |
-| `backend` | 8080 | Spring Boot API |
-| `mysql` | 3306 | MySQL 8.0 database |
 
 ---
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values:
+Copy `.env.example` to `.env` (gitignored — never commit it).
 
 ```dotenv
-# Database
-MYSQL_ROOT_PASSWORD=rootpassword
-MYSQL_DATABASE=employee_db
-MYSQL_USER=emp_user
-MYSQL_PASSWORD=emp_password
+# MySQL
+MYSQL_ROOT_PASSWORD=RootChangeMe123!
+DB_NAME=emp_portal
+DB_USER=emp_user
+DB_PASSWORD=AppChangeMe456!
 
-# Spring Boot
-SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/employee_db
-SPRING_DATASOURCE_USERNAME=emp_user
-SPRING_DATASOURCE_PASSWORD=emp_password
+# JWT signing key (minimum 32 characters)
+# Generate: openssl rand -base64 48
+JWT_SECRET=ReplaceWithAtLeast32CharRandomString!!
 
-# JWT
-JWT_SECRET=your-256-bit-secret-minimum-32-chars
-JWT_EXPIRATION_MS=86400000
-
-# Frontend (Vite)
-VITE_API_BASE_URL=/api
+# CORS allowed origins
+CORS_ORIGINS=http://localhost
 ```
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `MYSQL_ROOT_PASSWORD` | Yes | — | MySQL root password (init only) |
+| `DB_NAME` | No | `emp_portal` | Database name |
+| `DB_USER` | No | `emp_user` | App database user |
+| `DB_PASSWORD` | Yes | — | App database password |
+| `JWT_SECRET` | Yes | — | HS256 signing key (≥ 32 chars) |
+| `CORS_ORIGINS` | No | `http://localhost` | Allowed CORS origins |
 
 ---
 
@@ -519,40 +697,47 @@ mvn test jacoco:report
 
 ```bash
 cd backend
-mvn test
+mvn test          # unit + integration tests
+mvn clean verify  # full build + test (CI command)
 ```
 
 - **JUnit 5** + **Mockito** for unit tests
-- **Testcontainers** (MySQL 8) for integration tests
-- **106 test cases** across 7 test classes:
-  - `JwtServiceTest` — JWT token lifecycle (7 cases)
-  - `AuthServiceTest` — login/register service logic (6 cases)
-  - `EmployeeServiceTest` — CRUD + ownership checks (9 cases)
-  - `EmployeeControllerTest` — HTTP layer (11 cases)
-  - `GlobalExceptionHandlerTest` — error response format (7 cases)
-  - `RbacSecurityTest` — RBAC enforcement (31 cases)
-  - `AuditingIntegrationTest` — JPA auditing (@DataJpaTest, 20 cases)
-  - `ApiDocumentationTest` — OpenAPI availability + 401/403/404/400 (15 cases)
-  - `EmployeeManagementIntegrationTest` — full stack (Testcontainers)
+- **Testcontainers** (MySQL 8) for integration/repository tests
+- **155 test cases** across 10 test classes:
+  - `JwtServiceTest` — JWT token lifecycle (12 cases)
+  - `AuthServiceTest` — login/register service logic (4 cases)
+  - `EmployeeServiceTest` — CRUD + ownership checks (11 cases)
+  - `EmployeeControllerTest` — HTTP layer (8 cases)
+  - `GlobalExceptionHandlerTest` — error response format (12 cases)
+  - `RbacSecurityTest` — RBAC enforcement (38 cases)
+  - `AuditingIntegrationTest` — JPA auditing (`@DataJpaTest`, 19 cases)
+  - `ApiDocumentationTest` — OpenAPI + 401/403/404/400 responses (21 cases)
+  - `PersistenceRepositoryTest` — JPA repository layer (`@DataJpaTest`, 21 cases)
+  - `EmployeeManagementIntegrationTest` — full stack (Testcontainers, 9 cases)
 
 ### Frontend Tests
 
 ```bash
 cd frontend
-npm run test        # Single run
+npm test            # Single run (vitest run)
 npm run test:watch  # Watch mode
 npm run test:coverage
 ```
 
 - **Vitest** + **React Testing Library** + **jsdom**
 - Test files live in `src/tests/`
-- **~200 test cases** across:
-  - Auth context, login/register pages
-  - Dashboard hooks + page states
-  - Employee hooks, table, form, page
-  - Department hooks, table, form, page
-  - Leave hooks, table, form, page, calculations
-  - Formatter utilities for all modules
+- **326 test cases** across 22 test files:
+  - `AuthContext` — auth context state and token management (9 cases)
+  - `LoginPage` / `RegisterPage` — form validation and submission (35 cases)
+  - `useDashboard` / `DashboardPage` — hooks and page states (20 cases)
+  - `dashboardFormatters` — dashboard formatting utilities (27 cases)
+  - `useEmployees` / `EmployeesPage` / `EmployeeTable` / `EmployeeForm` — employee module (32 cases)
+  - `employeeFormatters` — employee formatting utilities (23 cases)
+  - `useDepartmentHooks` / `DepartmentsPage` / `DepartmentTable` / `DepartmentForm` — department module (30 cases)
+  - `departmentFormatters` — department formatting utilities (18 cases)
+  - `useLeaveHooks` / `LeavesPage` / `LeaveTable` / `LeaveForm` — leave module (57 cases)
+  - `leaveCalculations` — leave day calculation logic (40 cases)
+  - `leaveFormatters` — leave formatting utilities (36 cases)
 
 ---
 
@@ -575,9 +760,12 @@ npm run test:coverage
 
 ## Roadmap
 
-| Phase | Module | Target |
+| Phase | Module | Status |
 |---|---|---|
-| 3G | Attendance Management | Next |
+| DevOps 1 | Docker & Docker Compose | ✅ Done |
+| DevOps 2 | GitHub Actions CI | ✅ Done |
+| DevOps 3 | Registry push + deployment pipeline | Next |
+| 3G | Attendance Management | Upcoming |
 | 3H | Performance Reviews | Upcoming |
 | 3I | Profile + Settings Pages | Upcoming |
 | 4A | Backend Dashboard API | Upcoming |
@@ -590,7 +778,46 @@ npm run test:coverage
 
 ## Changelog
 
-### Development Loop 4 — API Documentation & Consistency *(current)*
+### DevOps Phase 3 — AWS ECR + OIDC + EC2 Deployment *(current)*
+- Added `publish` job: OIDC → `aws-actions/configure-aws-credentials@v4` → ECR push with immutable SHA tags
+- Added `deploy` job: SCP compose + scripts to EC2, SSH deploy via `appleboy/ssh-action`, health verification
+- No static AWS credentials — GitHub Actions uses `id-token: write` OIDC; EC2 uses IAM instance role
+- Created `docker-compose.prod.yml`: ECR images, RDS MySQL (no local MySQL container)
+- Created `.env.production.example`: production template (never committed)
+- Created `scripts/deploy.sh`: ECR login → pull → up -d → health wait loop
+- Created `scripts/health-check.sh`: Nginx /healthz + Spring Boot /api/actuator/health + DB check
+- Created `scripts/rollback.sh`: one-line rollback to any previous SHA
+- Created `aws/ecr/bootstrap-ecr.sh`: one-time ECR repository creation + lifecycle policies
+- Created `aws/ec2/bootstrap-ec2.sh`: Amazon Linux 2023 user-data (Docker, Compose v2, deploy user)
+- Created `aws/iam/` — IAM trust policy JSON, ECR push policy JSON, ECR pull policy JSON, setup guide
+- Existing 4 CI jobs (backend-ci, frontend-ci, docker-build, compose-validate) preserved unchanged
+
+### DevOps Phase 2 — CI/CD (GitHub Actions)
+- Rewrote `.github/workflows/ci.yml`: 4-job pipeline (backend-ci, frontend-ci, docker-build, compose-validate)
+- Java 17 → **Java 21** throughout CI (matches `pom.xml` `<java.version>21</java.version>`)
+- Added `npm test` (Vitest) step — frontend tests now run in CI (previously only lint + build)
+- `docker-build` job: BuildKit GHA cache, `push: false` validation only, runs after both CI jobs pass
+- `compose-validate` job: generates minimal `.env`, runs `docker compose config --quiet` on every push/PR
+- Added `permissions: contents: read` (minimum required), `concurrency` cancel-in-progress
+- PR trigger now covers both `main` and `develop` branches
+- Removed stale registry env vars (`REGISTRY`, `IMAGE_NAME`) — no push in this loop
+
+### DevOps Phase 1 — Docker & Docker Compose
+- `backend/Dockerfile`: Java 17 → 21, added tini, non-root `appuser`, 3-stage build
+- `frontend/Dockerfile`: 3-stage build with dedicated npm dep-cache layer
+- `frontend/nginx.conf`: security headers (CSP, HSTS, X-Frame-Options), gzip, proxy timeouts, `/healthz` endpoint
+- `docker-compose.yml`: complete rewrite — health checks, `127.0.0.1` port bindings, `service_healthy` dependency chain, correct env vars, SSL override
+- `.env.example`: corrected variable names, added `MYSQL_ROOT_PASSWORD`
+- Added `backend/.dockerignore`, `frontend/.dockerignore`, `.dockerignore` (root)
+
+### Database & Persistence Phase
+- Created `V2__add_roles_audit_columns_and_indexes.sql`: adds `created_at`/`updated_at`/`created_by`/`updated_by` to `roles` table + 7 performance indexes
+- Fixed N+1 in `DepartmentMapper`: new `countEmployeesByDepartmentId()` COUNT query
+- Fixed N+1 in employee list: two-step `findAllIds` + `findAllWithAssociationsByIds` JOIN FETCH strategy
+- Fixed N+1 in leave request list: same two-step ID + JOIN FETCH pattern
+- Added `PersistenceRepositoryTest.java` — 21 `@DataJpaTest` cases covering all repository operations
+
+### Development Loop 4 — API Documentation & Consistency
 - Expanded `OpenApiConfig.java` description: role table, auth instructions, error format reference
 - Added `springdoc.swagger-ui.try-it-out-enabled=true` and `tags-sorter=alpha` to `application.properties`
 - Fixed README API table: `DELETE /employees/{id}` and `DELETE /departments/{id}` now correctly list **ADMIN only**

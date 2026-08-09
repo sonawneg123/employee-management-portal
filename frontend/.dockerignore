@@ -1,0 +1,40 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  frontend/.dockerignore
+#  Excludes files that must not be sent to the Docker build context.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Node modules — the Docker build runs npm ci inside the container
+node_modules/
+
+# Vite build output — Docker build produces this fresh
+dist/
+build/
+.vite/
+
+# Test artefacts
+coverage/
+.vitest/
+
+# IDE and tooling
+.idea/
+.vscode/
+*.iml
+.eslintcache
+
+# Git metadata
+.git/
+.gitignore
+
+# Environment files — these must not leak into production images
+.env
+.env.*
+.env.local
+.env.*.local
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

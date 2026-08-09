@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,6 +21,22 @@ import java.util.UUID;
  * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
  * through the Criteria API (used for advanced search with multiple optional
  * parameters).
+ *
+ * <p>List-oriented queries ({@code findAllWithAssociations},
+ * {@code searchByKeyword}) use {@code JOIN FETCH} to load the mandatory
+ * {@code department} and optional {@code user} associations in a single
+ * database round-trip, preventing the N+1 select problem that would otherwise
+ * occur when the mapper accesses those lazily-loaded associations.
+ *
+ * <p>Because Hibernate cannot apply SQL-level {@code LIMIT}/{@code OFFSET}
+ * pagination when a {@code JOIN FETCH} is present on a collection relationship,
+ * these queries use a two-step approach:
+ * <ol>
+ *   <li>A scalar ID query with {@code Pageable} to retrieve the page of IDs
+ *       efficiently at the database level.</li>
+ *   <li>A fetch query that loads full entities by those IDs in a single
+ *       {@code IN (…)} statement.</li>
+ * </ol>
  *
  * @author Employee Management Portal Team
  */
@@ -72,6 +89,59 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
      */
     Page<Employee> findByStatus(EmployeeStatus status, Pageable pageable);
 
+    // ── Scalar ID queries (pagination happens here) ───────────────────────────
+
+    /**
+     * Returns a page of employee IDs for all employees — used as the first step
+     * of the two-query pagination strategy in
+     * {@link com.company.employeemanagement.service.impl.EmployeeServiceImpl}.
+     *
+     * @param pageable pagination and sorting parameters
+     * @return a page of UUID primary keys
+     */
+    @Query("SELECT e.id FROM Employee e")
+    Page<UUID> findAllIds(Pageable pageable);
+
+    /**
+     * Returns a page of employee IDs matching a keyword — used as the first
+     * step of the two-query pagination strategy.
+     *
+     * @param keyword  the search term (case-insensitive LIKE)
+     * @param pageable pagination and sorting parameters
+     * @return a page of UUID primary keys whose owner data matches the keyword
+     */
+    @Query("""
+            SELECT e.id FROM Employee e
+            LEFT JOIN e.user u
+            WHERE LOWER(e.jobTitle) LIKE LOWER(CONCAT('%', :keyword, '%'))
+               OR (u IS NOT NULL AND (
+                   LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%'))
+               ))
+            """)
+    Page<UUID> searchIdsByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    // ── Fetch queries (load full graph by IDs) ────────────────────────────────
+
+    /**
+     * Loads full {@link Employee} entities with their {@code department} and
+     * {@code user} associations fetched eagerly in a single query.
+     *
+     * <p>This is the second step of the two-query pagination strategy.
+     * The result set is deliberately unordered — the service layer re-applies
+     * the original page order after loading.
+     *
+     * @param ids the list of employee UUIDs to fetch
+     * @return employees with associations initialised — no lazy proxies
+     */
+    @Query("""
+            SELECT DISTINCT e FROM Employee e
+            LEFT JOIN FETCH e.department
+            LEFT JOIN FETCH e.user
+            WHERE e.id IN :ids
+            """)
+    List<Employee> findAllWithAssociationsByIds(@Param("ids") List<UUID> ids);
+
     /**
      * Full-text search across employee first name, last name, and job title
      * using a case-insensitive LIKE pattern.
@@ -83,6 +153,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
      * @param keyword  the search term
      * @param pageable pagination and sorting parameters
      * @return a page of matching employees
+     * @deprecated Use {@link #searchIdsByKeyword} + {@link #findAllWithAssociationsByIds}
+     *             for paginated list responses; this method is retained for
+     *             single-result lookups.
      */
     @Query("""
             SELECT e FROM Employee e

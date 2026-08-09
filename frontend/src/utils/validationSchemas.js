@@ -6,11 +6,70 @@
  * with the backend's Bean Validation constraints.
  *
  * Schemas exported:
+ *   {@link loginSchema}      — LoginForm
+ *   {@link registerSchema}   — RegisterForm
  *   {@link employeeSchema}   — CreateEmployeeRequest / UpdateEmployeeRequest
  *   {@link departmentSchema} — CreateDepartmentRequest / UpdateDepartmentRequest
  */
 
 import { z } from 'zod';
+
+// ── Login schema ──────────────────────────────────────────────────────────────
+
+/**
+ * Zod schema for the login form.
+ *
+ * @type {z.ZodObject}
+ */
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
+
+  password: z
+    .string()
+    .min(1, 'Password is required'),
+
+  rememberMe: z.boolean().optional(),
+});
+
+// ── Register schema ───────────────────────────────────────────────────────────
+
+/**
+ * Zod schema for the registration form.
+ *
+ * @type {z.ZodObject}
+ */
+export const registerSchema = z
+  .object({
+    firstName: z
+      .string()
+      .min(1, 'First name is required')
+      .max(100, 'First name must not exceed 100 characters'),
+
+    lastName: z
+      .string()
+      .min(1, 'Last name is required')
+      .max(100, 'Last name must not exceed 100 characters'),
+
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .email('Please enter a valid email address'),
+
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters'),
+
+    confirmPassword: z
+      .string()
+      .min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 // ── Employee schema ───────────────────────────────────────────────────────────
 

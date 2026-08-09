@@ -1,0 +1,46 @@
+{
+  "_comment": [
+    "Least-privilege IAM policy for the EC2 instance role.",
+    "Grants ONLY what is required for the EC2 host to:",
+    "  1. Authenticate to ECR",
+    "  2. Pull images from the two specific repositories",
+    "",
+    "BEFORE USE — replace:",
+    "  YOUR_ACCOUNT_ID  →  12-digit AWS account ID",
+    "  YOUR_REGION      →  e.g. us-east-1",
+    "",
+    "Attach to role: EC2-EmpPortal-InstanceRole",
+    "Attach role to instance profile: EC2-EmpPortal-InstanceProfile"
+  ],
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECRGetAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ECRPullBackend",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:DescribeImages"
+      ],
+      "Resource": "arn:aws:ecr:YOUR_REGION:YOUR_ACCOUNT_ID:repository/employee-management-backend"
+    },
+    {
+      "Sid": "ECRPullFrontend",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:BatchGetImage",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:DescribeImages"
+      ],
+      "Resource": "arn:aws:ecr:YOUR_REGION:YOUR_ACCOUNT_ID:repository/employee-management-frontend"
+    }
+  ]
+}

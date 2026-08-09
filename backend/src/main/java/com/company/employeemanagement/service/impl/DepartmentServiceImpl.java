@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.UUID;
 
+
 /**
  * Implementation of {@link DepartmentService} providing full CRUD operations
  * with optional keyword search and pagination.
@@ -51,13 +52,16 @@ public class DepartmentServiceImpl implements DepartmentService {
      * {@inheritDoc}
      *
      * <p>Returns all departments sorted by name ascending for stable dropdown ordering.
+     * Employee count is fetched via a dedicated COUNT query per department to avoid
+     * loading the full lazy {@code employees} collection (N+1 prevention).
      */
     @Override
     @Transactional(readOnly = true)
     public List<DepartmentResponse> findAll() {
         return departmentRepository.findAll(Sort.by("name").ascending())
                 .stream()
-                .map(departmentMapper::toResponse)
+                .map(d -> departmentMapper.toResponse(d,
+                        departmentRepository.countEmployeesByDepartmentId(d.getId())))
                 .toList();
     }
 
@@ -66,6 +70,8 @@ public class DepartmentServiceImpl implements DepartmentService {
      *
      * <p>When {@code keyword} is non-blank, delegates to a case-insensitive LIKE
      * search across name and code. Otherwise returns all departments.
+     * Employee count is fetched via a dedicated COUNT query per department to avoid
+     * loading the full lazy {@code employees} collection (N+1 prevention).
      */
     @Override
     @Transactional(readOnly = true)
@@ -74,10 +80,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         Page<DepartmentResponse> page;
         if (StringUtils.hasText(keyword)) {
             page = departmentRepository.searchByKeyword(keyword, pageable)
-                    .map(departmentMapper::toResponse);
+                    .map(d -> departmentMapper.toResponse(d,
+                            departmentRepository.countEmployeesByDepartmentId(d.getId())));
         } else {
             page = departmentRepository.findAll(pageable)
-                    .map(departmentMapper::toResponse);
+                    .map(d -> departmentMapper.toResponse(d,
+                            departmentRepository.countEmployeesByDepartmentId(d.getId())));
         }
         return PageResponse.from(page);
     }
@@ -88,7 +96,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     public DepartmentResponse findById(final UUID id) {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Department", id));
-        return departmentMapper.toResponse(department);
+        long count = departmentRepository.countEmployeesByDepartmentId(id);
+        return departmentMapper.toResponse(department, count);
     }
 
     /**
@@ -109,7 +118,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .build();
 
         Department saved = departmentRepository.save(department);
-        return departmentMapper.toResponse(saved);
+        return departmentMapper.toResponse(saved, 0L);
     }
 
     /**
@@ -134,7 +143,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.setCode(request.code());
 
         Department updated = departmentRepository.save(department);
-        return departmentMapper.toResponse(updated);
+        long count = departmentRepository.countEmployeesByDepartmentId(id);
+        return departmentMapper.toResponse(updated, count);
     }
 
     /** {@inheritDoc} */

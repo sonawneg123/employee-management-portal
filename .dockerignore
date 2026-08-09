@@ -1,0 +1,47 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  Root .dockerignore
+#  Applies when building from the repository root context (e.g. CI pipelines
+#  that build from the project root rather than a subdirectory).
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Git metadata
+.git/
+.gitignore
+.github/
+
+# IDE artefacts
+.idea/
+.vscode/
+*.iml
+
+# Environment and secrets — never include in build context
+.env
+.env.*
+*.pem
+*.key
+*.jks
+*.p12
+
+# Backend build output
+backend/target/
+backend/.mvn/repository/
+
+# Frontend artefacts
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/coverage/
+
+# Docker / Compose overrides that shouldn't be in image context
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Documentation artefacts
+docs/
+*.md
+!README.md
+
+# OS artefacts
+.DS_Store
+Thumbs.db

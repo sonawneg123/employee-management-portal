@@ -1,30 +1,64 @@
-version: "3.9"
+# ──────────────────────────────────────────────────────────────────────────────
+#  Docker Compose — Employee Management Portal
+#
+#  Architecture:
+#    Browser → frontend (Nginx :80)
+#                ├── /          → React SPA
+#                └── /api/*     → backend:8080 (Spring Boot)
+#                                      ↓
+#                                 mysql:3306 (MySQL 8)
+#
+#  Quick start:
+#    cp .env.example .env   # fill in secrets
+#    docker compose up -d
+#
+#  URLs (all via Nginx on port 80):
+#    App:      http://localhost
+#    API:      http://localhost/api
+#    Swagger:  http://localhost/api/swagger-ui.html
+#    Health:   http://localhost/api/actuator/health
+#
+#  Direct backend access (development convenience):
+#    http://localhost:8080/api
+# ──────────────────────────────────────────────────────────────────────────────
 
 services:
 
-  # ── MySQL ─────────────────────────────────────────────────
+  # ── MySQL 8.0 ────────────────────────────────────────────────────────────────
   mysql:
     image: mysql:8.0
     container_name: emp_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme_root}
       MYSQL_DATABASE:      ${DB_NAME:-emp_portal}
       MYSQL_USER:          ${DB_USER:-emp_user}
-      MYSQL_PASSWORD:      ${DB_PASSWORD:-root}
+      MYSQL_PASSWORD:      ${DB_PASSWORD:-changeme}
     ports:
-      - "3306:3306"
+      # Exposed on host for developer tools (e.g. DBeaver, TablePlus).
+      # Remove or restrict to 127.0.0.1 in production deployments.
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - emp_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      # Use the application user credentials — root may be locked in hardened setups
+      test:
+        - "CMD"
+        - "mysqladmin"
+        - "ping"
+        - "-h"
+        - "localhost"
+        - "-u"
+        - "${DB_USER:-emp_user}"
+        - "--password=${DB_PASSWORD:-changeme}"
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
 
-  # ── Spring Boot Backend ───────────────────────────────────
+  # ── Spring Boot Backend ───────────────────────────────────────────────────────
   backend:
     build:
       context: ./backend
@@ -36,19 +70,35 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_HOST:      mysql
-      DB_PORT:      3306
-      DB_NAME:      ${DB_NAME:-emp_portal}
-      DB_USER:      ${DB_USER:-emp_user}
-      DB_PASSWORD:  ${DB_PASSWORD:-root}
-      JWT_SECRET:   ${JWT_SECRET:-ChangeThisSecretInProduction!!}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:80}
+      # Database — uses the Compose service name 'mysql' as the hostname
+      DB_HOST:     mysql
+      DB_PORT:     "3306"
+      DB_NAME:     ${DB_NAME:-emp_portal}
+      DB_USER:     ${DB_USER:-emp_user}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      # Disable SSL for the internal Docker network connection
+      # (override the production profile's useSSL=true)
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/${DB_NAME:-emp_portal}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      # JWT — must be provided in .env (minimum 32 characters / 256 bits)
+      JWT_SECRET:  ${JWT_SECRET:-ChangeThisSecretNowItMustBeAtLeast32Chars!!}
+      # CORS — allow requests from the Nginx frontend container
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
     ports:
-      - "8080:8080"
+      # Exposed on host for direct API access during development.
+      - "127.0.0.1:8080:8080"
     networks:
       - emp_network
+    healthcheck:
+      # Spring Boot Actuator health endpoint — returns 200 only when DB is up
+      test:
+        - "CMD-SHELL"
+        - "wget -qO- http://localhost:8080/api/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 60s
 
-  # ── React Frontend (served by Nginx) ─────────────────────
+  # ── React Frontend (Nginx) ────────────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
@@ -56,15 +106,26 @@ services:
     container_name: emp_frontend
     restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "80:80"
     networks:
       - emp_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/healthz | grep -q 'ok' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
+# ── Networks ──────────────────────────────────────────────────────────────────
 networks:
   emp_network:
     driver: bridge
 
+# ── Volumes ───────────────────────────────────────────────────────────────────
+# Named volume — data survives 'docker compose down' but NOT 'docker compose down -v'
 volumes:
   mysql_data:
+    driver: local

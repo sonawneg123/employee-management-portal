@@ -16,12 +16,17 @@ import com.company.employeemanagement.repository.LeaveRequestRepository;
 import com.company.employeemanagement.security.SecurityUtils;
 import com.company.employeemanagement.service.LeaveRequestService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link LeaveRequestService} providing leave request lifecycle
@@ -68,30 +73,46 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
      * <p>If the caller holds only the {@code ROLE_EMPLOYEE} role, the result is
      * automatically scoped to their own employee record, regardless of the
      * {@code employeeId} filter parameter.
+     *
+     * <p>Uses a two-step ID + fetch approach to prevent N+1 selects: the ID query
+     * applies database-level pagination; the fetch query loads full entity graphs
+     * (leave → employee → department, employee → user) in a single round-trip.
      */
     @Override
     @Transactional(readOnly = true)
     public PageResponse<LeaveRequestResponse> findAll(final UUID employeeId,
                                                        final Pageable pageable) {
-        Page<LeaveRequestResponse> page;
-
+        // Step 1 — paginated ID query
+        final Page<UUID> idPage;
         if (securityUtils.hasRole("ROLE_EMPLOYEE") && !securityUtils.isPrivileged()) {
-            // Employee may only see their own leave requests
             UUID ownEmployeeId = securityUtils.getCurrentEmployee()
                     .map(Employee::getId)
                     .orElseThrow(() -> new AccessDeniedException(
                             "No employee record is linked to your account."));
-            page = leaveRequestRepository.findByEmployeeId(ownEmployeeId, pageable)
-                    .map(leaveRequestMapper::toResponse);
+            idPage = leaveRequestRepository.findIdsByEmployeeId(ownEmployeeId, pageable);
         } else if (employeeId != null) {
-            page = leaveRequestRepository.findByEmployeeId(employeeId, pageable)
-                    .map(leaveRequestMapper::toResponse);
+            idPage = leaveRequestRepository.findIdsByEmployeeId(employeeId, pageable);
         } else {
-            page = leaveRequestRepository.findAll(pageable)
-                    .map(leaveRequestMapper::toResponse);
+            idPage = leaveRequestRepository.findAllIds(pageable);
         }
 
-        return PageResponse.from(page);
+        if (idPage.isEmpty()) {
+            return PageResponse.from(new PageImpl<>(List.of(), pageable, idPage.getTotalElements()));
+        }
+
+        // Step 2 — batch-fetch full entities with associations
+        final List<UUID> ids = idPage.getContent();
+        final Map<UUID, LeaveRequest> byId = leaveRequestRepository
+                .findAllWithAssociationsByIds(ids)
+                .stream()
+                .collect(Collectors.toMap(LeaveRequest::getId, Function.identity()));
+
+        final List<LeaveRequestResponse> content = ids.stream()
+                .filter(byId::containsKey)
+                .map(id -> leaveRequestMapper.toResponse(byId.get(id)))
+                .collect(Collectors.toList());
+
+        return PageResponse.from(new PageImpl<>(content, pageable, idPage.getTotalElements()));
     }
 
     /**

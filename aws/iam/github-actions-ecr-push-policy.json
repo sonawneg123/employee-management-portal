@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "Least-privilege IAM policy for the GitHub Actions ECR push role.",
+    "Grants ONLY what is required to:",
+    "  1. Authenticate to ECR (GetAuthorizationToken — registry-level, not repo-scoped)",
+    "  2. Push images to the two specific repositories",
+    "  3. Check image existence before pushing (BatchCheckLayerAvailability)",
+    "",
+    "BEFORE USE — replace:",
+    "  YOUR_ACCOUNT_ID  →  12-digit AWS account ID",
+    "  YOUR_REGION      →  e.g. us-east-1",
+    "",
+    "Attach to role: GitHubActions-ECRPush-Role"
+  ],
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECRGetAuthToken",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ECRPushBackend",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart",
+        "ecr:DescribeImages",
+        "ecr:BatchGetImage"
+      ],
+      "Resource": "arn:aws:ecr:YOUR_REGION:YOUR_ACCOUNT_ID:repository/employee-management-backend"
+    },
+    {
+      "Sid": "ECRPushFrontend",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart",
+        "ecr:DescribeImages",
+        "ecr:BatchGetImage"
+      ],
+      "Resource": "arn:aws:ecr:YOUR_REGION:YOUR_ACCOUNT_ID:repository/employee-management-frontend"
+    }
+  ]
+}

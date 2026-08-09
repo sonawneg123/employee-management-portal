@@ -1,0 +1,33 @@
+{
+  "_comment": [
+    "IAM Trust Policy for GitHub Actions OIDC.",
+    "Attach to role: GitHubActions-ECRPush-Role",
+    "",
+    "BEFORE USE — replace the two placeholder values:",
+    "  YOUR_GITHUB_ORG_OR_USER  →  your GitHub username or organization",
+    "  YOUR_REPO_NAME           →  employee-management-portal (or whatever the repo is named)",
+    "",
+    "The condition restricts token issuance to:",
+    "  - Exactly this repository",
+    "  - Only the 'main' branch (ref:refs/heads/main)",
+    "  - The 'production' GitHub environment",
+    "No wildcard subjects — no other repo/branch can assume this role."
+  ],
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "GitHubOIDCAssumeRole",
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::YOUR_ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+          "token.actions.githubusercontent.com:sub": "repo:YOUR_GITHUB_ORG_OR_USER/YOUR_REPO_NAME:environment:production"
+        }
+      }
+    }
+  ]
+}

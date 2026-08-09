@@ -1,0 +1,82 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  docker-compose.prod.yml — Employee Management Portal
+#
+#  Production deployment on EC2.
+#  - Uses pre-built images from Amazon ECR (no local build)
+#  - Database: Amazon RDS MySQL 8 (no local MySQL container)
+#  - All secrets via environment variables (never hard-coded here)
+#
+#  Usage on EC2:
+#    export IMAGE_TAG=<git-sha>
+#    export ECR_REGISTRY=<account>.dkr.ecr.<region>.amazonaws.com
+#    # (remaining vars come from .env.production — see .env.production.example)
+#    docker compose -f docker-compose.prod.yml pull
+#    docker compose -f docker-compose.prod.yml up -d
+#
+#  Rollback to a previous SHA:
+#    export IMAGE_TAG=<previous-sha>
+#    docker compose -f docker-compose.prod.yml pull
+#    docker compose -f docker-compose.prod.yml up -d
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Spring Boot Backend ───────────────────────────────────────────────────
+  backend:
+    image: ${ECR_REGISTRY}/employee-management-backend:${IMAGE_TAG}
+    container_name: emp_backend
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # ── Database (RDS MySQL) ──────────────────────────────────────────────
+      DB_HOST:     ${DB_HOST}
+      DB_PORT:     ${DB_PORT:-3306}
+      DB_NAME:     ${DB_NAME}
+      DB_USER:     ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Build JDBC URL with SSL — RDS requires SSL in production
+      SPRING_DATASOURCE_URL: "jdbc:mysql://${DB_HOST}:${DB_PORT:-3306}/${DB_NAME}?useSSL=true&requireSSL=true&serverTimezone=UTC"
+      # ── JWT ───────────────────────────────────────────────────────────────
+      JWT_SECRET:  ${JWT_SECRET}
+      # ── CORS — allow only the production frontend domain ──────────────────
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    expose:
+      # Not published to host — only reachable from frontend via emp_network
+      - "8080"
+    networks:
+      - emp_network
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "wget -qO- http://localhost:8080/api/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 90s
+
+  # ── React Frontend (Nginx) ────────────────────────────────────────────────
+  frontend:
+    image: ${ECR_REGISTRY}/employee-management-frontend:${IMAGE_TAG}
+    container_name: emp_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Only port 80 is published — Nginx handles all inbound traffic
+      - "80:80"
+    networks:
+      - emp_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/healthz | grep -q 'ok' || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+# ── Networks ──────────────────────────────────────────────────────────────────
+networks:
+  emp_network:
+    driver: bridge
+
+# No volumes — database is managed by RDS, not a local container.
