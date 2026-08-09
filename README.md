@@ -778,7 +778,22 @@ npm run test:coverage
 
 ## Changelog
 
-### DevOps Phase 3 — AWS ECR + OIDC + EC2 Deployment *(current)*
+### DevOps Phase 4 — Real AWS Deployment Verification *(current)*
+- Fixed `health-check.sh`: replaced `(( N++ ))` with `N=$((N+1))` (bash strict-mode arithmetic trap at 0)
+- Fixed `health-check.sh`: replaced `compose ps --format` with `docker inspect` (stable across Compose v2 versions)
+- Fixed `health-check.sh`: fallback DB check when `show-details` omits components
+- Fixed `deploy.sh`: health-wait loop rewritten using `docker inspect` — eliminates false-healthy-on-empty-output bug
+- Fixed `deploy.sh`: added `AWS_REGION` validation guard; increased timeout to 180s for cold RDS starts
+- Fixed `application-prod.properties`: `show-details=never` → `show-details=always` (port 8080 is not published)
+- Fixed `ci.yml`: `compose-validate` job now also validates `docker-compose.prod.yml` with CI placeholder vars
+- Fixed `ci.yml`: removed invalid `strip_components` from `appleboy/scp-action` step
+- Added `scripts/smoke-test.sh`: 11 real API checks (auth, CRUD, RBAC, leave workflow, cleanup)
+- Added smoke-test step to `deploy` job in `ci.yml`
+- Added `aws/ec2/verify-ec2.sh`: on-host verification (Docker, Compose, IAM role, ECR auth, files, permissions)
+- Added `aws/ec2/ec2-rds-setup.md`: step-by-step security group, EC2, RDS, deploy-user SSH key setup
+- Updated `.env.production.example`: clearer variable split (on-EC2 vs CI-injected), stronger placeholder names
+
+### DevOps Phase 3 — AWS ECR + OIDC + EC2 Deployment
 - Added `publish` job: OIDC → `aws-actions/configure-aws-credentials@v4` → ECR push with immutable SHA tags
 - Added `deploy` job: SCP compose + scripts to EC2, SSH deploy via `appleboy/ssh-action`, health verification
 - No static AWS credentials — GitHub Actions uses `id-token: write` OIDC; EC2 uses IAM instance role

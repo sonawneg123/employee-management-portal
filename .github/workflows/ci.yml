@@ -21,7 +21,7 @@
 #    - Uses OIDC — no AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY stored anywhere
 #
 #  Image tags:
-#    <sha>      — short 7-char Git SHA (immutable, used for deployment + rollback)
+#    <full-sha> — full 40-char Git SHA (immutable, used for deployment + rollback)
 #    main-<sha> — branch-prefixed variant for human browsing in ECR console
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -170,11 +170,12 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Create minimal .env for Compose validation
+      - name: Create minimal env files for Compose validation
         # docker compose config requires all referenced variables to be resolvable.
         # We supply safe placeholder values — no real secrets are needed for
         # syntactic validation.
         run: |
+          # dev compose variables
           cat > .env << 'EOF'
           MYSQL_ROOT_PASSWORD=ci_root_placeholder
           DB_NAME=emp_portal_ci
@@ -184,10 +185,29 @@ jobs:
           CORS_ORIGINS=http://localhost
           EOF
 
-      - name: Validate docker-compose.yml
+          # prod compose variables
+          cat > .env.prod-ci << 'EOF'
+          DB_HOST=ci-rds-placeholder.rds.amazonaws.com
+          DB_PORT=3306
+          DB_NAME=emp_portal
+          DB_USER=ci_user
+          DB_PASSWORD=ci_placeholder
+          JWT_SECRET=CIPlaceholderSecretThatIsAtLeast32Chars!!
+          CORS_ORIGINS=http://ci-placeholder
+          EOF
+
+      - name: Validate docker-compose.yml (dev)
         # Parses the full compose file, resolves variable substitutions,
         # and exits non-zero if any syntax or structural error is found.
         run: docker compose config --quiet
+
+      - name: Validate docker-compose.prod.yml
+        # Validates the production compose file with placeholder variables.
+        # ECR_REGISTRY and IMAGE_TAG are injected inline for validation only.
+        env:
+          ECR_REGISTRY: "123456789.dkr.ecr.us-east-1.amazonaws.com"
+          IMAGE_TAG: "ci-validation-sha"
+        run: docker compose --file docker-compose.prod.yml --env-file .env.prod-ci config --quiet
 
   # ── Job 5: Publish to ECR ─────────────────────────────────────────────────
   #  Builds final images and pushes to ECR with immutable SHA tags.
@@ -280,16 +300,17 @@ jobs:
 
       - name: Copy deployment files to EC2
         # Copies docker-compose.prod.yml and the scripts directory to EC2.
+        # The target directory /opt/emp-portal must already exist (created by
+        # bootstrap-ec2.sh).
         # .env.production must already exist on the host — it is NOT generated
         # by CI and is never transmitted over SSH to avoid secrets in logs.
         uses: appleboy/scp-action@v0.1.7
         with:
-          host:        ${{ secrets.EC2_HOST }}
-          username:    ${{ vars.EC2_USER }}
-          key:         ${{ secrets.EC2_SSH_KEY }}
-          source:      "docker-compose.prod.yml,scripts/"
-          target:      "/opt/emp-portal"
-          strip_components: 0
+          host:     ${{ secrets.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          source:   "docker-compose.prod.yml,scripts/"
+          target:   "/opt/emp-portal"
 
       - name: Make scripts executable
         uses: appleboy/ssh-action@v1.0.3
@@ -320,6 +341,20 @@ jobs:
           IMAGE_TAG:    ${{ github.sha }}
           ECR_REGISTRY: ${{ vars.ECR_REGISTRY }}
           AWS_REGION:   ${{ vars.AWS_REGION }}
+
+      - name: Smoke tests
+        # Run real API verification against the deployed application.
+        # Runs on the EC2 host via SSH so no ports need to be published
+        # to GitHub Actions runners.
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.EC2_HOST }}
+          username: ${{ vars.EC2_USER }}
+          key:      ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            export BASE_URL="http://localhost"
+            export APP_DIR="/opt/emp-portal"
+            bash /opt/emp-portal/scripts/smoke-test.sh
 
       - name: Record deployment in summary
         if: success()
