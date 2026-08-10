@@ -73,6 +73,19 @@ public class LeaveRequest extends BaseEntity {
     private String reason;
 
     /**
+     * Reason provided by the reviewer when rejecting this leave request.
+     * Null for approved or still-pending requests.
+     */
+    @Column(name = "rejection_reason", length = 500)
+    private String rejectionReason;
+
+    /**
+     * Optional URL to a supporting attachment uploaded by the employee.
+     */
+    @Column(name = "attachment_url", length = 500)
+    private String attachmentUrl;
+
+    /**
      * Current approval status of the leave request.
      * Defaults to {@link LeaveStatus#PENDING}.
      */

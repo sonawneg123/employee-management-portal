@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -103,6 +104,34 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
     Page<UUID> findAllIds(Pageable pageable);
 
     /**
+     * Returns a page of employee IDs with optional keyword, departmentId, and status filters.
+     * Null parameters are treated as "no filter" (wildcard).
+     *
+     * @param keyword      optional search term; pass {@code null} to skip keyword filtering
+     * @param departmentId optional department UUID filter; pass {@code null} to skip
+     * @param status       optional {@link EmployeeStatus} filter; pass {@code null} to skip
+     * @param pageable     pagination and sorting parameters
+     * @return a page of matching employee UUIDs
+     */
+    @Query("""
+            SELECT e.id FROM Employee e
+            LEFT JOIN e.user u
+            WHERE (:keyword      IS NULL
+                   OR LOWER(e.jobTitle) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                   OR (u IS NOT NULL AND (
+                       LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                    OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%'))
+                   )))
+              AND (:departmentId IS NULL OR e.department.id = :departmentId)
+              AND (:status       IS NULL OR e.status        = :status)
+            """)
+    Page<UUID> findIdsByFilters(
+            @Param("keyword")      String keyword,
+            @Param("departmentId") UUID departmentId,
+            @Param("status")       EmployeeStatus status,
+            Pageable pageable);
+
+    /**
      * Returns a page of employee IDs matching a keyword — used as the first
      * step of the two-query pagination strategy.
      *
@@ -167,4 +196,45 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
                ))
             """)
     Page<Employee> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    // ── Dashboard aggregation queries ─────────────────────────────────────────
+
+    /**
+     * Counts employees with a specific status.
+     *
+     * @param status the {@link EmployeeStatus} to count
+     * @return total count of employees in the given status
+     */
+    long countByStatus(EmployeeStatus status);
+
+    /**
+     * Counts employees whose date of joining falls on or after the given date.
+     * Used to compute "new this month" (pass first day of current month).
+     *
+     * @param fromDate inclusive start date
+     * @return count of employees who joined on or after {@code fromDate}
+     */
+    @Query("SELECT COUNT(e) FROM Employee e WHERE e.dateOfJoining >= :fromDate")
+    long countByDateOfJoiningOnOrAfter(@Param("fromDate") LocalDate fromDate);
+
+    /**
+     * Counts employees whose date of joining falls within the given date range.
+     * Used for month-over-month trend computation.
+     *
+     * @param from inclusive start date
+     * @param to   inclusive end date
+     * @return count of employees who joined in the range
+     */
+    @Query("SELECT COUNT(e) FROM Employee e WHERE e.dateOfJoining >= :from AND e.dateOfJoining <= :to")
+    long countByDateOfJoiningBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
+
+    /**
+     * Returns employee counts grouped by status for the dashboard status chart.
+     * Each element of the list is an {@code Object[]} with two elements:
+     * {@code [0]} the status string, {@code [1]} the count as {@code Long}.
+     *
+     * @return list of {@code [status, count]} pairs for all statuses present
+     */
+    @Query("SELECT e.status, COUNT(e) FROM Employee e GROUP BY e.status")
+    List<Object[]> countGroupByStatus();
 }

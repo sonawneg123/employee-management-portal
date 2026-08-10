@@ -106,7 +106,7 @@ class EmployeeControllerTest {
             PageResponse<EmployeeResponse> page = new PageResponse<>(
                     List.of(resp), 0, 20, 1L, 1, true, LocalDateTime.now());
 
-            when(employeeService.findAll(any(), any())).thenReturn(page);
+            when(employeeService.findAll(any(), any(), any(), any())).thenReturn(page);
 
             mockMvc.perform(get("/employees"))
                     .andExpect(status().isOk())

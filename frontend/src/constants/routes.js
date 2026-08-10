@@ -16,7 +16,7 @@ export const ROUTES = /** @type {const} */ ({
   LOGIN:    '/login',
   REGISTER: '/register',
 
-  // ── Protected ───────────────────────────────────────────────────
+  // ── Protected (legacy — kept for backward compatibility) ────────
   DASHBOARD:       '/dashboard',
   EMPLOYEES:       '/employees',
   EMPLOYEE_DETAIL:   (id) => `/employees/${id}`,
@@ -29,6 +29,28 @@ export const ROUTES = /** @type {const} */ ({
   REVIEWS:         '/reviews',
   PROFILE:         '/profile',
   SETTINGS:        '/settings',
+
+  // ── Admin routes ─────────────────────────────────────────────────
+  ADMIN_DASHBOARD:    '/admin/dashboard',
+  ADMIN_EMPLOYEES:    '/admin/employees',
+  ADMIN_DEPARTMENTS:  '/admin/departments',
+  ADMIN_LEAVES:       '/admin/leaves',
+  ADMIN_ATTENDANCE:   '/admin/attendance',
+  ADMIN_REVIEWS:      '/admin/reviews',
+
+  // ── HR routes ────────────────────────────────────────────────────
+  HR_DASHBOARD:    '/hr/dashboard',
+  HR_EMPLOYEES:    '/hr/employees',
+  HR_LEAVES:       '/hr/leaves',
+  HR_ATTENDANCE:   '/hr/attendance',
+  HR_REVIEWS:      '/hr/reviews',
+
+  // ── Employee routes ──────────────────────────────────────────────
+  EMPLOYEE_DASHBOARD:   '/employee/dashboard',
+  EMPLOYEE_LEAVES:      '/employee/leaves',
+  EMPLOYEE_ATTENDANCE:  '/employee/attendance',
+  EMPLOYEE_PROFILE:     '/employee/profile',
+  EMPLOYEE_REVIEWS:     '/employee/reviews',
 
   // ── Fallback ─────────────────────────────────────────────────────
   NOT_FOUND:     '/404',

@@ -5,6 +5,8 @@ import com.company.employeemanagement.dto.request.ReviewLeaveRequest;
 import com.company.employeemanagement.dto.request.UpdateLeaveRequest;
 import com.company.employeemanagement.dto.response.LeaveRequestResponse;
 import com.company.employeemanagement.dto.response.PageResponse;
+import com.company.employeemanagement.entity.enums.LeaveStatus;
+import com.company.employeemanagement.entity.enums.LeaveType;
 import com.company.employeemanagement.service.LeaveRequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -68,19 +70,24 @@ public class LeaveController {
     }
 
     /**
-     * Returns a paginated list of leave requests, optionally filtered by employee.
+     * Returns a paginated list of leave requests, optionally filtered by employee,
+     * status, and/or leave type.
      *
      * @param employeeId optional UUID to filter by employee
+     * @param status     optional status filter (PENDING, APPROVED, REJECTED, CANCELLED)
+     * @param type       optional leave type filter
      * @param page       zero-based page number (default: 0)
      * @param size       page size between 1 and 100 (default: 20)
-     * @param sortBy     field to sort by (default: {@code "createdAt"})
-     * @param sortDir    sort direction: {@code asc} or {@code desc} (default: {@code "desc"})
+     * @param sortBy     field to sort by — also accepted as {@code sort} (default: {@code "createdAt"})
+     * @param sortDir    sort direction — also accepted as {@code direction} (default: {@code "desc"})
+     * @param sort       alias for {@code sortBy} (frontend compatibility)
+     * @param direction  alias for {@code sortDir} (frontend compatibility)
      * @return paginated list of leave requests
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER','EMPLOYEE')")
     @Operation(summary = "List leave requests",
-               description = "Returns a paginated list of leave requests. Filter by employeeId to see one employee's requests.")
+               description = "Returns a paginated list of leave requests. Filter by employeeId, status, or type.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Page of leave requests returned"),
             @ApiResponse(responseCode = "401", description = "Not authenticated",
@@ -91,23 +98,38 @@ public class LeaveController {
             @Parameter(description = "Filter by employee UUID")
             @RequestParam(required = false) final UUID employeeId,
 
+            @Parameter(description = "Filter by leave status")
+            @RequestParam(required = false) final LeaveStatus status,
+
+            @Parameter(description = "Filter by leave type")
+            @RequestParam(required = false) final LeaveType type,
+
             @Parameter(description = "Zero-based page number", example = "0")
             @RequestParam(defaultValue = "0") final int page,
 
             @Parameter(description = "Page size (1–100)", example = "20")
             @RequestParam(defaultValue = "20") final int size,
 
-            @Parameter(description = "Sort field", example = "createdAt")
+            @Parameter(description = "Sort field (also accepted as 'sort')", example = "createdAt")
             @RequestParam(defaultValue = "createdAt") final String sortBy,
 
-            @Parameter(description = "Sort direction: asc or desc", example = "desc")
-            @RequestParam(defaultValue = "desc") final String sortDir
+            @Parameter(description = "Sort direction: asc or desc (also accepted as 'direction')",
+                       example = "desc")
+            @RequestParam(defaultValue = "desc") final String sortDir,
+
+            @Parameter(description = "Alias for sortBy (frontend compatibility)", hidden = true)
+            @RequestParam(required = false) final String sort,
+
+            @Parameter(description = "Alias for sortDir (frontend compatibility)", hidden = true)
+            @RequestParam(required = false) final String direction
     ) {
-        Sort sort = sortDir.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, Math.min(size, 100), sort);
-        return ResponseEntity.ok(leaveRequestService.findAll(employeeId, pageable));
+        final String effectiveSortBy  = (sort      != null) ? sort      : sortBy;
+        final String effectiveSortDir = (direction != null) ? direction : sortDir;
+        Sort sortObj = effectiveSortDir.equalsIgnoreCase("asc")
+                ? Sort.by(effectiveSortBy).ascending()
+                : Sort.by(effectiveSortBy).descending();
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100), sortObj);
+        return ResponseEntity.ok(leaveRequestService.findAll(employeeId, status, type, pageable));
     }
 
     /**

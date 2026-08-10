@@ -6,17 +6,28 @@
  * when the user navigates to it.
  *
  * Route guards:
- * - {@link ProtectedRoute} — redirects unauthenticated users to /login.
- * - {@link PublicRoute}    — redirects authenticated users to /dashboard.
+ * - {@link ProtectedRoute}     — redirects unauthenticated users to /login.
+ * - {@link PublicRoute}        — redirects authenticated users to /dashboard.
+ * - {@link RoleProtectedRoute} — redirects unauthorised roles to /403.
+ *
+ * Route tree:
+ * - /admin/*    — ROLE_ADMIN only
+ * - /hr/*       — ROLE_HR, ROLE_MANAGER
+ * - /employee/* — ROLE_EMPLOYEE
+ * - /dashboard  — smart redirect to the correct role dashboard
+ * - Legacy flat routes remain for backward compatibility
  */
 
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
+import { ROLES } from '@/constants/roles';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
+import RoleProtectedRoute from './RoleProtectedRoute';
 import PageLoader from '@/components/common/PageLoader';
 import AppLayout from '@/components/layouts/AppLayout';
+import DashboardRedirect from '@/components/common/DashboardRedirect';
 
 // ── Lazy page imports ────────────────────────────────────────────────────────
 const LoginPage       = lazy(() => import('@/pages/auth/LoginPage'));
@@ -35,6 +46,11 @@ const ProfilePage     = lazy(() => import('@/pages/profile/ProfilePage'));
 const SettingsPage    = lazy(() => import('@/pages/settings/SettingsPage'));
 const NotFoundPage    = lazy(() => import('@/pages/NotFoundPage'));
 const AccessDeniedPage = lazy(() => import('@/pages/AccessDeniedPage'));
+
+// ── Role-specific dashboard pages ────────────────────────────────────────────
+const AdminDashboardPage    = lazy(() => import('@/pages/admin/AdminDashboardPage'));
+const HRDashboardPage       = lazy(() => import('@/pages/hr/HRDashboardPage'));
+const EmployeeDashboardPage = lazy(() => import('@/pages/employee/EmployeeDashboardPage'));
 
 // ── Suspense wrapper ─────────────────────────────────────────────────────────
 
@@ -65,8 +81,42 @@ export default function AppRoutes() {
       {/* ── Protected routes (redirect to login if not authenticated) ── */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-          <Route path={ROUTES.DASHBOARD}   element={withSuspense(<DashboardPage />)} />
+
+          {/* Root → smart redirect based on role */}
+          <Route index element={<DashboardRedirect />} />
+
+          {/* Legacy /dashboard → smart redirect */}
+          <Route path={ROUTES.DASHBOARD} element={<DashboardRedirect />} />
+
+          {/* ── Admin-only routes (/admin/*) ──────────────────────────── */}
+          <Route element={<RoleProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
+            <Route path={ROUTES.ADMIN_DASHBOARD}   element={withSuspense(<AdminDashboardPage />)} />
+            <Route path={ROUTES.ADMIN_EMPLOYEES}   element={withSuspense(<EmployeesPage />)} />
+            <Route path={ROUTES.ADMIN_DEPARTMENTS} element={withSuspense(<DepartmentsPage />)} />
+            <Route path={ROUTES.ADMIN_LEAVES}      element={withSuspense(<LeavesPage />)} />
+            <Route path={ROUTES.ADMIN_ATTENDANCE}  element={withSuspense(<AttendancePage />)} />
+            <Route path={ROUTES.ADMIN_REVIEWS}     element={withSuspense(<ReviewsPage />)} />
+          </Route>
+
+          {/* ── HR/Manager routes (/hr/*) ─────────────────────────────── */}
+          <Route element={<RoleProtectedRoute allowedRoles={[ROLES.HR, ROLES.MANAGER]} />}>
+            <Route path={ROUTES.HR_DASHBOARD}   element={withSuspense(<HRDashboardPage />)} />
+            <Route path={ROUTES.HR_EMPLOYEES}   element={withSuspense(<EmployeesPage />)} />
+            <Route path={ROUTES.HR_LEAVES}      element={withSuspense(<LeavesPage />)} />
+            <Route path={ROUTES.HR_ATTENDANCE}  element={withSuspense(<AttendancePage />)} />
+            <Route path={ROUTES.HR_REVIEWS}     element={withSuspense(<ReviewsPage />)} />
+          </Route>
+
+          {/* ── Employee self-service routes (/employee/*) ────────────── */}
+          <Route element={<RoleProtectedRoute allowedRoles={[ROLES.EMPLOYEE]} />}>
+            <Route path={ROUTES.EMPLOYEE_DASHBOARD}  element={withSuspense(<EmployeeDashboardPage />)} />
+            <Route path={ROUTES.EMPLOYEE_LEAVES}     element={withSuspense(<MyLeavesPage />)} />
+            <Route path={ROUTES.EMPLOYEE_ATTENDANCE} element={withSuspense(<AttendancePage />)} />
+            <Route path={ROUTES.EMPLOYEE_PROFILE}    element={withSuspense(<ProfilePage />)} />
+            <Route path={ROUTES.EMPLOYEE_REVIEWS}    element={withSuspense(<ReviewsPage />)} />
+          </Route>
+
+          {/* ── Legacy flat routes (backward compatibility) ───────────── */}
           <Route path={ROUTES.EMPLOYEES}          element={withSuspense(<EmployeesPage />)} />
           <Route path={`${ROUTES.EMPLOYEES}/:id`} element={withSuspense(<EmployeeDetailsPage />)} />
           <Route path={ROUTES.DEPARTMENTS}          element={withSuspense(<DepartmentsPage />)} />

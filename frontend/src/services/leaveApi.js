@@ -50,6 +50,19 @@ export async function getLeaveRequests(params = {}) {
 }
 
 /**
+ * Returns the authenticated user's own leave requests (scoped server-side).
+ * Calls GET /leaves/my which the backend automatically filters to the
+ * current user's linked employee record — avoids the userId vs employeeId mismatch.
+ *
+ * @param {{ page?: number, size?: number, sort?: string, direction?: string, status?: string, type?: string }} [params={}]
+ * @returns {Promise<import('./employeeApi').PageResponse<LeaveRequestResponse>>}
+ */
+export async function getMyLeaveRequests(params = {}) {
+  const { data } = await axiosInstance.get(API_ENDPOINTS.LEAVES_MY, { params });
+  return data;
+}
+
+/**
  * Returns a single leave request by UUID.
  *
  * @param {string} id

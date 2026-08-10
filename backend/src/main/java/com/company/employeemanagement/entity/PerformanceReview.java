@@ -11,6 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -45,7 +47,8 @@ public class PerformanceReview extends BaseEntity {
      * Stored as a bare UUID reference to avoid a hard FK dependency
      * on the users table from this table.
      */
-    @Column(name = "reviewer_id")
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "reviewer_id", length = 36)
     private UUID reviewerId;
 
     /**

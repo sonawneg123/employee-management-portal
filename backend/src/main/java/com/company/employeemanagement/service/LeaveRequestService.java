@@ -5,6 +5,8 @@ import com.company.employeemanagement.dto.request.ReviewLeaveRequest;
 import com.company.employeemanagement.dto.request.UpdateLeaveRequest;
 import com.company.employeemanagement.dto.response.LeaveRequestResponse;
 import com.company.employeemanagement.dto.response.PageResponse;
+import com.company.employeemanagement.entity.enums.LeaveStatus;
+import com.company.employeemanagement.entity.enums.LeaveType;
 import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
@@ -20,13 +22,16 @@ public interface LeaveRequestService {
 
     /**
      * Returns a paginated list of leave requests, optionally filtered by
-     * employee and/or status.
+     * employee, status, and/or leave type.
      *
      * @param employeeId optional UUID to filter by a specific employee
+     * @param status     optional {@link LeaveStatus} to filter by
+     * @param leaveType  optional {@link LeaveType} to filter by
      * @param pageable   pagination and sorting parameters
      * @return a {@link PageResponse} of {@link LeaveRequestResponse} records
      */
-    PageResponse<LeaveRequestResponse> findAll(UUID employeeId, Pageable pageable);
+    PageResponse<LeaveRequestResponse> findAll(UUID employeeId, LeaveStatus status,
+                                               LeaveType leaveType, Pageable pageable);
 
     /**
      * Returns the leave request with the specified UUID.

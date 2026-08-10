@@ -234,7 +234,8 @@ describe('AuthContext', () => {
       });
 
       await waitFor(() => {
-        expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true });
+        // register() calls resolveDashboard(roles) — ROLE_EMPLOYEE resolves to /employee/dashboard
+        expect(mockNavigate).toHaveBeenCalledWith('/employee/dashboard', { replace: true });
         expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBe('"new.token"');
       });
     });

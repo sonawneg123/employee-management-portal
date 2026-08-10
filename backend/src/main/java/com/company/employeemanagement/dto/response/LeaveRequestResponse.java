@@ -22,6 +22,7 @@ import java.util.UUID;
  * @param totalDays       computed number of calendar days (endDate - startDate + 1)
  * @param reason          optional justification provided by the employee
  * @param status          current approval status
+ * @param rejectionReason reason supplied by the reviewer on rejection, or {@code null}
  * @param reviewedBy      UUID of the reviewer, or {@code null} while pending
  * @param reviewedAt      timestamp of the review decision, or {@code null} while pending
  * @param createdAt       record creation timestamp
@@ -68,6 +69,10 @@ public record LeaveRequestResponse(
 
         @Schema(description = "Current approval status", example = "PENDING")
         LeaveStatus status,
+
+        @Schema(description = "Reason provided by the reviewer on rejection",
+                example = "Insufficient leave balance")
+        String rejectionReason,
 
         @Schema(description = "UUID of the reviewer who made the decision")
         UUID reviewedBy,

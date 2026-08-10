@@ -109,6 +109,21 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**",
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        // ── Settings endpoints ───────────────────────────
+                        .requestMatchers(HttpMethod.POST, "/settings/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── Reviews endpoints ────────────────────────────
+                        .requestMatchers(HttpMethod.GET, "/reviews/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/reviews/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/reviews/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/reviews/**")
+                                .hasRole("ADMIN")
+                        // ── Dashboard endpoints (all authenticated roles) ──
+                        .requestMatchers(HttpMethod.GET, "/dashboard/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         // ── Employee endpoints ───────────────────────────
                         .requestMatchers(HttpMethod.GET, "/employees/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")

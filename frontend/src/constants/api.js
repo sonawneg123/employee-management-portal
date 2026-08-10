@@ -42,6 +42,7 @@ export const API_ENDPOINTS = /** @type {const} */ ({
 
   // Leave requests
   LEAVES:        '/leaves',
+  LEAVES_MY:     '/leaves/my',
   LEAVE_BY_ID:   (id) => `/leaves/${id}`,
   LEAVE_APPROVE: (id) => `/leaves/${id}/approve`,
   LEAVE_REJECT:  (id) => `/leaves/${id}/reject`,

@@ -7,6 +7,7 @@ import com.company.employeemanagement.dto.response.PageResponse;
 import com.company.employeemanagement.entity.Department;
 import com.company.employeemanagement.entity.Employee;
 import com.company.employeemanagement.entity.User;
+import com.company.employeemanagement.entity.enums.EmployeeStatus;
 import com.company.employeemanagement.exception.AccessDeniedException;
 import com.company.employeemanagement.exception.DuplicateResourceException;
 import com.company.employeemanagement.exception.ResourceNotFoundException;
@@ -80,18 +81,17 @@ public class EmployeeServiceImpl implements EmployeeService {
      *       (with their {@code department} and {@code user} associations)
      *       for those IDs in one round-trip.</li>
      * </ol>
-     *
-     * <p>When {@code keyword} is non-blank, step 1 delegates to
-     * {@link EmployeeRepository#searchIdsByKeyword}; otherwise to
-     * {@link EmployeeRepository#findAllIds}.
      */
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<EmployeeResponse> findAll(final String keyword, final Pageable pageable) {
-        // Step 1 — paginated ID query (database-level LIMIT/OFFSET)
-        final Page<UUID> idPage = StringUtils.hasText(keyword)
-                ? employeeRepository.searchIdsByKeyword(keyword, pageable)
-                : employeeRepository.findAllIds(pageable);
+    public PageResponse<EmployeeResponse> findAll(final String keyword,
+                                                   final UUID departmentId,
+                                                   final EmployeeStatus status,
+                                                   final Pageable pageable) {
+        // Step 1 — paginated ID query with optional filters
+        final String effectiveKeyword = StringUtils.hasText(keyword) ? keyword : null;
+        final Page<UUID> idPage = employeeRepository.findIdsByFilters(
+                effectiveKeyword, departmentId, status, pageable);
 
         if (idPage.isEmpty()) {
             return PageResponse.from(new PageImpl<>(List.of(), pageable, idPage.getTotalElements()));

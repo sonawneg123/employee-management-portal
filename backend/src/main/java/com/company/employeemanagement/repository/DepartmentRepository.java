@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,4 +62,28 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
                OR LOWER(d.code) LIKE LOWER(CONCAT('%', :keyword, '%'))
             """)
     Page<Department> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    // ── Dashboard aggregation queries ─────────────────────────────────────────
+
+    /**
+     * Returns department name, code, and employee count as a projection list
+     * for the dashboard pie chart. Each element is an {@code Object[]} with:
+     * <ul>
+     *   <li>{@code [0]} — department name ({@code String})</li>
+     *   <li>{@code [1]} — department code ({@code String})</li>
+     *   <li>{@code [2]} — employee headcount ({@code Long})</li>
+     * </ul>
+     *
+     * <p>Departments with zero employees are included.
+     *
+     * @return list of {@code [name, code, count]} rows ordered by count descending
+     */
+    @Query("""
+            SELECT d.name, d.code, COUNT(e)
+            FROM Department d
+            LEFT JOIN d.employees e
+            GROUP BY d.id, d.name, d.code
+            ORDER BY COUNT(e) DESC
+            """)
+    List<Object[]> findDepartmentDistribution();
 }

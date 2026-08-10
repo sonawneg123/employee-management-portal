@@ -16,6 +16,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import {
   getLeaveRequests,
+  getMyLeaveRequests,
   getLeaveById,
   createLeaveRequest,
   updateLeaveRequest,
@@ -29,7 +30,6 @@ import {
   LEAVE_DEFAULT_SORT,
   LEAVE_DEFAULT_DIRECTION,
 } from '@/constants/leaveConstants';
-import { useAuth } from '@/contexts/AuthContext';
 
 // ── useLeaves ─────────────────────────────────────────────────────────────────
 
@@ -105,18 +105,17 @@ export function useLeaves(params = {}) {
  * }}
  */
 export function useMyLeaves(params = {}) {
-  const queryClient   = useQueryClient();
-  const { user }      = useAuth();
-  const employeeId    = user?.userId; // backend filters by userId on the /leaves endpoint
+  const queryClient = useQueryClient();
 
+  // Use /leaves/my which the backend scopes to the authenticated user's
+  // linked employee record — avoids the userId vs employeeId UUID mismatch.
   const effectiveParams = {
-    page:       params.page      ?? 0,
-    size:       params.size      ?? LEAVE_DEFAULT_PAGE_SIZE,
-    sort:       params.sort      ?? LEAVE_DEFAULT_SORT,
-    direction:  params.direction ?? LEAVE_DEFAULT_DIRECTION,
-    status:     params.status    || undefined,
-    type:       params.type      || undefined,
-    employeeId: employeeId       || undefined,
+    page:      params.page      ?? 0,
+    size:      params.size      ?? LEAVE_DEFAULT_PAGE_SIZE,
+    sort:      params.sort      ?? LEAVE_DEFAULT_SORT,
+    direction: params.direction ?? LEAVE_DEFAULT_DIRECTION,
+    status:    params.status    || undefined,
+    type:      params.type      || undefined,
   };
   Object.keys(effectiveParams).forEach(
     (k) => effectiveParams[k] === undefined && delete effectiveParams[k],
@@ -124,7 +123,7 @@ export function useMyLeaves(params = {}) {
 
   const query = useQuery({
     queryKey:        LEAVE_QUERY_KEYS.my(effectiveParams),
-    queryFn:         () => getLeaveRequests(effectiveParams),
+    queryFn:         () => getMyLeaveRequests(effectiveParams),
     staleTime:       30_000,
     placeholderData: (prev) => prev,
   });

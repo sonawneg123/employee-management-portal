@@ -1,10 +1,15 @@
 /**
- * @fileoverview Sidebar navigation component (placeholder).
+ * @fileoverview Sidebar navigation component.
  *
- * Renders the application navigation drawer. Business page links will be
- * added in Phase 3B once all page components are implemented.
+ * Renders the application navigation drawer with role-aware menu items.
+ * Each role sees only the navigation items appropriate to their access level,
+ * pointing at the correct role-scoped route paths.
  *
- * @placeholder Navigation items will be expanded in Phase 3B.
+ * Role → nav items:
+ * - ADMIN    → /admin/dashboard, /admin/employees, /admin/departments, /admin/leaves, /admin/attendance
+ * - HR       → /hr/dashboard, /hr/employees, /hr/leaves, /hr/attendance
+ * - MANAGER  → /hr/dashboard, /hr/employees, /hr/leaves, /hr/attendance
+ * - EMPLOYEE → /employee/dashboard, /employee/leaves, /employee/attendance, /employee/profile
  */
 
 import React from 'react';
@@ -26,68 +31,117 @@ import PeopleIcon      from '@mui/icons-material/People';
 import ApartmentIcon   from '@mui/icons-material/Apartment';
 import EventNoteIcon   from '@mui/icons-material/EventNote';
 import AccessTimeIcon  from '@mui/icons-material/AccessTime';
-import StarRateIcon    from '@mui/icons-material/StarRate';
 import PersonIcon      from '@mui/icons-material/Person';
 import SettingsIcon    from '@mui/icons-material/Settings';
+import AssessmentIcon  from '@mui/icons-material/Assessment';
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
  * @typedef {Object} NavItem
- * @property {string}      label - Display label.
- * @property {string}      path  - Route path.
- * @property {JSX.Element} icon  - MUI icon element.
- */
-
-/**
- * @typedef {Object} NavItem
- * @property {string}      label        - Display label.
- * @property {string}      path         - Route path.
- * @property {JSX.Element} icon         - MUI icon element.
+ * @property {string}      label          - Display label.
+ * @property {string}      path           - Route path.
+ * @property {JSX.Element} icon           - MUI icon element.
  * @property {string[]}    [allowedRoles] - Roles that can see this item; undefined = all roles.
  */
 
 /** @type {NavItem[]} */
 const NAV_ITEMS = [
+  // ── Admin items ─────────────────────────────────────────────────────────────
   {
     label: 'Dashboard',
-    path: ROUTES.DASHBOARD,
-    icon: <DashboardIcon />,
+    path:  ROUTES.ADMIN_DASHBOARD,
+    icon:  <DashboardIcon />,
+    allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Employees',
-    path: ROUTES.EMPLOYEES,
-    icon: <PeopleIcon />,
-    // All authenticated roles can view employees (EMPLOYEE sees own record)
+    path:  ROUTES.ADMIN_EMPLOYEES,
+    icon:  <PeopleIcon />,
+    allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Departments',
-    path: ROUTES.DEPARTMENTS,
-    icon: <ApartmentIcon />,
-    // All roles can view departments (read-only for MANAGER/EMPLOYEE)
+    path:  ROUTES.ADMIN_DEPARTMENTS,
+    icon:  <ApartmentIcon />,
+    allowedRoles: [ROLES.ADMIN],
   },
   {
-    label: 'All Leaves',
-    path: ROUTES.LEAVES,
-    icon: <EventNoteIcon />,
-    allowedRoles: [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
+    label: 'Leaves',
+    path:  ROUTES.ADMIN_LEAVES,
+    icon:  <EventNoteIcon />,
+    allowedRoles: [ROLES.ADMIN],
+  },
+  {
+    label: 'Attendance',
+    path:  ROUTES.ADMIN_ATTENDANCE,
+    icon:  <AccessTimeIcon />,
+    allowedRoles: [ROLES.ADMIN],
+  },
+  {
+    label: 'Reviews',
+    path:  ROUTES.ADMIN_REVIEWS,
+    icon:  <AssessmentIcon />,
+    allowedRoles: [ROLES.ADMIN],
+  },
+
+  // ── HR / Manager items ───────────────────────────────────────────────────────
+  {
+    label: 'Dashboard',
+    path:  ROUTES.HR_DASHBOARD,
+    icon:  <DashboardIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Employees',
+    path:  ROUTES.HR_EMPLOYEES,
+    icon:  <PeopleIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Leaves',
+    path:  ROUTES.HR_LEAVES,
+    icon:  <EventNoteIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Attendance',
+    path:  ROUTES.HR_ATTENDANCE,
+    icon:  <AccessTimeIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Reviews',
+    path:  ROUTES.HR_REVIEWS,
+    icon:  <AssessmentIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+
+  // ── Employee items ───────────────────────────────────────────────────────────
+  {
+    label: 'Dashboard',
+    path:  ROUTES.EMPLOYEE_DASHBOARD,
+    icon:  <DashboardIcon />,
+    allowedRoles: [ROLES.EMPLOYEE],
   },
   {
     label: 'My Leaves',
-    path: ROUTES.MY_LEAVES,
-    icon: <EventNoteIcon />,
+    path:  ROUTES.EMPLOYEE_LEAVES,
+    icon:  <EventNoteIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
   {
     label: 'Attendance',
-    path: ROUTES.ATTENDANCE,
-    icon: <AccessTimeIcon />,
+    path:  ROUTES.EMPLOYEE_ATTENDANCE,
+    icon:  <AccessTimeIcon />,
+    allowedRoles: [ROLES.EMPLOYEE],
   },
   {
-    label: 'Reviews',
-    path: ROUTES.REVIEWS,
-    icon: <StarRateIcon />,
+    label: 'My Reviews',
+    path:  ROUTES.EMPLOYEE_REVIEWS,
+    icon:  <AssessmentIcon />,
+    allowedRoles: [ROLES.EMPLOYEE],
   },
 ];
 
@@ -118,7 +172,7 @@ export default function Sidebar({ open, onClose, width, variant }) {
    * @type {NavItem[]}
    */
   const visibleNavItems = NAV_ITEMS.filter(({ allowedRoles }) => {
-    if (!allowedRoles) return true;            // no restriction — show to all
+    if (!allowedRoles) return true;
     return hasAnyRole(allowedRoles);
   });
 

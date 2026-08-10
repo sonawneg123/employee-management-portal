@@ -8,6 +8,7 @@ import com.company.employeemanagement.dto.response.PageResponse;
 import com.company.employeemanagement.entity.Employee;
 import com.company.employeemanagement.entity.LeaveRequest;
 import com.company.employeemanagement.entity.enums.LeaveStatus;
+import com.company.employeemanagement.entity.enums.LeaveType;
 import com.company.employeemanagement.exception.AccessDeniedException;
 import com.company.employeemanagement.exception.ResourceNotFoundException;
 import com.company.employeemanagement.mapper.LeaveRequestMapper;
@@ -81,6 +82,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<LeaveRequestResponse> findAll(final UUID employeeId,
+                                                       final LeaveStatus status,
+                                                       final LeaveType leaveType,
                                                        final Pageable pageable) {
         // Step 1 — paginated ID query
         final Page<UUID> idPage;
@@ -89,11 +92,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     .map(Employee::getId)
                     .orElseThrow(() -> new AccessDeniedException(
                             "No employee record is linked to your account."));
-            idPage = leaveRequestRepository.findIdsByEmployeeId(ownEmployeeId, pageable);
-        } else if (employeeId != null) {
-            idPage = leaveRequestRepository.findIdsByEmployeeId(employeeId, pageable);
+            idPage = leaveRequestRepository.findIdsByFilters(ownEmployeeId, status, leaveType, pageable);
         } else {
-            idPage = leaveRequestRepository.findAllIds(pageable);
+            idPage = leaveRequestRepository.findIdsByFilters(employeeId, status, leaveType, pageable);
         }
 
         if (idPage.isEmpty()) {
@@ -243,6 +244,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         leaveRequest.setStatus(LeaveStatus.REJECTED);
         leaveRequest.setReviewedAt(LocalDateTime.now());
         leaveRequest.setReviewedBy(currentUserId());
+        if (request != null && request.rejectionReason() != null) {
+            leaveRequest.setRejectionReason(request.rejectionReason());
+        }
 
         LeaveRequest updated = leaveRequestRepository.save(leaveRequest);
         return leaveRequestMapper.toResponse(updated);

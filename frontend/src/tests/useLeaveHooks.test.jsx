@@ -21,6 +21,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('@/services/leaveApi', () => ({
   getLeaveRequests:    vi.fn(),
+  getMyLeaveRequests:  vi.fn(),
   getLeaveById:        vi.fn(),
   createLeaveRequest:  vi.fn(),
   updateLeaveRequest:  vi.fn(),
@@ -35,6 +36,7 @@ vi.mock('@/contexts/AuthContext', () => ({
 
 import {
   getLeaveRequests,
+  getMyLeaveRequests,
   getLeaveById,
   createLeaveRequest,
   updateLeaveRequest,
@@ -123,7 +125,8 @@ describe('useLeaves', () => {
 describe('useMyLeaves', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getLeaveRequests.mockResolvedValue(PAGE);
+    // useMyLeaves calls getMyLeaveRequests (dedicated /leaves/my endpoint), not getLeaveRequests
+    getMyLeaveRequests.mockResolvedValue(PAGE);
     useAuth.mockReturnValue({ user: { userId: 'user-uuid-42' } });
   });
 
@@ -133,11 +136,9 @@ describe('useMyLeaves', () => {
     expect(result.current.data).toEqual(PAGE);
   });
 
-  it('passes the current userId as employeeId param', async () => {
+  it('calls getMyLeaveRequests (the scoped /leaves/my endpoint)', async () => {
     renderHook(() => useMyLeaves(), { wrapper: makeWrapper() });
-    await waitFor(() => expect(getLeaveRequests).toHaveBeenCalledOnce());
-    const calledWith = getLeaveRequests.mock.calls[0][0];
-    expect(calledWith.employeeId).toBe('user-uuid-42');
+    await waitFor(() => expect(getMyLeaveRequests).toHaveBeenCalledOnce());
   });
 
   it('exposes a refresh function', async () => {

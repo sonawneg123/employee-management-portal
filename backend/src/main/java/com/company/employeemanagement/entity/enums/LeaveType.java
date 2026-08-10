@@ -22,6 +22,12 @@ public enum LeaveType {
     /** Unpaid leave approved by the company. */
     UNPAID,
 
+    /** Emergency leave for urgent, unforeseen circumstances. */
+    EMERGENCY,
+
+    /** Leave taken for study, exams, or professional development. */
+    STUDY,
+
     /** Any other leave type not covered by the above categories. */
     OTHER
 }

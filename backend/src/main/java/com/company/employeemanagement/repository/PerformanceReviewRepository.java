@@ -25,4 +25,13 @@ public interface PerformanceReviewRepository extends JpaRepository<PerformanceRe
      * @return a page of performance reviews for the employee
      */
     Page<PerformanceReview> findByEmployeeId(UUID employeeId, Pageable pageable);
+
+    /**
+     * Returns a paginated list of all performance reviews across all employees,
+     * ordered according to the supplied {@link Pageable}.
+     *
+     * @param pageable pagination and sorting parameters
+     * @return a page of all performance reviews
+     */
+    Page<PerformanceReview> findAll(Pageable pageable);
 }

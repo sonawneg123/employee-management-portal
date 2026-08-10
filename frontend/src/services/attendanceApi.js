@@ -39,6 +39,18 @@ export async function getAttendance(params = {}) {
 }
 
 /**
+ * Returns the authenticated employee's own attendance records.
+ * Calls GET /attendance/my which the backend scopes to the current user.
+ *
+ * @param {{ startDate?: string, endDate?: string, page?: number, size?: number }} [params={}]
+ * @returns {Promise<import('./employeeApi').PageResponse<AttendanceResponse>>}
+ */
+export async function getMyAttendance(params = {}) {
+  const { data } = await axiosInstance.get(`${API_ENDPOINTS.ATTENDANCE}/my`, { params });
+  return data;
+}
+
+/**
  * Returns a single attendance record by UUID.
  *
  * @param {string} id

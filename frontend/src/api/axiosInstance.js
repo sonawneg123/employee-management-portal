@@ -102,13 +102,16 @@ export function normaliseError(error) {
 
   const { data, status } = error.response;
 
-  // RFC 7807 ProblemDetail shape from the Spring Boot backend
+  // RFC 7807 ProblemDetail shape from the Spring Boot backend.
+  // Spring serialises ProblemDetail extension properties at the top level of
+  // the JSON body (per RFC 7807), so `violations` lives at data.violations,
+  // not data.properties.violations.
   if (data && data.title) {
     return {
       status,
       title:      data.title,
       message:    data.detail ?? data.title,
-      violations: data.properties?.violations ?? null,
+      violations: data.violations ?? null,
       isNetwork:  false,
     };
   }

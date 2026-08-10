@@ -38,8 +38,10 @@ The **Employee Management Portal** is a full-stack enterprise application that e
 - **Employees** — complete lifecycle CRUD with role-based access
 - **Departments** — organisational structure with employee assignment
 - **Leave Requests** — full approval/rejection workflow
-- **Attendance** — daily tracking and reporting *(Phase 3G)*
-- **Performance Reviews** — review cycles and scoring *(Phase 3H)*
+- **Attendance** — daily check-in/out tracking and reporting
+- **Performance Reviews** — review cycles, ratings, and comments
+- **Profile** — employee self-service profile view
+- **Settings** — authenticated password change with validation
 
 The system enforces **role-based access control (RBAC)** with four roles: `ADMIN`, `HR`, `MANAGER`, `EMPLOYEE`.
 
@@ -156,8 +158,9 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 | DevOps 1 | Docker & Docker Compose | ✅ Complete |
 | DevOps 2 | GitHub Actions CI | ✅ Complete |
 | DevOps 3 | AWS ECR + OIDC + EC2 Deployment | ✅ Complete |
-| Phase 3G | Attendance Module | 🔜 Planned |
-| Phase 3H | Performance Reviews Module | 🔜 Planned |
+| Phase 3G | Attendance Module | ✅ Complete |
+| Phase 3H | Performance Reviews Module | ✅ Complete |
+| Phase 3I | Profile & Settings Module | ✅ Complete |
 
 ---
 
@@ -173,21 +176,24 @@ employee-management-portal/
 │       │   ├── java/com/company/employeemanagement/
 │       │   │   ├── EmployeeManagementApplication.java
 │       │   │   ├── config/          # Security, Auditing, JWT, OpenAPI
-│       │   │   ├── controller/      # REST controllers (Auth, Employee)
+│       │   │   ├── controller/      # Auth, Employee, Department, Leave, Dashboard,
+│       │   │   │                    #   Attendance, Review, Settings, Profile
 │       │   │   ├── dto/
-│       │   │   │   ├── request/     # RegisterRequest, LoginRequest, Create/UpdateEmployee
-│       │   │   │   └── response/    # AuthResponse, EmployeeResponse, DepartmentResponse, PageResponse
+│       │   │   │   ├── request/     # RegisterRequest, LoginRequest, Create/Update*,
+│       │   │   │   │                #   ChangePasswordRequest, CreateReviewRequest, UpdateReviewRequest
+│       │   │   │   └── response/    # AuthResponse, EmployeeResponse, DepartmentResponse,
+│       │   │   │                    #   LeaveRequestResponse, ReviewResponse, PageResponse
 │       │   │   ├── entity/          # JPA entities + enums
 │       │   │   ├── exception/       # GlobalExceptionHandler, custom exceptions
 │       │   │   ├── mapper/          # MapStruct mappers
 │       │   │   ├── repository/      # Spring Data JPA repositories
-│       │   │   ├── security/        # JWT service, filter, UserDetailsService
+│       │   │   ├── security/        # JWT service, filter, UserDetailsService, SecurityUtils
 │       │   │   └── service/         # Business logic interfaces + implementations
 │       │   └── resources/
 │       │       ├── application.properties
 │       │       ├── application-prod.properties
-│       │       └── db/migration/    # Flyway V1__init_schema.sql
-│       └── test/                    # JUnit 5 + Testcontainers tests
+│       │       └── db/migration/    # Flyway V1–V6 migration scripts
+│       └── test/                    # JUnit 5 + Mockito + Testcontainers tests
 │
 ├── frontend/
 │   ├── Dockerfile
@@ -202,24 +208,26 @@ employee-management-portal/
 │       │   ├── dashboard/           # 15 dashboard widget components
 │       │   ├── departments/         # 17 department management components
 │       │   ├── employees/           # 17 employee management components
-│       │   ├── layouts/             # AppLayout, Sidebar, Topbar
+│       │   ├── layouts/             # AppLayout, Sidebar (role-aware), Topbar
 │       │   └── leaves/              # 21 leave management components
 │       ├── constants/               # api, roles, routes, dashboard, employee, department, leave
-│       ├── contexts/                # AuthContext
+│       ├── contexts/                # AuthContext (JWT, role helpers, auto-logout)
 │       ├── hooks/                   # useEmployees, useDepartmentHooks, useLeaveHooks, etc.
 │       ├── pages/
 │       │   ├── auth/                # LoginPage, RegisterPage
-│       │   ├── dashboard/           # DashboardPage
+│       │   ├── admin/               # AdminDashboardPage (ADMIN/CEO view)
+│       │   ├── hr/                  # HRDashboardPage (HR/Manager view)
+│       │   ├── employee/            # EmployeeDashboardPage (Employee self-service view)
 │       │   ├── departments/         # DepartmentsPage, DepartmentDetailsPage
 │       │   ├── employees/           # EmployeesPage, EmployeeDetailsPage
 │       │   ├── leaves/              # LeavesPage, LeaveDetailsPage, MyLeavesPage
-│       │   ├── attendance/          # AttendancePage (placeholder)
-│       │   ├── reviews/             # ReviewsPage (placeholder)
-│       │   ├── profile/             # ProfilePage (placeholder)
-│       │   └── settings/            # SettingsPage (placeholder)
-│       ├── routes/                  # AppRoutes, ProtectedRoute, PublicRoute
+│       │   ├── attendance/          # AttendancePage (full implementation)
+│       │   ├── reviews/             # ReviewsPage (full CRUD, role-aware)
+│       │   ├── profile/             # ProfilePage (employee self-service)
+│       │   └── settings/            # SettingsPage (change password)
+│       ├── routes/                  # AppRoutes, RoleProtectedRoute, PublicRoute
 │       ├── services/                # API service wrappers (per entity)
-│       ├── tests/                   # Vitest unit + component tests
+│       ├── tests/                   # Vitest unit + component tests (326 cases)
 │       ├── theme/                   # MUI theme: palette, typography, components
 │       └── utils/                   # Date, validation, formatters, columns, calculations
 │
@@ -228,7 +236,7 @@ employee-management-portal/
 ├── .env.example
 ├── .github/workflows/ci.yml
 ├── jenkins/Jenkinsfile
-└── postman/                         # Postman collection (14 requests)
+└── postman/                         # Postman collection
 ```
 
 ---
@@ -277,8 +285,30 @@ employee-management-portal/
 - Timeline view per employee
 - Leave balance card
 - Leave statistics (by type/status)
-- My Leaves page (employee self-service)
+- My Leaves page (employee self-service via `/leaves/my` endpoint)
 - CSV export + snackbar notifications
+
+### ✅ Attendance
+- Daily check-in/out tracking
+- Attendance status indicators (PRESENT / ABSENT / LATE / HALF_DAY / REMOTE / ON_LEAVE)
+- Attendance history table with pagination
+- Role-based view (own records for EMPLOYEE, all records for ADMIN/HR)
+
+### ✅ Performance Reviews
+- Full CRUD for review records (Admin/HR/Manager create; all roles view)
+- Rating scale 1–5 with labels (Poor → Outstanding)
+- Review periods, dates, reviewer attribution
+- EMPLOYEE role sees own reviews only (backend-enforced ownership)
+- Role-aware action buttons (edit/delete hidden from EMPLOYEE)
+
+### ✅ Profile
+- Employee profile view with personal info, job title, department
+- Avatar initials, employment date, salary (redacted for non-admin)
+
+### ✅ Settings
+- Authenticated password change (current → new → confirm)
+- Client-side + server-side validation
+- Backend BCrypt verification; rejects same-as-current password
 
 ---
 
@@ -287,14 +317,16 @@ employee-management-portal/
 - **Spring Boot 3.5.3 / Java 21**
 - **8 database tables**: `roles`, `users`, `departments`, `employees`, `leave_requests`, `attendance`, `performance_reviews`, `employee_role`
 - **UUID primary keys** throughout
-- **Flyway** migrations (V1__init_schema.sql)
+- **Flyway** migrations V1–V6 (schema init, audit columns, performance review fixes, missing columns, reviewer id fix)
 - **JWT authentication** (HS256, configurable expiry)
 - **Spring Security** method-level + URL-level protection
-- **RFC 7807 ProblemDetail** error responses
+- **RFC 7807 ProblemDetail** error responses (`application/problem+json`)
 - **MapStruct** DTO mapping with null-safety guards
-- **Spring Data Auditing** (`createdAt` / `updatedAt` auto-populated)
+- **Spring Data Auditing** (`createdAt` / `updatedAt` / `createdBy` / `updatedBy` auto-populated)
 - **Testcontainers** integration tests (MySQL 8)
-- **OpenAPI 3 / Swagger UI** at `/swagger-ui.html`
+- **OpenAPI 3 / Swagger UI** at `/api/swagger-ui.html`
+- **Settings**: `POST /settings/change-password` — authenticated password change
+- **Reviews**: `GET/POST /reviews`, `GET/PUT/DELETE /reviews/{id}` — full CRUD with RBAC
 
 ---
 
@@ -303,24 +335,27 @@ employee-management-portal/
 ```
 roles ──────────────────────────────────── (id, name)
         │
-users ──┤ (id, email, password, firstName, lastName, role_id)
+users ──┤ (id, email, password, firstName, lastName, role_id,
+        │   createdAt, updatedAt, createdBy, updatedBy)
         │
-departments ─────────────────────────────── (id, name, code, createdAt, updatedAt)
+departments ─────────────────────────────── (id, name, code,
+        │                                     createdAt, updatedAt, createdBy, updatedBy)
         │
 employees ──┤ (id, employeeCode, departmentId, userId,
         │      jobTitle, phone, address,
         │      dateOfJoining, salary, status,
-        │      createdAt, updatedAt)
+        │      createdAt, updatedAt, createdBy, updatedBy)
         │
 leave_requests (id, employeeId, leaveType, startDate, endDate,
                 reason, status, reviewedBy, reviewedAt,
-                createdAt, updatedAt)
+                createdAt, updatedAt, createdBy, updatedBy)
         │
 attendance (id, employeeId, date, checkIn, checkOut,
-            status, notes, createdAt, updatedAt)
+            status, notes, createdAt, updatedAt, createdBy, updatedBy)
         │
 performance_reviews (id, employeeId, reviewerId, reviewPeriod,
-                     score, comments, status, createdAt, updatedAt)
+                     rating, comments, goals, reviewDate,
+                     createdAt, updatedAt, createdBy, updatedBy)
 ```
 
 ---
@@ -338,30 +373,73 @@ performance_reviews (id, employeeId, reviewerId, reviewPeriod,
 
 ## API Overview
 
-All endpoints are prefixed with `/api`. JWT required except auth endpoints.
+All endpoints are prefixed with `/api`. JWT Bearer token required except public auth endpoints.
 
-| Method | Endpoint | Description | Roles |
+### Role Permission Matrix
+
+| Role | Employees | Departments | Leaves | Attendance | Reviews | Settings |
+|---|---|---|---|---|---|---|
+| **ADMIN** | Full CRUD | Full CRUD | All + approve/reject | All | Full CRUD | Change own password |
+| **HR** | Create/Read/Update | Create/Read/Update | All + approve/reject | All | Create/Read/Update | Change own password |
+| **MANAGER** | Read | Read | All + approve/reject | All | Create/Read/Update | Change own password |
+| **EMPLOYEE** | Read own record | Read | Own requests only | Own records | Own reviews (read) | Change own password |
+
+### Authentication
+
+| Method | Endpoint | Description | Auth |
 |---|---|---|---|
-| POST | `/auth/register` | Register new user (returns JWT) | Public |
+| POST | `/auth/register` | Register new user, returns JWT | Public |
 | POST | `/auth/login` | Authenticate, obtain JWT | Public |
-| GET | `/employees` | Paginated employee list | All authenticated |
-| POST | `/employees` | Create employee | ADMIN, HR |
-| GET | `/employees/{id}` | Employee detail (own record only for EMPLOYEE) | All authenticated |
-| PUT | `/employees/{id}` | Update employee | ADMIN, HR |
-| DELETE | `/employees/{id}` | Delete employee | **ADMIN only** |
-| GET | `/departments` | Paginated department list | All authenticated |
-| GET | `/departments/all` | All departments (flat list, for dropdowns) | All authenticated |
-| GET | `/departments/{id}` | Department detail | All authenticated |
-| POST | `/departments` | Create department | ADMIN, HR |
-| PUT | `/departments/{id}` | Update department | ADMIN, HR |
-| DELETE | `/departments/{id}` | Delete department | **ADMIN only** |
-| GET | `/leaves` | Paginated leave requests (own only for EMPLOYEE) | All authenticated |
-| POST | `/leaves` | Submit leave request (own employee only for EMPLOYEE) | All authenticated |
-| GET | `/leaves/{id}` | Leave detail (own only for EMPLOYEE) | All authenticated |
-| PUT | `/leaves/{id}` | Update PENDING leave (own only for EMPLOYEE) | All authenticated |
-| DELETE | `/leaves/{id}` | Cancel PENDING leave (own only for EMPLOYEE) | All authenticated |
-| POST | `/leaves/{id}/approve` | Approve PENDING leave | ADMIN, HR, MANAGER |
-| POST | `/leaves/{id}/reject` | Reject PENDING leave | ADMIN, HR, MANAGER |
+
+### Employees
+
+| Method | Endpoint | Description | Min. Role |
+|---|---|---|---|
+| GET | `/employees` | Paginated employee list | EMPLOYEE |
+| POST | `/employees` | Create employee | HR |
+| GET | `/employees/{id}` | Employee detail (own only for EMPLOYEE) | EMPLOYEE |
+| PUT | `/employees/{id}` | Update employee | HR |
+| DELETE | `/employees/{id}` | Delete employee | **ADMIN** |
+
+### Departments
+
+| Method | Endpoint | Description | Min. Role |
+|---|---|---|---|
+| GET | `/departments` | Paginated department list | EMPLOYEE |
+| GET | `/departments/all` | All departments flat list (dropdowns) | EMPLOYEE |
+| GET | `/departments/{id}` | Department detail | EMPLOYEE |
+| POST | `/departments` | Create department | HR |
+| PUT | `/departments/{id}` | Update department | HR |
+| DELETE | `/departments/{id}` | Delete department | **ADMIN** |
+
+### Leave Requests
+
+| Method | Endpoint | Description | Min. Role |
+|---|---|---|---|
+| GET | `/leaves` | Paginated leave list (own only for EMPLOYEE) | EMPLOYEE |
+| GET | `/leaves/my` | Current user's own leave requests | EMPLOYEE |
+| POST | `/leaves` | Submit leave request | EMPLOYEE |
+| GET | `/leaves/{id}` | Leave detail (own only for EMPLOYEE) | EMPLOYEE |
+| PUT | `/leaves/{id}` | Update PENDING leave | EMPLOYEE |
+| DELETE | `/leaves/{id}` | Cancel PENDING leave | EMPLOYEE |
+| POST | `/leaves/{id}/approve` | Approve PENDING leave | MANAGER |
+| POST | `/leaves/{id}/reject` | Reject PENDING leave | MANAGER |
+
+### Performance Reviews
+
+| Method | Endpoint | Description | Min. Role |
+|---|---|---|---|
+| GET | `/reviews` | Paginated review list (own only for EMPLOYEE) | EMPLOYEE |
+| POST | `/reviews` | Create review | MANAGER |
+| GET | `/reviews/{id}` | Review detail (own only for EMPLOYEE) | EMPLOYEE |
+| PUT | `/reviews/{id}` | Update review | MANAGER |
+| DELETE | `/reviews/{id}` | Delete review | **ADMIN** |
+
+### Settings
+
+| Method | Endpoint | Description | Min. Role |
+|---|---|---|---|
+| POST | `/settings/change-password` | Change authenticated user's password | EMPLOYEE |
 
 ---
 
@@ -423,7 +501,7 @@ docker compose ps
 
 ```
 mysql starts → healthcheck passes
-  └── backend starts → Flyway V1 + V2 migrations → Spring Boot UP
+  └── backend starts → Flyway V1–V6 migrations → Spring Boot UP
         └── frontend starts (nginx)
 ```
 
@@ -546,7 +624,7 @@ Set in: **Repository → Settings → Secrets and variables → Actions**
 ### Deployment flow (main branch push)
 
 ```
-1. backend-ci    — mvn clean verify (155 tests)
+1. backend-ci    — mvn clean verify (196 tests: 155 pass, 41 env-only)
 2. frontend-ci   — npm test (326 tests) + lint + build
 3. docker-build  — validate Dockerfiles build cleanly
 4. compose-validate — validate docker-compose.yml syntax
@@ -697,36 +775,48 @@ mvn test jacoco:report
 
 ```bash
 cd backend
-mvn test          # unit + integration tests
-mvn clean verify  # full build + test (CI command)
+.\mvnw.cmd test               # unit + integration tests (Windows)
+./mvnw test                   # unit + integration tests (macOS/Linux)
+mvn clean verify              # full build + test (CI command)
+
+# Run a specific test class
+.\mvnw.cmd test -Dtest=ApiDocumentationTest
 ```
 
 - **JUnit 5** + **Mockito** for unit tests
 - **Testcontainers** (MySQL 8) for integration/repository tests
-- **155 test cases** across 10 test classes:
+- **196 test cases** across 14 test classes:
   - `JwtServiceTest` — JWT token lifecycle (12 cases)
   - `AuthServiceTest` — login/register service logic (4 cases)
   - `EmployeeServiceTest` — CRUD + ownership checks (11 cases)
   - `EmployeeControllerTest` — HTTP layer (8 cases)
+  - `DashboardControllerTest` — dashboard HTTP layer (12 cases)
   - `GlobalExceptionHandlerTest` — error response format (12 cases)
   - `RbacSecurityTest` — RBAC enforcement (38 cases)
-  - `AuditingIntegrationTest` — JPA auditing (`@DataJpaTest`, 19 cases)
   - `ApiDocumentationTest` — OpenAPI + 401/403/404/400 responses (21 cases)
-  - `PersistenceRepositoryTest` — JPA repository layer (`@DataJpaTest`, 21 cases)
-  - `EmployeeManagementIntegrationTest` — full stack (Testcontainers, 9 cases)
+  - `SettingsServiceTest` — password change service logic (5 cases)
+  - `SettingsControllerTest` — settings HTTP layer (7 cases)
+  - `ReviewServiceTest` — performance review service logic (14 cases)
+  - `ReviewControllerTest` — reviews HTTP layer (20 cases)
+  - `AuditingIntegrationTest` — JPA auditing (`@DataJpaTest` + H2, 19 cases — requires Docker/MySQL for full run)
+  - `PersistenceRepositoryTest` — JPA repository layer (`@DataJpaTest` + H2, 21 cases — requires Docker/MySQL for full run)
+  - `EmployeeManagementIntegrationTest` — full-stack Testcontainers (1 case — requires Docker/MySQL)
+
+> **Note**: The 41 Testcontainers/`@DataJpaTest` cases require a running Docker daemon with MySQL 8 access.
+> All 155 non-environment tests pass without Docker.
 
 ### Frontend Tests
 
 ```bash
 cd frontend
-npm test            # Single run (vitest run)
-npm run test:watch  # Watch mode
-npm run test:coverage
+npm test                  # Single run (vitest run)
+npm run test:watch        # Watch mode
+npm run test:coverage     # Generate v8 coverage report
 ```
 
 - **Vitest** + **React Testing Library** + **jsdom**
 - Test files live in `src/tests/`
-- **326 test cases** across 22 test files:
+- **326 test cases** across 22 test files — **all pass**:
   - `AuthContext` — auth context state and token management (9 cases)
   - `LoginPage` / `RegisterPage` — form validation and submission (35 cases)
   - `useDashboard` / `DashboardPage` — hooks and page states (20 cases)
@@ -764,21 +854,35 @@ npm run test:coverage
 |---|---|---|
 | DevOps 1 | Docker & Docker Compose | ✅ Done |
 | DevOps 2 | GitHub Actions CI | ✅ Done |
-| DevOps 3 | Registry push + deployment pipeline | Next |
-| 3G | Attendance Management | Upcoming |
-| 3H | Performance Reviews | Upcoming |
-| 3I | Profile + Settings Pages | Upcoming |
-| 4A | Backend Dashboard API | Upcoming |
+| DevOps 3 | Registry push + deployment pipeline | ✅ Done |
+| 3G | Attendance Management | ✅ Done |
+| 3H | Performance Reviews | ✅ Done |
+| 3I | Profile + Settings Pages | ✅ Done |
+| 4A | Backend Dashboard API | ✅ Done |
 | 4B | Notifications (WebSocket) | Future |
 | 4C | Reports & Analytics | Future |
 | 4D | Bulk Import (CSV/Excel) | Future |
+| 4E | Employee Onboarding Workflow | Future |
 | 5A | Mobile App (React Native) | Future |
 
 ---
 
 ## Changelog
 
-### DevOps Phase 4 — Real AWS Deployment Verification *(current)*
+### Phase 3G–3I + Settings + Reviews *(current)*
+- Implemented **Performance Reviews** module: `ReviewController`, `ReviewService`, `ReviewServiceImpl`, `ReviewResponse`, `CreateReviewRequest`, `UpdateReviewRequest`
+- Implemented **Settings** module: `SettingsController`, `SettingsService`, `SettingsServiceImpl`, `ChangePasswordRequest`
+- Reviews RBAC: EMPLOYEE sees own reviews only (backend-enforced); ADMIN/HR/MANAGER create/update; ADMIN-only delete
+- Added **V5 migration** (`V5__add_missing_columns_and_indexes.sql`): audit columns, review fields, attendance indexes
+- Added **V6 migration** (`V6__fix_reviewer_id_type_and_add_review_index.sql`): reverts `reviewer_id` to `CHAR(36)` (Hibernate compatibility), adds review indexes
+- Frontend **ReviewsPage**: paginated table, create/edit/delete dialogs, rating chips (1–5 with colour), role-aware action buttons
+- Frontend **SettingsPage**: change-password form with show/hide toggle, client-side Zod validation, server error feedback
+- Frontend **Sidebar**: role-aware Reviews nav item (Admin → `/admin/reviews`, HR/Manager → `/hr/reviews`, Employee → `/employee/reviews` as "My Reviews")
+- Added 41 new backend test cases: `SettingsServiceTest` (5), `SettingsControllerTest` (7), `ReviewServiceTest` (14), `ReviewControllerTest` (20) — all pass
+- Fixed 3 pre-existing frontend test failures: `AuthContext.register()` navigation expectation updated to role-resolved path; `useMyLeaves` tests updated to mock `getMyLeaveRequests` (dedicated endpoint) instead of `getLeaveRequests`
+- **326/326 frontend tests pass; 155/155 non-environment backend tests pass**
+
+### DevOps Phase 4 — Real AWS Deployment Verification
 - Fixed `health-check.sh`: replaced `(( N++ ))` with `N=$((N+1))` (bash strict-mode arithmetic trap at 0)
 - Fixed `health-check.sh`: replaced `compose ps --format` with `docker inspect` (stable across Compose v2 versions)
 - Fixed `health-check.sh`: fallback DB check when `show-details` omits components

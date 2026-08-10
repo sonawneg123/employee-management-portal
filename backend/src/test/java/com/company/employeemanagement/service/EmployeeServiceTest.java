@@ -86,6 +86,7 @@ class EmployeeServiceTest {
                 .salary(new BigDecimal("75000.00"))
                 .status(EmployeeStatus.ACTIVE)
                 .build();
+        emp.setId(id);
         return emp;
     }
 
@@ -110,8 +111,8 @@ class EmployeeServiceTest {
     class FindAll {
 
         @Test
-        @DisplayName("returns all employees when no keyword supplied")
-        void returnsAllWithoutKeyword() {
+        @DisplayName("returns all employees when no filters supplied")
+        void returnsAllWithoutFilters() {
             UUID deptId = UUID.randomUUID();
             UUID empId  = UUID.randomUUID();
             Department dept = buildDepartment(deptId);
@@ -119,15 +120,13 @@ class EmployeeServiceTest {
             EmployeeResponse response = buildEmployeeResponse(empId, deptId);
 
             Pageable pageable = PageRequest.of(0, 20);
-            // Step 1: ID page
             Page<UUID> idPage = new PageImpl<>(List.of(empId), pageable, 1);
-            // Step 2: fetched entities
-            when(employeeRepository.findAllIds(pageable)).thenReturn(idPage);
+            when(employeeRepository.findIdsByFilters(any(), any(), any(), any())).thenReturn(idPage);
             when(employeeRepository.findAllWithAssociationsByIds(List.of(empId)))
                     .thenReturn(List.of(emp));
             when(employeeMapper.toResponse(emp)).thenReturn(response);
 
-            PageResponse<EmployeeResponse> result = employeeService.findAll(null, pageable);
+            PageResponse<EmployeeResponse> result = employeeService.findAll(null, null, null, pageable);
 
             assertThat(result.content()).hasSize(1);
             assertThat(result.totalElements()).isEqualTo(1);
@@ -135,8 +134,8 @@ class EmployeeServiceTest {
         }
 
         @Test
-        @DisplayName("delegates to searchIdsByKeyword when keyword is non-blank")
-        void delegatesToKeywordSearch() {
+        @DisplayName("passes keyword filter to findIdsByFilters")
+        void passesKeywordFilter() {
             UUID deptId = UUID.randomUUID();
             UUID empId  = UUID.randomUUID();
             Department dept = buildDepartment(deptId);
@@ -146,16 +145,15 @@ class EmployeeServiceTest {
             Pageable pageable = PageRequest.of(0, 20);
             Page<UUID> idPage = new PageImpl<>(List.of(empId), pageable, 1);
 
-            when(employeeRepository.searchIdsByKeyword("engineer", pageable)).thenReturn(idPage);
+            when(employeeRepository.findIdsByFilters(any(), any(), any(), any())).thenReturn(idPage);
             when(employeeRepository.findAllWithAssociationsByIds(List.of(empId)))
                     .thenReturn(List.of(emp));
             when(employeeMapper.toResponse(emp)).thenReturn(response);
 
-            PageResponse<EmployeeResponse> result = employeeService.findAll("engineer", pageable);
+            PageResponse<EmployeeResponse> result = employeeService.findAll("engineer", null, null, pageable);
 
             assertThat(result.content()).hasSize(1);
-            verify(employeeRepository).searchIdsByKeyword("engineer", pageable);
-            verify(employeeRepository, never()).findAllIds(any(Pageable.class));
+            verify(employeeRepository).findIdsByFilters("engineer", null, null, pageable);
         }
 
         @Test
@@ -164,9 +162,9 @@ class EmployeeServiceTest {
             Pageable pageable = PageRequest.of(0, 20);
             Page<UUID> emptyIdPage = new PageImpl<>(List.of(), pageable, 0);
 
-            when(employeeRepository.findAllIds(pageable)).thenReturn(emptyIdPage);
+            when(employeeRepository.findIdsByFilters(any(), any(), any(), any())).thenReturn(emptyIdPage);
 
-            PageResponse<EmployeeResponse> result = employeeService.findAll(null, pageable);
+            PageResponse<EmployeeResponse> result = employeeService.findAll(null, null, null, pageable);
 
             assertThat(result.content()).isEmpty();
             assertThat(result.totalElements()).isZero();

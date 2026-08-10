@@ -1,75 +1,48 @@
 /**
- * @fileoverview Performance Review API service.
+ * reviewApi.js
+ * API client for Performance Review endpoints.
  */
+import axiosInstance from '../api/axiosInstance';
 
-import axiosInstance from '@/api/axiosInstance';
-import { API_ENDPOINTS } from '@/constants/api';
+const BASE = '/reviews';
 
 /**
- * @typedef {Object} PerformanceReviewResponse
- * @property {string}      id
- * @property {string}      employeeId
- * @property {string|null} reviewerId
- * @property {string}      reviewPeriod
- * @property {number}      rating
- * @property {string|null} comments
- * @property {string|null} goals
- * @property {string}      reviewDate
- * @property {string}      createdAt
- * @property {string}      updatedAt
+ * GET /reviews
+ * @param {{ employeeId?: string, page?: number, size?: number, sortBy?: string, sortDir?: string }} params
+ * @returns {Promise<PageResponse<ReviewResponse>>}
  */
+export const getReviews = (params = {}) =>
+  axiosInstance.get(BASE, { params });
 
 /**
- * Returns a paginated list of performance reviews.
- *
- * @param {Object} [params={}]
- * @returns {Promise<import('./employeeApi').PageResponse<PerformanceReviewResponse>>}
- */
-export async function getReviews(params = {}) {
-  const { data } = await axiosInstance.get(API_ENDPOINTS.REVIEWS, { params });
-  return data;
-}
-
-/**
- * Returns a single performance review by UUID.
- *
+ * GET /reviews/:id
  * @param {string} id
- * @returns {Promise<PerformanceReviewResponse>}
+ * @returns {Promise<ReviewResponse>}
  */
-export async function getReviewById(id) {
-  const { data } = await axiosInstance.get(API_ENDPOINTS.REVIEW_BY_ID(id));
-  return data;
-}
+export const getReviewById = (id) =>
+  axiosInstance.get(`${BASE}/${id}`);
 
 /**
- * Creates a new performance review (Manager/Admin only).
- *
- * @param {Object} payload
- * @returns {Promise<PerformanceReviewResponse>}
+ * POST /reviews
+ * @param {{ employeeId: string, reviewPeriod: string, rating: number, reviewDate: string, comments?: string, goals?: string }} data
+ * @returns {Promise<ReviewResponse>}
  */
-export async function createReview(payload) {
-  const { data } = await axiosInstance.post(API_ENDPOINTS.REVIEWS, payload);
-  return data;
-}
+export const createReview = (data) =>
+  axiosInstance.post(BASE, data);
 
 /**
- * Updates an existing performance review.
- *
+ * PUT /reviews/:id
  * @param {string} id
- * @param {Object} payload
- * @returns {Promise<PerformanceReviewResponse>}
+ * @param {{ reviewPeriod: string, rating: number, reviewDate: string, comments?: string, goals?: string }} data
+ * @returns {Promise<ReviewResponse>}
  */
-export async function updateReview(id, payload) {
-  const { data } = await axiosInstance.put(API_ENDPOINTS.REVIEW_BY_ID(id), payload);
-  return data;
-}
+export const updateReview = (id, data) =>
+  axiosInstance.put(`${BASE}/${id}`, data);
 
 /**
- * Deletes a performance review.
- *
+ * DELETE /reviews/:id
  * @param {string} id
  * @returns {Promise<void>}
  */
-export async function deleteReview(id) {
-  await axiosInstance.delete(API_ENDPOINTS.REVIEW_BY_ID(id));
-}
+export const deleteReview = (id) =>
+  axiosInstance.delete(`${BASE}/${id}`);

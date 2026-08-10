@@ -23,6 +23,19 @@ import { getItem, setItem, removeItem } from '@/utils/localStorage';
 import { isTokenExpired, getTokenRoles } from '@/utils/jwtUtils';
 import { TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from '@/constants/api';
 import { ROUTES } from '@/constants/routes';
+import { ROLES } from '@/constants/roles';
+
+/**
+ * Resolves the home dashboard path for a given roles array.
+ *
+ * @param {string[]} roles
+ * @returns {string}
+ */
+function resolveDashboard(roles = []) {
+  if (roles.includes(ROLES.ADMIN))                                return ROUTES.ADMIN_DASHBOARD;
+  if (roles.includes(ROLES.HR) || roles.includes(ROLES.MANAGER)) return ROUTES.HR_DASHBOARD;
+  return ROUTES.EMPLOYEE_DASHBOARD;
+}
 
 /**
  * @typedef {Object} AuthUser
@@ -105,9 +118,10 @@ export function AuthProvider({ children }) {
         const response = await authApi.login(payload);
         persistSession(response);
 
-        // Honour the redirect query param set by the Axios 401 interceptor
+        // Honour the redirect query param set by the Axios 401 interceptor;
+        // fall back to the role-appropriate dashboard instead of /dashboard.
         const params = new URLSearchParams(window.location.search);
-        const redirect = params.get('redirect') ?? ROUTES.DASHBOARD;
+        const redirect = params.get('redirect') ?? resolveDashboard(response.roles ?? []);
         navigate(redirect, { replace: true });
       } finally {
         setIsLoading(false);
@@ -129,7 +143,7 @@ export function AuthProvider({ children }) {
       try {
         const response = await authApi.register(payload);
         persistSession(response);
-        navigate(ROUTES.DASHBOARD, { replace: true });
+        navigate(resolveDashboard(response.roles ?? []), { replace: true });
       } finally {
         setIsLoading(false);
       }

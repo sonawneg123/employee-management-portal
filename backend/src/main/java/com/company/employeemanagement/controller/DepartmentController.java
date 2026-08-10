@@ -91,11 +91,13 @@ public class DepartmentController {
     /**
      * Returns a paginated, optionally keyword-filtered list of departments.
      *
-     * @param keyword optional search term (matched against name and code)
-     * @param page    zero-based page number (default: 0)
-     * @param size    page size between 1 and 100 (default: 20)
-     * @param sortBy  field name to sort by (default: {@code "name"})
-     * @param sortDir sort direction: {@code asc} or {@code desc} (default: {@code "asc"})
+     * @param keyword   optional search term (matched against name and code)
+     * @param page      zero-based page number (default: 0)
+     * @param size      page size between 1 and 100 (default: 20)
+     * @param sortBy    field name to sort by — also accepted as {@code sort} (default: {@code "name"})
+     * @param sortDir   sort direction — also accepted as {@code direction} (default: {@code "asc"})
+     * @param sort      alias for {@code sortBy} (frontend compatibility)
+     * @param direction alias for {@code sortDir} (frontend compatibility)
      * @return paginated {@link PageResponse} of {@link DepartmentResponse}
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -118,16 +120,25 @@ public class DepartmentController {
             @Parameter(description = "Page size (1–100)", example = "20")
             @RequestParam(defaultValue = "20") final int size,
 
-            @Parameter(description = "Sort field", example = "name")
+            @Parameter(description = "Sort field (also accepted as 'sort')", example = "name")
             @RequestParam(defaultValue = "name") final String sortBy,
 
-            @Parameter(description = "Sort direction: asc or desc", example = "asc")
-            @RequestParam(defaultValue = "asc") final String sortDir
+            @Parameter(description = "Sort direction: asc or desc (also accepted as 'direction')",
+                       example = "asc")
+            @RequestParam(defaultValue = "asc") final String sortDir,
+
+            @Parameter(description = "Alias for sortBy (frontend compatibility)", hidden = true)
+            @RequestParam(required = false) final String sort,
+
+            @Parameter(description = "Alias for sortDir (frontend compatibility)", hidden = true)
+            @RequestParam(required = false) final String direction
     ) {
-        Sort sort = sortDir.equalsIgnoreCase("desc")
-                ? Sort.by(sortBy).descending()
-                : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, Math.min(size, 100), sort);
+        final String effectiveSortBy  = (sort      != null) ? sort      : sortBy;
+        final String effectiveSortDir = (direction != null) ? direction : sortDir;
+        Sort sortObj = effectiveSortDir.equalsIgnoreCase("desc")
+                ? Sort.by(effectiveSortBy).descending()
+                : Sort.by(effectiveSortBy).ascending();
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100), sortObj);
         return ResponseEntity.ok(departmentService.findAllPaged(keyword, pageable));
     }
 

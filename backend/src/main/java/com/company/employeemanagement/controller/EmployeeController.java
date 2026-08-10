@@ -4,6 +4,7 @@ import com.company.employeemanagement.dto.request.CreateEmployeeRequest;
 import com.company.employeemanagement.dto.request.UpdateEmployeeRequest;
 import com.company.employeemanagement.dto.response.EmployeeResponse;
 import com.company.employeemanagement.dto.response.PageResponse;
+import com.company.employeemanagement.entity.enums.EmployeeStatus;
 import com.company.employeemanagement.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -69,18 +70,20 @@ public class EmployeeController {
     /**
      * Returns a paginated, optionally filtered list of employees.
      *
-     * @param keyword  optional search term (matched against name and job title)
-     * @param page     zero-based page number (default: 0)
-     * @param size     page size between 1 and 100 (default: 20)
-     * @param sortBy   field name to sort by (default: {@code "createdAt"})
-     * @param sortDir  sort direction: {@code asc} or {@code desc} (default: {@code "desc"})
+     * @param keyword      optional search term (matched against name and job title)
+     * @param departmentId optional UUID to filter by department
+     * @param status       optional employment status filter
+     * @param page         zero-based page number (default: 0)
+     * @param size         page size between 1 and 100 (default: 20)
+     * @param sortBy       field name to sort by (default: {@code "createdAt"})
+     * @param sortDir      sort direction: {@code asc} or {@code desc} (default: {@code "desc"})
      * @return a paginated {@link PageResponse} of {@link EmployeeResponse} records
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER','EMPLOYEE')")
     @Operation(
             summary = "List employees",
-            description = "Returns a paginated list of employees. Optionally filter by keyword."
+            description = "Returns a paginated list of employees. Optionally filter by keyword, departmentId, or status."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Page of employees returned"),
@@ -91,6 +94,12 @@ public class EmployeeController {
     public ResponseEntity<PageResponse<EmployeeResponse>> findAll(
             @Parameter(description = "Optional search keyword (name or job title)")
             @RequestParam(required = false) final String keyword,
+
+            @Parameter(description = "Filter by department UUID")
+            @RequestParam(required = false) final UUID departmentId,
+
+            @Parameter(description = "Filter by employment status")
+            @RequestParam(required = false) final EmployeeStatus status,
 
             @Parameter(description = "Zero-based page number", example = "0")
             @RequestParam(defaultValue = "0") final int page,
@@ -108,7 +117,7 @@ public class EmployeeController {
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, Math.min(size, 100), sort);
-        return ResponseEntity.ok(employeeService.findAll(keyword, pageable));
+        return ResponseEntity.ok(employeeService.findAll(keyword, departmentId, status, pageable));
     }
 
     /**

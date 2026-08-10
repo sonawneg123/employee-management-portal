@@ -4,6 +4,7 @@ import com.company.employeemanagement.dto.request.CreateEmployeeRequest;
 import com.company.employeemanagement.dto.request.UpdateEmployeeRequest;
 import com.company.employeemanagement.dto.response.EmployeeResponse;
 import com.company.employeemanagement.dto.response.PageResponse;
+import com.company.employeemanagement.entity.enums.EmployeeStatus;
 import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
@@ -19,14 +20,17 @@ import java.util.UUID;
 public interface EmployeeService {
 
     /**
-     * Returns a paginated, optionally keyword-filtered list of employees.
+     * Returns a paginated, optionally filtered list of employees.
      *
-     * @param keyword  optional search term matched against name and job title;
-     *                 pass {@code null} or empty string to return all employees
-     * @param pageable pagination and sorting parameters
+     * @param keyword      optional search term matched against name and job title;
+     *                     pass {@code null} or empty string to return all employees
+     * @param departmentId optional UUID to filter by department
+     * @param status       optional {@link EmployeeStatus} to filter by
+     * @param pageable     pagination and sorting parameters
      * @return a {@link PageResponse} containing matching {@link EmployeeResponse} records
      */
-    PageResponse<EmployeeResponse> findAll(String keyword, Pageable pageable);
+    PageResponse<EmployeeResponse> findAll(String keyword, UUID departmentId,
+                                           EmployeeStatus status, Pageable pageable);
 
     /**
      * Returns the employee with the specified UUID.

@@ -163,7 +163,7 @@ class RbacSecurityTest {
                 LEAVE_ID, EMPLOYEE_ID, "EMP-001", "John Doe", "Engineering",
                 LeaveType.ANNUAL,
                 LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 5), 5L,
-                "vacation", LeaveStatus.PENDING, null, null,
+                "vacation", LeaveStatus.PENDING, null, null, null,
                 LocalDateTime.now(), LocalDateTime.now(),
                 null, null
         );
@@ -246,7 +246,7 @@ class RbacSecurityTest {
         @WithMockUser(roles = "ADMIN")
         @DisplayName("GET /employees returns 200")
         void admin_getEmployees_returns200() throws Exception {
-            when(employeeService.findAll(any(), any())).thenReturn(stubEmployeePage());
+            when(employeeService.findAll(any(), any(), any(), any())).thenReturn(stubEmployeePage());
             mockMvc.perform(get("/employees"))
                     .andExpect(status().isOk());
         }
@@ -302,7 +302,7 @@ class RbacSecurityTest {
         @WithMockUser(roles = "HR")
         @DisplayName("GET /employees returns 200")
         void hr_getEmployees_returns200() throws Exception {
-            when(employeeService.findAll(any(), any())).thenReturn(stubEmployeePage());
+            when(employeeService.findAll(any(), any(), any(), any())).thenReturn(stubEmployeePage());
             mockMvc.perform(get("/employees"))
                     .andExpect(status().isOk());
         }
@@ -347,7 +347,7 @@ class RbacSecurityTest {
         @WithMockUser(roles = "MANAGER")
         @DisplayName("GET /employees returns 200")
         void manager_getEmployees_returns200() throws Exception {
-            when(employeeService.findAll(any(), any())).thenReturn(stubEmployeePage());
+            when(employeeService.findAll(any(), any(), any(), any())).thenReturn(stubEmployeePage());
             mockMvc.perform(get("/employees"))
                     .andExpect(status().isOk());
         }
@@ -432,7 +432,7 @@ class RbacSecurityTest {
         @WithMockUser(roles = "EMPLOYEE")
         @DisplayName("GET /employees returns 200 (service may filter by ownership)")
         void employee_getEmployees_returns200() throws Exception {
-            when(employeeService.findAll(any(), any())).thenReturn(stubEmployeePage());
+            when(employeeService.findAll(any(), any(), any(), any())).thenReturn(stubEmployeePage());
             mockMvc.perform(get("/employees"))
                     .andExpect(status().isOk());
         }
@@ -481,7 +481,7 @@ class RbacSecurityTest {
         @WithMockUser(roles = "EMPLOYEE")
         @DisplayName("GET /leaves returns 200 (service scopes to own leaves)")
         void employee_getLeaves_returns200() throws Exception {
-            when(leaveRequestService.findAll(any(), any())).thenReturn(stubLeavePage());
+            when(leaveRequestService.findAll(any(), any(), any(), any())).thenReturn(stubLeavePage());
             mockMvc.perform(get("/leaves"))
                     .andExpect(status().isOk());
         }

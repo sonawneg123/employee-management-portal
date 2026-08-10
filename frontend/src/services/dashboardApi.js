@@ -5,7 +5,7 @@
  * All requests flow through the shared Axios instance so that authentication
  * and error normalisation are applied automatically.
  *
- * Backend endpoints (to be implemented in Phase 4 backend extension):
+ * Backend endpoints:
  *   GET /api/dashboard/summary  — KPI counters
  *   GET /api/dashboard/activity — recent activity feed
  *   GET /api/dashboard/charts   — chart datasets
