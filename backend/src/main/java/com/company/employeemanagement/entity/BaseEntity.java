@@ -1,4 +1,6 @@
 package com.company.employeemanagement.entity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
@@ -45,10 +47,11 @@ public abstract class BaseEntity implements Serializable {
      * Universally unique identifier (UUID v4) serving as the primary key.
      * Generated automatically by Hibernate using the UUID strategy.
      */
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", nullable = false, updatable = false, length = 36)
-    private UUID id;
+   @Id
+@GeneratedValue(strategy = GenerationType.UUID)
+@JdbcTypeCode(SqlTypes.CHAR)
+@Column(name = "id", nullable = false, updatable = false, length = 36)
+private UUID id;
 
     /**
      * Timestamp of record creation. Set once by Spring Data JPA Auditing

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -40,9 +41,9 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.blankOrNullString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,23 +52,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Tests for API documentation availability and structured error-response consistency.
+ * Tests for API documentation availability and structured error-response
+ * consistency.
  *
- * <p>Uses {@link WebMvcTest} to boot the Spring MVC slice with the real
- * {@link SecurityConfig} and {@link GlobalExceptionHandler}, verifying that:
- * <ul>
- *   <li>The OpenAPI JSON descriptor ({@code /v3/api-docs}) is publicly reachable
- *       (SpringDoc registers its own MVC controller, auto-configured in the slice).</li>
- *   <li>Unauthenticated requests to protected endpoints return a structured JSON 401.</li>
- *   <li>Insufficient-role requests return a structured JSON 403.</li>
- *   <li>Not-found resources return a structured JSON 404.</li>
- *   <li>Bean-Validation failures return a structured JSON 400 with a violations map.</li>
- * </ul>
- *
- * <p>The JWT filter is replaced by a no-op so that {@code @WithMockUser}
- * authentication flows through without token parsing.
- *
- * @author Employee Management Portal Team
+ * <p>This is a web-layer test. Services and security dependencies are mocked
+ * so the test does not require a real database, Flyway migration, or
+ * Testcontainers MySQL instance.</p>
  */
 @WebMvcTest(controllers = {
         AuthController.class,
@@ -81,52 +71,91 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         GlobalExceptionHandler.class,
         ApiDocumentationTest.TestSecurityBeans.class
 })
+@ImportAutoConfiguration({
+        org.springdoc.webmvc.core.configuration.SpringDocWebMvcConfiguration.class,
+        org.springdoc.webmvc.core.configuration.MultipleOpenApiSupportConfiguration.class,
+        org.springdoc.core.configuration.SpringDocConfiguration.class,
+        org.springdoc.core.configuration.SpringDocSecurityConfiguration.class,
+        org.springdoc.core.properties.SpringDocConfigProperties.class,
+        org.springdoc.webmvc.ui.SwaggerConfig.class,
+        org.springdoc.core.properties.SwaggerUiConfigProperties.class,
+        org.springdoc.core.properties.SwaggerUiOAuthProperties.class
+})
 @TestPropertySource(properties = {
         "app.jwt.secret=ThisIsAVeryLongSecretKeyForJWTSigningThatIsAtLeast256BitsLong!!",
         "app.jwt.expiration-ms=86400000",
         "app.jwt.refresh-expiration-ms=604800000",
+
         "springdoc.api-docs.enabled=true",
-        "springdoc.swagger-ui.enabled=true"
+        "springdoc.swagger-ui.enabled=true",
+
+        /*
+         * application.properties contains /api as the servlet context path.
+         * These tests intentionally use controller-relative paths such as
+         * /employees and /v3/api-docs.
+         */
+        "server.servlet.context-path="
 })
 @DisplayName("API Documentation & Error Response Consistency")
 class ApiDocumentationTest {
 
-    // ── No-op JWT filter so @WithMockUser is honoured ───────────────────────
-
+    /**
+     * No-op JWT filter so @WithMockUser and @WithAnonymousUser are honoured
+     * without attempting to parse a real JWT.
+     */
     @TestConfiguration
     @EnableConfigurationProperties(JwtProperties.class)
     static class TestSecurityBeans {
+
         @Bean
         public JwtAuthenticationFilter jwtAuthenticationFilter(
                 final JwtService jwtService,
                 final UserDetailsService userDetailsService) {
+
             return new JwtAuthenticationFilter(jwtService, userDetailsService) {
+
                 @Override
                 protected void doFilterInternal(
                         final HttpServletRequest request,
                         final HttpServletResponse response,
-                        final FilterChain chain) throws ServletException, IOException {
+                        final FilterChain chain)
+                        throws ServletException, IOException {
+
                     chain.doFilter(request, response);
                 }
             };
         }
     }
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @MockBean private AuthService         authService;
-    @MockBean private EmployeeService     employeeService;
-    @MockBean private DepartmentService   departmentService;
-    @MockBean private LeaveRequestService leaveRequestService;
-    @MockBean private JwtService          jwtService;
-    @MockBean private UserDetailsService  userDetailsService;
-    @MockBean private SecurityUtils       securityUtils;
+    @MockBean
+    private AuthService authService;
+
+    @MockBean
+    private EmployeeService employeeService;
+
+    @MockBean
+    private DepartmentService departmentService;
+
+    @MockBean
+    private LeaveRequestService leaveRequestService;
+
+    @MockBean
+    private JwtService jwtService;
+
+    @MockBean
+    private UserDetailsService userDetailsService;
+
+    @MockBean
+    private SecurityUtils securityUtils;
 
     private static final UUID ANY_UUID = UUID.randomUUID();
 
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
     // OpenAPI / Swagger UI endpoint availability
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
 
     @Nested
     @DisplayName("OpenAPI descriptor availability")
@@ -136,15 +165,18 @@ class ApiDocumentationTest {
         @WithAnonymousUser
         @DisplayName("GET /v3/api-docs returns 200 with JSON content")
         void apiDocs_publiclyReachable_returns200() throws Exception {
+
             mockMvc.perform(get("/v3/api-docs"))
                     .andExpect(status().isOk())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
         }
 
         @Test
         @WithAnonymousUser
         @DisplayName("GET /v3/api-docs contains API title")
         void apiDocs_containsTitle() throws Exception {
+
             mockMvc.perform(get("/v3/api-docs"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.info.title")
@@ -155,23 +187,31 @@ class ApiDocumentationTest {
         @WithAnonymousUser
         @DisplayName("GET /v3/api-docs contains API version")
         void apiDocs_containsVersion() throws Exception {
+
             mockMvc.perform(get("/v3/api-docs"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.info.version").value("1.0.0"));
+                    .andExpect(jsonPath("$.info.version")
+                            .value("1.0.0"));
         }
 
         @Test
         @WithAnonymousUser
         @DisplayName("GET /v3/api-docs defines BearerAuth security scheme")
         void apiDocs_definesBearerAuthScheme() throws Exception {
+
             mockMvc.perform(get("/v3/api-docs"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.components.securitySchemes.BearerAuth").exists())
-                    .andExpect(jsonPath("$.components.securitySchemes.BearerAuth.type")
+                    .andExpect(jsonPath(
+                            "$.components.securitySchemes.BearerAuth")
+                            .exists())
+                    .andExpect(jsonPath(
+                            "$.components.securitySchemes.BearerAuth.type")
                             .value("http"))
-                    .andExpect(jsonPath("$.components.securitySchemes.BearerAuth.scheme")
+                    .andExpect(jsonPath(
+                            "$.components.securitySchemes.BearerAuth.scheme")
                             .value("bearer"))
-                    .andExpect(jsonPath("$.components.securitySchemes.BearerAuth.bearerFormat")
+                    .andExpect(jsonPath(
+                            "$.components.securitySchemes.BearerAuth.bearerFormat")
                             .value("JWT"));
         }
 
@@ -179,32 +219,40 @@ class ApiDocumentationTest {
         @WithAnonymousUser
         @DisplayName("GET /v3/api-docs exposes Authentication tag")
         void apiDocs_exposesAuthenticationTag() throws Exception {
+
             mockMvc.perform(get("/v3/api-docs"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.tags[?(@.name == 'Authentication')]").exists());
+                    .andExpect(jsonPath(
+                            "$.tags[?(@.name == 'Authentication')]")
+                            .exists());
         }
 
         @Test
         @WithAnonymousUser
         @DisplayName("GET /v3/api-docs exposes Employees tag")
         void apiDocs_exposesEmployeesTag() throws Exception {
+
             mockMvc.perform(get("/v3/api-docs"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.tags[?(@.name == 'Employees')]").exists());
+                    .andExpect(jsonPath(
+                            "$.tags[?(@.name == 'Employees')]")
+                            .exists());
         }
 
         @Test
         @WithAnonymousUser
-        @DisplayName("GET /swagger-ui.html is publicly accessible (redirect or 200)")
+        @DisplayName("GET /swagger-ui.html is publicly accessible")
         void swaggerUi_publiclyAccessible() throws Exception {
+
             mockMvc.perform(get("/swagger-ui.html"))
-                    .andExpect(status().is(anyOf(equalTo(200), equalTo(302))));
+                    .andExpect(status()
+                            .is(anyOf(equalTo(200), equalTo(302))));
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
     // Structured 401 — unauthenticated requests
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
 
     @Nested
     @DisplayName("Structured 401 — unauthenticated requests")
@@ -212,49 +260,63 @@ class ApiDocumentationTest {
 
         @Test
         @WithAnonymousUser
-        @DisplayName("GET /employees without token returns JSON 401 with status field")
-        void getEmployees_unauthenticated_returns401Json() throws Exception {
+        @DisplayName("GET /employees without token returns JSON 401")
+        void getEmployees_unauthenticated_returns401Json()
+                throws Exception {
+
             mockMvc.perform(get("/employees"))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.status").value(401));
         }
 
         @Test
         @WithAnonymousUser
-        @DisplayName("GET /departments without token returns JSON 401 with title field")
-        void getDepartments_unauthenticated_returns401JsonWithTitle() throws Exception {
+        @DisplayName("GET /departments without token returns JSON 401")
+        void getDepartments_unauthenticated_returns401JsonWithTitle()
+                throws Exception {
+
             mockMvc.perform(get("/departments"))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.title").value("Unauthorized"));
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.title")
+                            .value("Unauthorized"));
         }
 
         @Test
         @WithAnonymousUser
-        @DisplayName("GET /leaves without token returns JSON 401 with detail field")
-        void getLeaves_unauthenticated_returns401JsonWithDetail() throws Exception {
+        @DisplayName("GET /leaves without token returns JSON 401")
+        void getLeaves_unauthenticated_returns401JsonWithDetail()
+                throws Exception {
+
             mockMvc.perform(get("/leaves"))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.detail").value(not(blankOrNullString())));
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.detail")
+                            .value(not(blankOrNullString())));
         }
 
         @Test
         @WithAnonymousUser
-        @DisplayName("POST /employees without token returns JSON 401, not HTML")
-        void postEmployee_unauthenticated_returnsJsonNotHtml() throws Exception {
+        @DisplayName("POST /employees without token returns JSON 401")
+        void postEmployee_unauthenticated_returnsJsonNotHtml()
+                throws Exception {
+
             mockMvc.perform(post("/employees")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
     // Structured 403 — insufficient role
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
 
     @Nested
     @DisplayName("Structured 403 — insufficient role")
@@ -262,51 +324,66 @@ class ApiDocumentationTest {
 
         @Test
         @WithMockUser(roles = "EMPLOYEE")
-        @DisplayName("DELETE /employees/{id} by EMPLOYEE returns JSON 403 with status field")
-        void deleteEmployee_byEmployee_returns403Json() throws Exception {
+        @DisplayName("DELETE /employees/{id} by EMPLOYEE returns JSON 403")
+        void deleteEmployee_byEmployee_returns403Json()
+                throws Exception {
+
             mockMvc.perform(delete("/employees/{id}", ANY_UUID))
                     .andExpect(status().isForbidden())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.status").value(403));
         }
 
         @Test
         @WithMockUser(roles = "EMPLOYEE")
-        @DisplayName("DELETE /departments/{id} by EMPLOYEE returns JSON 403 with title field")
-        void deleteDepartment_byEmployee_returns403WithTitle() throws Exception {
+        @DisplayName("DELETE /departments/{id} by EMPLOYEE returns JSON 403")
+        void deleteDepartment_byEmployee_returns403WithTitle()
+                throws Exception {
+
             mockMvc.perform(delete("/departments/{id}", ANY_UUID))
                     .andExpect(status().isForbidden())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                    .andExpect(jsonPath("$.title").value("Access Denied"));
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.title")
+                            .value("Access Denied"));
         }
 
         @Test
         @WithMockUser(roles = "MANAGER")
         @DisplayName("POST /employees by MANAGER returns JSON 403")
-        void createEmployee_byManager_returns403Json() throws Exception {
+        void createEmployee_byManager_returns403Json()
+                throws Exception {
+
             mockMvc.perform(post("/employees")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isForbidden())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
         }
 
         @Test
         @WithMockUser(roles = "EMPLOYEE")
         @DisplayName("POST /leaves/{id}/approve by EMPLOYEE returns JSON 403")
-        void approveLeave_byEmployee_returns403Json() throws Exception {
-            mockMvc.perform(post("/leaves/{id}/approve", ANY_UUID)
+        void approveLeave_byEmployee_returns403Json()
+                throws Exception {
+
+            mockMvc.perform(post(
+                            "/leaves/{id}/approve",
+                            ANY_UUID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isForbidden())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.status").value(403));
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
     // Structured 400 — Bean Validation failures
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
 
     @Nested
     @DisplayName("Structured 400 — validation failures")
@@ -314,71 +391,104 @@ class ApiDocumentationTest {
 
         @Test
         @WithAnonymousUser
-        @DisplayName("POST /auth/register with invalid email returns JSON 400 with violations map")
-        void register_invalidEmail_returns400WithViolations() throws Exception {
+        @DisplayName("POST /auth/register invalid email returns JSON 400")
+        void register_invalidEmail_returns400WithViolations()
+                throws Exception {
+
             String body = """
-                    {"email":"not-an-email","password":"SecureP@ss1","firstName":"John","lastName":"Doe"}
+                    {
+                      "email":"not-an-email",
+                      "password":"SecureP@ss1",
+                      "firstName":"John",
+                      "lastName":"Doe"
+                    }
                     """;
+
             mockMvc.perform(post("/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(body))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.title").value("Validation Failed"))
-                    .andExpect(jsonPath("$.properties.violations.email").exists());
+                    .andExpect(jsonPath("$.title")
+                            .value("Validation Failed"))
+                    .andExpect(jsonPath(
+                            "$.violations.email")
+                            .exists());
         }
 
         @Test
         @WithAnonymousUser
-        @DisplayName("POST /auth/register with short password returns JSON 400 with violations map")
-        void register_shortPassword_returns400WithViolations() throws Exception {
+        @DisplayName("POST /auth/register short password returns JSON 400")
+        void register_shortPassword_returns400WithViolations()
+                throws Exception {
+
             String body = """
-                    {"email":"valid@example.com","password":"short","firstName":"John","lastName":"Doe"}
+                    {
+                      "email":"valid@example.com",
+                      "password":"short",
+                      "firstName":"John",
+                      "lastName":"Doe"
+                    }
                     """;
+
             mockMvc.perform(post("/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(body))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.properties.violations.password").exists());
+                    .andExpect(jsonPath("$.violations.password")
+                            .exists());
         }
 
         @Test
         @WithAnonymousUser
-        @DisplayName("POST /auth/login with blank email returns JSON 400 with violations map")
-        void login_blankEmail_returns400WithViolations() throws Exception {
+        @DisplayName("POST /auth/login blank email returns JSON 400")
+        void login_blankEmail_returns400WithViolations()
+                throws Exception {
+
             String body = """
-                    {"email":"","password":"somepass"}
+                    {
+                      "email":"",
+                      "password":"somepass"
+                    }
                     """;
+
             mockMvc.perform(post("/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(body))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.properties.violations.email").exists());
+                    .andExpect(jsonPath("$.violations.email")
+                            .exists());
         }
 
         @Test
         @WithAnonymousUser
-        @DisplayName("POST /auth/register with missing body fields returns JSON 400 with violations")
-        void register_missingFields_returns400() throws Exception {
-            String body = "{}";
+        @DisplayName("POST /auth/register missing fields returns JSON 400")
+        void register_missingFields_returns400()
+                throws Exception {
+
             mockMvc.perform(post("/auth/register")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(body))
+                            .content("{}"))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.properties.violations").isMap());
+                    .andExpect(jsonPath("$.violations")
+                            .isMap());
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    // Structured 404 — resource not found via GlobalExceptionHandler
-    // ══════════════════════════════════════════════════════════════════════════
+    // ========================================================================
+    // Structured 404 — resource not found
+    // ========================================================================
 
     @Nested
     @DisplayName("Structured 404 — resource not found")
@@ -386,33 +496,52 @@ class ApiDocumentationTest {
 
         @Test
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("GET /employees/{unknownId} returns JSON 404 with title field")
-        void getEmployee_unknownId_returns404Json() throws Exception {
-            org.mockito.Mockito.when(employeeService.findById(ANY_UUID))
-                    .thenThrow(new com.company.employeemanagement.exception.ResourceNotFoundException(
-                            "Employee", ANY_UUID));
+        @DisplayName("GET /employees/{unknownId} returns JSON 404")
+        void getEmployee_unknownId_returns404Json()
+                throws Exception {
+
+            org.mockito.Mockito.when(
+                            employeeService.findById(ANY_UUID))
+                    .thenThrow(
+                            new com.company.employeemanagement.exception
+                                    .ResourceNotFoundException(
+                                    "Employee",
+                                    ANY_UUID));
 
             mockMvc.perform(get("/employees/{id}", ANY_UUID))
                     .andExpect(status().isNotFound())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(
+                                    MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.title").value("Resource Not Found"))
-                    .andExpect(jsonPath("$.detail").value(not(blankOrNullString())));
+                    .andExpect(jsonPath("$.title")
+                            .value("Resource Not Found"))
+                    .andExpect(jsonPath("$.detail")
+                            .value(not(blankOrNullString())));
         }
 
         @Test
         @WithMockUser(roles = "ADMIN")
-        @DisplayName("GET /departments/{unknownId} returns JSON 404 with status and title")
-        void getDepartment_unknownId_returns404Json() throws Exception {
-            org.mockito.Mockito.when(departmentService.findById(ANY_UUID))
-                    .thenThrow(new com.company.employeemanagement.exception.ResourceNotFoundException(
-                            "Department", ANY_UUID));
+        @DisplayName("GET /departments/{unknownId} returns JSON 404")
+        void getDepartment_unknownId_returns404Json()
+                throws Exception {
+
+            org.mockito.Mockito.when(
+                            departmentService.findById(ANY_UUID))
+                    .thenThrow(
+                            new com.company.employeemanagement.exception
+                                    .ResourceNotFoundException(
+                                    "Department",
+                                    ANY_UUID));
 
             mockMvc.perform(get("/departments/{id}", ANY_UUID))
                     .andExpect(status().isNotFound())
-                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content()
+                            .contentTypeCompatibleWith(
+                                    MediaType.APPLICATION_PROBLEM_JSON))
                     .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.title").value("Resource Not Found"));
+                    .andExpect(jsonPath("$.title")
+                            .value("Resource Not Found"));
         }
     }
 }

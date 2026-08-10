@@ -56,7 +56,7 @@ public record PageResponse<T>(
      * @param springPage the Spring Data page to wrap
      * @return a populated {@link PageResponse}
      */
-    public static <T> PageResponse<T> from(final org.springframework.data.domain.Page<? extends T> springPage) {
+    public static <T> PageResponse<T> from(final org.springframework.data.domain.Page<T> springPage) {
         return new PageResponse<>(
                 springPage.getContent(),
                 springPage.getNumber(),

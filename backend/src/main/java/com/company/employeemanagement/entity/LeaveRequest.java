@@ -1,4 +1,6 @@
 package com.company.employeemanagement.entity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import com.company.employeemanagement.entity.enums.LeaveStatus;
 import com.company.employeemanagement.entity.enums.LeaveType;
@@ -83,9 +85,9 @@ public class LeaveRequest extends BaseEntity {
      * UUID of the HR or manager user who reviewed this request.
      * Null while the request is still pending.
      */
-    @Column(name = "reviewed_by")
-    private UUID reviewedBy;
-
+    @JdbcTypeCode(SqlTypes.CHAR)
+@Column(name = "reviewed_by")
+private UUID reviewedBy;
     /**
      * Timestamp when the review decision was made.
      * Null while the request is still pending.

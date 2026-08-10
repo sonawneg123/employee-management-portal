@@ -76,9 +76,8 @@ class AuditingIntegrationTest {
      * provided by {@link AuditingConfig}.
      */
     @TestConfiguration
-    @EnableJpaAuditing(auditorAwareRef = "auditorAware")
-    static class TestJpaAuditingConfig {
-    }
+static class TestJpaAuditingConfig {
+}
 
     @Autowired private DepartmentRepository  departmentRepository;
     @Autowired private EmployeeRepository    employeeRepository;

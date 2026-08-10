@@ -2,7 +2,7 @@ package com.company.employeemanagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
 
 /**
  * Entry point for the Employee Management Portal application.
@@ -16,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
  * @version 1.0.0
  */
 @SpringBootApplication
-@EnableJpaAuditing(auditorAwareRef = "auditorAware")
+
 public class EmployeeManagementApplication {
 
     /**

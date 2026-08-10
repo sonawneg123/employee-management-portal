@@ -77,17 +77,22 @@ class JwtServiceTest {
             String token = jwtService.generateToken(user);
             assertThat(jwtService.extractUsername(token)).isEqualTo("bob@example.com");
         }
-
         @Test
-        @DisplayName("embeds the roles claim in the token")
-        void embedsRolesClaim() {
-            UserDetails user = buildUser("carol@example.com", "ROLE_HR", "ROLE_EMPLOYEE");
-            String token = jwtService.generateToken(user);
-            List<?> roles = jwtService.extractClaim(token,
-                    claims -> claims.get("roles", List.class));
-            assertThat(roles).containsExactlyInAnyOrder("ROLE_HR", "ROLE_EMPLOYEE");
-        }
+@DisplayName("embeds the roles claim in the token")
+void embedsRolesClaim() {
+    UserDetails user = buildUser("carol@example.com", "ROLE_HR", "ROLE_EMPLOYEE");
+    String token = jwtService.generateToken(user);
 
+   @SuppressWarnings("unchecked")
+List<String> roles = (List<String>) jwtService.extractClaim(
+        token,
+        claims -> claims.get("roles", List.class)
+);
+
+    assertThat(roles)
+            .hasSize(2)
+            .contains("ROLE_HR", "ROLE_EMPLOYEE");
+}
         @Test
         @DisplayName("generates distinct tokens for the same user on successive calls")
         void generatesDifferentTokensSuccessively() throws InterruptedException {

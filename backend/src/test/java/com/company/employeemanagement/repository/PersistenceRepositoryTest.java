@@ -53,12 +53,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 })
 @DisplayName("Persistence & Constraint Tests")
 class PersistenceRepositoryTest {
-
-    @TestConfiguration
-    @EnableJpaAuditing(auditorAwareRef = "auditorAware")
-    static class TestJpaAuditingConfig {
-    }
-
+@TestConfiguration
+static class TestJpaAuditingConfig {
+}
     @Autowired private DepartmentRepository   departmentRepository;
     @Autowired private EmployeeRepository     employeeRepository;
     @Autowired private LeaveRequestRepository leaveRequestRepository;
