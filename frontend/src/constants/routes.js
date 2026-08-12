@@ -31,19 +31,25 @@ export const ROUTES = /** @type {const} */ ({
   SETTINGS:        '/settings',
 
   // ── Admin routes ─────────────────────────────────────────────────
-  ADMIN_DASHBOARD:    '/admin/dashboard',
-  ADMIN_EMPLOYEES:    '/admin/employees',
-  ADMIN_DEPARTMENTS:  '/admin/departments',
-  ADMIN_LEAVES:       '/admin/leaves',
-  ADMIN_ATTENDANCE:   '/admin/attendance',
-  ADMIN_REVIEWS:      '/admin/reviews',
+  ADMIN_DASHBOARD:         '/admin/dashboard',
+  ADMIN_EMPLOYEES:         '/admin/employees',
+  ADMIN_EMPLOYEE_DETAIL:   (id) => `/admin/employees/${id}`,
+  ADMIN_DEPARTMENTS:       '/admin/departments',
+  ADMIN_DEPARTMENT_DETAIL: (id) => `/admin/departments/${id}`,
+  ADMIN_LEAVES:            '/admin/leaves',
+  ADMIN_ATTENDANCE:        '/admin/attendance',
+  ADMIN_REVIEWS:           '/admin/reviews',
+  ADMIN_USERS:             '/admin/users',
 
   // ── HR routes ────────────────────────────────────────────────────
-  HR_DASHBOARD:    '/hr/dashboard',
-  HR_EMPLOYEES:    '/hr/employees',
-  HR_LEAVES:       '/hr/leaves',
-  HR_ATTENDANCE:   '/hr/attendance',
-  HR_REVIEWS:      '/hr/reviews',
+  HR_DASHBOARD:         '/hr/dashboard',
+  HR_EMPLOYEES:         '/hr/employees',
+  HR_EMPLOYEE_DETAIL:   (id) => `/hr/employees/${id}`,
+  HR_DEPARTMENTS:       '/hr/departments',
+  HR_DEPARTMENT_DETAIL: (id) => `/hr/departments/${id}`,
+  HR_LEAVES:            '/hr/leaves',
+  HR_ATTENDANCE:        '/hr/attendance',
+  HR_REVIEWS:           '/hr/reviews',
 
   // ── Employee routes ──────────────────────────────────────────────
   EMPLOYEE_DASHBOARD:   '/employee/dashboard',

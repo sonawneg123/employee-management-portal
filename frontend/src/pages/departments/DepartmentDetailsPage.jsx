@@ -11,7 +11,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -26,7 +26,6 @@ import DeleteIcon    from '@mui/icons-material/Delete';
 
 import { useAuth }         from '@/contexts/AuthContext';
 import { ROLES }           from '@/constants/roles';
-import { ROUTES }          from '@/constants/routes';
 import {
   useDepartment,
   useUpdateDepartment,
@@ -47,10 +46,15 @@ import DeleteDepartmentDialog   from '@/components/departments/DeleteDepartmentD
 export default function DepartmentDetailsPage() {
   const { id }    = useParams();
   const navigate  = useNavigate();
+  const location  = useLocation();
   const { hasAnyRole } = useAuth();
 
+  // Derive the list path by removing the /:id segment from the current URL.
+  // Works for /admin/departments/:id, /hr/departments/:id, and /departments/:id.
+  const listPath = location.pathname.replace(`/${id}`, '');
+
   const canEdit   = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canDelete = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
+  const canDelete = hasAnyRole([ROLES.ADMIN]);           // DELETE /departments/** → ADMIN only
 
   const { data: department, isLoading, isError, error } = useDepartment(id);
 
@@ -80,7 +84,7 @@ export default function DepartmentDetailsPage() {
     try {
       await deleteMutation.mutateAsync(id);
       showSnackbar('success', 'Department deleted.');
-      navigate(ROUTES.DEPARTMENTS, { replace: true });
+      navigate(listPath, { replace: true });
     } catch (err) {
       showSnackbar('error', err?.message ?? 'Failed to delete department.');
       setDeleteOpen(false);
@@ -109,7 +113,7 @@ export default function DepartmentDetailsPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Button
             startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(ROUTES.DEPARTMENTS)}
+            onClick={() => navigate(listPath)}
             variant="text"
             aria-label="Back to departments list"
           >

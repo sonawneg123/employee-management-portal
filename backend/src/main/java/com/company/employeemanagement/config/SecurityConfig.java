@@ -109,6 +109,9 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**",
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        // ── Admin-only management endpoints ──────────────
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+
                         // ── Settings endpoints ───────────────────────────
                         .requestMatchers(HttpMethod.POST, "/settings/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
@@ -153,6 +156,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/leaves/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         .requestMatchers(HttpMethod.DELETE, "/leaves/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── Attendance — self-service (my) for all roles; full list for privileged ──
+                        .requestMatchers(HttpMethod.GET, "/attendance/my")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/attendance/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/attendance/**")
+                                .hasAnyRole("ADMIN", "HR")
+                        .requestMatchers(HttpMethod.PUT, "/attendance/**")
+                                .hasAnyRole("ADMIN", "HR")
+                        // ── Profile — all authenticated roles ────────────────
+                        .requestMatchers("/profile/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         // ── All other requests require authentication ────
                         .anyRequest().authenticated()

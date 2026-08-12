@@ -13,7 +13,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -27,7 +27,6 @@ import DeleteIcon    from '@mui/icons-material/Delete';
 
 import { useAuth }           from '@/contexts/AuthContext';
 import { ROLES }             from '@/constants/roles';
-import { ROUTES }            from '@/constants/routes';
 import { useEmployee, useUpdateEmployee, useDeleteEmployee } from '@/hooks/useEmployees';
 import { formatFullName }    from '@/utils/employeeFormatters';
 
@@ -50,11 +49,16 @@ import DeleteEmployeeDialog from '@/components/employees/DeleteEmployeeDialog';
 export default function EmployeeDetailsPage() {
   const { id }    = useParams();
   const navigate  = useNavigate();
+  const location  = useLocation();
   const { hasAnyRole } = useAuth();
+
+  // Derive the list path by removing the /:id segment from the current URL.
+  // Works for /admin/employees/:id, /hr/employees/:id, and /employees/:id.
+  const listPath = location.pathname.replace(`/${id}`, '');
 
   // ── Permissions ────────────────────────────────────────────────────────────
   const canEdit   = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canDelete = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
+  const canDelete = hasAnyRole([ROLES.ADMIN]);           // DELETE /employees/** → ADMIN only
 
   // ── Data ───────────────────────────────────────────────────────────────────
   const { data: employee, isLoading, isError, error, isFetching } = useEmployee(id);
@@ -94,7 +98,7 @@ export default function EmployeeDetailsPage() {
     try {
       await deleteMutation.mutateAsync(id);
       showSnackbar('success', 'Employee deleted.');
-      navigate(ROUTES.EMPLOYEES, { replace: true });
+      navigate(listPath, { replace: true });
     } catch (err) {
       showSnackbar('error', err?.message ?? 'Failed to delete employee.');
       setDeleteOpen(false);
@@ -127,7 +131,7 @@ export default function EmployeeDetailsPage() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Button
             startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(ROUTES.EMPLOYEES)}
+            onClick={() => navigate(listPath)}
             variant="text"
             aria-label="Back to employees list"
           >

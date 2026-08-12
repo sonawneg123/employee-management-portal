@@ -14,6 +14,7 @@
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
   Box,
@@ -29,6 +30,8 @@ import AddIcon from '@mui/icons-material/Add';
 
 import { ROUTES }          from '@/constants/routes';
 import { useMyLeaves, useCreateLeave, useDeleteLeave } from '@/hooks/useLeaveHooks';
+import { getProfile } from '@/services/profileApi';
+import { useAuth } from '@/contexts/AuthContext';
 
 import LeaveBalanceCard    from '@/components/leaves/LeaveBalanceCard';
 import LeaveTimeline       from '@/components/leaves/LeaveTimeline';
@@ -44,6 +47,7 @@ import LeaveStatistics     from '@/components/leaves/LeaveStatistics';
  */
 export default function MyLeavesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [tab,    setTab]    = useState(0); // 0=Timeline, 1=Calendar
   const [status, setStatus] = useState('');
   const [type,   setType]   = useState('');
@@ -52,6 +56,14 @@ export default function MyLeavesPage() {
 
   const showSnackbar  = useCallback((severity, message) => setSnackbar({ open: true, severity, message }), []);
   const closeSnackbar = useCallback(() => setSnackbar((s) => ({ ...s, open: false })), []);
+
+  // Fetch own profile to get employeeId (required when submitting leave)
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.userId],
+    queryFn:  getProfile,
+    enabled:  Boolean(user?.userId),
+    staleTime: 5 * 60_000,
+  });
 
   const {
     data, isLoading, isError, error, refresh,
@@ -63,7 +75,12 @@ export default function MyLeavesPage() {
   const allLeaves    = data?.content ?? [];
   const approved     = allLeaves.filter((l) => l.status === 'APPROVED');
 
-  const handleSubmit = useCallback(async (payload) => {
+  const handleSubmit = useCallback(async (formPayload) => {
+    if (!profile?.employeeId) {
+      showSnackbar('error', 'Unable to submit leave: your employee record could not be found. Contact HR.');
+      return;
+    }
+    const payload = { ...formPayload, employeeId: profile.employeeId };
     try {
       await createMutation.mutateAsync(payload);
       showSnackbar('success', 'Leave request submitted successfully.');
@@ -72,7 +89,7 @@ export default function MyLeavesPage() {
     } catch (err) {
       if (!err?.violations) showSnackbar('error', err?.message ?? 'Failed to submit request.');
     }
-  }, [createMutation, showSnackbar, refresh]);
+  }, [createMutation, showSnackbar, refresh, profile]);
 
   const handleCancel = useCallback(async (leave) => {
     try {

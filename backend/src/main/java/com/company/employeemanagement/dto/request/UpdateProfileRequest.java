@@ -1,14 +1,17 @@
 package com.company.employeemanagement.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
  * Request DTO for updating the authenticated user's own personal information.
  *
- * @param firstName updated first name
- * @param lastName  updated last name
+ * <p>All fields are optional — only non-null values are applied to the record.
+ * This allows the profile page to update only phone/address without requiring
+ * the caller to re-supply firstName and lastName.
+ *
+ * @param firstName updated first name (optional — kept unchanged if null)
+ * @param lastName  updated last name  (optional — kept unchanged if null)
  * @param phone     updated phone number (optional)
  * @param address   updated address (optional)
  *
@@ -18,12 +21,10 @@ import jakarta.validation.constraints.Size;
 public record UpdateProfileRequest(
 
         @Schema(description = "Updated first name", example = "Jane")
-        @NotBlank(message = "First name is required")
         @Size(max = 100, message = "First name must not exceed 100 characters")
         String firstName,
 
         @Schema(description = "Updated last name", example = "Smith")
-        @NotBlank(message = "Last name is required")
         @Size(max = 100, message = "Last name must not exceed 100 characters")
         String lastName,
 

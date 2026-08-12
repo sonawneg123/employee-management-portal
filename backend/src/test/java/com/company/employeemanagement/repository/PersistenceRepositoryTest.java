@@ -7,6 +7,7 @@ import com.company.employeemanagement.entity.LeaveRequest;
 import com.company.employeemanagement.entity.enums.EmployeeStatus;
 import com.company.employeemanagement.entity.enums.LeaveStatus;
 import com.company.employeemanagement.entity.enums.LeaveType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,7 +50,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Import({AuditingConfig.class, PersistenceRepositoryTest.TestJpaAuditingConfig.class})
 @TestPropertySource(properties = {
         "spring.jpa.hibernate.ddl-auto=create-drop",
-        "spring.flyway.enabled=false"
+        "spring.flyway.enabled=false",
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect",
+        "spring.datasource.name=persistence-repo-test-db"
 })
 @DisplayName("Persistence & Constraint Tests")
 class PersistenceRepositoryTest {
@@ -66,6 +69,13 @@ static class TestJpaAuditingConfig {
     void setUp() {
         savedDept = departmentRepository.save(
                 Department.builder().name("Engineering").code("ENG").build());
+    }
+
+    @AfterEach
+    void tearDown() {
+        leaveRequestRepository.deleteAll();
+        employeeRepository.deleteAll();
+        departmentRepository.deleteAll();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

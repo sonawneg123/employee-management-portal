@@ -22,7 +22,7 @@ import {
   Visibility,
   VisibilityOff,
 } from '@mui/icons-material';
-import { changePassword } from '../../services/settingsApi';
+import { changePassword } from '@/services/settingsApi';
 
 const INITIAL = { currentPassword: '', newPassword: '', confirmPassword: '' };
 
@@ -69,17 +69,13 @@ export default function SettingsPage() {
       setSuccess(true);
       setForm(INITIAL);
     } catch (err) {
-      const data = err.response?.data;
-      if (data?.violations) {
+      // axiosInstance normalises errors to { status, title, message, violations }
+      if (err?.violations && typeof err.violations === 'object') {
         // Bean-validation field errors from backend
-        const mapped = {};
-        Object.entries(data.violations).forEach(([field, msg]) => {
-          mapped[field] = msg;
-        });
-        setErrors(mapped);
+        setErrors(err.violations);
       } else {
         // General error (wrong password, etc.)
-        setServerError(data?.detail || data?.message || 'An error occurred. Please try again.');
+        setServerError(err?.message || 'An error occurred. Please try again.');
       }
     } finally {
       setLoading(false);

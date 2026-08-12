@@ -105,11 +105,15 @@ public class AttendanceServiceImpl implements AttendanceService {
     public PageResponse<AttendanceResponse> findMyAttendance(final LocalDate date,
                                                               final AttendanceStatus status,
                                                               final Pageable pageable) {
-        UUID ownEmployeeId = securityUtils.getCurrentEmployee()
-                .map(Employee::getId)
-                .orElseThrow(() -> new AccessDeniedException(
-                        "No employee record is linked to your account."));
-        Page<Attendance> page = attendanceRepository.findByFilters(ownEmployeeId, date, status, pageable);
+        // If the authenticated user has no linked employee record yet (e.g. newly
+        // registered account not yet associated by HR), return an empty page instead
+        // of 403 so the self-service page renders gracefully.
+        java.util.Optional<UUID> maybeId = securityUtils.getCurrentEmployee()
+                .map(Employee::getId);
+        if (maybeId.isEmpty()) {
+            return PageResponse.from(new PageImpl<>(List.of(), pageable, 0L));
+        }
+        Page<Attendance> page = attendanceRepository.findByFilters(maybeId.get(), date, status, pageable);
         List<AttendanceResponse> content = page.getContent().stream()
                 .map(attendanceMapper::toResponse)
                 .collect(Collectors.toList());

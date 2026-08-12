@@ -293,11 +293,58 @@ public class LeaveController {
     }
 
     /**
-     * Cancels a {@code PENDING} leave request (employee action).
+     * Returns the authenticated employee's own leave requests, scoped server-side
+     * to the current principal's linked employee record.
      *
-     * @param id the UUID of the leave request to cancel
-     * @return {@code 204 No Content} on success
+     * <p>Mirrors the behaviour of {@link #findAll} but is dedicated for the
+     * self-service path so the frontend does not need to know the caller's
+     * {@code employeeId}.
+     *
+     * @param status    optional status filter
+     * @param type      optional leave type filter
+     * @param page      zero-based page number (default: 0)
+     * @param size      page size between 1 and 100 (default: 20)
+     * @param sort      sort field (default: {@code "createdAt"})
+     * @param direction sort direction (default: {@code "desc"})
+     * @return the caller's own paginated leave requests
      */
+    @GetMapping(value = "/my", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER','EMPLOYEE')")
+    @Operation(summary = "My leave requests",
+               description = "Returns the authenticated user's own leave requests. "
+                           + "The result is always scoped to the caller's employee record.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Page of own leave requests returned"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<PageResponse<LeaveRequestResponse>> myLeaves(
+            @Parameter(description = "Filter by leave status")
+            @RequestParam(required = false) final LeaveStatus status,
+
+            @Parameter(description = "Filter by leave type")
+            @RequestParam(required = false) final LeaveType type,
+
+            @Parameter(description = "Zero-based page number", example = "0")
+            @RequestParam(defaultValue = "0") final int page,
+
+            @Parameter(description = "Page size (1–100)", example = "20")
+            @RequestParam(defaultValue = "20") final int size,
+
+            @Parameter(description = "Sort field", example = "createdAt")
+            @RequestParam(defaultValue = "createdAt") final String sort,
+
+            @Parameter(description = "Sort direction: asc or desc", example = "desc")
+            @RequestParam(defaultValue = "desc") final String direction
+    ) {
+        Sort sortObj = direction.equalsIgnoreCase("asc")
+                ? Sort.by(sort).ascending()
+                : Sort.by(sort).descending();
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100), sortObj);
+        return ResponseEntity.ok(leaveRequestService.findMyLeaves(status, type, pageable));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER','EMPLOYEE')")
     @Operation(summary = "Cancel leave request",

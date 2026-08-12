@@ -182,6 +182,158 @@ describe('AuthContext', () => {
         act(async () => authCtx.login({ email: 'x@x.com', password: 'y' })),
       ).rejects.toThrow('Bad credentials');
     });
+
+    it('redirects ROLE_ADMIN to /admin/dashboard', async () => {
+      const mockResponse = {
+        accessToken: 'tok-admin', tokenType: 'Bearer', expiresIn: 86400,
+        userId: 'admin-1', email: 'admin@company.com',
+        firstName: 'Admin', lastName: 'User',
+        roles: ['ROLE_ADMIN'],
+      };
+      vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
+
+      let authCtx;
+      function Capture() { authCtx = useAuth(); return null; }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      await act(async () => {
+        await authCtx.login({ email: 'admin@company.com', password: 'Admin@1234!' });
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/admin/dashboard', { replace: true });
+      });
+    });
+
+    it('redirects ROLE_HR to /hr/dashboard', async () => {
+      const mockResponse = {
+        accessToken: 'tok-hr', tokenType: 'Bearer', expiresIn: 86400,
+        userId: 'hr-1', email: 'hr@company.com',
+        firstName: 'HR', lastName: 'User',
+        roles: ['ROLE_HR'],
+      };
+      vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
+
+      let authCtx;
+      function Capture() { authCtx = useAuth(); return null; }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      await act(async () => {
+        await authCtx.login({ email: 'hr@company.com', password: 'HR@1234!' });
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/hr/dashboard', { replace: true });
+      });
+    });
+
+    it('redirects ROLE_MANAGER to /hr/dashboard', async () => {
+      const mockResponse = {
+        accessToken: 'tok-mgr', tokenType: 'Bearer', expiresIn: 86400,
+        userId: 'mgr-1', email: 'manager@company.com',
+        firstName: 'Manager', lastName: 'User',
+        roles: ['ROLE_MANAGER'],
+      };
+      vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
+
+      let authCtx;
+      function Capture() { authCtx = useAuth(); return null; }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      await act(async () => {
+        await authCtx.login({ email: 'manager@company.com', password: 'Manager@1234!' });
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/hr/dashboard', { replace: true });
+      });
+    });
+
+    it('redirects ROLE_EMPLOYEE to /employee/dashboard', async () => {
+      const mockResponse = {
+        accessToken: 'tok-emp', tokenType: 'Bearer', expiresIn: 86400,
+        userId: 'emp-1', email: 'employee@example.com',
+        firstName: 'Employee', lastName: 'User',
+        roles: ['ROLE_EMPLOYEE'],
+      };
+      vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
+
+      let authCtx;
+      function Capture() { authCtx = useAuth(); return null; }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      await act(async () => {
+        await authCtx.login({ email: 'employee@example.com', password: 'password' });
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/employee/dashboard', { replace: true });
+      });
+    });
+
+    it('clears stale user state after logout and accepts new role on re-login', async () => {
+      // Login as admin
+      vi.mocked(authApi.login).mockResolvedValueOnce({
+        accessToken: 'tok-admin', tokenType: 'Bearer', expiresIn: 86400,
+        userId: 'admin-1', email: 'admin@company.com',
+        firstName: 'Admin', lastName: 'User', roles: ['ROLE_ADMIN'],
+      });
+
+      let authCtx;
+      function Capture() { authCtx = useAuth(); return null; }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      await act(async () => {
+        await authCtx.login({ email: 'admin@company.com', password: 'Admin@1234!' });
+      });
+
+      // Logout — clears state
+      act(() => authCtx.logout());
+
+      await waitFor(() => {
+        expect(localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
+      });
+
+      // Re-login as employee — should get employee dashboard, NOT admin
+      vi.mocked(authApi.login).mockResolvedValueOnce({
+        accessToken: 'tok-emp', tokenType: 'Bearer', expiresIn: 86400,
+        userId: 'emp-1', email: 'employee@example.com',
+        firstName: 'Employee', lastName: 'User', roles: ['ROLE_EMPLOYEE'],
+      });
+
+      await act(async () => {
+        await authCtx.login({ email: 'employee@example.com', password: 'password' });
+      });
+
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith('/employee/dashboard', { replace: true });
+      });
+    });
   });
 
   // ── logout() ───────────────────────────────────────────────────────────────

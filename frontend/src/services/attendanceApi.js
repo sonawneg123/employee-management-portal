@@ -46,7 +46,7 @@ export async function getAttendance(params = {}) {
  * @returns {Promise<import('./employeeApi').PageResponse<AttendanceResponse>>}
  */
 export async function getMyAttendance(params = {}) {
-  const { data } = await axiosInstance.get(`${API_ENDPOINTS.ATTENDANCE}/my`, { params });
+  const { data } = await axiosInstance.get(API_ENDPOINTS.ATTENDANCE_MY, { params });
   return data;
 }
 
@@ -84,12 +84,3 @@ export async function updateAttendance(id, payload) {
   return data;
 }
 
-/**
- * Deletes an attendance record.
- *
- * @param {string} id
- * @returns {Promise<void>}
- */
-export async function deleteAttendance(id) {
-  await axiosInstance.delete(API_ENDPOINTS.ATTENDANCE_BY_ID(id));
-}

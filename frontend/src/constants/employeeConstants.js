@@ -74,12 +74,11 @@ export const EMPLOYEE_STATUS_MAP = Object.fromEntries(
  * @type {SortOption[]}
  */
 export const EMPLOYEE_SORT_OPTIONS = [
-  { value: 'createdAt',    label: 'Date Added' },
-  { value: 'firstName',    label: 'First Name' },
-  { value: 'lastName',     label: 'Last Name'  },
-  { value: 'jobTitle',     label: 'Job Title'  },
-  { value: 'dateOfJoining',label: 'Join Date'  },
-  { value: 'salary',       label: 'Salary'     },
+  { value: 'createdAt',    label: 'Date Added'   },
+  { value: 'employeeCode', label: 'Employee Code' },
+  { value: 'jobTitle',     label: 'Job Title'    },
+  { value: 'dateOfJoining',label: 'Join Date'    },
+  { value: 'salary',       label: 'Salary'       },
 ];
 
 // ── Pagination ────────────────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link as RouterLink } from 'react-router-dom';
 import {
+  Alert,
   Box,
   Divider,
   Grid,
@@ -26,6 +27,7 @@ import {
   Typography,
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 import { registerSchema } from '@/utils/validationSchemas';
 import { useRegister } from '@/hooks/useRegister';
@@ -151,6 +153,19 @@ export default function RegisterForm() {
       noValidate
       aria-label="Registration form"
     >
+      {/* Role info note — registration always creates a ROLE_EMPLOYEE account.
+          HR/Admin accounts must be promoted by an administrator via the Admin panel.
+          role="status" is used (not "alert") so it does not interfere with form-level error alerts. */}
+      <Alert
+        severity="info"
+        role="status"
+        icon={<InfoOutlinedIcon fontSize="small" />}
+        sx={{ mb: 2.5, borderRadius: 2, fontSize: '0.8rem' }}
+      >
+        Registration creates an <strong>Employee</strong> account. To create HR or Admin accounts,
+        register here then ask your system administrator to promote the account via the Admin panel.
+      </Alert>
+
       {/* Form-level error */}
       <FormError message={getFormErrorMessage()} />
 

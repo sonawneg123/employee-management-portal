@@ -37,6 +37,17 @@ vi.mock('@/hooks/useLeaveHooks', () => ({
   useRejectLeave:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
 }));
 
+// Mock profileApi so the useQuery({ queryFn: getProfile }) added to LeavesPage
+// does not attempt a real network call during tests.
+vi.mock('@/services/profileApi', () => ({
+  getProfile: vi.fn().mockResolvedValue({
+    employeeId: 'emp-uuid-1',
+    firstName:  'Admin',
+    lastName:   'User',
+    email:      'admin@example.com',
+  }),
+}));
+
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(),
   AuthContext: { Provider: ({ children }) => children },

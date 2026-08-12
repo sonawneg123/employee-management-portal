@@ -26,14 +26,15 @@ import {
   Divider,
   Avatar,
 } from '@mui/material';
-import DashboardIcon   from '@mui/icons-material/Dashboard';
-import PeopleIcon      from '@mui/icons-material/People';
-import ApartmentIcon   from '@mui/icons-material/Apartment';
-import EventNoteIcon   from '@mui/icons-material/EventNote';
-import AccessTimeIcon  from '@mui/icons-material/AccessTime';
-import PersonIcon      from '@mui/icons-material/Person';
-import SettingsIcon    from '@mui/icons-material/Settings';
-import AssessmentIcon  from '@mui/icons-material/Assessment';
+import DashboardIcon        from '@mui/icons-material/Dashboard';
+import PeopleIcon           from '@mui/icons-material/People';
+import ApartmentIcon        from '@mui/icons-material/Apartment';
+import EventNoteIcon        from '@mui/icons-material/EventNote';
+import AccessTimeIcon       from '@mui/icons-material/AccessTime';
+import PersonIcon           from '@mui/icons-material/Person';
+import SettingsIcon         from '@mui/icons-material/Settings';
+import AssessmentIcon       from '@mui/icons-material/Assessment';
+import ManageAccountsIcon   from '@mui/icons-material/ManageAccounts';
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
 import { useAuth } from '@/contexts/AuthContext';
@@ -85,6 +86,12 @@ const NAV_ITEMS = [
     icon:  <AssessmentIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
+  {
+    label: 'Users',
+    path:  ROUTES.ADMIN_USERS,
+    icon:  <ManageAccountsIcon />,
+    allowedRoles: [ROLES.ADMIN],
+  },
 
   // ── HR / Manager items ───────────────────────────────────────────────────────
   {
@@ -97,6 +104,12 @@ const NAV_ITEMS = [
     label: 'Employees',
     path:  ROUTES.HR_EMPLOYEES,
     icon:  <PeopleIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Departments',
+    path:  ROUTES.HR_DEPARTMENTS,
+    icon:  <ApartmentIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
   {
@@ -132,7 +145,7 @@ const NAV_ITEMS = [
     allowedRoles: [ROLES.EMPLOYEE],
   },
   {
-    label: 'Attendance',
+    label: 'My Attendance',
     path:  ROUTES.EMPLOYEE_ATTENDANCE,
     icon:  <AccessTimeIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
@@ -141,6 +154,12 @@ const NAV_ITEMS = [
     label: 'My Reviews',
     path:  ROUTES.EMPLOYEE_REVIEWS,
     icon:  <AssessmentIcon />,
+    allowedRoles: [ROLES.EMPLOYEE],
+  },
+  {
+    label: 'My Profile',
+    path:  ROUTES.EMPLOYEE_PROFILE,
+    icon:  <PersonIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
 ];

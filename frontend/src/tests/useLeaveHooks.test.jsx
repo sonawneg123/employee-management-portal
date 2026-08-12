@@ -297,7 +297,8 @@ describe('useRejectLeave', () => {
   it('calls rejectLeave with id and reason', async () => {
     const { result } = renderHook(() => useRejectLeave(), { wrapper: makeWrapper() });
     await act(() => result.current.mutateAsync({ id: 'leave-1', reason: 'Not approved' }));
-    expect(rejectLeave).toHaveBeenCalledWith('leave-1', { reason: 'Not approved' });
+    // The hook maps `reason` → `rejectionReason` to match the backend DTO field name.
+    expect(rejectLeave).toHaveBeenCalledWith('leave-1', { rejectionReason: 'Not approved' });
   });
 
   it('isSuccess becomes true after mutation', async () => {

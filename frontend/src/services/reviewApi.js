@@ -2,7 +2,7 @@
  * reviewApi.js
  * API client for Performance Review endpoints.
  */
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '@/api/axiosInstance';
 
 const BASE = '/reviews';
 
@@ -12,7 +12,7 @@ const BASE = '/reviews';
  * @returns {Promise<PageResponse<ReviewResponse>>}
  */
 export const getReviews = (params = {}) =>
-  axiosInstance.get(BASE, { params });
+  axiosInstance.get(BASE, { params }).then((r) => r.data);
 
 /**
  * GET /reviews/:id
@@ -20,7 +20,7 @@ export const getReviews = (params = {}) =>
  * @returns {Promise<ReviewResponse>}
  */
 export const getReviewById = (id) =>
-  axiosInstance.get(`${BASE}/${id}`);
+  axiosInstance.get(`${BASE}/${id}`).then((r) => r.data);
 
 /**
  * POST /reviews
@@ -28,7 +28,7 @@ export const getReviewById = (id) =>
  * @returns {Promise<ReviewResponse>}
  */
 export const createReview = (data) =>
-  axiosInstance.post(BASE, data);
+  axiosInstance.post(BASE, data).then((r) => r.data);
 
 /**
  * PUT /reviews/:id
@@ -37,7 +37,7 @@ export const createReview = (data) =>
  * @returns {Promise<ReviewResponse>}
  */
 export const updateReview = (id, data) =>
-  axiosInstance.put(`${BASE}/${id}`, data);
+  axiosInstance.put(`${BASE}/${id}`, data).then((r) => r.data);
 
 /**
  * DELETE /reviews/:id

@@ -18,9 +18,10 @@ import {
   Button,
   Grid,
 } from '@mui/material';
-import RefreshIcon   from '@mui/icons-material/Refresh';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import PeopleIcon    from '@mui/icons-material/People';
+import RefreshIcon    from '@mui/icons-material/Refresh';
+import EventNoteIcon  from '@mui/icons-material/EventNote';
+import PeopleIcon     from '@mui/icons-material/People';
+import ApartmentIcon  from '@mui/icons-material/Apartment';
 
 import { useDashboardSummary, useRefreshAllDashboard } from '@/hooks/useDashboard';
 import { ROUTES } from '@/constants/routes';
@@ -111,6 +112,14 @@ export default function HRDashboardPage() {
             size="small"
           >
             Manage Employees
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<ApartmentIcon />}
+            onClick={() => navigate(ROUTES.HR_DEPARTMENTS)}
+            size="small"
+          >
+            Departments
           </Button>
           <Button
             variant="outlined"

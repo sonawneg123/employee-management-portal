@@ -27,7 +27,7 @@ const BASE = '/profile';
  * @property {string|null} departmentName
  * @property {string|null} employeeCode
  * @property {string}      status
- * @property {string|null} joiningDate
+ * @property {string|null} dateOfJoining
  * @property {string}      createdAt
  * @property {string}      updatedAt
  */

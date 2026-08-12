@@ -88,11 +88,13 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         // Step 1 — paginated ID query
         final Page<UUID> idPage;
         if (securityUtils.hasRole("ROLE_EMPLOYEE") && !securityUtils.isPrivileged()) {
-            UUID ownEmployeeId = securityUtils.getCurrentEmployee()
-                    .map(Employee::getId)
-                    .orElseThrow(() -> new AccessDeniedException(
-                            "No employee record is linked to your account."));
-            idPage = leaveRequestRepository.findIdsByFilters(ownEmployeeId, status, leaveType, pageable);
+            // If no linked employee record yet, return empty page instead of 403
+            java.util.Optional<UUID> maybeId = securityUtils.getCurrentEmployee()
+                    .map(Employee::getId);
+            if (maybeId.isEmpty()) {
+                return PageResponse.from(new PageImpl<>(List.of(), pageable, 0L));
+            }
+            idPage = leaveRequestRepository.findIdsByFilters(maybeId.get(), status, leaveType, pageable);
         } else {
             idPage = leaveRequestRepository.findIdsByFilters(employeeId, status, leaveType, pageable);
         }
@@ -102,6 +104,47 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
 
         // Step 2 — batch-fetch full entities with associations
+        final List<UUID> ids = idPage.getContent();
+        final Map<UUID, LeaveRequest> byId = leaveRequestRepository
+                .findAllWithAssociationsByIds(ids)
+                .stream()
+                .collect(Collectors.toMap(LeaveRequest::getId, Function.identity()));
+
+        final List<LeaveRequestResponse> content = ids.stream()
+                .filter(byId::containsKey)
+                .map(id -> leaveRequestMapper.toResponse(byId.get(id)))
+                .collect(Collectors.toList());
+
+        return PageResponse.from(new PageImpl<>(content, pageable, idPage.getTotalElements()));
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Always resolves the currently authenticated user's employee record and
+     * uses it as the filter, so that ADMIN, HR, and MANAGER users also see only
+     * their own leaves via the self-service endpoint.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<LeaveRequestResponse> findMyLeaves(final LeaveStatus status,
+                                                            final LeaveType leaveType,
+                                                            final Pageable pageable) {
+        // If no linked employee record yet, return empty page instead of 403
+        java.util.Optional<UUID> maybeId = securityUtils.getCurrentEmployee()
+                .map(Employee::getId);
+        if (maybeId.isEmpty()) {
+            return PageResponse.from(new PageImpl<>(List.of(), pageable, 0L));
+        }
+        UUID ownEmployeeId = maybeId.get();
+
+        final Page<UUID> idPage = leaveRequestRepository.findIdsByFilters(
+                ownEmployeeId, status, leaveType, pageable);
+
+        if (idPage.isEmpty()) {
+            return PageResponse.from(new PageImpl<>(List.of(), pageable, idPage.getTotalElements()));
+        }
+
         final List<UUID> ids = idPage.getContent();
         final Map<UUID, LeaveRequest> byId = leaveRequestRepository
                 .findAllWithAssociationsByIds(ids)

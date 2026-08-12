@@ -91,7 +91,8 @@ export async function createLeaveRequest(payload) {
  * @returns {Promise<LeaveRequestResponse>}
  */
 export async function approveLeave(id) {
-  const { data } = await axiosInstance.post(API_ENDPOINTS.LEAVE_APPROVE(id));
+  // Pass an empty JSON body so Spring accepts the application/json content type.
+  const { data } = await axiosInstance.post(API_ENDPOINTS.LEAVE_APPROVE(id), {});
   return data;
 }
 
@@ -99,10 +100,11 @@ export async function approveLeave(id) {
  * Rejects a pending leave request (HR/Admin only).
  *
  * @param {string} id
- * @param {{ reason?: string }} [payload={}]
+ * @param {{ rejectionReason?: string }} [payload={}]
  * @returns {Promise<LeaveRequestResponse>}
  */
 export async function rejectLeave(id, payload = {}) {
+  // Backend field is `rejectionReason`, not `reason`.
   const { data } = await axiosInstance.post(API_ENDPOINTS.LEAVE_REJECT(id), payload);
   return data;
 }

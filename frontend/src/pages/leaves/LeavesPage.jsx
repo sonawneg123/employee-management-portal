@@ -17,12 +17,14 @@
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   Alert, Box, Card, Snackbar, Tab, Tabs, Typography, useMediaQuery, useTheme,
 } from '@mui/material';
 import { useAuth }         from '@/contexts/AuthContext';
 import { ROLES }           from '@/constants/roles';
 import { ROUTES }          from '@/constants/routes';
+import { getProfile }      from '@/services/profileApi';
 import {
   LEAVE_DEFAULT_PAGE_SIZE, LEAVE_DEFAULT_SORT, LEAVE_DEFAULT_DIRECTION,
   LEAVE_CSV_HEADERS, LEAVE_CSV_FIELDS,
@@ -51,7 +53,15 @@ export default function LeavesPage() {
   const theme    = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const { hasAnyRole } = useAuth();
+  const { hasAnyRole, user } = useAuth();
+
+  // Fetch own profile to obtain employeeId for leave creation
+  const { data: profile } = useQuery({
+    queryKey:  ['profile', user?.userId],
+    queryFn:   getProfile,
+    enabled:   Boolean(user?.userId),
+    staleTime: 5 * 60_000,
+  });
 
   const canCreate  = true; // all roles can submit
   const canApprove = hasAnyRole([ROLES.ADMIN, ROLES.HR, ROLES.MANAGER]);
@@ -107,20 +117,25 @@ export default function LeavesPage() {
   const handleEdit   = useCallback((l) => { setEditLeave(l); setDialogMode('edit'); }, []);
   const handleClose  = useCallback(() => { setDialogMode(null); setEditLeave(null); }, []);
 
-  const handleSubmit = useCallback(async (payload) => {
+  const handleSubmit = useCallback(async (formPayload) => {
     try {
       if (dialogMode === 'create') {
+        if (!profile?.employeeId) {
+          showSnackbar('error', 'Unable to submit leave: your employee record could not be found. Contact HR.');
+          return;
+        }
+        const payload = { ...formPayload, employeeId: profile.employeeId };
         await createMutation.mutateAsync(payload);
         showSnackbar('success', 'Leave request submitted.');
       } else {
-        await updateMutation.mutateAsync({ id: editLeave.id, payload });
+        await updateMutation.mutateAsync({ id: editLeave.id, payload: formPayload });
         showSnackbar('success', 'Leave request updated.');
       }
       handleClose();
     } catch (err) {
       if (!err?.violations) showSnackbar('error', err?.message ?? 'An error occurred.');
     }
-  }, [dialogMode, editLeave, createMutation, updateMutation, showSnackbar, handleClose]);
+  }, [dialogMode, editLeave, createMutation, updateMutation, showSnackbar, handleClose, profile]);
 
   const handleCancel = useCallback(async (leave) => {
     try {

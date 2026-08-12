@@ -123,8 +123,12 @@ public class ProfileController {
             @Valid @RequestBody final UpdateProfileRequest request) {
         User user = resolveCurrentUser();
 
-        user.setFirstName(request.firstName());
-        user.setLastName(request.lastName());
+        if (request.firstName() != null && !request.firstName().isBlank()) {
+            user.setFirstName(request.firstName());
+        }
+        if (request.lastName() != null && !request.lastName().isBlank()) {
+            user.setLastName(request.lastName());
+        }
         User saved = userRepository.save(user);
 
         Employee employee = employeeRepository.findByUserId(saved.getId()).orElse(null);

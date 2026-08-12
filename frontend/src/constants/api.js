@@ -48,8 +48,9 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   LEAVE_REJECT:  (id) => `/leaves/${id}/reject`,
 
   // Attendance
-  ATTENDANCE:    '/attendance',
-  ATTENDANCE_BY_ID: (id) => `/attendance/${id}`,
+  ATTENDANCE:        '/attendance',
+  ATTENDANCE_MY:     '/attendance/my',
+  ATTENDANCE_BY_ID:  (id) => `/attendance/${id}`,
 
   // Performance reviews
   REVIEWS:     '/reviews',

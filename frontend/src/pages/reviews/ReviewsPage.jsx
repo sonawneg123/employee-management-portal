@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Chip,
@@ -51,8 +52,9 @@ import {
   createReview,
   updateReview,
   deleteReview,
-} from '../../services/reviewApi';
-import { useAuth } from '../../hooks/useAuth';
+} from '@/services/reviewApi';
+import { getEmployees } from '@/services/employeeApi';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ── Rating helpers ─────────────────────────────────────────────────────────
 
@@ -115,17 +117,24 @@ export default function ReviewsPage() {
   // ── Query ──────────────────────────────────────────────────────────────
   const { data, isLoading, isError } = useQuery({
     queryKey: ['reviews', page, rowsPerPage, sortBy, sortDir],
-    queryFn: () =>
-      getReviews({ page, size: rowsPerPage, sortBy, sortDir })
-        .then((r) => r.data),
-    keepPreviousData: true,
+    queryFn: () => getReviews({ page, size: rowsPerPage, sortBy, sortDir }),
+    placeholderData: (prev) => prev,
   });
+
+  // Employee list for the create-review autocomplete (managers/HR/admin only)
+  const { data: employeeData } = useQuery({
+    queryKey: ['employees', 'all-for-review'],
+    queryFn: () => getEmployees({ size: 200, sortBy: 'firstName', sortDir: 'asc' }),
+    enabled: canManage,
+    staleTime: 5 * 60_000,
+  });
+  const employeeOptions = employeeData?.content ?? [];
 
   // ── Mutations ──────────────────────────────────────────────────────────
   const onCreate = useMutation({
-    mutationFn: (payload) => createReview(payload).then((r) => r.data),
+    mutationFn: (payload) => createReview(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(['reviews']);
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
       setFormOpen(false);
       showSnack('Review created successfully.');
     },
@@ -133,9 +142,9 @@ export default function ReviewsPage() {
   });
 
   const onUpdate = useMutation({
-    mutationFn: ({ id, payload }) => updateReview(id, payload).then((r) => r.data),
+    mutationFn: ({ id, payload }) => updateReview(id, payload),
     onSuccess: () => {
-      queryClient.invalidateQueries(['reviews']);
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
       setFormOpen(false);
       showSnack('Review updated successfully.');
     },
@@ -145,7 +154,7 @@ export default function ReviewsPage() {
   const onDelete = useMutation({
     mutationFn: (id) => deleteReview(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['reviews']);
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
       setDeleteTarget(null);
       showSnack('Review deleted.', 'info');
     },
@@ -153,11 +162,11 @@ export default function ReviewsPage() {
   });
 
   const handleMutationError = (err) => {
-    const data = err.response?.data;
-    if (data?.violations) {
-      setFormErrors(data.violations);
+    // axiosInstance normalises errors: { status, title, message, violations }
+    if (err?.violations) {
+      setFormErrors(err.violations);
     } else {
-      showSnack(data?.detail || 'An error occurred.', 'error');
+      showSnack(err?.message || 'An error occurred.', 'error');
     }
   };
 
@@ -353,16 +362,31 @@ export default function ReviewsPage() {
         <DialogTitle>{editTarget ? 'Edit Review' : 'New Performance Review'}</DialogTitle>
         <DialogContent>
           {!editTarget && (
-            <TextField
-              fullWidth
-              label="Employee ID (UUID)"
-              name="employeeId"
-              value={formData.employeeId}
-              onChange={handleFormChange}
-              error={!!formErrors.employeeId}
-              helperText={formErrors.employeeId}
-              margin="dense"
-              placeholder="e.g. 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+            <Autocomplete
+              options={employeeOptions}
+              getOptionLabel={(opt) =>
+                opt.firstName && opt.lastName
+                  ? `${opt.firstName} ${opt.lastName} (${opt.employeeCode})`
+                  : opt.employeeCode ?? opt.id
+              }
+              isOptionEqualToValue={(opt, val) => opt.id === val.id}
+              value={employeeOptions.find((e) => e.id === formData.employeeId) ?? null}
+              onChange={(_e, emp) => {
+                setFormData((p) => ({ ...p, employeeId: emp?.id ?? '' }));
+                setFormErrors((p) => ({ ...p, employeeId: '' }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Employee"
+                  required
+                  margin="dense"
+                  error={!!formErrors.employeeId}
+                  helperText={formErrors.employeeId ?? (employeeOptions.length === 0 ? 'No employee records yet — create employees first via HR.' : '')}
+                  placeholder="Search by name or code…"
+                />
+              )}
+              noOptionsText="No employees found"
             />
           )}
           <TextField

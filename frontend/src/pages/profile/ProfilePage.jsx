@@ -104,13 +104,18 @@ export default function ProfilePage() {
     reset,
     formState: { errors },
   } = useForm({
-    defaultValues: { phone: '', address: '' },
+    defaultValues: { firstName: '', lastName: '', phone: '', address: '' },
   });
 
   // Populate form when profile loads or edit mode opens
   useEffect(() => {
     if (profile) {
-      reset({ phone: profile.phone ?? '', address: profile.address ?? '' });
+      reset({
+        firstName: profile.firstName ?? '',
+        lastName:  profile.lastName  ?? '',
+        phone:     profile.phone     ?? '',
+        address:   profile.address   ?? '',
+      });
     }
   }, [profile, reset]);
 
@@ -132,7 +137,12 @@ export default function ProfilePage() {
   });
 
   const handleCancelEdit = () => {
-    reset({ phone: profile?.phone ?? '', address: profile?.address ?? '' });
+    reset({
+      firstName: profile?.firstName ?? '',
+      lastName:  profile?.lastName  ?? '',
+      phone:     profile?.phone     ?? '',
+      address:   profile?.address   ?? '',
+    });
     setEditMode(false);
   };
 
@@ -210,7 +220,7 @@ export default function ProfilePage() {
                 <InfoRow Icon={PersonIcon}       label="Employee ID"  value={profile?.employeeCode} loading={isLoading} />
                 <InfoRow Icon={WorkIcon}         label="Job Title"    value={profile?.jobTitle}      loading={isLoading} />
                 <InfoRow Icon={ApartmentIcon}    label="Department"   value={profile?.departmentName} loading={isLoading} />
-                <InfoRow Icon={CalendarTodayIcon} label="Joined"      value={profile?.joiningDate}   loading={isLoading} />
+                <InfoRow Icon={CalendarTodayIcon} label="Joined"      value={profile?.dateOfJoining}   loading={isLoading} />
                 <InfoRow Icon={EmailIcon}        label="Email"        value={profile?.email ?? user?.email} loading={isLoading} />
               </Box>
             </CardContent>
@@ -240,6 +250,32 @@ export default function ProfilePage() {
               {editMode ? (
                 <Box component="form" onSubmit={handleSave}>
                   <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <TextField
+                        label="First Name"
+                        fullWidth
+                        size="small"
+                        {...register('firstName', {
+                          maxLength: { value: 100, message: 'First name must be at most 100 characters' },
+                        })}
+                        error={Boolean(errors.firstName)}
+                        helperText={errors.firstName?.message}
+                        inputProps={{ 'aria-label': 'First name' }}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <TextField
+                        label="Last Name"
+                        fullWidth
+                        size="small"
+                        {...register('lastName', {
+                          maxLength: { value: 100, message: 'Last name must be at most 100 characters' },
+                        })}
+                        error={Boolean(errors.lastName)}
+                        helperText={errors.lastName?.message}
+                        inputProps={{ 'aria-label': 'Last name' }}
+                      />
+                    </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
                         label="Phone"

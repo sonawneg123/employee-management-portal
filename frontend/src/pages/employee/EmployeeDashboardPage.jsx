@@ -95,7 +95,7 @@ function ProfileSummaryCard({ profile, isLoading }) {
             { Icon: WorkIcon,         label: 'Job Title',    value: profile?.jobTitle },
             { Icon: ApartmentIcon,    label: 'Department',   value: profile?.departmentName },
             { Icon: PersonIcon,       label: 'Employee ID',  value: profile?.employeeCode },
-            { Icon: CalendarTodayIcon, label: 'Joined',      value: profile?.joiningDate },
+            { Icon: CalendarTodayIcon, label: 'Joined',      value: profile?.dateOfJoining },
           ].map(({ Icon, label, value }) => (
             <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
               <Icon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />

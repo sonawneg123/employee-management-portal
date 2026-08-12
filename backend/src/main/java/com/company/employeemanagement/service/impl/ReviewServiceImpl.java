@@ -76,9 +76,14 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional(readOnly = true)
     public PageResponse<ReviewResponse> findAll(final UUID employeeId, final Pageable pageable) {
         if (securityUtils.hasRole("ROLE_EMPLOYEE") && !securityUtils.isPrivileged()) {
-            // EMPLOYEE: force scope to own reviews
-            Employee own = resolveCurrentEmployee();
-            Page<PerformanceReview> page = reviewRepository.findByEmployeeId(own.getId(), pageable);
+            // EMPLOYEE: force scope to own reviews; return empty page if no linked record yet
+            java.util.Optional<Employee> maybeEmp = securityUtils.getCurrentEmployee();
+            if (maybeEmp.isEmpty()) {
+                return PageResponse.from(
+                        new org.springframework.data.domain.PageImpl<>(
+                                java.util.List.of(), pageable, 0L));
+            }
+            Page<PerformanceReview> page = reviewRepository.findByEmployeeId(maybeEmp.get().getId(), pageable);
             return PageResponse.from(page.map(this::toResponse));
         }
 

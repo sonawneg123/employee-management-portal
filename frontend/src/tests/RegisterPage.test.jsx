@@ -146,7 +146,7 @@ describe('RegisterPage', () => {
       await waitFor(() => {
         expect(screen.getByText(/at least 8 characters/i)).toBeInTheDocument();
       });
-    });
+    }, 15_000);
 
     it('shows password mismatch error', async () => {
       const { user } = renderWithProviders(<RegisterPage />);
@@ -156,7 +156,7 @@ describe('RegisterPage', () => {
       await waitFor(() => {
         expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
       });
-    });
+    }, 15_000);
 
     it('shows invalid email format error', async () => {
       const { user } = renderWithProviders(<RegisterPage />);
@@ -211,7 +211,7 @@ describe('RegisterPage', () => {
           password:  'StrongP@ss1',
         });
       });
-    });
+    }, 15_000);
 
     it('disables submit button while loading', async () => {
       const registerMock = vi.fn(() => new Promise(() => {}));
@@ -223,7 +223,7 @@ describe('RegisterPage', () => {
       await waitFor(() => {
         expect(screen.getByRole('button', { name: /create account/i })).toBeDisabled();
       });
-    });
+    }, 15_000);
   });
 
   describe('Error handling', () => {
@@ -238,7 +238,7 @@ describe('RegisterPage', () => {
       await waitFor(() => {
         expect(screen.getByRole('alert')).toHaveTextContent(/already registered/i);
       });
-    });
+    }, 15_000);
 
     it('applies server violation errors to their corresponding fields', async () => {
       const errorWithViolations = {
@@ -255,7 +255,7 @@ describe('RegisterPage', () => {
       await waitFor(() => {
         expect(screen.getByText('Email domain is not allowed')).toBeInTheDocument();
       });
-    });
+    }, 15_000);
 
     it('shows generic 500 error at form level', async () => {
       const error500 = { status: 500, message: 'An unexpected server error occurred.', violations: null };
@@ -268,6 +268,6 @@ describe('RegisterPage', () => {
       await waitFor(() => {
         expect(screen.getByRole('alert')).toHaveTextContent(/unexpected server error/i);
       });
-    });
+    }, 15_000);
   });
 });

@@ -129,7 +129,8 @@ export function useMyLeaves(params = {}) {
   });
 
   const refresh = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.my({}) });
+    // Invalidate by prefix (['leaves', 'my']) to match all param variants
+    queryClient.invalidateQueries({ queryKey: ['leaves', 'my'] });
   }, [queryClient]);
 
   return {
@@ -181,6 +182,8 @@ export function useCreateLeave() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.lists() });
       queryClient.invalidateQueries({ queryKey: LEAVE_QUERY_KEYS.all() });
+      // Also invalidate the my-leaves prefix so the self-service timeline refreshes
+      queryClient.invalidateQueries({ queryKey: ['leaves', 'my'] });
     },
   });
 }
@@ -288,7 +291,7 @@ export function useApproveLeave() {
 export function useRejectLeave() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, reason }) => rejectLeave(id, { reason }),
+    mutationFn: ({ id, reason }) => rejectLeave(id, { rejectionReason: reason }),
     onMutate: async ({ id }) => {
       await queryClient.cancelQueries({ queryKey: LEAVE_QUERY_KEYS.detail(id) });
       const previous = queryClient.getQueryData(LEAVE_QUERY_KEYS.detail(id));

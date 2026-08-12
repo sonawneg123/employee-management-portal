@@ -114,7 +114,10 @@ describe('EmployeeTable', () => {
   it('calls onSort when a sortable column header is clicked', () => {
     const onSort = vi.fn();
     renderTable({ employees: [EMPLOYEE], onSort });
-    fireEvent.click(screen.getByRole('button', { name: /sort by employee/i }));
+    // The "Employee" column is intentionally non-sortable (firstName is not a
+    // valid Spring Data JPA sort field on the Employee entity). Use "Job Title"
+    // which maps to the valid `jobTitle` entity field.
+    fireEvent.click(screen.getByRole('button', { name: /sort by job title/i }));
     expect(onSort).toHaveBeenCalled();
   });
 });

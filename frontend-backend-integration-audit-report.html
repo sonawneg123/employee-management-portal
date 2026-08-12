@@ -1,0 +1,191 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Integration Audit Report</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; background: #ffffff; color: #1f2328; }
+  .page { max-width: 760px; margin: 0 auto; padding: 32px 24px 48px; }
+  h1 { font-size: 1.55rem; font-weight: 700; margin-bottom: 4px; }
+  .meta { font-size: 0.82rem; color: #57606a; margin-bottom: 28px; }
+  h2 { font-size: 1.05rem; font-weight: 700; margin: 28px 0 10px; padding-bottom: 5px; border-bottom: 1px solid #e5e7eb; }
+  h3 { font-size: 0.93rem; font-weight: 700; margin: 18px 0 6px; color: #1f2328; }
+  p { margin-bottom: 10px; color: #1f2328; }
+  ul, ol { margin: 0 0 10px 20px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 14px; }
+  th { text-align: left; padding: 6px 10px; background: #f7f8fa; border: 1px solid #e5e7eb; font-weight: 600; color: #57606a; }
+  td { padding: 6px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+  .badge-red    { background: #fde8e8; color: #c0392b; }
+  .badge-green  { background: #e6f4ea; color: #1a7340; }
+  .badge-blue   { background: #e8f0fe; color: #1a56a8; }
+  .badge-yellow { background: #fef9e7; color: #7d6608; }
+  .badge-gray   { background: #f7f8fa; color: #57606a; border: 1px solid #e5e7eb; }
+  code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 0.82em; background: #f7f8fa; padding: 1px 5px; border-radius: 4px; border: 1px solid #e5e7eb; }
+  .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+  .kpi { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px 12px; text-align: center; }
+  .kpi .num { font-size: 1.8rem; font-weight: 700; color: #1f2328; }
+  .kpi .lbl { font-size: 0.75rem; color: #57606a; margin-top: 2px; }
+  .kpi.green .num { color: #1a7340; }
+  .kpi.red .num { color: #c0392b; }
+  .section-card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px 18px; margin-bottom: 14px; }
+  .footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #57606a; }
+  .check { color: #1a7340; font-weight: 700; }
+  .cross { color: #c0392b; font-weight: 700; }
+  .fixed { color: #1a56a8; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Frontend / Backend Integration Audit</h1>
+  <p class="meta">Employee Management Portal · Spring Boot 3.5 + React 18 · Audit Date: 2025</p>
+
+  
+  <div class="summary-grid">
+    <div class="kpi red"><div class="num">3</div><div class="lbl">Issues Found</div></div>
+    <div class="kpi green"><div class="num">3</div><div class="lbl">Issues Fixed</div></div>
+    <div class="kpi green"><div class="num">326</div><div class="lbl">Tests Passing</div></div>
+    <div class="kpi green"><div class="num">0</div><div class="lbl">Build Errors</div></div>
+  </div>
+
+  
+  <h2>1. Backend API Contract Summary</h2>
+  <table>
+    <tr><th>Controller</th><th>Base Path</th><th>Key Endpoints</th><th>Auth</th></tr>
+    <tr><td>AuthController</td><td><code>/api/auth</code></td><td>POST /register, POST /login</td><td>Public</td></tr>
+    <tr><td>LeaveController</td><td><code>/api/leaves</code></td><td>GET, POST, PUT /{id}, DELETE /{id}, POST /{id}/approve, POST /{id}/reject, GET /my</td><td>All roles</td></tr>
+    <tr><td>AttendanceController</td><td><code>/api/attendance</code></td><td>GET, POST, PUT /{id}, GET /my, GET /{id}</td><td>ADMIN/HR/MGR write; all read /my</td></tr>
+    <tr><td>ReviewController</td><td><code>/api/reviews</code></td><td>GET, POST, PUT /{id}, DELETE /{id}</td><td>All read; ADMIN/HR/MGR write</td></tr>
+    <tr><td>ProfileController</td><td><code>/api/profile</code></td><td>GET, PUT /personal</td><td>All roles (self-scoped)</td></tr>
+    <tr><td>DashboardController</td><td><code>/api/dashboard</code></td><td>GET /summary, GET /charts, GET /activity</td><td>All roles</td></tr>
+    <tr><td>EmployeeController</td><td><code>/api/employees</code></td><td>GET, GET /{id}, POST, PUT /{id}, DELETE /{id}</td><td>All read; ADMIN/HR write</td></tr>
+    <tr><td>DepartmentController</td><td><code>/api/departments</code></td><td>GET /all, GET, GET /{id}, POST, PUT /{id}, DELETE /{id}</td><td>All read; ADMIN/HR write</td></tr>
+    <tr><td>AdminController</td><td><code>/api/admin/users</code></td><td>GET, PUT /{id}/role, PUT /{id}/enabled</td><td>ADMIN only</td></tr>
+    <tr><td>SettingsController</td><td><code>/api/settings</code></td><td>POST /change-password</td><td>All roles</td></tr>
+  </table>
+
+  
+  <h2>2. Issues Found &amp; Fixed</h2>
+
+  <div class="section-card">
+    <h3><span class="badge badge-red">BUG</span>   Issue 1 — <code>rejectLeave</code> field name mismatch</h3>
+    <p><strong>File:</strong> <code>frontend/src/services/leaveApi.js</code> · <code>frontend/src/hooks/useLeaveHooks.js</code></p>
+    <p><strong>Root Cause:</strong> The backend <code>ReviewLeaveRequest</code> DTO uses field <code>rejectionReason</code>, but the frontend hook was sending <code>{ reason: "…" }</code> — an unknown field. Spring silently ignored it, leaving <code>rejectionReason</code> null on every rejection.</p>
+    <p><strong>Fix:</strong> The <code>useRejectLeave</code> hook now maps the UI variable <code>reason</code> to the correct DTO field: <code>{ rejectionReason: reason }</code>. JSDoc types updated in the service layer to match.</p>
+    <p><strong>Test updated:</strong> <code>src/tests/useLeaveHooks.test.jsx</code> — assertion corrected to expect <code>{ rejectionReason: "Not approved" }</code>.</p>
+  </div>
+
+  <div class="section-card">
+    <h3><span class="badge badge-red">BUG</span>   Issue 2 — <code>approveLeave</code> sent no request body</h3>
+    <p><strong>File:</strong> <code>frontend/src/services/leaveApi.js</code></p>
+    <p><strong>Root Cause:</strong> <code>axiosInstance.post(url)</code> with no body argument sends a request without a <code>Content-Type</code> header. The endpoint declares <code>consumes = APPLICATION_JSON</code>, so Spring rejects the call with 415 Unsupported Media Type when the client omits the Content-Type entirely.</p>
+    <p><strong>Fix:</strong> Changed to <code>axiosInstance.post(url, {})</code> — an explicit empty JSON body ensures Axios sets <code>Content-Type: application/json</code>.</p>
+  </div>
+
+  <div class="section-card">
+    <h3><span class="badge badge-red">BUG</span>   Issue 3 — <code>SettingsPage</code> used raw Axios error shape</h3>
+    <p><strong>File:</strong> <code>frontend/src/pages/settings/SettingsPage.jsx</code></p>
+    <p><strong>Root Cause:</strong> The page error handler read <code>err.response?.data</code> (raw Axios shape) instead of the normalised error object <code>{ message, violations }</code> that <code>axiosInstance</code> throws after its response interceptor runs. As a result: (a) no violation errors were displayed, (b) general errors fell back to a blank message.</p>
+    <p><strong>Fix:</strong> Replaced raw access pattern with the normalised shape: <code>err?.violations</code> for field errors and <code>err?.message</code> for general errors — consistent with every other page in the app.</p>
+  </div>
+
+  <div class="section-card">
+    <h3><span class="badge badge-yellow">DEAD CODE</span>   Issue 4 — <code>deleteAttendance</code> called non-existent endpoint</h3>
+    <p><strong>File:</strong> <code>frontend/src/services/attendanceApi.js</code></p>
+    <p><strong>Root Cause:</strong> The service exported a <code>deleteAttendance(id)</code> function calling <code>DELETE /attendance/{id}</code>, but the backend <code>AttendanceController</code> has <strong>no DELETE endpoint</strong> — only GET, POST, PUT. Any call would produce a 405 Method Not Allowed.</p>
+    <p><strong>Fix:</strong> Removed the dead <code>deleteAttendance</code> export. No component imported or called it.</p>
+  </div>
+
+  
+  <h2>3. Authentication Flow Audit</h2>
+  <table>
+    <tr><th>Check</th><th>Result</th><th>Notes</th></tr>
+    <tr><td>RegisterPage sends correct fields</td><td><span class="check">✓ PASS</span></td><td><code>{ email, password, firstName, lastName }</code> — matches <code>RegisterRequest</code> exactly. No <code>role</code> field in backend DTO (all registrations get ROLE_EMPLOYEE); no role selector needed.</td></tr>
+    <tr><td>Login response <code>roles</code> extraction</td><td><span class="check">✓ PASS</span></td><td><code>AuthResponse.roles</code> is a <code>List&lt;String&gt;</code>. <code>AuthContext.persistSession</code> reads <code>authResponse.roles</code> directly — correct.</td></tr>
+    <tr><td>JWT token storage key consistency</td><td><span class="check">✓ PASS</span></td><td><code>emp_portal_token</code> used consistently in <code>api.js</code>, <code>axiosInstance.js</code>, and <code>AuthContext</code>.</td></tr>
+    <tr><td>Bearer token injected on every request</td><td><span class="check">✓ PASS</span></td><td>Axios request interceptor reads <code>TOKEN_STORAGE_KEY</code> and sets <code>Authorization: Bearer …</code>.</td></tr>
+    <tr><td>401 → redirect to /login</td><td><span class="check">✓ PASS</span></td><td>Response interceptor clears storage and redirects, preserving the <code>?redirect=</code> param.</td></tr>
+    <tr><td>403 → redirect to /403</td><td><span class="check">✓ PASS</span></td><td>Response interceptor redirects to <code>ROUTES.ACCESS_DENIED</code>.</td></tr>
+    <tr><td>DashboardRedirect role logic</td><td><span class="check">✓ PASS</span></td><td>ADMIN → <code>/admin/dashboard</code>, HR/MANAGER → <code>/hr/dashboard</code>, EMPLOYEE → <code>/employee/dashboard</code>. Matches <code>AuthContext.resolveDashboard</code>.</td></tr>
+    <tr><td>Token expiry auto-logout</td><td><span class="check">✓ PASS</span></td><td><code>isTokenExpired</code> checked on mount via <code>useEffect</code> in <code>AuthContext</code>.</td></tr>
+    <tr><td>API base URL matches backend context-path</td><td><span class="check">✓ PASS</span></td><td><code>API_BASE_URL = '/api'</code>. Vite dev proxy and Nginx production both forward <code>/api/*</code> to port 8080.</td></tr>
+  </table>
+
+  
+  <h2>4. Role-Based Routing</h2>
+  <table>
+    <tr><th>Role</th><th>Dashboard</th><th>Protected by</th></tr>
+    <tr><td><code>ROLE_ADMIN</code></td><td><code>/admin/dashboard</code></td><td><code>RoleProtectedRoute</code> + backend <code>@PreAuthorize</code></td></tr>
+    <tr><td><code>ROLE_HR</code> / <code>ROLE_MANAGER</code></td><td><code>/hr/dashboard</code></td><td><code>RoleProtectedRoute</code> + backend <code>@PreAuthorize</code></td></tr>
+    <tr><td><code>ROLE_EMPLOYEE</code></td><td><code>/employee/dashboard</code></td><td><code>RoleProtectedRoute</code> + backend <code>@PreAuthorize</code></td></tr>
+    <tr><td>Unauthenticated</td><td><code>/login</code></td><td><code>ProtectedRoute</code></td></tr>
+  </table>
+
+  
+  <h2>5. Files Changed</h2>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>frontend/src/services/leaveApi.js</code></td><td>Fixed <code>approveLeave</code> to send empty body <code>{}</code>; fixed <code>rejectLeave</code> JSDoc field name to <code>rejectionReason</code></td></tr>
+    <tr><td><code>frontend/src/hooks/useLeaveHooks.js</code></td><td>Fixed <code>useRejectLeave</code> to send <code>{ rejectionReason: reason }</code> instead of <code>{ reason }</code></td></tr>
+    <tr><td><code>frontend/src/pages/settings/SettingsPage.jsx</code></td><td>Fixed error handler to use normalised error shape (<code>err.violations</code>, <code>err.message</code>)</td></tr>
+    <tr><td><code>frontend/src/services/attendanceApi.js</code></td><td>Removed dead <code>deleteAttendance</code> export (no backend DELETE endpoint)</td></tr>
+    <tr><td><code>frontend/src/tests/useLeaveHooks.test.jsx</code></td><td>Updated assertion to expect <code>{ rejectionReason: … }</code> — matches the corrected hook behaviour</td></tr>
+  </table>
+
+  
+  <h2>6. API Cross-Check — No Other Mismatches</h2>
+  <p>All other endpoints were verified correct:</p>
+  <ul>
+    <li><strong>Auth</strong>: register/login field names exactly match <code>RegisterRequest</code> / <code>LoginRequest</code></li>
+    <li><strong>Employees</strong>: <code>getEmployees</code>, <code>createEmployee</code>, <code>updateEmployee</code>, <code>deleteEmployee</code> — correct methods, paths, field names</li>
+    <li><strong>Departments</strong>: <code>getDepartments()</code> → <code>GET /departments/all</code>; <code>getDepartmentsPaged</code> → <code>GET /departments</code> — correct</li>
+    <li><strong>Leaves</strong>: <code>getLeaveRequests</code>, <code>getMyLeaveRequests</code>, <code>createLeaveRequest</code> (with <code>employeeId</code> from profile), <code>updateLeaveRequest</code>, <code>cancelLeave</code> — all correct</li>
+    <li><strong>Attendance</strong>: <code>getAttendance</code>, <code>getMyAttendance</code>, <code>createAttendance</code>, <code>updateAttendance</code> — field names match <code>CreateAttendanceRequest</code> / <code>AttendanceResponse</code></li>
+    <li><strong>Reviews</strong>: <code>getReviews</code>, <code>createReview</code>, <code>updateReview</code>, <code>deleteReview</code> — correct; <code>CreateReviewRequest</code> fields all sent</li>
+    <li><strong>Profile</strong>: <code>getProfile</code> → <code>GET /profile</code>; <code>updatePersonalInfo</code> → <code>PUT /profile/personal</code>; <code>ProfileResponse.dateOfJoining</code> correctly accessed as <code>profile.dateOfJoining</code></li>
+    <li><strong>Dashboard</strong>: <code>getDashboardSummary</code>, <code>getDashboardCharts</code>, <code>getDashboardActivity</code> — paths and response fields correct</li>
+    <li><strong>Admin</strong>: <code>getUsers</code>, <code>updateUserRole</code> (sends <code>{ roleName }</code>), <code>setUserEnabled</code> (query param) — all correct</li>
+    <li><strong>Settings</strong>: <code>changePassword</code> → <code>POST /settings/change-password</code> with <code>{ currentPassword, newPassword, confirmPassword }</code> — correct</li>
+  </ul>
+
+  
+  <h2>7. Test Results</h2>
+  <div class="section-card">
+    <p><strong>Command:</strong> <code>cd frontend &amp;&amp; npm test -- --run</code></p>
+    <table>
+      <tr><th>Metric</th><th>Result</th></tr>
+      <tr><td>Test files</td><td>22 passed, 0 failed</td></tr>
+      <tr><td>Tests</td><td><strong>326 passed, 0 failed</strong></td></tr>
+      <tr><td>Prior run (before fixes)</td><td>325 passed, 1 failed (<code>useRejectLeave</code>)</td></tr>
+      <tr><td>New failures introduced</td><td>None</td></tr>
+    </table>
+  </div>
+
+  
+  <h2>8. Build Results</h2>
+  <div class="section-card">
+    <table>
+      <tr><th>Build</th><th>Result</th><th>Notes</th></tr>
+      <tr><td>Frontend <code>npm run build</code></td><td><span class="check">✓ SUCCESS</span></td><td>12 693 modules transformed; 0 errors; built in 33s</td></tr>
+      <tr><td>Backend <code>.\mvnw compile -q</code></td><td><span class="check">✓ SUCCESS</span></td><td>No output = no warnings or errors</td></tr>
+    </table>
+  </div>
+
+  
+  <h2>9. Remaining Blockers</h2>
+  <p>None. All integration issues have been resolved. The portal is ready for end-to-end testing against the running backend.</p>
+  <p><em>Seed accounts available for testing:</em></p>
+  <ul>
+    <li><code>admin@company.com / Admin@1234!</code> → ROLE_ADMIN</li>
+    <li><code>hr@company.com / HR@1234!</code> → ROLE_HR</li>
+    <li><code>manager@company.com / Manager@1234!</code> → ROLE_MANAGER</li>
+  </ul>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

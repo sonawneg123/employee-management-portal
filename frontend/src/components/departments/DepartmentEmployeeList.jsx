@@ -39,7 +39,7 @@ export default function DepartmentEmployeeList({ departmentId }) {
   const { data, isLoading } = useEmployees({
     departmentId,
     size: 50,
-    sort: 'firstName',
+    sort: 'employeeCode',
     direction: 'asc',
   });
 

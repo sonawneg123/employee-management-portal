@@ -19,10 +19,13 @@ import {
   Button,
   Grid,
 } from '@mui/material';
-import RefreshIcon    from '@mui/icons-material/Refresh';
-import PersonAddIcon  from '@mui/icons-material/PersonAdd';
-import ApartmentIcon  from '@mui/icons-material/Apartment';
-import EventNoteIcon  from '@mui/icons-material/EventNote';
+import RefreshIcon         from '@mui/icons-material/Refresh';
+import PersonAddIcon       from '@mui/icons-material/PersonAdd';
+import ApartmentIcon       from '@mui/icons-material/Apartment';
+import EventNoteIcon       from '@mui/icons-material/EventNote';
+import AssessmentIcon      from '@mui/icons-material/Assessment';
+import AccessTimeIcon      from '@mui/icons-material/AccessTime';
+import ManageAccountsIcon  from '@mui/icons-material/ManageAccounts';
 
 import { useDashboardSummary, useRefreshAllDashboard } from '@/hooks/useDashboard';
 import { ROUTES } from '@/constants/routes';
@@ -113,7 +116,7 @@ export default function AdminDashboardPage() {
             onClick={() => navigate(ROUTES.ADMIN_EMPLOYEES)}
             size="small"
           >
-            Add Employee
+            Employees
           </Button>
           <Button
             variant="outlined"
@@ -121,7 +124,7 @@ export default function AdminDashboardPage() {
             onClick={() => navigate(ROUTES.ADMIN_DEPARTMENTS)}
             size="small"
           >
-            Add Department
+            Departments
           </Button>
           <Button
             variant="outlined"
@@ -130,8 +133,32 @@ export default function AdminDashboardPage() {
             onClick={() => navigate(ROUTES.ADMIN_LEAVES)}
             size="small"
           >
-            Approve Leaves
-            {summary?.pendingLeaves > 0 && ` (${summary.pendingLeaves})`}
+            Leaves{summary?.pendingLeaves > 0 && ` (${summary.pendingLeaves})`}
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<AccessTimeIcon />}
+            onClick={() => navigate(ROUTES.ADMIN_ATTENDANCE)}
+            size="small"
+          >
+            Attendance
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<AssessmentIcon />}
+            onClick={() => navigate(ROUTES.ADMIN_REVIEWS)}
+            size="small"
+          >
+            Reviews
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            startIcon={<ManageAccountsIcon />}
+            onClick={() => navigate(ROUTES.ADMIN_USERS)}
+            size="small"
+          >
+            Users
           </Button>
         </Box>
 

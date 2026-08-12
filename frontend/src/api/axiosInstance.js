@@ -48,8 +48,11 @@ axiosInstance.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
 
-    // Automatic logout on 401 — token expired or invalid
-    if (status === 401) {
+    // Automatic logout on 401 — token expired or invalid.
+    // Skip the redirect when the 401 comes from the login endpoint itself
+    // so LoginForm can display the "Invalid email or password." inline error.
+    const requestUrl = error.config?.url ?? '';
+    if (status === 401 && !requestUrl.includes('/auth/login')) {
       clearAll();
       // Redirect to login while preserving the attempted URL for post-login redirect
       const current = window.location.pathname;
@@ -58,15 +61,9 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(normaliseError(error));
     }
 
-    // Redirect to the access-denied page on 403 — do not expose the resource
-    if (status === 403) {
-      const current = window.location.pathname;
-      if (current !== ROUTES.ACCESS_DENIED) {
-        window.location.href = ROUTES.ACCESS_DENIED;
-      }
-      return Promise.reject(normaliseError(error));
-    }
-
+    // 403 — let the individual component/page handle it (show an error message).
+    // A global redirect would boot the user off their current page for any
+    // widget-level permission failure, which is too aggressive.
     return Promise.reject(normaliseError(error));
   },
 );

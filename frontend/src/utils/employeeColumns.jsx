@@ -49,7 +49,7 @@ export function getEmployeeColumns() {
     {
       id:       EMPLOYEE_COLUMNS.FULL_NAME,
       label:    'Employee',
-      sortable: true,
+      sortable: false,
       width:    '220px',
       render:   (row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

@@ -2,7 +2,7 @@
  * settingsApi.js
  * API client for Settings endpoints.
  */
-import axiosInstance from '../api/axiosInstance';
+import axiosInstance from '@/api/axiosInstance';
 
 const BASE = '/settings';
 

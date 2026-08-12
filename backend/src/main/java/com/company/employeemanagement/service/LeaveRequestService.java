@@ -34,6 +34,26 @@ public interface LeaveRequestService {
                                                LeaveType leaveType, Pageable pageable);
 
     /**
+     * Returns the authenticated caller's own leave requests, scoped to their
+     * linked employee record regardless of their role.
+     *
+     * <p>Unlike {@link #findAll}, this method always resolves the currently
+     * authenticated user's employee record and uses it as the filter, so that
+     * ADMIN, HR, and MANAGER users also see only their own leaves when calling
+     * the self-service endpoint.
+     *
+     * @param status    optional {@link LeaveStatus} to filter by
+     * @param leaveType optional {@link LeaveType} to filter by
+     * @param pageable  pagination and sorting parameters
+     * @return a {@link PageResponse} of the caller's own leave requests
+     * @throws com.company.employeemanagement.exception.AccessDeniedException
+     *         if the authenticated user has no linked employee record
+     */
+    PageResponse<LeaveRequestResponse> findMyLeaves(LeaveStatus status,
+                                                    LeaveType leaveType,
+                                                    Pageable pageable);
+
+    /**
      * Returns the leave request with the specified UUID.
      *
      * @param id the UUID of the leave request

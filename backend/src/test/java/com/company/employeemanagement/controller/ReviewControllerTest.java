@@ -39,6 +39,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.Mockito;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -90,6 +93,11 @@ class ReviewControllerTest {
 
     private static final UUID REVIEW_ID   = UUID.randomUUID();
     private static final UUID EMPLOYEE_ID = UUID.randomUUID();
+
+    @BeforeEach
+    void resetMocks() {
+        Mockito.reset(reviewService);
+    }
 
     private ReviewResponse stubResponse() {
         return new ReviewResponse(

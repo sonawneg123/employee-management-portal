@@ -17,7 +17,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -29,7 +29,6 @@ import {
 } from '@mui/material';
 import { useAuth }             from '@/contexts/AuthContext';
 import { ROLES }               from '@/constants/roles';
-import { ROUTES }              from '@/constants/routes';
 import {
   EMPLOYEE_DEFAULT_PAGE_SIZE,
   EMPLOYEE_DEFAULT_SORT,
@@ -76,12 +75,18 @@ export default function EmployeesPage() {
   const theme     = useTheme();
   const isMobile  = useMediaQuery(theme.breakpoints.down('md'));
   const navigate  = useNavigate();
+  const location  = useLocation();
   const { user, hasAnyRole } = useAuth();
+
+  // Derive the list base path from the current location so that navigation
+  // to the detail view stays within the same role-scoped prefix
+  // (/admin/employees, /hr/employees, or /employees).
+  const listBase = location.pathname.replace(/\/$/, '');
 
   // ── Role permissions ───────────────────────────────────────────────────────
   const canCreate = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
   const canEdit   = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canDelete = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
+  const canDelete = hasAnyRole([ROLES.ADMIN]);           // DELETE /employees/** → ADMIN only
 
   // ── Query params state ─────────────────────────────────────────────────────
   const [page,         setPage]         = useState(0);
@@ -211,8 +216,8 @@ export default function EmployeesPage() {
   // ── Navigation ─────────────────────────────────────────────────────────────
 
   const handleView = useCallback((emp) => {
-    navigate(`${ROUTES.EMPLOYEES}/${emp.id}`);
-  }, [navigate]);
+    navigate(`${listBase}/${emp.id}`);
+  }, [navigate, listBase]);
 
   // ── CSV Export ─────────────────────────────────────────────────────────────
 

@@ -32,7 +32,6 @@ import DashboardRedirect from '@/components/common/DashboardRedirect';
 // ── Lazy page imports ────────────────────────────────────────────────────────
 const LoginPage       = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage    = lazy(() => import('@/pages/auth/RegisterPage'));
-const DashboardPage   = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const EmployeesPage        = lazy(() => import('@/pages/employees/EmployeesPage'));
 const EmployeeDetailsPage  = lazy(() => import('@/pages/employees/EmployeeDetailsPage'));
 const DepartmentsPage       = lazy(() => import('@/pages/departments/DepartmentsPage'));
@@ -49,6 +48,7 @@ const AccessDeniedPage = lazy(() => import('@/pages/AccessDeniedPage'));
 
 // ── Role-specific dashboard pages ────────────────────────────────────────────
 const AdminDashboardPage    = lazy(() => import('@/pages/admin/AdminDashboardPage'));
+const AdminUsersPage        = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const HRDashboardPage       = lazy(() => import('@/pages/hr/HRDashboardPage'));
 const EmployeeDashboardPage = lazy(() => import('@/pages/employee/EmployeeDashboardPage'));
 
@@ -92,19 +92,25 @@ export default function AppRoutes() {
           <Route element={<RoleProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
             <Route path={ROUTES.ADMIN_DASHBOARD}   element={withSuspense(<AdminDashboardPage />)} />
             <Route path={ROUTES.ADMIN_EMPLOYEES}   element={withSuspense(<EmployeesPage />)} />
+            <Route path={`${ROUTES.ADMIN_EMPLOYEES}/:id`} element={withSuspense(<EmployeeDetailsPage />)} />
             <Route path={ROUTES.ADMIN_DEPARTMENTS} element={withSuspense(<DepartmentsPage />)} />
+            <Route path={`${ROUTES.ADMIN_DEPARTMENTS}/:id`} element={withSuspense(<DepartmentDetailsPage />)} />
             <Route path={ROUTES.ADMIN_LEAVES}      element={withSuspense(<LeavesPage />)} />
             <Route path={ROUTES.ADMIN_ATTENDANCE}  element={withSuspense(<AttendancePage />)} />
             <Route path={ROUTES.ADMIN_REVIEWS}     element={withSuspense(<ReviewsPage />)} />
+            <Route path={ROUTES.ADMIN_USERS}       element={withSuspense(<AdminUsersPage />)} />
           </Route>
 
           {/* ── HR/Manager routes (/hr/*) ─────────────────────────────── */}
           <Route element={<RoleProtectedRoute allowedRoles={[ROLES.HR, ROLES.MANAGER]} />}>
-            <Route path={ROUTES.HR_DASHBOARD}   element={withSuspense(<HRDashboardPage />)} />
-            <Route path={ROUTES.HR_EMPLOYEES}   element={withSuspense(<EmployeesPage />)} />
-            <Route path={ROUTES.HR_LEAVES}      element={withSuspense(<LeavesPage />)} />
-            <Route path={ROUTES.HR_ATTENDANCE}  element={withSuspense(<AttendancePage />)} />
-            <Route path={ROUTES.HR_REVIEWS}     element={withSuspense(<ReviewsPage />)} />
+            <Route path={ROUTES.HR_DASHBOARD}     element={withSuspense(<HRDashboardPage />)} />
+            <Route path={ROUTES.HR_EMPLOYEES}     element={withSuspense(<EmployeesPage />)} />
+            <Route path={`${ROUTES.HR_EMPLOYEES}/:id`} element={withSuspense(<EmployeeDetailsPage />)} />
+            <Route path={ROUTES.HR_DEPARTMENTS}   element={withSuspense(<DepartmentsPage />)} />
+            <Route path={`${ROUTES.HR_DEPARTMENTS}/:id`} element={withSuspense(<DepartmentDetailsPage />)} />
+            <Route path={ROUTES.HR_LEAVES}        element={withSuspense(<LeavesPage />)} />
+            <Route path={ROUTES.HR_ATTENDANCE}    element={withSuspense(<AttendancePage />)} />
+            <Route path={ROUTES.HR_REVIEWS}       element={withSuspense(<ReviewsPage />)} />
           </Route>
 
           {/* ── Employee self-service routes (/employee/*) ────────────── */}

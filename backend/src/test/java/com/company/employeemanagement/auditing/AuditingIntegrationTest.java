@@ -60,7 +60,9 @@ import static org.assertj.core.api.Assertions.assertThat;
         // Use H2 create-drop so the test schema is built from entities
         "spring.jpa.hibernate.ddl-auto=create-drop",
         // Disable Flyway for the JPA slice — schema comes from Hibernate
-        "spring.flyway.enabled=false"
+        "spring.flyway.enabled=false",
+        // Use H2 dialect so Hibernate generates H2-compatible DDL (not MySQL)
+        "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect"
 })
 @DisplayName("JPA Auditing — BaseEntity audit fields")
 class AuditingIntegrationTest {
@@ -97,6 +99,9 @@ static class TestJpaAuditingConfig {
     @AfterEach
     void resetSecurityContext() {
         SecurityContextHolder.clearContext();
+        leaveRequestRepository.deleteAll();
+        employeeRepository.deleteAll();
+        departmentRepository.deleteAll();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
