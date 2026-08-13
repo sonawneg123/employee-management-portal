@@ -388,10 +388,11 @@ describe('RegisterPage — duplicate email (409)', () => {
     );
   }, 15_000);
 
-  it('shows role info note about Employee-only account creation', () => {
+  it('shows "Create account as" role selector when no role is pre-selected', () => {
     renderWithMockedAuth(<RegisterPage />);
-    expect(screen.getByText(/registration creates an/i)).toBeInTheDocument();
-    expect(screen.getByText(/employee/i, { selector: 'strong' })).toBeInTheDocument();
+    // The new role selector replaces the old text note
+    expect(screen.getByText(/create account as/i)).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: /select role/i })).toBeInTheDocument();
   });
 });
 

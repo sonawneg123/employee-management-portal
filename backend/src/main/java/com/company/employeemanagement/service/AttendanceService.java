@@ -67,6 +67,31 @@ public interface AttendanceService {
     AttendanceResponse create(CreateAttendanceRequest request);
 
     /**
+     * Self-service check-in: marks the authenticated employee as present for today.
+     * The employee ID is derived from the authenticated principal — it cannot be
+     * supplied by the caller.
+     *
+     * @return the newly created {@link AttendanceResponse}
+     * @throws com.company.employeemanagement.exception.AccessDeniedException
+     *         if the authenticated user has no linked employee record
+     * @throws IllegalStateException if an attendance record already exists for
+     *         today for this employee
+     */
+    AttendanceResponse checkIn();
+
+    /**
+     * Self-service check-out: records the check-out time for the authenticated
+     * employee's attendance record for today.
+     *
+     * @return the updated {@link AttendanceResponse}
+     * @throws com.company.employeemanagement.exception.AccessDeniedException
+     *         if the authenticated user has no linked employee record
+     * @throws com.company.employeemanagement.exception.ResourceNotFoundException
+     *         if no check-in record exists for today
+     */
+    AttendanceResponse checkOut();
+
+    /**
      * Updates an existing attendance record.
      *
      * @param id      the UUID of the record to update

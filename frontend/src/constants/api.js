@@ -50,6 +50,8 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   // Attendance
   ATTENDANCE: '/attendance',
   ATTENDANCE_MY: '/attendance/my',
+  ATTENDANCE_CHECKIN: '/attendance/checkin',
+  ATTENDANCE_CHECKOUT: '/attendance/checkout',
   ATTENDANCE_BY_ID: (id) => `/attendance/${id}`,
 
   // Performance reviews

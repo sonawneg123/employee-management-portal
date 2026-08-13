@@ -19,6 +19,8 @@ import java.util.UUID;
  * Clients wishing to update only specific fields should use a PATCH endpoint
  * (to be introduced in a future phase).
  *
+ * @param firstName     updated first name
+ * @param lastName      updated last name
  * @param departmentId  UUID of the employee's department
  * @param jobTitle      updated job title
  * @param phone         updated contact phone number
@@ -31,6 +33,16 @@ import java.util.UUID;
  */
 @Schema(description = "Payload required to update an existing employee record (full replacement)")
 public record UpdateEmployeeRequest(
+
+        @Schema(description = "First name of the employee", example = "John")
+        @NotBlank(message = "First name is required")
+        @Size(max = 100, message = "First name must not exceed 100 characters")
+        String firstName,
+
+        @Schema(description = "Last name of the employee", example = "Doe")
+        @NotBlank(message = "Last name is required")
+        @Size(max = 100, message = "Last name must not exceed 100 characters")
+        String lastName,
 
         @Schema(description = "UUID of the department", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
         @NotNull(message = "Department ID is required")

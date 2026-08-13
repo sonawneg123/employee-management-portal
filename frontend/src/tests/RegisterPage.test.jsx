@@ -215,6 +215,8 @@ describe('RegisterPage', () => {
           lastName: 'Smith',
           email: 'jane@example.com',
           password: 'StrongP@ss1',
+          // role is always included now (defaults to ROLE_EMPLOYEE when no role pre-selected)
+          role: 'ROLE_EMPLOYEE',
         });
       });
     }, 15_000);

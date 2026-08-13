@@ -3,6 +3,7 @@
  *
  * Responsibilities:
  * - Renders first name, last name, email, password, and confirm-password fields.
+ * - Shows a "Create account as" role dropdown when no specific role is pre-selected.
  * - Validates with Zod via {@link registerSchema}.
  * - Shows real-time password strength indicator.
  * - Calls {@link useRegister} on submit.
@@ -13,7 +14,7 @@
  *   the correct role is included in the submission payload.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,10 +30,13 @@ import {
   Typography,
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 
 import { registerSchema } from '@/utils/validationSchemas';
 import { useRegister } from '@/hooks/useRegister';
 import { ROUTES } from '@/constants/routes';
+import { ROLES } from '@/constants/roles';
 import PasswordField from '@/components/auth/PasswordField';
 import FormError from '@/components/auth/FormError';
 import LoadingButton from '@/components/auth/LoadingButton';
@@ -45,6 +49,32 @@ import LoadingButton from '@/components/auth/LoadingButton';
  * @property {string} password
  * @property {string} confirmPassword
  */
+
+// ── Role options for the "Create account as" dropdown ────────────────────────
+
+/**
+ * The application's actual supported roles for new account creation.
+ * Only ROLE_EMPLOYEE and ROLE_HR are accepted by the backend's public
+ * registration endpoint. ROLE_ADMIN and ROLE_MANAGER cannot be self-registered.
+ */
+const ROLE_OPTIONS = [
+  {
+    value: ROLES.HR,
+    label: 'HR',
+    description: 'HR operations and employee management',
+    Icon: WorkRoundedIcon,
+    color: '#4F46E5',
+  },
+  {
+    value: ROLES.EMPLOYEE,
+    label: 'Employee',
+    description: 'Self-service portal access',
+    Icon: PersonRoundedIcon,
+    color: '#10B981',
+  },
+];
+
+// ── Password strength helper ──────────────────────────────────────────────────
 
 /**
  * Calculates a password strength score between 0 and 4.
@@ -76,17 +106,25 @@ function getPasswordStrength(password) {
   return { score, ...map[score] };
 }
 
+// ── Component ─────────────────────────────────────────────────────────────────
+
 /**
  * Fully controlled registration form.
  *
- * @returns {JSX.Element}
- */
-/**
  * @param {{ role?: string }} props
  * @returns {JSX.Element}
  */
 export default function RegisterForm({ role }) {
   const { mutate: register, isPending, isError, error, reset: resetMutation } = useRegister();
+
+  // When no role is pre-selected via route, show the role selector.
+  // Default to EMPLOYEE as the most common case.
+  const [selectedRole, setSelectedRole] = useState(role ?? ROLES.EMPLOYEE);
+
+  // Keep in sync if the prop changes (e.g., route changes)
+  useEffect(() => {
+    if (role) setSelectedRole(role);
+  }, [role]);
 
   const {
     control,
@@ -145,15 +183,15 @@ export default function RegisterForm({ role }) {
         lastName: values.lastName,
         email: values.email,
         password: values.password,
+        role: selectedRole,
       };
-      if (role) {
-        payload.role = role;
-      }
       await register(payload);
     } catch {
       // Errors are surfaced through mutation state
     }
   };
+
+  const showRoleSelector = !role; // show selector only when no role is pre-set via route
 
   return (
     <Box
@@ -164,6 +202,97 @@ export default function RegisterForm({ role }) {
     >
       {/* Form-level error */}
       <FormError message={getFormErrorMessage()} />
+
+      {/* ── Create account as (role selector) ───────────────────────────── */}
+      {showRoleSelector && (
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="caption"
+            fontWeight={600}
+            color="text.secondary"
+            sx={{ display: 'block', mb: 1, letterSpacing: '0.02em' }}
+          >
+            Create account as
+          </Typography>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 1,
+            }}
+            role="radiogroup"
+            aria-label="Select role"
+          >
+            {ROLE_OPTIONS.map(({ value, label, Icon, color }) => {
+              const isSelected = selectedRole === value;
+              return (
+                <Box
+                  key={value}
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={0}
+                  onClick={() => setSelectedRole(value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedRole(value);
+                    }
+                  }}
+                  sx={{
+                    p: 1.5,
+                    borderRadius: '10px',
+                    border: '1.5px solid',
+                    borderColor: isSelected ? color : 'divider',
+                    bgcolor: isSelected
+                      ? (theme) => (theme.palette.mode === 'dark' ? `${color}20` : `${color}0d`)
+                      : 'background.paper',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'all 0.15s ease',
+                    outline: 'none',
+                    '&:hover': {
+                      borderColor: color,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark' ? `${color}18` : `${color}08`,
+                    },
+                    '&:focus-visible': {
+                      outline: `2px solid ${color}`,
+                      outlineOffset: 2,
+                    },
+                  }}
+                >
+                  <Icon
+                    sx={{
+                      fontSize: 20,
+                      color: isSelected ? color : 'text.secondary',
+                      display: 'block',
+                      mx: 'auto',
+                      mb: 0.5,
+                      transition: 'color 0.15s ease',
+                    }}
+                  />
+                  <Typography
+                    variant="caption"
+                    fontWeight={isSelected ? 700 : 500}
+                    sx={{
+                      color: isSelected ? color : 'text.primary',
+                      display: 'block',
+                      lineHeight: 1.3,
+                      transition: 'color 0.15s ease',
+                    }}
+                  >
+                    {label}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+          {/* Role description */}
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.75, display: 'block' }}>
+            {ROLE_OPTIONS.find((r) => r.value === selectedRole)?.description}
+          </Typography>
+        </Box>
+      )}
 
       {/* Name row */}
       <Grid container spacing={2} sx={{ mb: 2.5 }}>
@@ -283,14 +412,6 @@ export default function RegisterForm({ role }) {
           required
         />
       </Box>
-
-      {/* Role info note — shown when no specific role is pre-selected */}
-      {!role && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-          This registration creates an <strong>Employee</strong> account. Contact your administrator
-          to create HR or Manager accounts.
-        </Typography>
-      )}
 
       {/* Terms note */}
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>

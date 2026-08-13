@@ -56,6 +56,21 @@ public class Employee extends BaseEntity {
     private User user;
 
     /**
+     * First name of the employee, stored directly on the record so that
+     * HR-created employees (without a portal User account) still have a
+     * displayable name. When a User is linked, the UI and API prefer
+     * the User's name; this column is the fallback.
+     */
+    @Column(name = "first_name", length = 100)
+    private String firstName;
+
+    /**
+     * Last name of the employee. See {@link #firstName}.
+     */
+    @Column(name = "last_name", length = 100)
+    private String lastName;
+
+    /**
      * Unique employee code assigned by HR (e.g., "EMP-0001").
      * Used as an alternative stable external identifier.
      */

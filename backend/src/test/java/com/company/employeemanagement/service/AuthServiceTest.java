@@ -4,9 +4,14 @@ import com.company.employeemanagement.config.JwtProperties;
 import com.company.employeemanagement.dto.request.LoginRequest;
 import com.company.employeemanagement.dto.request.RegisterRequest;
 import com.company.employeemanagement.dto.response.AuthResponse;
+import com.company.employeemanagement.entity.Department;
+import com.company.employeemanagement.entity.Employee;
 import com.company.employeemanagement.entity.Role;
 import com.company.employeemanagement.entity.User;
+import com.company.employeemanagement.entity.enums.EmployeeStatus;
 import com.company.employeemanagement.exception.DuplicateResourceException;
+import com.company.employeemanagement.repository.DepartmentRepository;
+import com.company.employeemanagement.repository.EmployeeRepository;
 import com.company.employeemanagement.repository.RoleRepository;
 import com.company.employeemanagement.repository.UserRepository;
 import com.company.employeemanagement.security.JwtService;
@@ -54,6 +59,8 @@ class AuthServiceTest {
 
     @Mock private UserRepository         userRepository;
     @Mock private RoleRepository         roleRepository;
+    @Mock private EmployeeRepository     employeeRepository;
+    @Mock private DepartmentRepository   departmentRepository;
     @Mock private PasswordEncoder        passwordEncoder;
     @Mock private JwtService             jwtService;
     @Mock private AuthenticationManager  authenticationManager;
@@ -69,8 +76,8 @@ class AuthServiceTest {
                 604_800_000L
         );
         authService = new AuthServiceImpl(
-                userRepository, roleRepository, passwordEncoder,
-                jwtService, authenticationManager, userDetailsService, props
+                userRepository, roleRepository, employeeRepository, departmentRepository,
+                passwordEncoder, jwtService, authenticationManager, userDetailsService, props
         );
     }
 
@@ -91,12 +98,26 @@ class AuthServiceTest {
 
             Role role = Role.builder().name("ROLE_EMPLOYEE").build();
 
+            UUID userId = UUID.randomUUID();
             User savedUser = User.builder()
                     .email("john@example.com")
                     .firstName("John")
                     .lastName("Doe")
                     .passwordHash("hashed")
                     .roles(Set.of(role))
+                    .build();
+            // Simulate JPA-assigned ID so that employee auto-creation receives a non-null user ID
+            savedUser.setId(userId);
+
+            // Stub a department so Employee record auto-creation does not abort
+            Department dept = Department.builder().name("General").code("GEN").build();
+
+            Employee savedEmployee = Employee.builder()
+                    .user(savedUser)
+                    .employeeCode("REG-0000000001")
+                    .department(dept)
+                    .jobTitle("Employee")
+                    .status(EmployeeStatus.ACTIVE)
                     .build();
 
             UserDetails userDetails = org.springframework.security.core.userdetails.User
@@ -109,6 +130,11 @@ class AuthServiceTest {
             when(roleRepository.findByName("ROLE_EMPLOYEE")).thenReturn(Optional.of(role));
             when(passwordEncoder.encode("SecureP@ss1")).thenReturn("hashed");
             when(userRepository.save(any(User.class))).thenReturn(savedUser);
+            // Employee auto-creation stubs — use any() to match even if user ID is null in tests
+            when(employeeRepository.findByUserId(any())).thenReturn(Optional.empty());
+            when(departmentRepository.findByCode("GEN")).thenReturn(Optional.of(dept));
+            when(employeeRepository.existsByEmployeeCode(anyString())).thenReturn(false);
+            when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
             when(userDetailsService.loadUserByUsername("john@example.com")).thenReturn(userDetails);
             when(jwtService.generateToken(userDetails)).thenReturn("mock.jwt.token");
 
@@ -122,6 +148,8 @@ class AuthServiceTest {
             assertThat(response.firstName()).isEqualTo("John");
             assertThat(response.roles()).containsExactly("ROLE_EMPLOYEE");
             verify(userRepository).save(any(User.class));
+            // Verify that an Employee record was auto-created
+            verify(employeeRepository).save(any(Employee.class));
         }
 
         @Test

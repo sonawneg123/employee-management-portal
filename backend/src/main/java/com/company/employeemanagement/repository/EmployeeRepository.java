@@ -117,7 +117,9 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
             SELECT e.id FROM Employee e
             LEFT JOIN e.user u
             WHERE (:keyword      IS NULL
-                   OR LOWER(e.jobTitle) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                   OR LOWER(e.jobTitle)   LIKE LOWER(CONCAT('%', :keyword, '%'))
+                   OR (e.firstName IS NOT NULL AND LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+                   OR (e.lastName  IS NOT NULL AND LOWER(e.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%')))
                    OR (u IS NOT NULL AND (
                        LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
                     OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -143,6 +145,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
             SELECT e.id FROM Employee e
             LEFT JOIN e.user u
             WHERE LOWER(e.jobTitle) LIKE LOWER(CONCAT('%', :keyword, '%'))
+               OR (e.firstName IS NOT NULL AND LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+               OR (e.lastName  IS NOT NULL AND LOWER(e.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%')))
                OR (u IS NOT NULL AND (
                    LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%'))
@@ -190,6 +194,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
             SELECT e FROM Employee e
             LEFT JOIN e.user u
             WHERE LOWER(e.jobTitle) LIKE LOWER(CONCAT('%', :keyword, '%'))
+               OR (e.firstName IS NOT NULL AND LOWER(e.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+               OR (e.lastName  IS NOT NULL AND LOWER(e.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%')))
                OR (u IS NOT NULL AND (
                    LOWER(u.firstName) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :keyword, '%'))

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -56,8 +57,10 @@ class GlobalExceptionHandlerTest {
         void returns404() {
             ResourceNotFoundException ex = new ResourceNotFoundException(
                     "Employee", UUID.randomUUID());
-            ProblemDetail problem = handler.handleResourceNotFound(ex, webRequest);
-            assertThat(problem.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+            ResponseEntity<ProblemDetail> response = handler.handleResourceNotFound(ex, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         }
 
         @Test
@@ -65,7 +68,8 @@ class GlobalExceptionHandlerTest {
         void hasCorrectTitle() {
             ResourceNotFoundException ex = new ResourceNotFoundException(
                     "Department", "code", "ENG");
-            ProblemDetail problem = handler.handleResourceNotFound(ex, webRequest);
+            ProblemDetail problem = handler.handleResourceNotFound(ex, webRequest).getBody();
+            assertThat(problem).isNotNull();
             assertThat(problem.getTitle()).isEqualTo("Resource Not Found");
         }
 
@@ -74,7 +78,8 @@ class GlobalExceptionHandlerTest {
         void detailContainsResourceName() {
             ResourceNotFoundException ex = new ResourceNotFoundException(
                     "Employee", "email", "john@example.com");
-            ProblemDetail problem = handler.handleResourceNotFound(ex, webRequest);
+            ProblemDetail problem = handler.handleResourceNotFound(ex, webRequest).getBody();
+            assertThat(problem).isNotNull();
             assertThat(problem.getDetail()).contains("Employee");
         }
     }
@@ -92,8 +97,10 @@ class GlobalExceptionHandlerTest {
         void returns409() {
             DuplicateResourceException ex = new DuplicateResourceException(
                     "User", "email", "dupe@example.com");
-            ProblemDetail problem = handler.handleDuplicateResource(ex, webRequest);
-            assertThat(problem.getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
+            ResponseEntity<ProblemDetail> response = handler.handleDuplicateResource(ex, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
         }
 
         @Test
@@ -101,7 +108,8 @@ class GlobalExceptionHandlerTest {
         void hasCorrectTitle() {
             DuplicateResourceException ex = new DuplicateResourceException(
                     "Employee", "employeeCode", "EMP-001");
-            ProblemDetail problem = handler.handleDuplicateResource(ex, webRequest);
+            ProblemDetail problem = handler.handleDuplicateResource(ex, webRequest).getBody();
+            assertThat(problem).isNotNull();
             assertThat(problem.getTitle()).isEqualTo("Duplicate Resource");
         }
     }
@@ -118,15 +126,18 @@ class GlobalExceptionHandlerTest {
         @DisplayName("returns 401 status")
         void returns401() {
             BadCredentialsException ex = new BadCredentialsException("Bad credentials");
-            ProblemDetail problem = handler.handleBadCredentials(ex, webRequest);
-            assertThat(problem.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+            ResponseEntity<ProblemDetail> response = handler.handleBadCredentials(ex, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
         }
 
         @Test
         @DisplayName("detail obscures actual error (does not leak credentials)")
         void detailIsGeneric() {
             BadCredentialsException ex = new BadCredentialsException("Bad credentials");
-            ProblemDetail problem = handler.handleBadCredentials(ex, webRequest);
+            ProblemDetail problem = handler.handleBadCredentials(ex, webRequest).getBody();
+            assertThat(problem).isNotNull();
             assertThat(problem.getDetail()).isEqualTo("Invalid email or password.");
         }
     }
@@ -143,9 +154,11 @@ class GlobalExceptionHandlerTest {
         @DisplayName("returns 401 with 'Account Disabled' title")
         void returns401WithCorrectTitle() {
             DisabledException ex = new DisabledException("User is disabled");
-            ProblemDetail problem = handler.handleDisabled(ex, webRequest);
-            assertThat(problem.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
-            assertThat(problem.getTitle()).isEqualTo("Account Disabled");
+            ResponseEntity<ProblemDetail> response = handler.handleDisabled(ex, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+            assertThat(response.getBody().getTitle()).isEqualTo("Account Disabled");
         }
     }
 
@@ -161,9 +174,11 @@ class GlobalExceptionHandlerTest {
         @DisplayName("returns 401 with 'Account Locked' title")
         void returns401WithCorrectTitle() {
             LockedException ex = new LockedException("Account locked");
-            ProblemDetail problem = handler.handleLocked(ex, webRequest);
-            assertThat(problem.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
-            assertThat(problem.getTitle()).isEqualTo("Account Locked");
+            ResponseEntity<ProblemDetail> response = handler.handleLocked(ex, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+            assertThat(response.getBody().getTitle()).isEqualTo("Account Locked");
         }
     }
 
@@ -187,8 +202,11 @@ class GlobalExceptionHandlerTest {
             MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
             when(ex.getBindingResult()).thenReturn(bindingResult);
 
-            ProblemDetail problem = handler.handleValidation(ex, webRequest);
+            ResponseEntity<ProblemDetail> response = handler.handleValidation(ex, webRequest);
+            ProblemDetail problem = response.getBody();
 
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(problem).isNotNull();
             assertThat(problem.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
             assertThat(problem.getTitle()).isEqualTo("Validation Failed");
             assertThat(problem.getProperties())
@@ -208,16 +226,19 @@ class GlobalExceptionHandlerTest {
         @DisplayName("returns 500 for unhandled exceptions")
         void returns500() {
             Exception ex = new RuntimeException("Something unexpected");
-            ProblemDetail problem = handler.handleGeneral(ex, webRequest);
-            assertThat(problem.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            assertThat(problem.getTitle()).isEqualTo("Internal Server Error");
+            ResponseEntity<ProblemDetail> response = handler.handleGeneral(ex, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            assertThat(response.getBody().getTitle()).isEqualTo("Internal Server Error");
         }
 
         @Test
         @DisplayName("does not leak internal exception message in detail")
         void doesNotLeakMessage() {
             Exception ex = new RuntimeException("Database connection pool exhausted");
-            ProblemDetail problem = handler.handleGeneral(ex, webRequest);
+            ProblemDetail problem = handler.handleGeneral(ex, webRequest).getBody();
+            assertThat(problem).isNotNull();
             assertThat(problem.getDetail()).doesNotContain("Database connection pool exhausted");
         }
     }

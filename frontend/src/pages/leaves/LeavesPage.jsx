@@ -19,6 +19,7 @@ import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Box, Card, Snackbar, Typography, useMediaQuery, useTheme } from '@mui/material';
+import EventNoteRoundedIcon from '@mui/icons-material/EventNoteRounded';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/constants/roles';
 import { ROUTES } from '@/constants/routes';
@@ -242,13 +243,33 @@ export default function LeavesPage() {
         <title>Leave Requests — PeopleCore HR</title>
       </Helmet>
 
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
-          Leave Requests
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Manage employee leave requests
-        </Typography>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: '12px',
+            bgcolor: 'rgba(245,158,11,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <EventNoteRoundedIcon sx={{ fontSize: 22, color: 'warning.main' }} />
+        </Box>
+        <Box>
+          <Typography
+            variant="h2"
+            fontWeight={800}
+            sx={{ letterSpacing: '-0.02em', mb: 0.25, lineHeight: 1.2 }}
+          >
+            Leave Requests
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage employee leave requests
+          </Typography>
+        </Box>
       </Box>
 
       {/* Statistics banner */}

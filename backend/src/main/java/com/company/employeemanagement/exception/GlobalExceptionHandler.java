@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -27,6 +28,14 @@ import java.util.stream.Collectors;
  * {@code type}, {@code title}, {@code status}, {@code detail}, and
  * {@code instance} fields, plus any domain-specific extension properties.
  *
+ * <p>IMPORTANT: Handlers return {@code ResponseEntity<ProblemDetail>} rather than
+ * a bare {@code ProblemDetail}. When returning bare {@code ProblemDetail} from a
+ * {@code @RestControllerAdvice} in Spring 6.x / Boot 3.x the framework does NOT
+ * automatically propagate the status value stored inside {@code ProblemDetail} to
+ * the HTTP response status line — the response would come back as {@code 200 OK}
+ * while the body contains the real status number. Wrapping in {@code ResponseEntity}
+ * is the correct and explicit approach.
+ *
  * <p>Unhandled exceptions fall through to Spring Boot's default
  * {@code BasicErrorController} which also returns {@link ProblemDetail}.
  *
@@ -39,71 +48,55 @@ public class GlobalExceptionHandler {
 
     /**
      * Handles {@link ResourceNotFoundException} — resource not found (404).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 404
      */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ProblemDetail handleResourceNotFound(final ResourceNotFoundException ex,
-                                                final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleResourceNotFound(final ResourceNotFoundException ex,
+                                                                 final WebRequest request) {
         log.warn("Resource not found: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setTitle("Resource Not Found");
         problem.setType(URI.create("https://company.com/errors/resource-not-found"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
     }
 
     /**
      * Handles {@link DuplicateResourceException} — conflict (409).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 409
      */
     @ExceptionHandler(DuplicateResourceException.class)
-    public ProblemDetail handleDuplicateResource(final DuplicateResourceException ex,
-                                                  final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleDuplicateResource(final DuplicateResourceException ex,
+                                                                  final WebRequest request) {
         log.warn("Duplicate resource: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         problem.setTitle("Duplicate Resource");
         problem.setType(URI.create("https://company.com/errors/duplicate-resource"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
 
     /**
      * Handles application-level {@link AccessDeniedException} — forbidden (403).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 403
      */
     @ExceptionHandler(AccessDeniedException.class)
-    public ProblemDetail handleAccessDenied(final AccessDeniedException ex,
-                                             final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleAccessDenied(final AccessDeniedException ex,
+                                                             final WebRequest request) {
         log.warn("Access denied: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
         problem.setTitle("Access Denied");
         problem.setType(URI.create("https://company.com/errors/access-denied"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
 
     /**
      * Handles Spring Security's {@link org.springframework.security.access.AccessDeniedException}
      * — forbidden (403).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 403
      */
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ProblemDetail handleSpringAccessDenied(
+    public ResponseEntity<ProblemDetail> handleSpringAccessDenied(
             final org.springframework.security.access.AccessDeniedException ex,
             final WebRequest request) {
         log.warn("Spring Security access denied: {}", ex.getMessage());
@@ -113,19 +106,18 @@ public class GlobalExceptionHandler {
         problem.setType(URI.create("https://company.com/errors/access-denied"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
 
     /**
      * Handles {@link BadCredentialsException} — invalid credentials (401).
      *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 401
+     * <p>Returns a generic "Invalid email or password." message regardless of
+     * whether the email exists, to prevent user enumeration.
      */
     @ExceptionHandler(BadCredentialsException.class)
-    public ProblemDetail handleBadCredentials(final BadCredentialsException ex,
-                                               final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleBadCredentials(final BadCredentialsException ex,
+                                                               final WebRequest request) {
         log.warn("Authentication failure: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNAUTHORIZED, "Invalid email or password.");
@@ -133,19 +125,15 @@ public class GlobalExceptionHandler {
         problem.setType(URI.create("https://company.com/errors/authentication-failed"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
     }
 
     /**
      * Handles {@link DisabledException} — account disabled (401).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 401
      */
     @ExceptionHandler(DisabledException.class)
-    public ProblemDetail handleDisabled(final DisabledException ex,
-                                         final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleDisabled(final DisabledException ex,
+                                                         final WebRequest request) {
         log.warn("Account disabled: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNAUTHORIZED, "This account has been disabled.");
@@ -153,19 +141,15 @@ public class GlobalExceptionHandler {
         problem.setType(URI.create("https://company.com/errors/account-disabled"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
     }
 
     /**
      * Handles {@link LockedException} — account locked (401).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 401
      */
     @ExceptionHandler(LockedException.class)
-    public ProblemDetail handleLocked(final LockedException ex,
-                                       final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleLocked(final LockedException ex,
+                                                       final WebRequest request) {
         log.warn("Account locked: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNAUTHORIZED, "This account has been locked.");
@@ -173,7 +157,7 @@ public class GlobalExceptionHandler {
         problem.setType(URI.create("https://company.com/errors/account-locked"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problem);
     }
 
     /**
@@ -182,14 +166,10 @@ public class GlobalExceptionHandler {
      * <p>Returns a {@link ProblemDetail} augmented with a {@code violations} map
      * whose keys are field names and values are the first validation message
      * for that field.
-     *
-     * @param ex      the exception carrying all binding errors
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 400 and a violations extension
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidation(final MethodArgumentNotValidException ex,
-                                          final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleValidation(final MethodArgumentNotValidException ex,
+                                                           final WebRequest request) {
         Map<String, String> violations = ex.getBindingResult().getFieldErrors()
                 .stream()
                 .collect(Collectors.toMap(
@@ -205,20 +185,16 @@ public class GlobalExceptionHandler {
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
         problem.setProperty("violations", violations);
-        return problem;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     /**
      * Handles {@link ConstraintViolationException} — constraint violations from
      * path variables and request parameters (400).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 400
      */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ProblemDetail handleConstraintViolation(final ConstraintViolationException ex,
-                                                    final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleConstraintViolation(final ConstraintViolationException ex,
+                                                                    final WebRequest request) {
         Map<String, String> violations = ex.getConstraintViolations().stream()
                 .collect(Collectors.toMap(
                         cv -> cv.getPropertyPath().toString(),
@@ -232,7 +208,7 @@ public class GlobalExceptionHandler {
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
         problem.setProperty("violations", violations);
-        return problem;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     /**
@@ -240,52 +216,40 @@ public class GlobalExceptionHandler {
      *
      * <p>Used when an operation cannot proceed due to the current state of the resource
      * (e.g., trying to approve a leave request that is not PENDING).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 409
      */
     @ExceptionHandler(IllegalStateException.class)
-    public ProblemDetail handleIllegalState(final IllegalStateException ex,
-                                             final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleIllegalState(final IllegalStateException ex,
+                                                             final WebRequest request) {
         log.warn("Illegal state: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         problem.setTitle("Invalid Operation");
         problem.setType(URI.create("https://company.com/errors/invalid-operation"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
 
     /**
      * Handles {@link IllegalArgumentException} — invalid input not caught by Bean Validation (400).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 400
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ProblemDetail handleIllegalArgument(final IllegalArgumentException ex,
-                                                final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleIllegalArgument(final IllegalArgumentException ex,
+                                                                final WebRequest request) {
         log.warn("Illegal argument: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         problem.setTitle("Invalid Input");
         problem.setType(URI.create("https://company.com/errors/invalid-input"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
     }
 
     /**
      * Catch-all handler for any unrecognised runtime exceptions (500).
-     *
-     * @param ex      the exception
-     * @param request the current HTTP request
-     * @return a {@link ProblemDetail} with status 500
      */
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleGeneral(final Exception ex,
-                                        final WebRequest request) {
+    public ResponseEntity<ProblemDetail> handleGeneral(final Exception ex,
+                                                        final WebRequest request) {
         log.error("Unhandled exception: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,
@@ -294,14 +258,11 @@ public class GlobalExceptionHandler {
         problem.setType(URI.create("https://company.com/errors/internal-error"));
         problem.setProperty("timestamp", Instant.now());
         problem.setProperty("path", extractPath(request));
-        return problem;
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problem);
     }
 
     /**
      * Extracts the request URI path from a {@link WebRequest} description string.
-     *
-     * @param request the current HTTP request
-     * @return the URI path portion of the request
      */
     private String extractPath(final WebRequest request) {
         String description = request.getDescription(false);

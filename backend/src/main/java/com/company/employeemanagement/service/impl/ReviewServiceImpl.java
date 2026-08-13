@@ -190,6 +190,10 @@ public class ReviewServiceImpl implements ReviewService {
         String employeeName = null;
         if (emp.getUser() != null) {
             employeeName = emp.getUser().getFirstName() + " " + emp.getUser().getLastName();
+        } else if (emp.getFirstName() != null) {
+            // HR-created employees have no User account — use the entity's own name fields
+            employeeName = emp.getFirstName()
+                    + (emp.getLastName() != null ? " " + emp.getLastName() : "");
         }
 
         String reviewerName = null;

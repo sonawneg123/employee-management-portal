@@ -122,6 +122,61 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     /**
      * {@inheritDoc}
+     *
+     * <p>The employee is resolved from the authenticated principal — the caller
+     * cannot pass an employee ID.
+     */
+    @Override
+    @Transactional
+    public AttendanceResponse checkIn() {
+        Employee employee = securityUtils.getCurrentEmployee()
+                .orElseThrow(() -> new AccessDeniedException(
+                        "No employee record is linked to your account. Contact HR."));
+
+        LocalDate today = LocalDate.now();
+
+        attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), today)
+                .ifPresent(existing -> {
+                    throw new IllegalStateException(
+                            "You have already checked in for today (" + today + ").");
+                });
+
+        Attendance attendance = Attendance.builder()
+                .employee(employee)
+                .attendanceDate(today)
+                .checkInTime(java.time.LocalTime.now())
+                .status(AttendanceStatus.PRESENT)
+                .build();
+
+        return attendanceMapper.toResponse(attendanceRepository.save(attendance));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public AttendanceResponse checkOut() {
+        Employee employee = securityUtils.getCurrentEmployee()
+                .orElseThrow(() -> new AccessDeniedException(
+                        "No employee record is linked to your account. Contact HR."));
+
+        LocalDate today = LocalDate.now();
+
+        Attendance attendance = attendanceRepository.findByEmployeeIdAndAttendanceDate(employee.getId(), today)
+                .orElseThrow(() -> new com.company.employeemanagement.exception.ResourceNotFoundException(
+                        "Attendance", "date", today.toString()));
+
+        if (attendance.getCheckOutTime() != null) {
+            throw new IllegalStateException("You have already checked out for today (" + today + ").");
+        }
+
+        attendance.setCheckOutTime(java.time.LocalTime.now());
+        return attendanceMapper.toResponse(attendanceRepository.save(attendance));
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     @Transactional

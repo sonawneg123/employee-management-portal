@@ -47,12 +47,16 @@ import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import EventNoteRoundedIcon from '@mui/icons-material/EventNoteRounded';
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
+import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 
 import {
   getAttendance,
   getMyAttendance,
   createAttendance,
   updateAttendance,
+  checkIn,
+  checkOut,
 } from '@/services/attendanceApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/constants/roles';
@@ -419,6 +423,25 @@ export default function AttendancePage() {
     onError: (err) => showSnack('error', err?.message ?? 'Failed to update record.'),
   });
 
+  // ── Employee self-service check-in / check-out mutations ─────────────────
+  const checkInMutation = useMutation({
+    mutationFn: checkIn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'my'] });
+      showSnack('success', 'Checked in successfully.');
+    },
+    onError: (err) => showSnack('error', err?.message ?? 'Check-in failed.'),
+  });
+
+  const checkOutMutation = useMutation({
+    mutationFn: checkOut,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'my'] });
+      showSnack('success', 'Checked out successfully.');
+    },
+    onError: (err) => showSnack('error', err?.message ?? 'Check-out failed.'),
+  });
+
   const isMutating = createMutation.isPending || updateMutation.isPending;
 
   const openCreate = useCallback(() => {
@@ -506,6 +529,45 @@ export default function AttendancePage() {
           >
             Mark Attendance
           </Button>
+        )}
+        {/* Employee self-service check-in / check-out */}
+        {!isAdminOrHr && (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={
+                checkInMutation.isPending ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <LoginRoundedIcon />
+                )
+              }
+              onClick={() => checkInMutation.mutate()}
+              disabled={checkInMutation.isPending || checkOutMutation.isPending}
+              aria-label="Check in for today"
+              sx={{ height: 44, borderRadius: '10px', px: 3, fontWeight: 600 }}
+            >
+              Check In
+            </Button>
+            <Button
+              variant="outlined"
+              color="warning"
+              startIcon={
+                checkOutMutation.isPending ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <LogoutRoundedIcon />
+                )
+              }
+              onClick={() => checkOutMutation.mutate()}
+              disabled={checkInMutation.isPending || checkOutMutation.isPending}
+              aria-label="Check out for today"
+              sx={{ height: 44, borderRadius: '10px', px: 3, fontWeight: 600 }}
+            >
+              Check Out
+            </Button>
+          </Box>
         )}
       </Box>
 

@@ -83,3 +83,27 @@ export async function updateAttendance(id, payload) {
   const { data } = await axiosInstance.put(API_ENDPOINTS.ATTENDANCE_BY_ID(id), payload);
   return data;
 }
+
+/**
+ * Employee self-service check-in.
+ * Marks the authenticated employee as PRESENT for today.
+ * The employee ID is resolved server-side from the JWT — no payload required.
+ *
+ * @returns {Promise<AttendanceResponse>}
+ */
+export async function checkIn() {
+  const { data } = await axiosInstance.post(API_ENDPOINTS.ATTENDANCE_CHECKIN);
+  return data;
+}
+
+/**
+ * Employee self-service check-out.
+ * Records the check-out time on today's attendance record.
+ * The employee ID is resolved server-side from the JWT — no payload required.
+ *
+ * @returns {Promise<AttendanceResponse>}
+ */
+export async function checkOut() {
+  const { data } = await axiosInstance.post(API_ENDPOINTS.ATTENDANCE_CHECKOUT);
+  return data;
+}

@@ -104,7 +104,7 @@ export default function AdminDashboardPage() {
           onRefresh={handleRefresh}
         />
 
-        {/* Welcome */}
+        {/* Welcome banner */}
         <WelcomeCard />
 
         {/* KPI cards */}

@@ -19,6 +19,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Alert, Box, Card, Snackbar, Typography, useMediaQuery, useTheme } from '@mui/material';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/constants/roles';
 import {
@@ -256,13 +257,33 @@ export default function EmployeesPage() {
       </Helmet>
 
       {/* Page heading */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
-          Employees
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Manage all employee records
-        </Typography>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: '12px',
+            bgcolor: 'rgba(79,70,229,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <PeopleRoundedIcon sx={{ fontSize: 22, color: 'primary.main' }} />
+        </Box>
+        <Box>
+          <Typography
+            variant="h2"
+            fontWeight={800}
+            sx={{ letterSpacing: '-0.02em', mb: 0.25, lineHeight: 1.2 }}
+          >
+            Employees
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage all employee records
+          </Typography>
+        </Box>
       </Box>
 
       <Card>

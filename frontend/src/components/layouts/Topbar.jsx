@@ -56,8 +56,10 @@ function getRoleChipLabel(roles) {
  * Premium top application bar.
  *
  * @param {{
- *   onMenuClick:  () => void,
- *   sidebarWidth: number,
+ *   onMenuClick:      () => void,
+ *   onCollapseToggle: () => void,
+ *   sidebarWidth:     number,
+ *   collapsed:        boolean,
  * }} props
  * @returns {JSX.Element}
  */

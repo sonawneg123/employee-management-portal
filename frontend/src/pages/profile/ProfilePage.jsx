@@ -27,6 +27,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
@@ -181,13 +182,33 @@ export default function ProfilePage() {
         <title>My Profile — PeopleCore HR</title>
       </Helmet>
 
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
-          My Profile
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          View and manage your employee information
-        </Typography>
+      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: '12px',
+            bgcolor: 'rgba(79,70,229,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <PersonRoundedIcon sx={{ fontSize: 22, color: 'primary.main' }} />
+        </Box>
+        <Box>
+          <Typography
+            variant="h2"
+            fontWeight={800}
+            sx={{ letterSpacing: '-0.02em', mb: 0.25, lineHeight: 1.2 }}
+          >
+            My Profile
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            View and manage your employee information
+          </Typography>
+        </Box>
       </Box>
 
       {isError && (

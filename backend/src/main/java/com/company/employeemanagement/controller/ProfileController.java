@@ -2,11 +2,14 @@ package com.company.employeemanagement.controller;
 
 import com.company.employeemanagement.dto.request.UpdateProfileRequest;
 import com.company.employeemanagement.dto.response.ProfileResponse;
+import com.company.employeemanagement.entity.Department;
 import com.company.employeemanagement.entity.Employee;
 import com.company.employeemanagement.entity.Role;
 import com.company.employeemanagement.entity.User;
+import com.company.employeemanagement.entity.enums.EmployeeStatus;
 import com.company.employeemanagement.exception.AccessDeniedException;
 import com.company.employeemanagement.exception.ResourceNotFoundException;
+import com.company.employeemanagement.repository.DepartmentRepository;
 import com.company.employeemanagement.repository.EmployeeRepository;
 import com.company.employeemanagement.repository.UserRepository;
 import com.company.employeemanagement.security.SecurityUtils;
@@ -47,23 +50,30 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "BearerAuth")
 public class ProfileController {
 
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(ProfileController.class);
+
     private final SecurityUtils securityUtils;
     private final UserRepository userRepository;
     private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
 
     /**
      * Constructs the controller with required dependencies.
      *
-     * @param securityUtils      helper for current-principal inspection
-     * @param userRepository     repository for user account lookups and saves
-     * @param employeeRepository repository for employee record lookups and saves
+     * @param securityUtils       helper for current-principal inspection
+     * @param userRepository      repository for user account lookups and saves
+     * @param employeeRepository  repository for employee record lookups and saves
+     * @param departmentRepository repository for department lookups (auto-create Employee)
      */
     public ProfileController(final SecurityUtils securityUtils,
                               final UserRepository userRepository,
-                              final EmployeeRepository employeeRepository) {
+                              final EmployeeRepository employeeRepository,
+                              final DepartmentRepository departmentRepository) {
         this.securityUtils = securityUtils;
         this.userRepository = userRepository;
         this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     /**
@@ -84,10 +94,18 @@ public class ProfileController {
                     content = @Content(mediaType = "application/problem+json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseEntity<ProfileResponse> getProfile() {
         User user = resolveCurrentUser();
         Employee employee = employeeRepository.findByUserId(user.getId()).orElse(null);
+
+        // Safety net: if the user has ROLE_EMPLOYEE but no Employee record yet,
+        // create one now so leave submission and other employee features work immediately.
+        if (employee == null && user.getRoles().stream()
+                .anyMatch(r -> "ROLE_EMPLOYEE".equals(r.getName()))) {
+            employee = ensureEmployeeRecord(user);
+        }
+
         return ResponseEntity.ok(buildProfileResponse(user, employee));
     }
 
@@ -142,6 +160,61 @@ public class ProfileController {
     }
 
     // ───────────────────────── private helpers ─────────────────────────────────
+
+    /**
+     * Creates an {@link Employee} record for the given user if one does not already exist.
+     * Uses the "GEN" department (or first available, or creates one) to satisfy the
+     * NOT NULL constraint on {@code department_id}.
+     *
+     * @param user the user to link
+     * @return the newly created (or existing) employee record, or {@code null} if creation failed
+     */
+    private Employee ensureEmployeeRecord(final User user) {
+        // Double-check inside the transaction (defensive)
+        java.util.Optional<Employee> existing = employeeRepository.findByUserId(user.getId());
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        Department department = departmentRepository.findByCode("GEN")
+                .or(() -> departmentRepository.findAll().stream().findFirst())
+                .orElseGet(() -> {
+                    log.info("ProfileController.ensureEmployee: creating 'General' department for user id={}", user.getId());
+                    return departmentRepository.save(
+                            Department.builder().name("General").code("GEN").build());
+                });
+
+        // Generate a collision-resistant employee code
+        String code = generateCode();
+
+        Employee emp = Employee.builder()
+                .user(user)
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .employeeCode(code)
+                .department(department)
+                .jobTitle("Employee")
+                .dateOfJoining(java.time.LocalDate.now())
+                .salary(java.math.BigDecimal.ZERO)
+                .status(EmployeeStatus.ACTIVE)
+                .build();
+
+        Employee saved = employeeRepository.save(emp);
+        log.info("ProfileController: auto-created Employee id={} code={} for user id={}",
+                saved.getId(), saved.getEmployeeCode(), user.getId());
+        return saved;
+    }
+
+    private String generateCode() {
+        for (int i = 0; i < 20; i++) {
+            String code = String.format("REG-%010d", System.currentTimeMillis() % 10_000_000_000L + i);
+            if (!employeeRepository.existsByEmployeeCode(code)) {
+                return code;
+            }
+        }
+        return "REG-" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+    }
+
 
     /**
      * Resolves the currently authenticated principal to a {@link User} entity.

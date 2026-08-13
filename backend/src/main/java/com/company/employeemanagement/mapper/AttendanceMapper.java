@@ -42,9 +42,14 @@ public interface AttendanceMapper {
             return null;
         }
         User user = employee.getUser();
-        if (user == null) {
-            return employee.getEmployeeCode();
+        // Prefer user's name if linked, then employee's own name fields, then employee code
+        String firstName = (user != null && user.getFirstName() != null)
+                ? user.getFirstName() : employee.getFirstName();
+        String lastName  = (user != null && user.getLastName() != null)
+                ? user.getLastName()  : employee.getLastName();
+        if (firstName != null || lastName != null) {
+            return ((firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "")).trim();
         }
-        return user.getFirstName() + " " + user.getLastName();
+        return employee.getEmployeeCode();
     }
 }

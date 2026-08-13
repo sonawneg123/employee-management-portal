@@ -199,6 +199,59 @@ public class AttendanceController {
     }
 
     /**
+     * Employee self-service check-in.
+     * Marks the authenticated employee as PRESENT for today and records the current time
+     * as the check-in time. The employee ID is derived from the JWT — it cannot be
+     * supplied or overridden by the caller.
+     *
+     * @return {@code 201 Created} with the new {@link AttendanceResponse}
+     */
+    @PostMapping(value = "/checkin", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER','EMPLOYEE')")
+    @Operation(summary = "Self-service check-in",
+               description = "Marks the authenticated employee as PRESENT for today. "
+                           + "Employee ID is derived from the JWT — cannot be set by the caller.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Check-in recorded",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AttendanceResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Already checked in today",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "No linked employee record",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<AttendanceResponse> checkIn() {
+        return ResponseEntity.status(HttpStatus.CREATED).body(attendanceService.checkIn());
+    }
+
+    /**
+     * Employee self-service check-out.
+     * Records the current time as the check-out time on today's attendance record.
+     *
+     * @return {@code 200 OK} with the updated {@link AttendanceResponse}
+     */
+    @PostMapping(value = "/checkout", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER','EMPLOYEE')")
+    @Operation(summary = "Self-service check-out",
+               description = "Records the check-out time on today's attendance record.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Check-out recorded",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AttendanceResponse.class))),
+            @ApiResponse(responseCode = "400", description = "No check-in found for today or already checked out",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "403", description = "No linked employee record",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<AttendanceResponse> checkOut() {
+        return ResponseEntity.ok(attendanceService.checkOut());
+    }
+
+    /**
      * Creates a new attendance record (HR / Admin manual marking).
      *
      * @param request the creation payload

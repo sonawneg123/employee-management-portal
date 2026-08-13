@@ -167,6 +167,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .employeeCode(request.employeeCode())
                 .department(department)
                 .user(user)
+                .firstName(request.firstName())
+                .lastName(request.lastName())
                 .jobTitle(request.jobTitle())
                 .phone(request.phone())
                 .address(request.address())
@@ -192,6 +194,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Department", request.departmentId()));
 
+        employee.setFirstName(request.firstName());
+        employee.setLastName(request.lastName());
         employee.setDepartment(department);
         employee.setJobTitle(request.jobTitle());
         employee.setPhone(request.phone());

@@ -44,9 +44,9 @@ public interface EmployeeMapper {
     @Mapping(target = "departmentId",   source = "department.id")
     @Mapping(target = "departmentName", source = "department.name")
     @Mapping(target = "userId",         source = "user", qualifiedByName = "userToId")
-    @Mapping(target = "firstName",      source = "user", qualifiedByName = "userToFirstName")
-    @Mapping(target = "lastName",       source = "user", qualifiedByName = "userToLastName")
-    @Mapping(target = "email",          source = "user", qualifiedByName = "userToEmail")
+    @Mapping(target = "firstName",      source = "employee", qualifiedByName = "employeeToFirstName")
+    @Mapping(target = "lastName",       source = "employee", qualifiedByName = "employeeToLastName")
+    @Mapping(target = "email",          source = "employee", qualifiedByName = "employeeToEmail")
     EmployeeResponse toResponse(Employee employee);
 
     /**
@@ -62,6 +62,10 @@ public interface EmployeeMapper {
 
     /**
      * Extracts the first name from a nullable {@link User}.
+     * Returns the user's first name, or {@code null} if the user is {@code null}.
+     * The mapper uses this together with {@code employee.firstName} — MapStruct
+     * will use the user value first; the employee entity's {@code firstName} column
+     * is the fallback handled by the {@code toResponse} mapping below.
      *
      * @param user the user entity, may be {@code null}
      * @return the user's first name, or {@code null}
@@ -91,5 +95,51 @@ public interface EmployeeMapper {
     @Named("userToEmail")
     default String userToEmail(final User user) {
         return user == null ? null : user.getEmail();
+    }
+
+    /**
+     * Returns the effective first name: user's first name if a User is linked,
+     * otherwise the employee's own {@code firstName} column value.
+     *
+     * @param employee the employee entity
+     * @return the effective first name, or {@code null}
+     */
+    @Named("employeeToFirstName")
+    default String employeeToFirstName(final Employee employee) {
+        if (employee == null) return null;
+        if (employee.getUser() != null && employee.getUser().getFirstName() != null) {
+            return employee.getUser().getFirstName();
+        }
+        return employee.getFirstName();
+    }
+
+    /**
+     * Returns the effective last name: user's last name if a User is linked,
+     * otherwise the employee's own {@code lastName} column value.
+     *
+     * @param employee the employee entity
+     * @return the effective last name, or {@code null}
+     */
+    @Named("employeeToLastName")
+    default String employeeToLastName(final Employee employee) {
+        if (employee == null) return null;
+        if (employee.getUser() != null && employee.getUser().getLastName() != null) {
+            return employee.getUser().getLastName();
+        }
+        return employee.getLastName();
+    }
+
+    /**
+     * Returns the effective email: user's email if a User is linked,
+     * otherwise {@code null}.
+     *
+     * @param employee the employee entity
+     * @return the effective email, or {@code null}
+     */
+    @Named("employeeToEmail")
+    default String employeeToEmail(final Employee employee) {
+        if (employee == null) return null;
+        if (employee.getUser() != null) return employee.getUser().getEmail();
+        return null;
     }
 }

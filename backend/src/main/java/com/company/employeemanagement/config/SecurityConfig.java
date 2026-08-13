@@ -157,8 +157,12 @@ public class SecurityConfig {
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         .requestMatchers(HttpMethod.DELETE, "/leaves/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
-                        // ── Attendance — self-service (my) for all roles; full list for privileged ──
+                        // ── Attendance — self-service (my/checkin/checkout) for all roles ──────────
                         .requestMatchers(HttpMethod.GET, "/attendance/my")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Employee self-service check-in / check-out — must be listed BEFORE the
+                        // more general POST /attendance/** rule (Spring evaluates rules in order).
+                        .requestMatchers(HttpMethod.POST, "/attendance/checkin", "/attendance/checkout")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         .requestMatchers(HttpMethod.GET, "/attendance/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER")

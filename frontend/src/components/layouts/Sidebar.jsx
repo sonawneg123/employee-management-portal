@@ -3,7 +3,7 @@
  *
  * Dark sidebar (#0F172A) with Indigo active state.
  * Role-aware navigation — each role sees only its own routes.
- * Supports: permanent (desktop), temporary (mobile drawer), collapsed state.
+ * Supports: permanent (desktop), temporary (mobile drawer), collapsed icon-only state.
  *
  * Role → routes mapping:
  *  ADMIN    → /admin/*
@@ -35,6 +35,8 @@ import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
 import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
@@ -198,14 +200,25 @@ function roleLabel(roles) {
  * Sidebar navigation drawer.
  *
  * @param {{
- *   open:    boolean,
- *   onClose: () => void,
- *   width:   number,
- *   variant: 'permanent' | 'temporary',
+ *   open:             boolean,
+ *   onClose:          () => void,
+ *   onCollapseToggle: () => void,
+ *   width:            number,
+ *   collapsedWidth:   number,
+ *   collapsed:        boolean,
+ *   variant:          'permanent' | 'temporary',
  * }} props
  * @returns {JSX.Element}
  */
-export default function Sidebar({ open, onClose, width, variant }) {
+export default function Sidebar({
+  open,
+  onClose,
+  onCollapseToggle,
+  width,
+  collapsedWidth,
+  collapsed,
+  variant,
+}) {
   const location = useLocation();
   const { user, hasAnyRole } = useAuth();
 
@@ -217,27 +230,34 @@ export default function Sidebar({ open, onClose, width, variant }) {
     ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
     : '?';
 
+  // Effective width based on collapsed state (only for permanent variant)
+  const effectiveWidth = variant === 'permanent' && collapsed ? collapsedWidth : width;
+
   const content = (
     <Box
       sx={{
-        width,
+        width: effectiveWidth,
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
         bgcolor: SIDEBAR_BG,
         borderRight: `1px solid ${SIDEBAR_BORDER}`,
+        overflow: 'hidden',
+        transition: 'width 0.25s ease',
       }}
     >
       {/* ── Brand ──────────────────────────────────────────────────────── */}
       <Box
         sx={{
-          px: 3,
-          pt: 3,
-          pb: 2.5,
+          px: collapsed ? 1 : 2.5,
+          pt: 2.5,
+          pb: 2,
           display: 'flex',
           alignItems: 'center',
-          gap: 1.25,
+          gap: collapsed ? 0 : 1.25,
           borderBottom: `1px solid ${SIDEBAR_BORDER}`,
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          transition: 'padding 0.25s ease',
         }}
       >
         <Box
@@ -254,23 +274,25 @@ export default function Sidebar({ open, onClose, width, variant }) {
         >
           <PeopleAltIcon sx={{ color: '#fff', fontSize: 17 }} />
         </Box>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography
-            variant="body2"
-            fontWeight={800}
-            noWrap
-            sx={{ color: '#F1F5F9', letterSpacing: '-0.01em', lineHeight: 1.2 }}
-          >
-            PeopleCore HR
-          </Typography>
-          <Typography variant="caption" sx={{ color: TEXT_MUTED, fontSize: '0.675rem' }}>
-            Management Portal
-          </Typography>
-        </Box>
+        {!collapsed && (
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              variant="body2"
+              fontWeight={800}
+              noWrap
+              sx={{ color: '#F1F5F9', letterSpacing: '-0.01em', lineHeight: 1.2 }}
+            >
+              PeopleCore HR
+            </Typography>
+            <Typography variant="caption" sx={{ color: TEXT_MUTED, fontSize: '0.675rem' }}>
+              Management Portal
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       {/* ── User info ──────────────────────────────────────────────────── */}
-      {user && (
+      {user && !collapsed && (
         <Box
           sx={{
             px: 2.5,
@@ -312,27 +334,68 @@ export default function Sidebar({ open, onClose, width, variant }) {
         </Box>
       )}
 
-      {/* ── Main nav ───────────────────────────────────────────────────── */}
-      <Box sx={{ px: 1.5, py: 1.5, flexGrow: 1, overflowY: 'auto' }}>
-        <Typography
-          variant="overline"
+      {/* Collapsed user avatar only */}
+      {user && collapsed && (
+        <Box
           sx={{
-            color: TEXT_MUTED,
-            fontSize: '0.6rem',
-            px: 1,
-            mb: 1,
-            display: 'block',
+            py: 1.5,
+            display: 'flex',
+            justifyContent: 'center',
+            borderBottom: `1px solid ${SIDEBAR_BORDER}`,
           }}
         >
-          Navigation
-        </Typography>
+          <Tooltip title={`${user.firstName} ${user.lastName}`} placement="right">
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                fontSize: '0.7rem',
+                fontWeight: 700,
+                cursor: 'default',
+              }}
+            >
+              {initials}
+            </Avatar>
+          </Tooltip>
+        </Box>
+      )}
+
+      {/* ── Main nav ───────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          px: collapsed ? 0.5 : 1.5,
+          py: 1.5,
+          flexGrow: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}
+      >
+        {!collapsed && (
+          <Typography
+            variant="overline"
+            sx={{
+              color: TEXT_MUTED,
+              fontSize: '0.6rem',
+              px: 1,
+              mb: 1,
+              display: 'block',
+            }}
+          >
+            Navigation
+          </Typography>
+        )}
         <List disablePadding>
           {visibleNavItems.map(({ label, path, icon }) => {
             const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
 
             return (
               <ListItem key={path} disablePadding sx={{ mb: 0.25 }}>
-                <Tooltip title={label} placement="right" disableHoverListener>
+                <Tooltip
+                  title={collapsed ? label : ''}
+                  placement="right"
+                  disableHoverListener={!collapsed}
+                >
                   <ListItemButton
                     component={NavLink}
                     to={path}
@@ -340,8 +403,9 @@ export default function Sidebar({ open, onClose, width, variant }) {
                     sx={{
                       borderRadius: '10px',
                       py: 0.85,
-                      px: 1.25,
+                      px: collapsed ? 0 : 1.25,
                       minHeight: 40,
+                      justifyContent: collapsed ? 'center' : 'flex-start',
                       color: isActive ? ACTIVE_COLOR : TEXT_COLOR,
                       bgcolor: isActive ? ACTIVE_BG : 'transparent',
                       '&:hover': {
@@ -354,32 +418,37 @@ export default function Sidebar({ open, onClose, width, variant }) {
                   >
                     <ListItemIcon
                       sx={{
-                        minWidth: 34,
+                        minWidth: collapsed ? 0 : 34,
                         color: isActive ? ACTIVE_COLOR : TEXT_MUTED,
                         '& .MuiSvgIcon-root': { fontSize: 18 },
+                        justifyContent: 'center',
                       }}
                     >
                       {icon}
                     </ListItemIcon>
-                    <ListItemText
-                      primary={label}
-                      primaryTypographyProps={{
-                        fontSize: '0.8375rem',
-                        fontWeight: isActive ? 600 : 500,
-                        letterSpacing: '0.005em',
-                      }}
-                    />
-                    {isActive && (
-                      <Box
-                        sx={{
-                          width: 3,
-                          height: 20,
-                          borderRadius: '3px',
-                          background: 'linear-gradient(180deg, #4F46E5, #7C3AED)',
-                          ml: 1,
-                          flexShrink: 0,
-                        }}
-                      />
+                    {!collapsed && (
+                      <>
+                        <ListItemText
+                          primary={label}
+                          primaryTypographyProps={{
+                            fontSize: '0.8375rem',
+                            fontWeight: isActive ? 600 : 500,
+                            letterSpacing: '0.005em',
+                          }}
+                        />
+                        {isActive && (
+                          <Box
+                            sx={{
+                              width: 3,
+                              height: 20,
+                              borderRadius: '3px',
+                              background: 'linear-gradient(180deg, #4F46E5, #7C3AED)',
+                              ml: 1,
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                      </>
                     )}
                   </ListItemButton>
                 </Tooltip>
@@ -392,7 +461,7 @@ export default function Sidebar({ open, onClose, width, variant }) {
       {/* ── Bottom items ───────────────────────────────────────────────── */}
       <Box
         sx={{
-          px: 1.5,
+          px: collapsed ? 0.5 : 1.5,
           py: 1.5,
           borderTop: `1px solid ${SIDEBAR_BORDER}`,
         }}
@@ -402,43 +471,91 @@ export default function Sidebar({ open, onClose, width, variant }) {
             const isActive = location.pathname === path;
             return (
               <ListItem key={path} disablePadding sx={{ mb: 0.25 }}>
-                <ListItemButton
-                  component={NavLink}
-                  to={path}
-                  onClick={variant === 'temporary' ? onClose : undefined}
-                  sx={{
-                    borderRadius: '10px',
-                    py: 0.85,
-                    px: 1.25,
-                    minHeight: 38,
-                    color: isActive ? ACTIVE_COLOR : TEXT_COLOR,
-                    bgcolor: isActive ? ACTIVE_BG : 'transparent',
-                    '&:hover': { bgcolor: HOVER_BG, color: '#F1F5F9' },
-                    transition: 'all 0.15s ease',
-                  }}
-                  aria-current={isActive ? 'page' : undefined}
+                <Tooltip
+                  title={collapsed ? label : ''}
+                  placement="right"
+                  disableHoverListener={!collapsed}
                 >
-                  <ListItemIcon
+                  <ListItemButton
+                    component={NavLink}
+                    to={path}
+                    onClick={variant === 'temporary' ? onClose : undefined}
                     sx={{
-                      minWidth: 34,
-                      color: isActive ? ACTIVE_COLOR : TEXT_MUTED,
-                      '& .MuiSvgIcon-root': { fontSize: 18 },
+                      borderRadius: '10px',
+                      py: 0.85,
+                      px: collapsed ? 0 : 1.25,
+                      minHeight: 38,
+                      justifyContent: collapsed ? 'center' : 'flex-start',
+                      color: isActive ? ACTIVE_COLOR : TEXT_COLOR,
+                      bgcolor: isActive ? ACTIVE_BG : 'transparent',
+                      '&:hover': { bgcolor: HOVER_BG, color: '#F1F5F9' },
+                      transition: 'all 0.15s ease',
                     }}
+                    aria-current={isActive ? 'page' : undefined}
                   >
-                    {icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={label}
-                    primaryTypographyProps={{
-                      fontSize: '0.8375rem',
-                      fontWeight: isActive ? 600 : 500,
-                    }}
-                  />
-                </ListItemButton>
+                    <ListItemIcon
+                      sx={{
+                        minWidth: collapsed ? 0 : 34,
+                        color: isActive ? ACTIVE_COLOR : TEXT_MUTED,
+                        '& .MuiSvgIcon-root': { fontSize: 18 },
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {icon}
+                    </ListItemIcon>
+                    {!collapsed && (
+                      <ListItemText
+                        primary={label}
+                        primaryTypographyProps={{
+                          fontSize: '0.8375rem',
+                          fontWeight: isActive ? 600 : 500,
+                        }}
+                      />
+                    )}
+                  </ListItemButton>
+                </Tooltip>
               </ListItem>
             );
           })}
         </List>
+
+        {/* Collapse toggle (desktop only) */}
+        {variant === 'permanent' && (
+          <Tooltip title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} placement="right">
+            <ListItemButton
+              onClick={onCollapseToggle}
+              sx={{
+                borderRadius: '10px',
+                py: 0.75,
+                px: collapsed ? 0 : 1.25,
+                minHeight: 36,
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                color: TEXT_MUTED,
+                '&:hover': { bgcolor: HOVER_BG, color: '#F1F5F9' },
+                transition: 'all 0.15s ease',
+                mt: 0.5,
+              }}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: collapsed ? 0 : 34,
+                  color: 'inherit',
+                  '& .MuiSvgIcon-root': { fontSize: 18 },
+                  justifyContent: 'center',
+                }}
+              >
+                {collapsed ? <ChevronRightRoundedIcon /> : <ChevronLeftRoundedIcon />}
+              </ListItemIcon>
+              {!collapsed && (
+                <ListItemText
+                  primary="Collapse"
+                  primaryTypographyProps={{ fontSize: '0.8375rem', fontWeight: 500 }}
+                />
+              )}
+            </ListItemButton>
+          </Tooltip>
+        )}
       </Box>
     </Box>
   );
@@ -449,13 +566,16 @@ export default function Sidebar({ open, onClose, width, variant }) {
       open={variant === 'permanent' ? true : open}
       onClose={onClose}
       sx={{
-        width,
+        width: effectiveWidth,
         flexShrink: 0,
+        transition: 'width 0.25s ease',
         '& .MuiDrawer-paper': {
-          width,
+          width: effectiveWidth,
           boxSizing: 'border-box',
           border: 'none',
           bgcolor: SIDEBAR_BG,
+          transition: 'width 0.25s ease',
+          overflowX: 'hidden',
         },
       }}
     >

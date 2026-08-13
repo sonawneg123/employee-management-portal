@@ -16,6 +16,8 @@ import com.company.employeemanagement.repository.EmployeeRepository;
 import com.company.employeemanagement.repository.LeaveRequestRepository;
 import com.company.employeemanagement.security.SecurityUtils;
 import com.company.employeemanagement.service.LeaveRequestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +46,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
+
+    private static final Logger log = LoggerFactory.getLogger(LeaveRequestServiceImpl.class);
 
     private final LeaveRequestRepository leaveRequestRepository;
     private final EmployeeRepository employeeRepository;
@@ -194,15 +198,26 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     "End date must not be before start date.");
         }
 
+        // Log the authenticated context for debugging
+        String authenticatedUsername = securityUtils.getCurrentUsername();
+        log.info("LeaveRequest.create: authenticated username={}", authenticatedUsername);
+
         Employee employee = employeeRepository.findById(request.employeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee", request.employeeId()));
+        log.info("LeaveRequest.create: resolved employee id={} code={}",
+                employee.getId(), employee.getEmployeeCode());
 
         // EMPLOYEE role: enforce that the request is for the caller's own record
         if (securityUtils.hasRole("ROLE_EMPLOYEE") && !securityUtils.isPrivileged()) {
             Employee ownEmployee = securityUtils.getCurrentEmployee()
                     .orElseThrow(() -> new AccessDeniedException(
-                            "No employee record is linked to your account."));
+                            "No employee record is linked to your account. "
+                            + "Please contact HR to link your user account to an employee record."));
+            log.info("LeaveRequest.create: current employee id={} code={}",
+                    ownEmployee.getId(), ownEmployee.getEmployeeCode());
             if (!ownEmployee.getId().equals(employee.getId())) {
+                log.warn("LeaveRequest.create: employee id mismatch — requested={} own={}",
+                        employee.getId(), ownEmployee.getId());
                 throw new AccessDeniedException(
                         "You may only submit leave requests for your own employee record.");
             }
@@ -218,6 +233,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                 .build();
 
         LeaveRequest saved = leaveRequestRepository.save(leaveRequest);
+        log.info("LeaveRequest.create: persisted leave id={} for employee id={} status=PENDING",
+                saved.getId(), employee.getId());
         return leaveRequestMapper.toResponse(saved);
     }
 

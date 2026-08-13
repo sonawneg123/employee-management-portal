@@ -16,9 +16,13 @@ import java.util.UUID;
  * Request DTO for creating a new employee record.
  *
  * <p>The {@code userId} field is optional — an employee record can be
- * created before a portal user account exists.
+ * created before a portal user account exists. {@code firstName} and
+ * {@code lastName} are stored directly on the employee record so that
+ * HR-created employees have a displayable name even without a user account.
  *
  * @param userId        optional UUID of an existing {@link com.company.employeemanagement.entity.User}
+ * @param firstName     employee first name
+ * @param lastName      employee last name
  * @param employeeCode  unique short identifier assigned by HR (e.g., {@code EMP-0001})
  * @param departmentId  UUID of the department this employee belongs to
  * @param jobTitle      current job title of the employee
@@ -36,6 +40,16 @@ public record CreateEmployeeRequest(
         @Schema(description = "UUID of an existing user account to link to this employee",
                 example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
         UUID userId,
+
+        @Schema(description = "First name of the employee", example = "John")
+        @NotBlank(message = "First name is required")
+        @Size(max = 100, message = "First name must not exceed 100 characters")
+        String firstName,
+
+        @Schema(description = "Last name of the employee", example = "Doe")
+        @NotBlank(message = "Last name is required")
+        @Size(max = 100, message = "Last name must not exceed 100 characters")
+        String lastName,
 
         @Schema(description = "Unique employee code assigned by HR", example = "EMP-0001")
         @NotBlank(message = "Employee code is required")

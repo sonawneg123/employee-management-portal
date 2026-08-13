@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -77,6 +78,10 @@ public class DataInitializer implements CommandLineRunner {
                     .orElseThrow(() -> new IllegalStateException(
                             "Role " + ROLE_EMPLOYEE + " not found — run Flyway migrations first"));
 
+            // Use a mutable HashSet — Set.of() produces an immutable set that causes
+            // UnsupportedOperationException when AdminService tries to change the role.
+            Set<Role> roles = new HashSet<>();
+            roles.add(employeeRole);
             User newUser = User.builder()
                     .email(EMPLOYEE_EMAIL)
                     .passwordHash(passwordEncoder.encode(EMPLOYEE_PASSWORD))
@@ -84,7 +89,7 @@ public class DataInitializer implements CommandLineRunner {
                     .lastName("Employee")
                     .isEnabled(true)
                     .isLocked(false)
-                    .roles(Set.of(employeeRole))
+                    .roles(roles)
                     .build();
             return userRepository.save(newUser);
         });
