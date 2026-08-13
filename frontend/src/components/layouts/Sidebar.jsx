@@ -1,20 +1,20 @@
 /**
- * @fileoverview Sidebar navigation component.
+ * @fileoverview Sidebar — premium dark navigation drawer.
  *
- * Renders the application navigation drawer with role-aware menu items.
- * Each role sees only the navigation items appropriate to their access level,
- * pointing at the correct role-scoped route paths.
+ * Dark sidebar (#0F172A) with Indigo active state.
+ * Role-aware navigation — each role sees only its own routes.
+ * Supports: permanent (desktop), temporary (mobile drawer), collapsed state.
  *
- * Role → nav items:
- * - ADMIN    → /admin/dashboard, /admin/employees, /admin/departments, /admin/leaves, /admin/attendance
- * - HR       → /hr/dashboard, /hr/employees, /hr/leaves, /hr/attendance
- * - MANAGER  → /hr/dashboard, /hr/employees, /hr/leaves, /hr/attendance
- * - EMPLOYEE → /employee/dashboard, /employee/leaves, /employee/attendance, /employee/profile
+ * Role → routes mapping:
+ *  ADMIN    → /admin/*
+ *  HR/MGR   → /hr/*
+ *  EMPLOYEE → /employee/*
  */
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
+  Avatar,
   Box,
   Drawer,
   List,
@@ -22,162 +22,186 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Tooltip,
   Typography,
-  Divider,
-  Avatar,
 } from '@mui/material';
-import DashboardIcon        from '@mui/icons-material/Dashboard';
-import PeopleIcon           from '@mui/icons-material/People';
-import ApartmentIcon        from '@mui/icons-material/Apartment';
-import EventNoteIcon        from '@mui/icons-material/EventNote';
-import AccessTimeIcon       from '@mui/icons-material/AccessTime';
-import PersonIcon           from '@mui/icons-material/Person';
-import SettingsIcon         from '@mui/icons-material/Settings';
-import AssessmentIcon       from '@mui/icons-material/Assessment';
-import ManageAccountsIcon   from '@mui/icons-material/ManageAccounts';
+import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
+import EventNoteRoundedIcon from '@mui/icons-material/EventNoteRounded';
+import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
+import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
+import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
+import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
 import { useAuth } from '@/contexts/AuthContext';
 
+/** Sidebar background colour — intentionally hardcoded to avoid theme leakage. */
+const SIDEBAR_BG = '#0F172A';
+const SIDEBAR_BORDER = 'rgba(241,245,249,0.06)';
+const ACTIVE_BG = 'rgba(79,70,229,0.2)';
+const ACTIVE_COLOR = '#818CF8';
+const HOVER_BG = 'rgba(241,245,249,0.06)';
+const TEXT_MUTED = 'rgba(148,163,184,0.9)';
+const TEXT_COLOR = 'rgba(226,232,240,0.9)';
+
 /**
  * @typedef {Object} NavItem
- * @property {string}      label          - Display label.
- * @property {string}      path           - Route path.
- * @property {JSX.Element} icon           - MUI icon element.
- * @property {string[]}    [allowedRoles] - Roles that can see this item; undefined = all roles.
+ * @property {string}      label
+ * @property {string}      path
+ * @property {JSX.Element} icon
+ * @property {string[]}    [allowedRoles]
  */
 
 /** @type {NavItem[]} */
 const NAV_ITEMS = [
-  // ── Admin items ─────────────────────────────────────────────────────────────
+  // ── Admin ─────────────────────────────────────────────────────────────────
   {
     label: 'Dashboard',
-    path:  ROUTES.ADMIN_DASHBOARD,
-    icon:  <DashboardIcon />,
+    path: ROUTES.ADMIN_DASHBOARD,
+    icon: <DashboardRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Employees',
-    path:  ROUTES.ADMIN_EMPLOYEES,
-    icon:  <PeopleIcon />,
+    path: ROUTES.ADMIN_EMPLOYEES,
+    icon: <PeopleRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Departments',
-    path:  ROUTES.ADMIN_DEPARTMENTS,
-    icon:  <ApartmentIcon />,
+    path: ROUTES.ADMIN_DEPARTMENTS,
+    icon: <ApartmentRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Leaves',
-    path:  ROUTES.ADMIN_LEAVES,
-    icon:  <EventNoteIcon />,
+    path: ROUTES.ADMIN_LEAVES,
+    icon: <EventNoteRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Attendance',
-    path:  ROUTES.ADMIN_ATTENDANCE,
-    icon:  <AccessTimeIcon />,
+    path: ROUTES.ADMIN_ATTENDANCE,
+    icon: <AccessTimeRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Reviews',
-    path:  ROUTES.ADMIN_REVIEWS,
-    icon:  <AssessmentIcon />,
+    path: ROUTES.ADMIN_REVIEWS,
+    icon: <AssessmentRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
   {
     label: 'Users',
-    path:  ROUTES.ADMIN_USERS,
-    icon:  <ManageAccountsIcon />,
+    path: ROUTES.ADMIN_USERS,
+    icon: <ManageAccountsRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
 
-  // ── HR / Manager items ───────────────────────────────────────────────────────
+  // ── HR / Manager ──────────────────────────────────────────────────────────
   {
     label: 'Dashboard',
-    path:  ROUTES.HR_DASHBOARD,
-    icon:  <DashboardIcon />,
+    path: ROUTES.HR_DASHBOARD,
+    icon: <DashboardRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
   {
     label: 'Employees',
-    path:  ROUTES.HR_EMPLOYEES,
-    icon:  <PeopleIcon />,
+    path: ROUTES.HR_EMPLOYEES,
+    icon: <PeopleRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
   {
     label: 'Departments',
-    path:  ROUTES.HR_DEPARTMENTS,
-    icon:  <ApartmentIcon />,
+    path: ROUTES.HR_DEPARTMENTS,
+    icon: <ApartmentRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
   {
     label: 'Leaves',
-    path:  ROUTES.HR_LEAVES,
-    icon:  <EventNoteIcon />,
+    path: ROUTES.HR_LEAVES,
+    icon: <EventNoteRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
   {
     label: 'Attendance',
-    path:  ROUTES.HR_ATTENDANCE,
-    icon:  <AccessTimeIcon />,
+    path: ROUTES.HR_ATTENDANCE,
+    icon: <AccessTimeRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
   {
     label: 'Reviews',
-    path:  ROUTES.HR_REVIEWS,
-    icon:  <AssessmentIcon />,
+    path: ROUTES.HR_REVIEWS,
+    icon: <AssessmentRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
 
-  // ── Employee items ───────────────────────────────────────────────────────────
+  // ── Employee ──────────────────────────────────────────────────────────────
   {
     label: 'Dashboard',
-    path:  ROUTES.EMPLOYEE_DASHBOARD,
-    icon:  <DashboardIcon />,
+    path: ROUTES.EMPLOYEE_DASHBOARD,
+    icon: <DashboardRoundedIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
   {
     label: 'My Leaves',
-    path:  ROUTES.EMPLOYEE_LEAVES,
-    icon:  <EventNoteIcon />,
+    path: ROUTES.EMPLOYEE_LEAVES,
+    icon: <EventNoteRoundedIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
   {
     label: 'My Attendance',
-    path:  ROUTES.EMPLOYEE_ATTENDANCE,
-    icon:  <AccessTimeIcon />,
+    path: ROUTES.EMPLOYEE_ATTENDANCE,
+    icon: <AccessTimeRoundedIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
   {
     label: 'My Reviews',
-    path:  ROUTES.EMPLOYEE_REVIEWS,
-    icon:  <AssessmentIcon />,
+    path: ROUTES.EMPLOYEE_REVIEWS,
+    icon: <AssessmentRoundedIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
   {
     label: 'My Profile',
-    path:  ROUTES.EMPLOYEE_PROFILE,
-    icon:  <PersonIcon />,
+    path: ROUTES.EMPLOYEE_PROFILE,
+    icon: <PersonRoundedIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
 ];
 
 /** @type {NavItem[]} */
 const BOTTOM_ITEMS = [
-  { label: 'Profile',  path: ROUTES.PROFILE,  icon: <PersonIcon /> },
-  { label: 'Settings', path: ROUTES.SETTINGS, icon: <SettingsIcon /> },
+  { label: 'Profile', path: ROUTES.PROFILE, icon: <PersonRoundedIcon /> },
+  { label: 'Settings', path: ROUTES.SETTINGS, icon: <SettingsRoundedIcon /> },
 ];
+
+/**
+ * Returns the display role label for the user avatar row.
+ *
+ * @param {string[]} roles
+ * @returns {string}
+ */
+function roleLabel(roles) {
+  if (!roles?.length) return 'User';
+  if (roles.includes(ROLES.ADMIN)) return 'Administrator';
+  if (roles.includes(ROLES.HR)) return 'HR Manager';
+  if (roles.includes(ROLES.MANAGER)) return 'Manager';
+  return 'Employee';
+}
 
 /**
  * Sidebar navigation drawer.
  *
  * @param {{
- *   open: boolean,
+ *   open:    boolean,
  *   onClose: () => void,
- *   width: number,
- *   variant: 'permanent' | 'temporary'
+ *   width:   number,
+ *   variant: 'permanent' | 'temporary',
  * }} props
  * @returns {JSX.Element}
  */
@@ -185,15 +209,13 @@ export default function Sidebar({ open, onClose, width, variant }) {
   const location = useLocation();
   const { user, hasAnyRole } = useAuth();
 
-  /**
-   * Filters NAV_ITEMS to only those the current user's role is allowed to see.
-   *
-   * @type {NavItem[]}
-   */
-  const visibleNavItems = NAV_ITEMS.filter(({ allowedRoles }) => {
-    if (!allowedRoles) return true;
-    return hasAnyRole(allowedRoles);
-  });
+  const visibleNavItems = NAV_ITEMS.filter(
+    ({ allowedRoles }) => !allowedRoles || hasAnyRole(allowedRoles),
+  );
+
+  const initials = user
+    ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
+    : '?';
 
   const content = (
     <Box
@@ -202,85 +224,222 @@ export default function Sidebar({ open, onClose, width, variant }) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        bgcolor: 'background.paper',
+        bgcolor: SIDEBAR_BG,
+        borderRight: `1px solid ${SIDEBAR_BORDER}`,
       }}
     >
-      {/* Brand header */}
-      <Box sx={{ p: 3, pb: 2 }}>
-        <Typography variant="h6" fontWeight={700} color="primary.main" noWrap>
-          EMP Portal
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Management System
-        </Typography>
+      {/* ── Brand ──────────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          px: 3,
+          pt: 3,
+          pb: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.25,
+          borderBottom: `1px solid ${SIDEBAR_BORDER}`,
+        }}
+      >
+        <Box
+          sx={{
+            width: 32,
+            height: 32,
+            borderRadius: '8px',
+            background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <PeopleAltIcon sx={{ color: '#fff', fontSize: 17 }} />
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            fontWeight={800}
+            noWrap
+            sx={{ color: '#F1F5F9', letterSpacing: '-0.01em', lineHeight: 1.2 }}
+          >
+            PeopleCore HR
+          </Typography>
+          <Typography variant="caption" sx={{ color: TEXT_MUTED, fontSize: '0.675rem' }}>
+            Management Portal
+          </Typography>
+        </Box>
       </Box>
 
-      <Divider />
-
-      {/* User info */}
+      {/* ── User info ──────────────────────────────────────────────────── */}
       {user && (
-        <Box sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Avatar sx={{ width: 36, height: 36, bgcolor: 'primary.main', fontSize: '0.875rem' }}>
-            {user.firstName?.[0]}{user.lastName?.[0]}
-          </Avatar>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="body2" fontWeight={600} noWrap>
-              {user.firstName} {user.lastName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {user.email}
-            </Typography>
+        <Box
+          sx={{
+            px: 2.5,
+            py: 2,
+            borderBottom: `1px solid ${SIDEBAR_BORDER}`,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Avatar
+              sx={{
+                width: 34,
+                height: 34,
+                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              {initials}
+            </Avatar>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                noWrap
+                sx={{ color: '#F1F5F9', fontSize: '0.8rem' }}
+              >
+                {user.firstName} {user.lastName}
+              </Typography>
+              <Typography
+                variant="caption"
+                noWrap
+                sx={{ color: TEXT_MUTED, fontSize: '0.7rem', display: 'block' }}
+              >
+                {roleLabel(user.roles)}
+              </Typography>
+            </Box>
           </Box>
         </Box>
       )}
 
-      <Divider />
+      {/* ── Main nav ───────────────────────────────────────────────────── */}
+      <Box sx={{ px: 1.5, py: 1.5, flexGrow: 1, overflowY: 'auto' }}>
+        <Typography
+          variant="overline"
+          sx={{
+            color: TEXT_MUTED,
+            fontSize: '0.6rem',
+            px: 1,
+            mb: 1,
+            display: 'block',
+          }}
+        >
+          Navigation
+        </Typography>
+        <List disablePadding>
+          {visibleNavItems.map(({ label, path, icon }) => {
+            const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
 
-      {/* Main navigation */}
-      <List sx={{ px: 1.5, py: 1, flexGrow: 1 }}>
-        {visibleNavItems.map(({ label, path, icon }) => (
-          <ListItem key={path} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              component={NavLink}
-              to={path}
-              selected={location.pathname === path}
-              onClick={variant === 'temporary' ? onClose : undefined}
-              sx={{
-                borderRadius: 2,
-                '&.active, &.Mui-selected': {
-                  bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
-                  '& .MuiListItemIcon-root': { color: 'primary.contrastText' },
-                  '&:hover': { bgcolor: 'primary.dark' },
-                },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 36 }}>{icon}</ListItemIcon>
-              <ListItemText primary={label} primaryTypographyProps={{ fontSize: '0.875rem' }} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+            return (
+              <ListItem key={path} disablePadding sx={{ mb: 0.25 }}>
+                <Tooltip title={label} placement="right" disableHoverListener>
+                  <ListItemButton
+                    component={NavLink}
+                    to={path}
+                    onClick={variant === 'temporary' ? onClose : undefined}
+                    sx={{
+                      borderRadius: '10px',
+                      py: 0.85,
+                      px: 1.25,
+                      minHeight: 40,
+                      color: isActive ? ACTIVE_COLOR : TEXT_COLOR,
+                      bgcolor: isActive ? ACTIVE_BG : 'transparent',
+                      '&:hover': {
+                        bgcolor: isActive ? ACTIVE_BG : HOVER_BG,
+                        color: isActive ? ACTIVE_COLOR : '#F1F5F9',
+                      },
+                      transition: 'all 0.15s ease',
+                    }}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 34,
+                        color: isActive ? ACTIVE_COLOR : TEXT_MUTED,
+                        '& .MuiSvgIcon-root': { fontSize: 18 },
+                      }}
+                    >
+                      {icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={label}
+                      primaryTypographyProps={{
+                        fontSize: '0.8375rem',
+                        fontWeight: isActive ? 600 : 500,
+                        letterSpacing: '0.005em',
+                      }}
+                    />
+                    {isActive && (
+                      <Box
+                        sx={{
+                          width: 3,
+                          height: 20,
+                          borderRadius: '3px',
+                          background: 'linear-gradient(180deg, #4F46E5, #7C3AED)',
+                          ml: 1,
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </ListItemButton>
+                </Tooltip>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
 
-      <Divider />
-
-      {/* Bottom items */}
-      <List sx={{ px: 1.5, py: 1 }}>
-        {BOTTOM_ITEMS.map(({ label, path, icon }) => (
-          <ListItem key={path} disablePadding sx={{ mb: 0.5 }}>
-            <ListItemButton
-              component={NavLink}
-              to={path}
-              selected={location.pathname === path}
-              onClick={variant === 'temporary' ? onClose : undefined}
-              sx={{ borderRadius: 2 }}
-            >
-              <ListItemIcon sx={{ minWidth: 36 }}>{icon}</ListItemIcon>
-              <ListItemText primary={label} primaryTypographyProps={{ fontSize: '0.875rem' }} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      {/* ── Bottom items ───────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          px: 1.5,
+          py: 1.5,
+          borderTop: `1px solid ${SIDEBAR_BORDER}`,
+        }}
+      >
+        <List disablePadding>
+          {BOTTOM_ITEMS.map(({ label, path, icon }) => {
+            const isActive = location.pathname === path;
+            return (
+              <ListItem key={path} disablePadding sx={{ mb: 0.25 }}>
+                <ListItemButton
+                  component={NavLink}
+                  to={path}
+                  onClick={variant === 'temporary' ? onClose : undefined}
+                  sx={{
+                    borderRadius: '10px',
+                    py: 0.85,
+                    px: 1.25,
+                    minHeight: 38,
+                    color: isActive ? ACTIVE_COLOR : TEXT_COLOR,
+                    bgcolor: isActive ? ACTIVE_BG : 'transparent',
+                    '&:hover': { bgcolor: HOVER_BG, color: '#F1F5F9' },
+                    transition: 'all 0.15s ease',
+                  }}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 34,
+                      color: isActive ? ACTIVE_COLOR : TEXT_MUTED,
+                      '& .MuiSvgIcon-root': { fontSize: 18 },
+                    }}
+                  >
+                    {icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={label}
+                    primaryTypographyProps={{
+                      fontSize: '0.8375rem',
+                      fontWeight: isActive ? 600 : 500,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
     </Box>
   );
 
@@ -296,7 +455,7 @@ export default function Sidebar({ open, onClose, width, variant }) {
           width,
           boxSizing: 'border-box',
           border: 'none',
-          boxShadow: variant === 'permanent' ? 'none' : undefined,
+          bgcolor: SIDEBAR_BG,
         },
       }}
     >

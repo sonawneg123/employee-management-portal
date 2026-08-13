@@ -15,12 +15,16 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import AddIcon      from '@mui/icons-material/Add';
-import RefreshIcon  from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import DownloadIcon from '@mui/icons-material/Download';
-import LeaveSearch  from './LeaveSearch';
+import LeaveSearch from './LeaveSearch';
 import LeaveFilters from './LeaveFilters';
-import { LEAVE_SORT_OPTIONS, LEAVE_DEFAULT_SORT, LEAVE_DEFAULT_DIRECTION } from '@/constants/leaveConstants';
+import {
+  LEAVE_SORT_OPTIONS,
+  LEAVE_DEFAULT_SORT,
+  LEAVE_DEFAULT_DIRECTION,
+} from '@/constants/leaveConstants';
 
 /**
  * @typedef {Object} LeaveToolbarProps
@@ -50,9 +54,23 @@ import { LEAVE_SORT_OPTIONS, LEAVE_DEFAULT_SORT, LEAVE_DEFAULT_DIRECTION } from 
  * @returns {JSX.Element}
  */
 export default function LeaveToolbar({
-  search, status, type, sort, direction, totalElements, isFetching, canCreate,
-  onSearchChange, onStatusChange, onTypeChange, onSortChange, onDirectionChange,
-  onAdd, onRefresh, onExport, onClearFilters,
+  search,
+  status,
+  type,
+  sort,
+  direction,
+  totalElements,
+  isFetching,
+  canCreate,
+  onSearchChange,
+  onStatusChange,
+  onTypeChange,
+  onSortChange,
+  onDirectionChange,
+  onAdd,
+  onRefresh,
+  onExport,
+  onClearFilters,
 }) {
   const hasActiveFilters = Boolean(search || status || type);
 
@@ -61,8 +79,10 @@ export default function LeaveToolbar({
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', mb: 1.5 }}>
         <LeaveSearch value={search} onSearch={onSearchChange} disabled={isFetching} />
         <LeaveFilters
-          status={status} type={type}
-          onStatusChange={onStatusChange} onTypeChange={onTypeChange}
+          status={status}
+          type={type}
+          onStatusChange={onStatusChange}
+          onTypeChange={onTypeChange}
           disabled={isFetching}
         />
         {hasActiveFilters && (
@@ -82,7 +102,9 @@ export default function LeaveToolbar({
               aria-label="Sort by"
             >
               {LEAVE_SORT_OPTIONS.map((o) => (
-                <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+                <MenuItem key={o.value} value={o.value}>
+                  {o.label}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -104,28 +126,58 @@ export default function LeaveToolbar({
 
       <Divider />
 
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1.5, flexWrap: 'wrap', gap: 1 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mt: 1.5,
+          flexWrap: 'wrap',
+          gap: 1,
+        }}
+      >
         <Typography variant="body2" color="text.secondary">
           {totalElements != null ? `${totalElements} request${totalElements !== 1 ? 's' : ''}` : ''}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Tooltip title="Refresh">
-            <IconButton size="small" onClick={onRefresh} disabled={isFetching} aria-label="Refresh"
-              sx={{ animation: isFetching ? 'spin 1s linear infinite' : 'none',
-                '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }}>
+            <IconButton
+              size="small"
+              onClick={onRefresh}
+              disabled={isFetching}
+              aria-label="Refresh"
+              sx={{
+                animation: isFetching ? 'spin 1s linear infinite' : 'none',
+                '@keyframes spin': {
+                  '0%': { transform: 'rotate(0deg)' },
+                  '100%': { transform: 'rotate(360deg)' },
+                },
+              }}
+            >
               <RefreshIcon fontSize="small" />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Export CSV">
-            <IconButton size="small" onClick={onExport} disabled={isFetching || !totalElements} aria-label="Export CSV">
+            <IconButton
+              size="small"
+              onClick={onExport}
+              disabled={isFetching || !totalElements}
+              aria-label="Export CSV"
+            >
               <DownloadIcon fontSize="small" />
             </IconButton>
           </Tooltip>
 
           {canCreate && (
-            <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={onAdd} aria-label="Request leave">
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddIcon />}
+              onClick={onAdd}
+              aria-label="Request leave"
+            >
               Request Leave
             </Button>
           )}

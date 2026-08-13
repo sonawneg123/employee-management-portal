@@ -51,7 +51,9 @@ export default function DepartmentFilters({
           aria-label="Sort departments by"
         >
           {DEPARTMENT_SORT_OPTIONS.map((opt) => (
-            <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+            <MenuItem key={opt.value} value={opt.value}>
+              {opt.label}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>

@@ -1,11 +1,11 @@
 /**
- * @fileoverview ProfilePage — authenticated user's employee profile.
+ * @fileoverview ProfilePage — authenticated user's employee profile (redesigned).
  *
- * Fetches the current user's profile via GET /profile and displays:
- * - Name, email, department, job title, employee code, joining date, status
+ * Fetches via GET /profile and displays:
+ * - Name, role badge, status, employee meta
  * - Editable personal info (phone, address) via PUT /profile/personal
  *
- * Uses react-query for data fetching and react-hook-form for the edit form.
+ * Layout: premium profile header card + information sections.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -27,41 +27,67 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import EditIcon       from '@mui/icons-material/Edit';
-import SaveIcon       from '@mui/icons-material/Save';
-import CancelIcon     from '@mui/icons-material/Cancel';
-import PersonIcon     from '@mui/icons-material/Person';
-import ApartmentIcon  from '@mui/icons-material/Apartment';
-import WorkIcon       from '@mui/icons-material/Work';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PhoneIcon      from '@mui/icons-material/Phone';
-import HomeIcon       from '@mui/icons-material/Home';
-import EmailIcon      from '@mui/icons-material/Email';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
+import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
+import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
+import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
+import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 
 import { getProfile, updatePersonalInfo } from '@/services/profileApi';
 import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/constants/roles';
 
-// ── Info row helper ──────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 /**
- * Renders a labelled info row with an icon.
+ * @param {string[]} roles
+ * @returns {string}
+ */
+function getRoleLabel(roles) {
+  if (!roles?.length) return 'Employee';
+  if (roles.includes(ROLES.ADMIN)) return 'Administrator';
+  if (roles.includes(ROLES.HR)) return 'HR Manager';
+  if (roles.includes(ROLES.MANAGER)) return 'Manager';
+  return 'Employee';
+}
+
+/**
+ * Single labelled info row with icon.
  *
  * @param {{ Icon: React.ElementType, label: string, value: string|null, loading: boolean }} props
- * @returns {JSX.Element}
  */
 function InfoRow({ Icon, label, value, loading }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1 }}>
-      <Icon sx={{ fontSize: 20, color: 'text.secondary', mt: 0.25, flexShrink: 0 }} />
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1.25 }}>
+      <Box
+        sx={{
+          width: 32,
+          height: 32,
+          borderRadius: '8px',
+          bgcolor: 'rgba(79,70,229,0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          mt: 0.1,
+        }}
+      >
+        <Icon sx={{ fontSize: 16, color: 'primary.main' }} />
+      </Box>
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="caption" color="text.secondary" display="block">
+        <Typography variant="caption" color="text.secondary" display="block" fontWeight={500}>
           {label}
         </Typography>
         {loading ? (
-          <Skeleton variant="text" width={160} />
+          <Skeleton variant="text" width={160} height={20} />
         ) : (
-          <Typography variant="body2" fontWeight={500}>
-            {value ?? '—'}
+          <Typography variant="body2" fontWeight={600} sx={{ wordBreak: 'break-word' }}>
+            {value || '—'}
           </Typography>
         )}
       </Box>
@@ -69,7 +95,7 @@ function InfoRow({ Icon, label, value, loading }) {
   );
 }
 
-// ── Page component ────────────────────────────────────────────────────────────
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 /**
  * Profile page — view and edit own employee details.
@@ -84,20 +110,20 @@ export default function ProfilePage() {
 
   const showSnack = (severity, message) => setSnackbar({ open: true, severity, message });
 
-  // ── Fetch profile ────────────────────────────────────────────────────────
+  // ── Fetch profile ──────────────────────────────────────────────────────────
   const {
-    data:      profile,
+    data: profile,
     isLoading,
     isError,
     error,
   } = useQuery({
     queryKey: ['profile', user?.userId],
-    queryFn:  getProfile,
-    enabled:  Boolean(user?.userId),
+    queryFn: getProfile,
+    enabled: Boolean(user?.userId),
     staleTime: 5 * 60_000,
   });
 
-  // ── Edit form ────────────────────────────────────────────────────────────
+  // ── Edit form ──────────────────────────────────────────────────────────────
   const {
     register,
     handleSubmit,
@@ -107,140 +133,218 @@ export default function ProfilePage() {
     defaultValues: { firstName: '', lastName: '', phone: '', address: '' },
   });
 
-  // Populate form when profile loads or edit mode opens
   useEffect(() => {
     if (profile) {
       reset({
         firstName: profile.firstName ?? '',
-        lastName:  profile.lastName  ?? '',
-        phone:     profile.phone     ?? '',
-        address:   profile.address   ?? '',
+        lastName: profile.lastName ?? '',
+        phone: profile.phone ?? '',
+        address: profile.address ?? '',
       });
     }
   }, [profile, reset]);
 
-  // ── Save mutation ────────────────────────────────────────────────────────
+  // ── Save mutation ──────────────────────────────────────────────────────────
   const saveMutation = useMutation({
     mutationFn: updatePersonalInfo,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile', user?.userId] });
       setEditMode(false);
-      showSnack('success', 'Profile updated successfully.');
+      showSnack('success', 'Profile updated successfully 🎉');
     },
-    onError: (err) => {
-      showSnack('error', err?.message ?? 'Failed to update profile.');
-    },
+    onError: (err) => showSnack('error', err?.message ?? 'Failed to update profile.'),
   });
 
-  const handleSave = handleSubmit((values) => {
-    saveMutation.mutate(values);
-  });
+  const handleSave = handleSubmit((values) => saveMutation.mutate(values));
 
   const handleCancelEdit = () => {
     reset({
       firstName: profile?.firstName ?? '',
-      lastName:  profile?.lastName  ?? '',
-      phone:     profile?.phone     ?? '',
-      address:   profile?.address   ?? '',
+      lastName: profile?.lastName ?? '',
+      phone: profile?.phone ?? '',
+      address: profile?.address ?? '',
     });
     setEditMode(false);
   };
 
-  // ── Render helpers ───────────────────────────────────────────────────────
   const initials = profile
     ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
     : user
       ? `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase()
       : '?';
 
+  const roleLabel = getRoleLabel(user?.roles);
+
   return (
     <>
-      <Helmet><title>My Profile — Employee Portal</title></Helmet>
+      <Helmet>
+        <title>My Profile — PeopleCore HR</title>
+      </Helmet>
 
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>My Profile</Typography>
+        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
+          My Profile
+        </Typography>
         <Typography variant="body2" color="text.secondary">
           View and manage your employee information
         </Typography>
       </Box>
 
       {isError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error?.message ?? 'Failed to load profile. Please try again.'}
         </Alert>
       )}
 
       <Grid container spacing={3}>
-        {/* ── Left column: avatar + identity ─────────────────────────── */}
+        {/* ── Left: avatar + identity ─────────────────────────────────── */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Card>
-            <CardContent sx={{ p: 3, textAlign: 'center' }}>
-              {isLoading ? (
-                <Skeleton variant="circular" width={96} height={96} sx={{ mx: 'auto', mb: 2 }} />
-              ) : (
-                <Avatar
+            <CardContent sx={{ p: 3 }}>
+              {/* Avatar + name block */}
+              <Box sx={{ textAlign: 'center', mb: 3 }}>
+                {isLoading ? (
+                  <Skeleton variant="circular" width={88} height={88} sx={{ mx: 'auto', mb: 2 }} />
+                ) : (
+                  <Avatar
+                    sx={{
+                      width: 88,
+                      height: 88,
+                      background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                      fontSize: '2rem',
+                      fontWeight: 800,
+                      mx: 'auto',
+                      mb: 2,
+                    }}
+                  >
+                    {initials}
+                  </Avatar>
+                )}
+
+                {isLoading ? (
+                  <>
+                    <Skeleton variant="text" width="70%" height={28} sx={{ mx: 'auto' }} />
+                    <Skeleton variant="text" width="90%" height={20} sx={{ mx: 'auto' }} />
+                  </>
+                ) : (
+                  <>
+                    <Typography variant="h5" fontWeight={800} gutterBottom>
+                      {profile?.firstName} {profile?.lastName}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      {profile?.email ?? user?.email}
+                    </Typography>
+                  </>
+                )}
+
+                <Box
                   sx={{
-                    width: 96,
-                    height: 96,
-                    bgcolor: 'primary.main',
-                    fontSize: '2rem',
-                    mx: 'auto',
-                    mb: 2,
+                    display: 'flex',
+                    gap: 1,
+                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                    mt: 1,
                   }}
                 >
-                  {initials}
-                </Avatar>
-              )}
-
-              {isLoading ? (
-                <>
-                  <Skeleton variant="text" width="60%" sx={{ mx: 'auto' }} height={32} />
-                  <Skeleton variant="text" width="80%" sx={{ mx: 'auto' }} />
-                </>
-              ) : (
-                <>
-                  <Typography variant="h6" fontWeight={700} gutterBottom>
-                    {profile?.firstName} {profile?.lastName}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {profile?.email ?? user?.email}
-                  </Typography>
-                  <Chip
-                    label={profile?.status ?? 'ACTIVE'}
-                    color={profile?.status === 'ACTIVE' ? 'success' : 'default'}
-                    size="small"
-                    sx={{ fontWeight: 600, mt: 0.5 }}
-                  />
-                </>
-              )}
-
-              <Divider sx={{ my: 2 }} />
-
-              <Box sx={{ textAlign: 'left' }}>
-                <InfoRow Icon={PersonIcon}       label="Employee ID"  value={profile?.employeeCode} loading={isLoading} />
-                <InfoRow Icon={WorkIcon}         label="Job Title"    value={profile?.jobTitle}      loading={isLoading} />
-                <InfoRow Icon={ApartmentIcon}    label="Department"   value={profile?.departmentName} loading={isLoading} />
-                <InfoRow Icon={CalendarTodayIcon} label="Joined"      value={profile?.dateOfJoining}   loading={isLoading} />
-                <InfoRow Icon={EmailIcon}        label="Email"        value={profile?.email ?? user?.email} loading={isLoading} />
+                  {!isLoading && (
+                    <>
+                      <Chip
+                        label={roleLabel}
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          bgcolor: 'rgba(79,70,229,0.1)',
+                          color: 'primary.main',
+                          border: '1px solid rgba(79,70,229,0.2)',
+                        }}
+                      />
+                      <Chip
+                        label={profile?.status ?? 'ACTIVE'}
+                        size="small"
+                        sx={{
+                          fontWeight: 700,
+                          bgcolor:
+                            profile?.status === 'ACTIVE'
+                              ? 'rgba(16,185,129,0.1)'
+                              : 'rgba(245,158,11,0.1)',
+                          color: profile?.status === 'ACTIVE' ? 'success.main' : 'warning.main',
+                          border:
+                            profile?.status === 'ACTIVE'
+                              ? '1px solid rgba(16,185,129,0.2)'
+                              : '1px solid rgba(245,158,11,0.2)',
+                        }}
+                      />
+                    </>
+                  )}
+                </Box>
               </Box>
+
+              <Divider sx={{ mb: 2 }} />
+
+              {/* Identity details */}
+              <InfoRow
+                Icon={BadgeRoundedIcon}
+                label="Employee ID"
+                value={profile?.employeeCode}
+                loading={isLoading}
+              />
+              <InfoRow
+                Icon={WorkRoundedIcon}
+                label="Job Title"
+                value={profile?.jobTitle}
+                loading={isLoading}
+              />
+              <InfoRow
+                Icon={ApartmentRoundedIcon}
+                label="Department"
+                value={profile?.departmentName}
+                loading={isLoading}
+              />
+              <InfoRow
+                Icon={CalendarTodayRoundedIcon}
+                label="Joined"
+                value={profile?.dateOfJoining}
+                loading={isLoading}
+              />
+              <InfoRow
+                Icon={EmailRoundedIcon}
+                label="Email"
+                value={profile?.email ?? user?.email}
+                loading={isLoading}
+              />
             </CardContent>
           </Card>
         </Grid>
 
-        {/* ── Right column: editable personal info ───────────────────── */}
+        {/* ── Right: editable personal info ───────────────────────────── */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" fontWeight={600}>
-                  Personal Information
-                </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 3,
+                }}
+              >
+                <Box>
+                  <Typography variant="h5" fontWeight={700}>
+                    Personal Information
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {editMode
+                      ? 'Edit your contact details below.'
+                      : 'Your phone and address details.'}
+                  </Typography>
+                </Box>
                 {!editMode && !isLoading && (
                   <Button
                     variant="outlined"
                     size="small"
-                    startIcon={<EditIcon />}
+                    startIcon={<EditRoundedIcon />}
                     onClick={() => setEditMode(true)}
+                    sx={{ fontWeight: 600 }}
                   >
                     Edit
                   </Button>
@@ -256,7 +360,7 @@ export default function ProfilePage() {
                         fullWidth
                         size="small"
                         {...register('firstName', {
-                          maxLength: { value: 100, message: 'First name must be at most 100 characters' },
+                          maxLength: { value: 100, message: 'Max 100 chars' },
                         })}
                         error={Boolean(errors.firstName)}
                         helperText={errors.firstName?.message}
@@ -269,7 +373,7 @@ export default function ProfilePage() {
                         fullWidth
                         size="small"
                         {...register('lastName', {
-                          maxLength: { value: 100, message: 'Last name must be at most 100 characters' },
+                          maxLength: { value: 100, message: 'Max 100 chars' },
                         })}
                         error={Boolean(errors.lastName)}
                         helperText={errors.lastName?.message}
@@ -282,7 +386,7 @@ export default function ProfilePage() {
                         fullWidth
                         size="small"
                         {...register('phone', {
-                          maxLength: { value: 20, message: 'Phone must be at most 20 characters' },
+                          maxLength: { value: 20, message: 'Max 20 chars' },
                         })}
                         error={Boolean(errors.phone)}
                         helperText={errors.phone?.message}
@@ -297,7 +401,7 @@ export default function ProfilePage() {
                         rows={3}
                         size="small"
                         {...register('address', {
-                          maxLength: { value: 255, message: 'Address must be at most 255 characters' },
+                          maxLength: { value: 255, message: 'Max 255 chars' },
                         })}
                         error={Boolean(errors.address)}
                         helperText={errors.address?.message}
@@ -305,19 +409,20 @@ export default function ProfilePage() {
                       />
                     </Grid>
                     <Grid size={{ xs: 12 }}>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Box sx={{ display: 'flex', gap: 1.5 }}>
                         <Button
                           type="submit"
                           variant="contained"
-                          startIcon={<SaveIcon />}
+                          startIcon={<SaveRoundedIcon />}
                           size="small"
                           disabled={saveMutation.isPending}
+                          sx={{ fontWeight: 600 }}
                         >
                           {saveMutation.isPending ? 'Saving…' : 'Save Changes'}
                         </Button>
                         <Button
                           variant="outlined"
-                          startIcon={<CancelIcon />}
+                          startIcon={<CancelRoundedIcon />}
                           size="small"
                           onClick={handleCancelEdit}
                           disabled={saveMutation.isPending}
@@ -330,8 +435,41 @@ export default function ProfilePage() {
                 </Box>
               ) : (
                 <Box>
-                  <InfoRow Icon={PhoneIcon} label="Phone"   value={profile?.phone}   loading={isLoading} />
-                  <InfoRow Icon={HomeIcon}  label="Address" value={profile?.address} loading={isLoading} />
+                  <InfoRow
+                    Icon={PhoneRoundedIcon}
+                    label="Phone"
+                    value={profile?.phone}
+                    loading={isLoading}
+                  />
+                  <InfoRow
+                    Icon={HomeRoundedIcon}
+                    label="Address"
+                    value={profile?.address}
+                    loading={isLoading}
+                  />
+                  {!isLoading && !profile?.phone && !profile?.address && (
+                    <Box
+                      sx={{
+                        py: 4,
+                        textAlign: 'center',
+                        color: 'text.disabled',
+                        border: '1.5px dashed',
+                        borderColor: 'divider',
+                        borderRadius: '12px',
+                        mt: 1,
+                      }}
+                    >
+                      <Typography variant="body2">No contact details yet.</Typography>
+                      <Button
+                        size="small"
+                        startIcon={<EditRoundedIcon />}
+                        onClick={() => setEditMode(true)}
+                        sx={{ mt: 1 }}
+                      >
+                        Add contact info
+                      </Button>
+                    </Box>
+                  )}
                 </Box>
               )}
             </CardContent>

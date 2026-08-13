@@ -14,10 +14,7 @@ import {
   getDashboardActivity,
   getDashboardCharts,
 } from '@/services/dashboardApi';
-import {
-  DASHBOARD_QUERY_KEYS,
-  DASHBOARD_REFRESH_INTERVAL_MS,
-} from '@/constants/dashboard';
+import { DASHBOARD_QUERY_KEYS, DASHBOARD_REFRESH_INTERVAL_MS } from '@/constants/dashboard';
 
 // ── useDashboardSummary ───────────────────────────────────────────────────────
 
@@ -41,9 +38,9 @@ export function useDashboardSummary() {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey:        DASHBOARD_QUERY_KEYS.summary(),
-    queryFn:         getDashboardSummary,
-    staleTime:       60_000,            // 1 minute — KPIs change frequently
+    queryKey: DASHBOARD_QUERY_KEYS.summary(),
+    queryFn: getDashboardSummary,
+    staleTime: 60_000, // 1 minute — KPIs change frequently
     refetchInterval: DASHBOARD_REFRESH_INTERVAL_MS,
   });
 
@@ -52,11 +49,11 @@ export function useDashboardSummary() {
   }, [queryClient]);
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
     refresh,
   };
 }
@@ -83,9 +80,9 @@ export function useDashboardActivity(params = {}) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey:        [...DASHBOARD_QUERY_KEYS.activity(), params],
-    queryFn:         () => getDashboardActivity(params),
-    staleTime:       30_000,            // 30 seconds — activity is real-time
+    queryKey: [...DASHBOARD_QUERY_KEYS.activity(), params],
+    queryFn: () => getDashboardActivity(params),
+    staleTime: 30_000, // 30 seconds — activity is real-time
     refetchInterval: DASHBOARD_REFRESH_INTERVAL_MS,
   });
 
@@ -94,11 +91,11 @@ export function useDashboardActivity(params = {}) {
   }, [queryClient]);
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
     refresh,
   };
 }
@@ -124,9 +121,9 @@ export function useDashboardCharts() {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey:        DASHBOARD_QUERY_KEYS.charts(),
-    queryFn:         getDashboardCharts,
-    staleTime:       2 * 60_000,        // 2 minutes — chart data changes slowly
+    queryKey: DASHBOARD_QUERY_KEYS.charts(),
+    queryFn: getDashboardCharts,
+    staleTime: 2 * 60_000, // 2 minutes — chart data changes slowly
     refetchInterval: DASHBOARD_REFRESH_INTERVAL_MS,
   });
 
@@ -135,11 +132,11 @@ export function useDashboardCharts() {
   }, [queryClient]);
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
     refresh,
   };
 }

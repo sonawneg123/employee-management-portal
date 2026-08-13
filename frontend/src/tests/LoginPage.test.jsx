@@ -52,15 +52,15 @@ function makeQueryClient() {
  */
 function makeAuthContext(overrides = {}) {
   return {
-    user:            null,
-    token:           null,
+    user: null,
+    token: null,
     isAuthenticated: false,
-    isLoading:       false,
-    login:           vi.fn(),
-    register:        vi.fn(),
-    logout:          vi.fn(),
-    hasRole:         vi.fn(() => false),
-    hasAnyRole:      vi.fn(() => false),
+    isLoading: false,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    hasRole: vi.fn(() => false),
+    hasAnyRole: vi.fn(() => false),
     ...overrides,
   };
 }
@@ -84,9 +84,7 @@ function renderWithProviders(ui, { initialPath = '/login', authContext = {} } = 
       <QueryClientProvider client={qc}>
         <ThemeProvider theme={testTheme}>
           <MemoryRouter initialEntries={[initialPath]}>
-            <AuthContext.Provider value={auth}>
-              {ui}
-            </AuthContext.Provider>
+            <AuthContext.Provider value={auth}>{ui}</AuthContext.Provider>
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -219,7 +217,7 @@ describe('LoginPage', () => {
 
       await waitFor(() => {
         expect(loginMock).toHaveBeenCalledWith({
-          email:    'user@example.com',
+          email: 'user@example.com',
           password: 'correct-password',
         });
       });
@@ -242,7 +240,12 @@ describe('LoginPage', () => {
 
   describe('Error handling', () => {
     it('displays 401 bad credentials error', async () => {
-      const error401 = { status: 401, message: 'Invalid email or password.', violations: null, isNetwork: false };
+      const error401 = {
+        status: 401,
+        message: 'Invalid email or password.',
+        violations: null,
+        isNetwork: false,
+      };
       const loginMock = vi.fn().mockRejectedValue(error401);
       const { user } = renderWithProviders(<LoginPage />, { authContext: { login: loginMock } });
 

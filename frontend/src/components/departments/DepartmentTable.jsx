@@ -22,10 +22,10 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { getDepartmentColumns } from '@/utils/departmentColumns';
-import DepartmentActionsMenu  from './DepartmentActionsMenu';
-import DepartmentSkeleton     from './DepartmentSkeleton';
-import DepartmentEmptyState   from './DepartmentEmptyState';
-import DepartmentErrorState   from './DepartmentErrorState';
+import DepartmentActionsMenu from './DepartmentActionsMenu';
+import DepartmentSkeleton from './DepartmentSkeleton';
+import DepartmentEmptyState from './DepartmentEmptyState';
+import DepartmentErrorState from './DepartmentErrorState';
 
 /**
  * @typedef {Object} DepartmentTableProps
@@ -77,8 +77,8 @@ export default function DepartmentTable({
 }) {
   const columns = getDepartmentColumns();
 
-  const [menuAnchor, setMenuAnchor]   = useState(null);
-  const [menuDept,   setMenuDept]     = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [menuDept, setMenuDept] = useState(null);
 
   const handleMenuOpen = (e, dept) => {
     e.stopPropagation();

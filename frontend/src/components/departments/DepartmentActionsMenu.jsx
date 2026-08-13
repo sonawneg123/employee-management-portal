@@ -3,16 +3,10 @@
  */
 
 import React from 'react';
-import {
-  Divider,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-} from '@mui/material';
+import { Divider, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon       from '@mui/icons-material/Edit';
-import DeleteIcon     from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 /**
  * @typedef {Object} DepartmentActionsMenuProps
@@ -39,10 +33,13 @@ export default function DepartmentActionsMenu({
   onView,
   onEdit,
   onDelete,
-  canEdit   = false,
+  canEdit = false,
   canDelete = false,
 }) {
-  const handle = (action) => () => { onClose(); action(); };
+  const handle = (action) => () => {
+    onClose();
+    action();
+  };
 
   return (
     <Menu
@@ -50,17 +47,21 @@ export default function DepartmentActionsMenu({
       open={open}
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      transformOrigin={{ vertical: 'top',    horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       slotProps={{ paper: { sx: { minWidth: 160 } } }}
     >
       <MenuItem onClick={handle(onView)} aria-label="View department">
-        <ListItemIcon><VisibilityIcon fontSize="small" /></ListItemIcon>
+        <ListItemIcon>
+          <VisibilityIcon fontSize="small" />
+        </ListItemIcon>
         <ListItemText>View Details</ListItemText>
       </MenuItem>
 
       {canEdit && (
         <MenuItem onClick={handle(onEdit)} aria-label="Edit department">
-          <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
           <ListItemText>Edit</ListItemText>
         </MenuItem>
       )}

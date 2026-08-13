@@ -1,47 +1,57 @@
 /**
- * @fileoverview LoginPage — full implementation.
+ * @fileoverview LoginPage — premium split-screen sign-in page.
  *
- * Composes {@link AuthLayout}, {@link AuthCard}, and {@link LoginForm}
- * into the complete login page. Handles:
- * - Session restoration: if the user is already authenticated they are
- *   redirected to the dashboard before this page renders (via PublicRoute).
- * - Redirect param: honours ?redirect=<path> after successful login.
- * - Toast notification on successful login (shown after dashboard render).
+ * Accepts an optional {@code targetRole} prop so that role-specific login
+ * routes (/login/admin, /login/hr, /login/employee) can display appropriate
+ * branding. Composes AuthLayout, AuthCard, and LoginForm.
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Helmet } from 'react-helmet-async';
-import AuthLayout  from '@/components/auth/AuthLayout';
-import AuthCard    from '@/components/auth/AuthCard';
-import LoginForm   from '@/components/auth/LoginForm';
+import AuthLayout from '@/components/auth/AuthLayout';
+import AuthCard from '@/components/auth/AuthCard';
+import LoginForm from '@/components/auth/LoginForm';
+
+/** Maps a targetRole to human-readable label for AuthCard / Helmet. */
+const ROLE_LABELS = {
+  ROLE_ADMIN: 'Admin',
+  ROLE_HR: 'HR',
+  ROLE_EMPLOYEE: 'Employee',
+};
 
 /**
- * Login page — the entry point for returning users.
+ * Login page.
  *
+ * @param {{ targetRole?: string }} props
  * @returns {JSX.Element}
  */
-export default function LoginPage() {
+export default function LoginPage({ targetRole }) {
+  const roleLabel = ROLE_LABELS[targetRole] ?? null;
+  const pageTitle = roleLabel ? `Sign In as ${roleLabel}` : 'Sign In';
+  const cardDescription = roleLabel
+    ? `Enter your ${roleLabel} credentials to access your account.`
+    : 'Enter your credentials to access your account.';
+
   return (
     <>
-      {/* Document title (requires react-helmet-async, gracefully degrades if absent) */}
-      {typeof Helmet !== 'undefined' && (
-        <Helmet>
-          <title>Sign In — Employee Management Portal</title>
-          <meta name="description" content="Sign in to the Employee Management Portal" />
-        </Helmet>
-      )}
+      <Helmet>
+        <title>{pageTitle} — PeopleCore HR</title>
+        <meta name="description" content="Sign in to PeopleCore HR to manage your workforce." />
+      </Helmet>
 
       <AuthLayout
-        title="Welcome back to EMP Portal"
+        title="Welcome back 👋"
         subtitle="Sign in to manage your workforce, track attendance, and review performance all in one place."
       >
-        <AuthCard
-          title="Sign In"
-          description="Enter your email and password to access your account."
-        >
+        <AuthCard title={pageTitle} description={cardDescription}>
           <LoginForm />
         </AuthCard>
       </AuthLayout>
     </>
   );
 }
+
+LoginPage.propTypes = {
+  targetRole: PropTypes.string,
+};

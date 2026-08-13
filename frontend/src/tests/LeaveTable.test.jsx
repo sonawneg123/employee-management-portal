@@ -24,23 +24,23 @@ import LeaveTable from '@/components/leaves/LeaveTable';
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const LEAVE_1 = {
-  id:           'leave-uuid-1',
+  id: 'leave-uuid-1',
   employeeName: 'Alice Smith',
-  leaveType:    'ANNUAL',
-  status:       'PENDING',
-  startDate:    '2025-06-02',
-  endDate:      '2025-06-06',
-  reason:       'Holiday',
+  leaveType: 'ANNUAL',
+  status: 'PENDING',
+  startDate: '2025-06-02',
+  endDate: '2025-06-06',
+  reason: 'Holiday',
 };
 
 const LEAVE_2 = {
-  id:           'leave-uuid-2',
+  id: 'leave-uuid-2',
   employeeName: 'Bob Jones',
-  leaveType:    'SICK',
-  status:       'APPROVED',
-  startDate:    '2025-06-09',
-  endDate:      '2025-06-10',
-  reason:       '',
+  leaveType: 'SICK',
+  status: 'APPROVED',
+  startDate: '2025-06-09',
+  endDate: '2025-06-10',
+  reason: '',
 };
 
 // ── Wrapper ───────────────────────────────────────────────────────────────────
@@ -49,27 +49,27 @@ const theme = createTheme();
 
 function renderTable(overrides = {}) {
   const defaults = {
-    leaves:      [LEAVE_1, LEAVE_2],
-    isLoading:   false,
-    isFetching:  false,
-    isError:     false,
-    error:       null,
-    sort:        'createdAt',
-    direction:   'desc',
-    hasFilters:  false,
-    canApprove:  true,
-    canEdit:     true,
-    canCancel:   true,
-    onSort:          vi.fn(),
-    onView:          vi.fn(),
-    onApprove:       vi.fn(),
-    onReject:        vi.fn(),
-    onEdit:          vi.fn(),
-    onCancel:        vi.fn(),
-    onRetry:         vi.fn(),
-    onClearFilters:  vi.fn(),
-    onAdd:           vi.fn(),
-    canCreate:       true,
+    leaves: [LEAVE_1, LEAVE_2],
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+    error: null,
+    sort: 'createdAt',
+    direction: 'desc',
+    hasFilters: false,
+    canApprove: true,
+    canEdit: true,
+    canCancel: true,
+    onSort: vi.fn(),
+    onView: vi.fn(),
+    onApprove: vi.fn(),
+    onReject: vi.fn(),
+    onEdit: vi.fn(),
+    onCancel: vi.fn(),
+    onRetry: vi.fn(),
+    onClearFilters: vi.fn(),
+    onAdd: vi.fn(),
+    canCreate: true,
   };
 
   return render(

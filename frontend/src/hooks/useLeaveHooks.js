@@ -58,13 +58,13 @@ export function useLeaves(params = {}) {
   const queryClient = useQueryClient();
 
   const effectiveParams = {
-    page:       params.page      ?? 0,
-    size:       params.size      ?? LEAVE_DEFAULT_PAGE_SIZE,
-    sort:       params.sort      ?? LEAVE_DEFAULT_SORT,
-    direction:  params.direction ?? LEAVE_DEFAULT_DIRECTION,
-    keyword:    params.search    || undefined,
-    status:     params.status    || undefined,
-    type:       params.type      || undefined,
+    page: params.page ?? 0,
+    size: params.size ?? LEAVE_DEFAULT_PAGE_SIZE,
+    sort: params.sort ?? LEAVE_DEFAULT_SORT,
+    direction: params.direction ?? LEAVE_DEFAULT_DIRECTION,
+    keyword: params.search || undefined,
+    status: params.status || undefined,
+    type: params.type || undefined,
     employeeId: params.employeeId || undefined,
   };
   Object.keys(effectiveParams).forEach(
@@ -72,9 +72,9 @@ export function useLeaves(params = {}) {
   );
 
   const query = useQuery({
-    queryKey:        LEAVE_QUERY_KEYS.list(effectiveParams),
-    queryFn:         () => getLeaveRequests(effectiveParams),
-    staleTime:       30_000,
+    queryKey: LEAVE_QUERY_KEYS.list(effectiveParams),
+    queryFn: () => getLeaveRequests(effectiveParams),
+    staleTime: 30_000,
     placeholderData: (prev) => prev,
   });
 
@@ -83,11 +83,11 @@ export function useLeaves(params = {}) {
   }, [queryClient]);
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
     refresh,
   };
 }
@@ -110,21 +110,21 @@ export function useMyLeaves(params = {}) {
   // Use /leaves/my which the backend scopes to the authenticated user's
   // linked employee record — avoids the userId vs employeeId UUID mismatch.
   const effectiveParams = {
-    page:      params.page      ?? 0,
-    size:      params.size      ?? LEAVE_DEFAULT_PAGE_SIZE,
-    sort:      params.sort      ?? LEAVE_DEFAULT_SORT,
+    page: params.page ?? 0,
+    size: params.size ?? LEAVE_DEFAULT_PAGE_SIZE,
+    sort: params.sort ?? LEAVE_DEFAULT_SORT,
     direction: params.direction ?? LEAVE_DEFAULT_DIRECTION,
-    status:    params.status    || undefined,
-    type:      params.type      || undefined,
+    status: params.status || undefined,
+    type: params.type || undefined,
   };
   Object.keys(effectiveParams).forEach(
     (k) => effectiveParams[k] === undefined && delete effectiveParams[k],
   );
 
   const query = useQuery({
-    queryKey:        LEAVE_QUERY_KEYS.my(effectiveParams),
-    queryFn:         () => getMyLeaveRequests(effectiveParams),
-    staleTime:       30_000,
+    queryKey: LEAVE_QUERY_KEYS.my(effectiveParams),
+    queryFn: () => getMyLeaveRequests(effectiveParams),
+    staleTime: 30_000,
     placeholderData: (prev) => prev,
   });
 
@@ -134,11 +134,11 @@ export function useMyLeaves(params = {}) {
   }, [queryClient]);
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
     refresh,
   };
 }
@@ -154,16 +154,16 @@ export function useMyLeaves(params = {}) {
 export function useLeave(id) {
   const query = useQuery({
     queryKey: LEAVE_QUERY_KEYS.detail(id),
-    queryFn:  () => getLeaveById(id),
-    enabled:  Boolean(id),
+    queryFn: () => getLeaveById(id),
+    enabled: Boolean(id),
     staleTime: 60_000,
   });
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
@@ -234,7 +234,7 @@ export function useDeleteLeave() {
         if (!old?.content) return old;
         return {
           ...old,
-          content:       old.content.filter((l) => l.id !== id),
+          content: old.content.filter((l) => l.id !== id),
           totalElements: Math.max(0, (old.totalElements ?? 1) - 1),
         };
       });
@@ -266,7 +266,8 @@ export function useApproveLeave() {
       await queryClient.cancelQueries({ queryKey: LEAVE_QUERY_KEYS.detail(id) });
       const previous = queryClient.getQueryData(LEAVE_QUERY_KEYS.detail(id));
       queryClient.setQueryData(LEAVE_QUERY_KEYS.detail(id), (old) => ({
-        ...old, status: 'APPROVED',
+        ...old,
+        status: 'APPROVED',
       }));
       return { previous, id };
     },
@@ -296,7 +297,8 @@ export function useRejectLeave() {
       await queryClient.cancelQueries({ queryKey: LEAVE_QUERY_KEYS.detail(id) });
       const previous = queryClient.getQueryData(LEAVE_QUERY_KEYS.detail(id));
       queryClient.setQueryData(LEAVE_QUERY_KEYS.detail(id), (old) => ({
-        ...old, status: 'REJECTED',
+        ...old,
+        status: 'REJECTED',
       }));
       return { previous, id };
     },

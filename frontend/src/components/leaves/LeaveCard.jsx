@@ -13,10 +13,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import MoreVertIcon      from '@mui/icons-material/MoreVert';
-import WarningAmberIcon  from '@mui/icons-material/WarningAmber';
-import LeaveStatusChip   from './LeaveStatusChip';
-import LeaveTypeChip     from './LeaveTypeChip';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import LeaveStatusChip from './LeaveStatusChip';
+import LeaveTypeChip from './LeaveTypeChip';
 import { formatLeaveDateRange, formatLeaveWorkingDays } from '@/utils/leaveFormatters';
 
 /**
@@ -34,7 +34,11 @@ import { formatLeaveDateRange, formatLeaveWorkingDays } from '@/utils/leaveForma
  */
 export default function LeaveCard({ leave, onClick, onMenuOpen }) {
   return (
-    <Card variant="outlined" sx={{ mb: 1.5 }} aria-label={`Leave card for ${leave.employeeName ?? 'employee'}`}>
+    <Card
+      variant="outlined"
+      sx={{ mb: 1.5 }}
+      aria-label={`Leave card for ${leave.employeeName ?? 'employee'}`}
+    >
       <Box sx={{ display: 'flex', alignItems: 'stretch' }}>
         <CardActionArea onClick={onClick} sx={{ flex: 1 }} aria-label="View leave details">
           <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -71,8 +75,11 @@ export default function LeaveCard({ leave, onClick, onMenuOpen }) {
         {onMenuOpen && (
           <Box sx={{ display: 'flex', alignItems: 'center', pr: 1 }}>
             <Tooltip title="Actions">
-              <IconButton size="small" onClick={(e) => onMenuOpen(e, leave)}
-                aria-label="Leave actions">
+              <IconButton
+                size="small"
+                onClick={(e) => onMenuOpen(e, leave)}
+                aria-label="Leave actions"
+              >
                 <MoreVertIcon fontSize="small" />
               </IconButton>
             </Tooltip>

@@ -5,11 +5,7 @@
  */
 
 import dayjs from 'dayjs';
-import { formatDate } from '@/utils/dateUtils';
-import {
-  LEAVE_TYPE_MAP,
-  LEAVE_STATUS_MAP,
-} from '@/constants/leaveConstants';
+import { LEAVE_TYPE_MAP, LEAVE_STATUS_MAP } from '@/constants/leaveConstants';
 import { countWorkingDays } from '@/utils/leaveCalculations';
 
 // ── Type + status labels ──────────────────────────────────────────────────────
@@ -46,7 +42,7 @@ export function formatLeaveStatus(status) {
 export function formatLeaveDateRange(startDate, endDate) {
   if (!startDate && !endDate) return '—';
   const s = startDate ? dayjs(startDate).format('MMM D') : '?';
-  const e = endDate   ? dayjs(endDate).format('MMM D, YYYY') : '?';
+  const e = endDate ? dayjs(endDate).format('MMM D, YYYY') : '?';
   return `${s} – ${e}`;
 }
 
@@ -59,10 +55,10 @@ export function formatLeaveDateRange(startDate, endDate) {
 export function formatLeaveStartRelative(startDate) {
   if (!startDate) return '—';
   const diff = dayjs(startDate).diff(dayjs(), 'day');
-  if (diff === 0)  return 'Today';
-  if (diff === 1)  return 'Tomorrow';
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
   if (diff === -1) return 'Yesterday';
-  if (diff > 0)    return `In ${diff} days`;
+  if (diff > 0) return `In ${diff} days`;
   return `${Math.abs(diff)} days ago`;
 }
 
@@ -107,9 +103,7 @@ export function buildLeaveCsvString(leaves, headers, fields) {
     return `"${str.replace(/"/g, '""')}"`;
   };
   const headerRow = headers.map(escape).join(',');
-  const dataRows  = leaves.map((l) =>
-    fields.map((k) => escape(l[k])).join(','),
-  );
+  const dataRows = leaves.map((l) => fields.map((k) => escape(l[k])).join(','));
   return [headerRow, ...dataRows].join('\r\n');
 }
 
@@ -122,9 +116,9 @@ export function buildLeaveCsvString(leaves, headers, fields) {
  */
 export function downloadLeaveCsv(csvContent, filename = 'leaves.csv') {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href     = url;
+  link.href = url;
   link.download = filename;
   link.style.display = 'none';
   document.body.appendChild(link);
@@ -156,12 +150,12 @@ export function downloadLeaveCsv(csvContent, filename = 'leaves.csv') {
 export function toCalendarEvent(leave, color) {
   const typeMeta = LEAVE_TYPE_MAP[leave.leaveType];
   return {
-    id:        leave.id,
-    title:     `${typeMeta?.icon ?? ''} ${leave.employeeName ?? formatLeaveType(leave.leaveType)}`,
-    start:     leave.startDate,
-    end:       leave.endDate,
+    id: leave.id,
+    title: `${typeMeta?.icon ?? ''} ${leave.employeeName ?? formatLeaveType(leave.leaveType)}`,
+    start: leave.startDate,
+    end: leave.endDate,
     color,
-    status:    leave.status,
+    status: leave.status,
     leaveType: leave.leaveType,
   };
 }

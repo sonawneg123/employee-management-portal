@@ -21,15 +21,15 @@ import { QueryClient } from '@tanstack/react-query';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime:         2 * 60 * 1000,  // 2 minutes
-      gcTime:            5 * 60 * 1000,  // 5 minutes (formerly cacheTime)
-      retry:             1,
-      retryDelay:        (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+      retry: 1,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10_000),
       refetchOnWindowFocus: false,
-      refetchOnReconnect:   true,
+      refetchOnReconnect: true,
     },
     mutations: {
-      retry: 0,  // Never retry mutations — side effects must be explicit
+      retry: 0, // Never retry mutations — side effects must be explicit
     },
   },
 });

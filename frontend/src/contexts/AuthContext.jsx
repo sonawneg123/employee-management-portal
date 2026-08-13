@@ -9,18 +9,11 @@
  * on the next render cycle.
  */
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as authApi from '@/services/authApi';
 import { getItem, setItem, removeItem } from '@/utils/localStorage';
-import { isTokenExpired, getTokenRoles } from '@/utils/jwtUtils';
+import { isTokenExpired } from '@/utils/jwtUtils';
 import { TOKEN_STORAGE_KEY, USER_STORAGE_KEY } from '@/constants/api';
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
@@ -32,7 +25,7 @@ import { ROLES } from '@/constants/roles';
  * @returns {string}
  */
 function resolveDashboard(roles = []) {
-  if (roles.includes(ROLES.ADMIN))                                return ROUTES.ADMIN_DASHBOARD;
+  if (roles.includes(ROLES.ADMIN)) return ROUTES.ADMIN_DASHBOARD;
   if (roles.includes(ROLES.HR) || roles.includes(ROLES.MANAGER)) return ROUTES.HR_DASHBOARD;
   return ROUTES.EMPLOYEE_DASHBOARD;
 }
@@ -161,7 +154,7 @@ export function AuthProvider({ children }) {
     removeItem(USER_STORAGE_KEY);
     setToken(null);
     setUser(null);
-    navigate(ROUTES.LOGIN, { replace: true });
+    navigate('/login', { replace: true });
   }, [navigate]);
 
   /**
@@ -170,10 +163,7 @@ export function AuthProvider({ children }) {
    * @param {string} role - Role string to check (e.g., {@code "ROLE_ADMIN"}).
    * @returns {boolean}
    */
-  const hasRole = useCallback(
-    (role) => user?.roles?.includes(role) ?? false,
-    [user],
-  );
+  const hasRole = useCallback((role) => user?.roles?.includes(role) ?? false, [user]);
 
   /**
    * Returns whether the authenticated user possesses at least one of the
@@ -182,15 +172,22 @@ export function AuthProvider({ children }) {
    * @param {string[]} roles - Role strings to check.
    * @returns {boolean}
    */
-  const hasAnyRole = useCallback(
-    (roles) => roles.some((r) => user?.roles?.includes(r)),
-    [user],
-  );
+  const hasAnyRole = useCallback((roles) => roles.some((r) => user?.roles?.includes(r)), [user]);
 
   const isAuthenticated = Boolean(token && user && !isTokenExpired(token));
 
   const value = useMemo(
-    () => ({ user, token, isAuthenticated, isLoading, login, register, logout, hasRole, hasAnyRole }),
+    () => ({
+      user,
+      token,
+      isAuthenticated,
+      isLoading,
+      login,
+      register,
+      logout,
+      hasRole,
+      hasAnyRole,
+    }),
     [user, token, isAuthenticated, isLoading, login, register, logout, hasRole, hasAnyRole],
   );
 
@@ -202,6 +199,7 @@ export function AuthProvider({ children }) {
  *
  * @returns {AuthContextValue}
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');

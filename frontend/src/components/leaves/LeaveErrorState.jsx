@@ -25,8 +25,13 @@ export default function LeaveErrorState({ error, onRetry }) {
       <Alert
         severity="error"
         action={
-          <Button color="inherit" size="small" startIcon={<RefreshIcon />}
-            onClick={onRetry} aria-label="Retry">
+          <Button
+            color="inherit"
+            size="small"
+            startIcon={<RefreshIcon />}
+            onClick={onRetry}
+            aria-label="Retry"
+          >
             Retry
           </Button>
         }

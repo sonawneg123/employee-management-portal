@@ -9,14 +9,16 @@
  * - Surfaces server-side errors (409 duplicate email, 400 validation) via
  *   {@link FormError} and per-field errors.
  * - Fully keyboard-navigable with ARIA labelling.
+ * - Accepts an optional {@code role} prop forwarded from RegisterPage so that
+ *   the correct role is included in the submission payload.
  */
 
 import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link as RouterLink } from 'react-router-dom';
 import {
-  Alert,
   Box,
   Divider,
   Grid,
@@ -27,13 +29,12 @@ import {
   Typography,
 } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 import { registerSchema } from '@/utils/validationSchemas';
 import { useRegister } from '@/hooks/useRegister';
 import { ROUTES } from '@/constants/routes';
 import PasswordField from '@/components/auth/PasswordField';
-import FormError     from '@/components/auth/FormError';
+import FormError from '@/components/auth/FormError';
 import LoadingButton from '@/components/auth/LoadingButton';
 
 /**
@@ -60,17 +61,17 @@ import LoadingButton from '@/components/auth/LoadingButton';
 function getPasswordStrength(password) {
   if (!password) return { score: 0, label: '', color: 'error' };
   let score = 0;
-  if (password.length >= 8)                    score += 1;
-  if (/[A-Z]/.test(password))                 score += 1;
-  if (/\d/.test(password))                     score += 1;
-  if (/[^A-Za-z0-9]/.test(password))          score += 1;
+  if (password.length >= 8) score += 1;
+  if (/[A-Z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
   const map = {
-    0: { label: '',           color: 'error' },
-    1: { label: 'Weak',       color: 'error' },
-    2: { label: 'Fair',       color: 'warning' },
-    3: { label: 'Good',       color: 'info' },
-    4: { label: 'Strong',     color: 'success' },
+    0: { label: '', color: 'error' },
+    1: { label: 'Weak', color: 'error' },
+    2: { label: 'Fair', color: 'warning' },
+    3: { label: 'Good', color: 'info' },
+    4: { label: 'Strong', color: 'success' },
   };
   return { score, ...map[score] };
 }
@@ -80,12 +81,15 @@ function getPasswordStrength(password) {
  *
  * @returns {JSX.Element}
  */
-export default function RegisterForm() {
+/**
+ * @param {{ role?: string }} props
+ * @returns {JSX.Element}
+ */
+export default function RegisterForm({ role }) {
   const { mutate: register, isPending, isError, error, reset: resetMutation } = useRegister();
 
   const {
     control,
-    register: registerField,
     handleSubmit,
     setError,
     watch,
@@ -93,10 +97,10 @@ export default function RegisterForm() {
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName:       '',
-      lastName:        '',
-      email:           '',
-      password:        '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
       confirmPassword: '',
     },
     mode: 'onTouched',
@@ -123,7 +127,8 @@ export default function RegisterForm() {
   const getFormErrorMessage = () => {
     if (!isError || !error) return null;
     if (error.violations) return null;
-    if (error.status === 409) return 'This email address is already registered. Please sign in or use a different email.';
+    if (error.status === 409)
+      return 'This email address is already registered. Please sign in or use a different email.';
     return error.message ?? 'Registration failed. Please try again.';
   };
 
@@ -135,12 +140,16 @@ export default function RegisterForm() {
   const onSubmit = async (values) => {
     resetMutation();
     try {
-      await register({
+      const payload = {
         firstName: values.firstName,
-        lastName:  values.lastName,
-        email:     values.email,
-        password:  values.password,
-      });
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+      };
+      if (role) {
+        payload.role = role;
+      }
+      await register(payload);
     } catch {
       // Errors are surfaced through mutation state
     }
@@ -153,19 +162,6 @@ export default function RegisterForm() {
       noValidate
       aria-label="Registration form"
     >
-      {/* Role info note — registration always creates a ROLE_EMPLOYEE account.
-          HR/Admin accounts must be promoted by an administrator via the Admin panel.
-          role="status" is used (not "alert") so it does not interfere with form-level error alerts. */}
-      <Alert
-        severity="info"
-        role="status"
-        icon={<InfoOutlinedIcon fontSize="small" />}
-        sx={{ mb: 2.5, borderRadius: 2, fontSize: '0.8rem' }}
-      >
-        Registration creates an <strong>Employee</strong> account. To create HR or Admin accounts,
-        register here then ask your system administrator to promote the account via the Admin panel.
-      </Alert>
-
       {/* Form-level error */}
       <FormError message={getFormErrorMessage()} />
 
@@ -288,11 +284,25 @@ export default function RegisterForm() {
         />
       </Box>
 
+      {/* Role info note — shown when no specific role is pre-selected */}
+      {!role && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+          This registration creates an <strong>Employee</strong> account. Contact your administrator
+          to create HR or Manager accounts.
+        </Typography>
+      )}
+
       {/* Terms note */}
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
         By creating an account, you agree to our{' '}
-        <Link href="#" underline="hover">Terms of Service</Link> and{' '}
-        <Link href="#" underline="hover">Privacy Policy</Link>.
+        <Link href="#" underline="hover">
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link href="#" underline="hover">
+          Privacy Policy
+        </Link>
+        .
       </Typography>
 
       {/* Submit button */}
@@ -322,3 +332,7 @@ export default function RegisterForm() {
     </Box>
   );
 }
+
+RegisterForm.propTypes = {
+  role: PropTypes.string,
+};

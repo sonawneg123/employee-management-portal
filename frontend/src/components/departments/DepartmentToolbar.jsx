@@ -5,18 +5,11 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import AddIcon      from '@mui/icons-material/Add';
-import RefreshIcon  from '@mui/icons-material/Refresh';
+import { Box, Button, Divider, IconButton, Tooltip, Typography } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import DownloadIcon from '@mui/icons-material/Download';
-import DepartmentSearch  from './DepartmentSearch';
+import DepartmentSearch from './DepartmentSearch';
 import DepartmentFilters from './DepartmentFilters';
 
 /**
@@ -61,11 +54,7 @@ export default function DepartmentToolbar({
     <Box sx={{ p: 2 }}>
       {/* Row 1: search + filters */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, alignItems: 'center', mb: 1.5 }}>
-        <DepartmentSearch
-          value={search}
-          onSearch={onSearchChange}
-          disabled={isFetching}
-        />
+        <DepartmentSearch value={search} onSearch={onSearchChange} disabled={isFetching} />
         <DepartmentFilters
           sort={sort}
           direction={direction}
@@ -91,8 +80,8 @@ export default function DepartmentToolbar({
       {/* Row 2: count + actions */}
       <Box
         sx={{
-          display:        'flex',
-          alignItems:     'center',
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           mt: 1.5,
           flexWrap: 'wrap',
@@ -115,7 +104,7 @@ export default function DepartmentToolbar({
               sx={{
                 animation: isFetching ? 'spin 1s linear infinite' : 'none',
                 '@keyframes spin': {
-                  '0%':   { transform: 'rotate(0deg)' },
+                  '0%': { transform: 'rotate(0deg)' },
                   '100%': { transform: 'rotate(360deg)' },
                 },
               }}

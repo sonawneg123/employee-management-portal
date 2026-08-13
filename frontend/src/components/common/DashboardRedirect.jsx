@@ -29,7 +29,7 @@ import { ROUTES } from '@/constants/routes';
  * @returns {string}
  */
 function resolveDashboardPath(roles = []) {
-  if (roles.includes(ROLES.ADMIN))                           return ROUTES.ADMIN_DASHBOARD;
+  if (roles.includes(ROLES.ADMIN)) return ROUTES.ADMIN_DASHBOARD;
   if (roles.includes(ROLES.HR) || roles.includes(ROLES.MANAGER)) return ROUTES.HR_DASHBOARD;
   return ROUTES.EMPLOYEE_DASHBOARD;
 }

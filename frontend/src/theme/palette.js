@@ -1,9 +1,9 @@
 /**
  * @fileoverview Material UI palette definitions for light and dark modes.
  *
- * The primary colour is the company brand blue (#1976d2). All other colours
- * are derived from it or from Material UI's default palette to ensure
- * accessible contrast ratios (WCAG AA minimum).
+ * Brand identity: Indigo (#4F46E5) as primary, Violet (#7C3AED) as accent.
+ * Status colours follow semantic conventions: emerald = success,
+ * amber = warning, red = error.
  */
 
 /**
@@ -14,47 +14,47 @@
 export const lightPalette = {
   mode: 'light',
   primary: {
-    main:         '#1976d2',
-    light:        '#42a5f5',
-    dark:         '#1565c0',
+    main: '#4F46E5',
+    light: '#818CF8',
+    dark: '#4338CA',
     contrastText: '#ffffff',
   },
   secondary: {
-    main:         '#7c3aed',
-    light:        '#a78bfa',
-    dark:         '#5b21b6',
+    main: '#7C3AED',
+    light: '#A78BFA',
+    dark: '#5B21B6',
     contrastText: '#ffffff',
   },
   error: {
-    main:  '#d32f2f',
-    light: '#ef5350',
-    dark:  '#c62828',
+    main: '#EF4444',
+    light: '#FCA5A5',
+    dark: '#DC2626',
   },
   warning: {
-    main:  '#ed6c02',
-    light: '#ff9800',
-    dark:  '#e65100',
+    main: '#F59E0B',
+    light: '#FCD34D',
+    dark: '#D97706',
   },
   info: {
-    main:  '#0288d1',
-    light: '#03a9f4',
-    dark:  '#01579b',
+    main: '#3B82F6',
+    light: '#93C5FD',
+    dark: '#2563EB',
   },
   success: {
-    main:  '#2e7d32',
-    light: '#4caf50',
-    dark:  '#1b5e20',
+    main: '#10B981',
+    light: '#6EE7B7',
+    dark: '#059669',
   },
   background: {
-    default: '#f4f6f8',
-    paper:   '#ffffff',
+    default: '#F8FAFC',
+    paper: '#FFFFFF',
   },
   text: {
-    primary:   'rgba(0,0,0,0.87)',
-    secondary: 'rgba(0,0,0,0.6)',
-    disabled:  'rgba(0,0,0,0.38)',
+    primary: '#0F172A',
+    secondary: '#64748B',
+    disabled: '#94A3B8',
   },
-  divider: 'rgba(0,0,0,0.12)',
+  divider: '#E2E8F0',
 };
 
 /**
@@ -65,45 +65,45 @@ export const lightPalette = {
 export const darkPalette = {
   mode: 'dark',
   primary: {
-    main:         '#42a5f5',
-    light:        '#80d8ff',
-    dark:         '#0077c2',
-    contrastText: '#000000',
+    main: '#818CF8',
+    light: '#A5B4FC',
+    dark: '#4F46E5',
+    contrastText: '#ffffff',
   },
   secondary: {
-    main:         '#a78bfa',
-    light:        '#c4b5fd',
-    dark:         '#7c3aed',
-    contrastText: '#000000',
+    main: '#A78BFA',
+    light: '#C4B5FD',
+    dark: '#7C3AED',
+    contrastText: '#ffffff',
   },
   error: {
-    main:  '#f44336',
-    light: '#e57373',
-    dark:  '#d32f2f',
+    main: '#F87171',
+    light: '#FCA5A5',
+    dark: '#EF4444',
   },
   warning: {
-    main:  '#ffa726',
-    light: '#ffb74d',
-    dark:  '#f57c00',
+    main: '#FCD34D',
+    light: '#FDE68A',
+    dark: '#F59E0B',
   },
   info: {
-    main:  '#29b6f6',
-    light: '#4fc3f7',
-    dark:  '#0288d1',
+    main: '#60A5FA',
+    light: '#93C5FD',
+    dark: '#3B82F6',
   },
   success: {
-    main:  '#66bb6a',
-    light: '#81c784',
-    dark:  '#388e3c',
+    main: '#34D399',
+    light: '#6EE7B7',
+    dark: '#10B981',
   },
   background: {
-    default: '#0f1723',
-    paper:   '#1a2332',
+    default: '#0A0F1E',
+    paper: '#111827',
   },
   text: {
-    primary:   'rgba(255,255,255,0.87)',
-    secondary: 'rgba(255,255,255,0.6)',
-    disabled:  'rgba(255,255,255,0.38)',
+    primary: '#F1F5F9',
+    secondary: '#94A3B8',
+    disabled: '#475569',
   },
-  divider: 'rgba(255,255,255,0.12)',
+  divider: 'rgba(241,245,249,0.08)',
 };

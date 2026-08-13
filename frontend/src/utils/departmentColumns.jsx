@@ -8,12 +8,7 @@
 import React from 'react';
 import { Box, Chip, Typography } from '@mui/material';
 import DepartmentAvatar from '@/components/departments/DepartmentAvatar';
-import {
-  formatDeptCode,
-  formatEmployeeCount,
-  formatDeptCreatedAt,
-  formatHeadName,
-} from '@/utils/departmentFormatters';
+import { formatDeptCode, formatDeptCreatedAt, formatHeadName } from '@/utils/departmentFormatters';
 import { DEPARTMENT_COLUMNS } from '@/constants/departmentConstants';
 
 /**
@@ -34,20 +29,18 @@ import { DEPARTMENT_COLUMNS } from '@/constants/departmentConstants';
 export function getDepartmentColumns() {
   return [
     {
-      id:       DEPARTMENT_COLUMNS.AVATAR,
-      label:    '',
+      id: DEPARTMENT_COLUMNS.AVATAR,
+      label: '',
       sortable: false,
-      width:    '52px',
-      render:   (row) => (
-        <DepartmentAvatar name={row.name} size={40} />
-      ),
+      width: '52px',
+      render: (row) => <DepartmentAvatar name={row.name} size={40} />,
     },
     {
-      id:       DEPARTMENT_COLUMNS.NAME,
-      label:    'Department',
+      id: DEPARTMENT_COLUMNS.NAME,
+      label: 'Department',
       sortable: true,
-      width:    '220px',
-      render:   (row) => (
+      width: '220px',
+      render: (row) => (
         <Box>
           <Typography variant="body2" fontWeight={600}>
             {row.name}
@@ -70,11 +63,11 @@ export function getDepartmentColumns() {
       ),
     },
     {
-      id:       DEPARTMENT_COLUMNS.CODE,
-      label:    'Code',
+      id: DEPARTMENT_COLUMNS.CODE,
+      label: 'Code',
       sortable: true,
-      width:    '100px',
-      render:   (row) => (
+      width: '100px',
+      render: (row) => (
         <Chip
           label={formatDeptCode(row.code)}
           size="small"
@@ -85,37 +78,31 @@ export function getDepartmentColumns() {
       ),
     },
     {
-      id:       DEPARTMENT_COLUMNS.EMPLOYEE_COUNT,
-      label:    'Employees',
+      id: DEPARTMENT_COLUMNS.EMPLOYEE_COUNT,
+      label: 'Employees',
       sortable: false,
-      align:    'center',
-      width:    '110px',
-      render:   (row) => (
+      align: 'center',
+      width: '110px',
+      render: (row) => (
         <Typography variant="body2" fontWeight={600} color="primary.main">
           {row.employeeCount ?? '—'}
         </Typography>
       ),
     },
     {
-      id:       DEPARTMENT_COLUMNS.HEAD,
-      label:    'Head',
+      id: DEPARTMENT_COLUMNS.HEAD,
+      label: 'Head',
       sortable: false,
-      width:    '160px',
-      render:   (row) => (
-        <Typography variant="body2">
-          {formatHeadName(row.headName)}
-        </Typography>
-      ),
+      width: '160px',
+      render: (row) => <Typography variant="body2">{formatHeadName(row.headName)}</Typography>,
     },
     {
-      id:       DEPARTMENT_COLUMNS.CREATED_AT,
-      label:    'Created',
+      id: DEPARTMENT_COLUMNS.CREATED_AT,
+      label: 'Created',
       sortable: true,
-      width:    '130px',
-      render:   (row) => (
-        <Typography variant="body2">
-          {formatDeptCreatedAt(row.createdAt)}
-        </Typography>
+      width: '130px',
+      render: (row) => (
+        <Typography variant="body2">{formatDeptCreatedAt(row.createdAt)}</Typography>
       ),
     },
   ];

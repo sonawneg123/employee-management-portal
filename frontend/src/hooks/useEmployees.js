@@ -57,13 +57,13 @@ export function useEmployees(params = {}) {
   const queryClient = useQueryClient();
 
   const effectiveParams = {
-    page:         params.page      ?? 0,
-    size:         params.size      ?? EMPLOYEE_DEFAULT_PAGE_SIZE,
-    sort:         params.sort      ?? EMPLOYEE_DEFAULT_SORT,
-    direction:    params.direction ?? EMPLOYEE_DEFAULT_DIRECTION,
-    keyword:      params.search    ?? undefined,
+    page: params.page ?? 0,
+    size: params.size ?? EMPLOYEE_DEFAULT_PAGE_SIZE,
+    sort: params.sort ?? EMPLOYEE_DEFAULT_SORT,
+    direction: params.direction ?? EMPLOYEE_DEFAULT_DIRECTION,
+    keyword: params.search ?? undefined,
     departmentId: params.departmentId || undefined,
-    status:       params.status       || undefined,
+    status: params.status || undefined,
   };
 
   // Strip undefined keys so Axios doesn't send empty params
@@ -73,7 +73,7 @@ export function useEmployees(params = {}) {
 
   const query = useQuery({
     queryKey: EMPLOYEE_QUERY_KEYS.list(effectiveParams),
-    queryFn:  () => getEmployees(effectiveParams),
+    queryFn: () => getEmployees(effectiveParams),
     staleTime: 30_000,
     placeholderData: (prev) => prev, // keep previous data visible while fetching
   });
@@ -83,11 +83,11 @@ export function useEmployees(params = {}) {
   }, [queryClient]);
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
     refresh,
   };
 }
@@ -109,17 +109,17 @@ export function useEmployees(params = {}) {
 export function useEmployee(id) {
   const query = useQuery({
     queryKey: EMPLOYEE_QUERY_KEYS.detail(id),
-    queryFn:  () => getEmployeeById(id),
-    enabled:  Boolean(id),
+    queryFn: () => getEmployeeById(id),
+    enabled: Boolean(id),
     staleTime: 60_000,
   });
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
@@ -176,10 +176,7 @@ export function useUpdateEmployee() {
     onError: (_err, _vars, context) => {
       // Roll back on error
       if (context?.previous) {
-        queryClient.setQueryData(
-          EMPLOYEE_QUERY_KEYS.detail(context.id),
-          context.previous,
-        );
+        queryClient.setQueryData(EMPLOYEE_QUERY_KEYS.detail(context.id), context.previous);
       }
     },
 
@@ -214,17 +211,14 @@ export function useDeleteEmployee() {
       });
 
       // Optimistically remove the deleted row from every cached page
-      queryClient.setQueriesData(
-        { queryKey: EMPLOYEE_QUERY_KEYS.lists() },
-        (old) => {
-          if (!old?.content) return old;
-          return {
-            ...old,
-            content:       old.content.filter((e) => e.id !== id),
-            totalElements: Math.max(0, (old.totalElements ?? 1) - 1),
-          };
-        },
-      );
+      queryClient.setQueriesData({ queryKey: EMPLOYEE_QUERY_KEYS.lists() }, (old) => {
+        if (!old?.content) return old;
+        return {
+          ...old,
+          content: old.content.filter((e) => e.id !== id),
+          totalElements: Math.max(0, (old.totalElements ?? 1) - 1),
+        };
+      });
 
       return { previousLists };
     },

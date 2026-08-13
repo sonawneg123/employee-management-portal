@@ -15,20 +15,12 @@
  * Role guards hide the Add / Edit / Delete actions based on the current user.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Card,
-  Snackbar,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import { useAuth }             from '@/contexts/AuthContext';
-import { ROLES }               from '@/constants/roles';
+import { Alert, Box, Card, Snackbar, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/constants/roles';
 import {
   EMPLOYEE_DEFAULT_PAGE_SIZE,
   EMPLOYEE_DEFAULT_SORT,
@@ -44,12 +36,12 @@ import {
 } from '@/hooks/useEmployees';
 import { buildCsvString, downloadCsv } from '@/utils/employeeFormatters';
 
-import EmployeeToolbar        from '@/components/employees/EmployeeToolbar';
-import EmployeeTable          from '@/components/employees/EmployeeTable';
-import EmployeeCard           from '@/components/employees/EmployeeCard';
-import EmployeePagination     from '@/components/employees/EmployeePagination';
-import EmployeeDialog         from '@/components/employees/EmployeeDialog';
-import DeleteEmployeeDialog   from '@/components/employees/DeleteEmployeeDialog';
+import EmployeeToolbar from '@/components/employees/EmployeeToolbar';
+import EmployeeTable from '@/components/employees/EmployeeTable';
+import EmployeeCard from '@/components/employees/EmployeeCard';
+import EmployeePagination from '@/components/employees/EmployeePagination';
+import EmployeeDialog from '@/components/employees/EmployeeDialog';
+import DeleteEmployeeDialog from '@/components/employees/DeleteEmployeeDialog';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -72,11 +64,11 @@ import DeleteEmployeeDialog   from '@/components/employees/DeleteEmployeeDialog'
  * @returns {JSX.Element}
  */
 export default function EmployeesPage() {
-  const theme     = useTheme();
-  const isMobile  = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const { user, hasAnyRole } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { hasAnyRole } = useAuth();
 
   // Derive the list base path from the current location so that navigation
   // to the detail view stays within the same role-scoped prefix
@@ -85,45 +77,46 @@ export default function EmployeesPage() {
 
   // ── Role permissions ───────────────────────────────────────────────────────
   const canCreate = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canEdit   = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canDelete = hasAnyRole([ROLES.ADMIN]);           // DELETE /employees/** → ADMIN only
+  const canEdit = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
+  const canDelete = hasAnyRole([ROLES.ADMIN]); // DELETE /employees/** → ADMIN only
 
   // ── Query params state ─────────────────────────────────────────────────────
-  const [page,         setPage]         = useState(0);
-  const [pageSize,     setPageSize]     = useState(EMPLOYEE_DEFAULT_PAGE_SIZE);
-  const [sort,         setSort]         = useState(EMPLOYEE_DEFAULT_SORT);
-  const [direction,    setDirection]    = useState(EMPLOYEE_DEFAULT_DIRECTION);
-  const [search,       setSearch]       = useState('');
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(EMPLOYEE_DEFAULT_PAGE_SIZE);
+  const [sort, setSort] = useState(EMPLOYEE_DEFAULT_SORT);
+  const [direction, setDirection] = useState(EMPLOYEE_DEFAULT_DIRECTION);
+  const [search, setSearch] = useState('');
   const [departmentId, setDepartmentId] = useState('');
-  const [status,       setStatus]       = useState('');
+  const [status, setStatus] = useState('');
 
   // ── Dialog state ───────────────────────────────────────────────────────────
   /** @type {[DialogMode, Function]} */
-  const [dialogMode,    setDialogMode]    = useState(null);
-  const [editEmployee,  setEditEmployee]  = useState(null);
-  const [deleteTarget,  setDeleteTarget]  = useState(null);
+  const [dialogMode, setDialogMode] = useState(null);
+  const [editEmployee, setEditEmployee] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   // ── Snackbar state ─────────────────────────────────────────────────────────
   /** @type {[SnackbarState, Function]} */
   const [snackbar, setSnackbar] = useState({ open: false, severity: 'success', message: '' });
 
   // ── Data hooks ─────────────────────────────────────────────────────────────
-  const {
-    data,
-    isLoading,
-    isFetching,
-    isError,
-    error,
-    refresh,
-  } = useEmployees({ page, size: pageSize, sort, direction, search, departmentId, status });
+  const { data, isLoading, isFetching, isError, error, refresh } = useEmployees({
+    page,
+    size: pageSize,
+    sort,
+    direction,
+    search,
+    departmentId,
+    status,
+  });
 
   const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee();
   const deleteMutation = useDeleteEmployee();
 
-  const employees     = data?.content        ?? [];
-  const totalElements = data?.totalElements  ?? 0;
-  const hasFilters    = Boolean(search || departmentId || status);
+  const employees = useMemo(() => data?.content ?? [], [data?.content]);
+  const totalElements = data?.totalElements ?? 0;
+  const hasFilters = Boolean(search || departmentId || status);
 
   // ── Snackbar helpers ───────────────────────────────────────────────────────
 
@@ -141,11 +134,27 @@ export default function EmployeesPage() {
 
   // ── Filter / sort handlers ─────────────────────────────────────────────────
 
-  const handleSearchChange    = useCallback((v) => { setSearch(v);       setPage(0); }, []);
-  const handleDepartmentChange = useCallback((v) => { setDepartmentId(v); setPage(0); }, []);
-  const handleStatusChange    = useCallback((v) => { setStatus(v);       setPage(0); }, []);
-  const handleSortChange      = useCallback((field, dir) => { setSort(field); setDirection(dir); setPage(0); }, []);
-  const handleDirectionChange = useCallback((dir) => { setDirection(dir); setPage(0); }, []);
+  const handleSearchChange = useCallback((v) => {
+    setSearch(v);
+    setPage(0);
+  }, []);
+  const handleDepartmentChange = useCallback((v) => {
+    setDepartmentId(v);
+    setPage(0);
+  }, []);
+  const handleStatusChange = useCallback((v) => {
+    setStatus(v);
+    setPage(0);
+  }, []);
+  const handleSortChange = useCallback((field, dir) => {
+    setSort(field);
+    setDirection(dir);
+    setPage(0);
+  }, []);
+  const handleDirectionChange = useCallback((dir) => {
+    setDirection(dir);
+    setPage(0);
+  }, []);
 
   const handleClearFilters = useCallback(() => {
     setSearch('');
@@ -176,23 +185,26 @@ export default function EmployeesPage() {
   /**
    * @param {Object} payload
    */
-  const handleSubmit = useCallback(async (payload) => {
-    try {
-      if (dialogMode === 'create') {
-        await createMutation.mutateAsync(payload);
-        showSnackbar('success', 'Employee created successfully.');
-      } else {
-        await updateMutation.mutateAsync({ id: editEmployee.id, payload });
-        showSnackbar('success', 'Employee updated successfully.');
+  const handleSubmit = useCallback(
+    async (payload) => {
+      try {
+        if (dialogMode === 'create') {
+          await createMutation.mutateAsync(payload);
+          showSnackbar('success', 'Employee created successfully.');
+        } else {
+          await updateMutation.mutateAsync({ id: editEmployee.id, payload });
+          showSnackbar('success', 'Employee updated successfully.');
+        }
+        handleCloseDialog();
+      } catch (err) {
+        // Server violations are handled by EmployeeForm via serverErrors prop
+        if (!err?.violations) {
+          showSnackbar('error', err?.message ?? 'An error occurred. Please try again.');
+        }
       }
-      handleCloseDialog();
-    } catch (err) {
-      // Server violations are handled by EmployeeForm via serverErrors prop
-      if (!err?.violations) {
-        showSnackbar('error', err?.message ?? 'An error occurred. Please try again.');
-      }
-    }
-  }, [dialogMode, editEmployee, createMutation, updateMutation, showSnackbar, handleCloseDialog]);
+    },
+    [dialogMode, editEmployee, createMutation, updateMutation, showSnackbar, handleCloseDialog],
+  );
 
   const handleOpenDelete = useCallback((emp) => {
     setDeleteTarget(emp);
@@ -215,9 +227,12 @@ export default function EmployeesPage() {
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
-  const handleView = useCallback((emp) => {
-    navigate(`${listBase}/${emp.id}`);
-  }, [navigate, listBase]);
+  const handleView = useCallback(
+    (emp) => {
+      navigate(`${listBase}/${emp.id}`);
+    },
+    [navigate, listBase],
+  );
 
   // ── CSV Export ─────────────────────────────────────────────────────────────
 
@@ -237,12 +252,12 @@ export default function EmployeesPage() {
   return (
     <>
       <Helmet>
-        <title>Employees — Employee Portal</title>
+        <title>Employees — PeopleCore HR</title>
       </Helmet>
 
       {/* Page heading */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>
+        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
           Employees
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -250,7 +265,7 @@ export default function EmployeesPage() {
         </Typography>
       </Box>
 
-      <Card variant="outlined">
+      <Card>
         {/* Toolbar */}
         <EmployeeToolbar
           search={search}
@@ -325,7 +340,10 @@ export default function EmployeesPage() {
           pageSize={pageSize}
           totalElements={totalElements}
           onPageChange={setPage}
-          onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(0);
+          }}
           disabled={isLoading || isFetching}
         />
       </Card>

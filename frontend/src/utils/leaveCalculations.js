@@ -25,7 +25,7 @@ dayjs.extend(isBetween);
  */
 export function countWorkingDays(startDate, endDate, publicHolidays = []) {
   const start = dayjs(startDate).startOf('day');
-  const end   = dayjs(endDate).startOf('day');
+  const end = dayjs(endDate).startOf('day');
 
   if (!start.isValid() || !end.isValid()) return 0;
   if (end.isBefore(start)) return 0;
@@ -36,7 +36,7 @@ export function countWorkingDays(startDate, endDate, publicHolidays = []) {
 
   while (current.isSameOrBefore(end, 'day')) {
     const dayOfWeek = current.day(); // 0=Sun, 6=Sat
-    const dateStr   = current.format('YYYY-MM-DD');
+    const dateStr = current.format('YYYY-MM-DD');
     if (dayOfWeek !== 0 && dayOfWeek !== 6 && !holidaySet.has(dateStr)) {
       count++;
     }
@@ -55,7 +55,7 @@ export function countWorkingDays(startDate, endDate, publicHolidays = []) {
  */
 export function countCalendarDays(startDate, endDate) {
   const start = dayjs(startDate);
-  const end   = dayjs(endDate);
+  const end = dayjs(endDate);
   if (!start.isValid() || !end.isValid() || end.isBefore(start)) return 0;
   return end.diff(start, 'day') + 1;
 }
@@ -71,10 +71,10 @@ export function countCalendarDays(startDate, endDate) {
  */
 export function validateDateRange(startDate, endDate) {
   const start = dayjs(startDate);
-  const end   = dayjs(endDate);
+  const end = dayjs(endDate);
 
   if (!start.isValid()) return { valid: false, message: 'Start date is invalid.' };
-  if (!end.isValid())   return { valid: false, message: 'End date is invalid.'   };
+  if (!end.isValid()) return { valid: false, message: 'End date is invalid.' };
   if (end.isBefore(start)) {
     return { valid: false, message: 'End date must be on or after start date.' };
   }
@@ -94,9 +94,9 @@ export function validateDateRange(startDate, endDate) {
  * @returns {boolean}
  */
 export function isDateInLeaveRange(date, startDate, endDate) {
-  const d     = dayjs(date);
+  const d = dayjs(date);
   const start = dayjs(startDate);
-  const end   = dayjs(endDate);
+  const end = dayjs(endDate);
   if (!d.isValid() || !start.isValid() || !end.isValid()) return false;
   return d.isBetween(start, end, 'day', '[]');
 }
@@ -112,9 +112,9 @@ export function isDateInLeaveRange(date, startDate, endDate) {
  */
 export function doLeavesOverlap(rangeA, rangeB) {
   const aStart = dayjs(rangeA.startDate);
-  const aEnd   = dayjs(rangeA.endDate);
+  const aEnd = dayjs(rangeA.endDate);
   const bStart = dayjs(rangeB.startDate);
-  const bEnd   = dayjs(rangeB.endDate);
+  const bEnd = dayjs(rangeB.endDate);
 
   // Overlap if A starts before B ends AND B starts before A ends
   return aStart.isSameOrBefore(bEnd, 'day') && bStart.isSameOrBefore(aEnd, 'day');

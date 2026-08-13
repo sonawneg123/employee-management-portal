@@ -12,28 +12,23 @@
 import React, { useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Button,
-  Grid,
-} from '@mui/material';
-import RefreshIcon    from '@mui/icons-material/Refresh';
-import EventNoteIcon  from '@mui/icons-material/EventNote';
-import PeopleIcon     from '@mui/icons-material/People';
-import ApartmentIcon  from '@mui/icons-material/Apartment';
+import { Alert, Box, Button, Grid } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import PeopleIcon from '@mui/icons-material/People';
+import ApartmentIcon from '@mui/icons-material/Apartment';
 
 import { useDashboardSummary, useRefreshAllDashboard } from '@/hooks/useDashboard';
 import { ROUTES } from '@/constants/routes';
 
-import DashboardHeader             from '@/components/dashboard/DashboardHeader';
-import DashboardSkeleton           from '@/components/dashboard/DashboardSkeleton';
-import WelcomeCard                 from '@/components/dashboard/WelcomeCard';
-import StatisticsCards             from '@/components/dashboard/StatisticsCards';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton';
+import WelcomeCard from '@/components/dashboard/WelcomeCard';
+import StatisticsCards from '@/components/dashboard/StatisticsCards';
 import DepartmentDistributionChart from '@/components/dashboard/DepartmentDistributionChart';
-import UpcomingLeavesWidget        from '@/components/dashboard/UpcomingLeavesWidget';
-import RecentActivity              from '@/components/dashboard/RecentActivity';
-import AttendanceSummaryWidget     from '@/components/dashboard/AttendanceSummaryWidget';
+import UpcomingLeavesWidget from '@/components/dashboard/UpcomingLeavesWidget';
+import RecentActivity from '@/components/dashboard/RecentActivity';
+import AttendanceSummaryWidget from '@/components/dashboard/AttendanceSummaryWidget';
 
 /**
  * HR/Manager dashboard page — people-management view.
@@ -43,37 +38,44 @@ import AttendanceSummaryWidget     from '@/components/dashboard/AttendanceSummar
 export default function HRDashboardPage() {
   const navigate = useNavigate();
   const {
-    data:      summary,
+    data: summary,
     isLoading,
     isFetching,
     isError,
     error,
-    refresh:   refreshSummary,
+    refresh: refreshSummary,
   } = useDashboardSummary();
 
   const refreshAll = useRefreshAllDashboard();
   const handleRefresh = useCallback(() => refreshAll(), [refreshAll]);
 
-  // ── Loading ────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <>
-        <Helmet><title>HR Dashboard — Employee Portal</title></Helmet>
+        <Helmet>
+          <title>Dashboard — PeopleCore HR</title>
+        </Helmet>
         <DashboardSkeleton />
       </>
     );
   }
 
-  // ── Error ──────────────────────────────────────────────────────────────────
   if (isError) {
     return (
       <>
-        <Helmet><title>HR Dashboard — Employee Portal</title></Helmet>
+        <Helmet>
+          <title>Dashboard — PeopleCore HR</title>
+        </Helmet>
         <Box sx={{ p: 2 }}>
           <Alert
             severity="error"
             action={
-              <Button color="inherit" size="small" startIcon={<RefreshIcon />} onClick={refreshSummary}>
+              <Button
+                color="inherit"
+                size="small"
+                startIcon={<RefreshIcon />}
+                onClick={refreshSummary}
+              >
                 Retry
               </Button>
             }
@@ -85,10 +87,11 @@ export default function HRDashboardPage() {
     );
   }
 
-  // ── Data ───────────────────────────────────────────────────────────────────
   return (
     <>
-      <Helmet><title>HR Dashboard — Employee Portal</title></Helmet>
+      <Helmet>
+        <title>Dashboard — PeopleCore HR</title>
+      </Helmet>
 
       <Box sx={{ pb: 4 }}>
         <DashboardHeader

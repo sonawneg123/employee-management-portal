@@ -16,8 +16,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import MoreVertIcon  from '@mui/icons-material/MoreVert';
-import PeopleIcon    from '@mui/icons-material/People';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PeopleIcon from '@mui/icons-material/People';
 import DepartmentAvatar from './DepartmentAvatar';
 import { formatDeptCode, formatHeadName } from '@/utils/departmentFormatters';
 
@@ -74,7 +74,9 @@ export default function DepartmentCard({ department, onClick, onMenuOpen, select
                 </Typography>
                 {department.headName && (
                   <>
-                    <Typography variant="caption" color="text.disabled" sx={{ mx: 0.5 }}>·</Typography>
+                    <Typography variant="caption" color="text.disabled" sx={{ mx: 0.5 }}>
+                      ·
+                    </Typography>
                     <Typography variant="caption" color="text.secondary" noWrap>
                       {formatHeadName(department.headName)}
                     </Typography>

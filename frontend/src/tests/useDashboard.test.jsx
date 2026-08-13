@@ -25,9 +25,9 @@ import {
 // ── Mock API services ─────────────────────────────────────────────────────────
 
 vi.mock('@/services/dashboardApi', () => ({
-  getDashboardSummary:  vi.fn(),
+  getDashboardSummary: vi.fn(),
   getDashboardActivity: vi.fn(),
-  getDashboardCharts:   vi.fn(),
+  getDashboardCharts: vi.fn(),
 }));
 
 import {
@@ -40,27 +40,27 @@ import {
 
 /** @type {import('@/services/dashboardApi').DashboardSummary} */
 const MOCK_SUMMARY = {
-  totalEmployees:   42,
+  totalEmployees: 42,
   totalDepartments: 5,
-  pendingLeaves:    3,
-  presentToday:     38,
-  activeEmployees:  40,
-  onLeaveToday:     2,
-  newThisMonth:     4,
-  trendEmployees:   2,
-  trendLeaves:      -1,
-  trendAttendance:  0.05,
-  attendanceRate:   0.9,
+  pendingLeaves: 3,
+  presentToday: 38,
+  activeEmployees: 40,
+  onLeaveToday: 2,
+  newThisMonth: 4,
+  trendEmployees: 2,
+  trendLeaves: -1,
+  trendAttendance: 0.05,
+  attendanceRate: 0.9,
 };
 
 /** @type {import('@/services/dashboardApi').ActivityItem[]} */
 const MOCK_ACTIVITY = [
   {
-    id:          'act-1',
-    type:        'EMPLOYEE_JOINED',
+    id: 'act-1',
+    type: 'EMPLOYEE_JOINED',
     description: 'Alice joined the team',
-    timestamp:   '2024-01-15T10:00:00Z',
-    actorName:   'Admin',
+    timestamp: '2024-01-15T10:00:00Z',
+    actorName: 'Admin',
   },
 ];
 
@@ -68,15 +68,15 @@ const MOCK_ACTIVITY = [
 const MOCK_CHARTS = {
   departmentDistribution: [
     { name: 'Engineering', count: 20, code: 'ENG' },
-    { name: 'HR',          count: 5,  code: 'HR'  },
+    { name: 'HR', count: 5, code: 'HR' },
   ],
   attendanceTrend: [
     { date: '2024-01-14', present: 37, absent: 5 },
     { date: '2024-01-15', present: 38, absent: 4 },
   ],
   employeeStatusBreakdown: [
-    { status: 'ACTIVE',   count: 40 },
-    { status: 'INACTIVE', count: 2  },
+    { status: 'ACTIVE', count: 40 },
+    { status: 'INACTIVE', count: 2 },
   ],
 };
 
@@ -90,7 +90,7 @@ const MOCK_CHARTS = {
 function makeWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries:   { retry: false, refetchInterval: false, gcTime: 0 },
+      queries: { retry: false, refetchInterval: false, gcTime: 0 },
       mutations: { retry: false },
     },
   });
@@ -112,7 +112,7 @@ describe('useDashboardSummary', () => {
   it('returns data on successful fetch', async () => {
     getDashboardSummary.mockResolvedValue(MOCK_SUMMARY);
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDashboardSummary(), { wrapper });
+    const { result } = renderHook(() => useDashboardSummary(), { wrapper });
 
     expect(result.current.isLoading).toBe(true);
 
@@ -125,7 +125,7 @@ describe('useDashboardSummary', () => {
   it('exposes isError when fetch fails', async () => {
     getDashboardSummary.mockRejectedValue(new Error('Network error'));
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDashboardSummary(), { wrapper });
+    const { result } = renderHook(() => useDashboardSummary(), { wrapper });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
@@ -159,7 +159,7 @@ describe('useDashboardActivity', () => {
   it('returns activity array on success', async () => {
     getDashboardActivity.mockResolvedValue(MOCK_ACTIVITY);
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDashboardActivity({ limit: 5 }), { wrapper });
+    const { result } = renderHook(() => useDashboardActivity({ limit: 5 }), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -170,7 +170,7 @@ describe('useDashboardActivity', () => {
   it('returns empty array gracefully', async () => {
     getDashboardActivity.mockResolvedValue([]);
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDashboardActivity(), { wrapper });
+    const { result } = renderHook(() => useDashboardActivity(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toEqual([]);
@@ -202,7 +202,7 @@ describe('useDashboardCharts', () => {
   it('returns chart data on success', async () => {
     getDashboardCharts.mockResolvedValue(MOCK_CHARTS);
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDashboardCharts(), { wrapper });
+    const { result } = renderHook(() => useDashboardCharts(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 

@@ -23,14 +23,14 @@ import { DEPARTMENT_QUERY_KEYS } from '@/constants/employeeConstants';
 export function useDepartments() {
   const query = useQuery({
     queryKey: DEPARTMENT_QUERY_KEYS.list(),
-    queryFn:  getDepartments,
+    queryFn: getDepartments,
     staleTime: 5 * 60_000, // departments change rarely
   });
 
   return {
-    data:      query.data,
+    data: query.data,
     isLoading: query.isLoading,
-    isError:   query.isError,
-    error:     query.error,
+    isError: query.isError,
+    error: query.error,
   };
 }

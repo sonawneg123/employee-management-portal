@@ -44,12 +44,14 @@ export default function DepartmentEmployeeList({ departmentId }) {
   });
 
   const employees = data?.content ?? [];
-  const total     = data?.totalElements ?? 0;
+  const total = data?.totalElements ?? 0;
 
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+        <Box
+          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}
+        >
           <Typography variant="subtitle2" fontWeight={700}>
             Employees
           </Typography>
@@ -84,7 +86,9 @@ export default function DepartmentEmployeeList({ departmentId }) {
             {employees.map((emp) => {
               const fullName = formatFullName(emp.firstName, emp.lastName);
               return (
-                <ListItem key={emp.id} sx={{ px: 0, py: 0.75 }}
+                <ListItem
+                  key={emp.id}
+                  sx={{ px: 0, py: 0.75 }}
                   secondaryAction={<EmployeeStatusChip status={emp.status} size="small" />}
                 >
                   <ListItemAvatar sx={{ minWidth: 44 }}>

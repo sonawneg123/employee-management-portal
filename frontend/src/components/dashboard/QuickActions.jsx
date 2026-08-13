@@ -8,18 +8,13 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Grid,
-  Typography,
-} from '@mui/material';
-import PersonAddIcon   from '@mui/icons-material/PersonAdd';
-import EventNoteIcon   from '@mui/icons-material/EventNote';
-import ApartmentIcon   from '@mui/icons-material/Apartment';
-import AccessTimeIcon  from '@mui/icons-material/AccessTime';
-import StarRateIcon    from '@mui/icons-material/StarRate';
-import PeopleIcon      from '@mui/icons-material/People';
+import { Box, Button, Grid, Typography } from '@mui/material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import StarRateIcon from '@mui/icons-material/StarRate';
+import PeopleIcon from '@mui/icons-material/People';
 import { useAuth } from '@/hooks/useAuth';
 import { ROLES } from '@/constants/roles';
 import { ROUTES } from '@/constants/routes';
@@ -37,50 +32,50 @@ import { ROUTES } from '@/constants/routes';
 /** @type {QuickActionDef[]} */
 const QUICK_ACTIONS = [
   {
-    id:    'add-employee',
+    id: 'add-employee',
     label: 'Add Employee',
-    path:  ROUTES.EMPLOYEES,
-    Icon:  PersonAddIcon,
+    path: ROUTES.EMPLOYEES,
+    Icon: PersonAddIcon,
     color: 'primary',
     roles: [ROLES.ADMIN, ROLES.HR],
   },
   {
-    id:    'manage-leaves',
+    id: 'manage-leaves',
     label: 'Manage Leaves',
-    path:  ROUTES.LEAVES,
-    Icon:  EventNoteIcon,
+    path: ROUTES.LEAVES,
+    Icon: EventNoteIcon,
     color: 'warning',
     roles: [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
   },
   {
-    id:    'departments',
+    id: 'departments',
     label: 'Departments',
-    path:  ROUTES.DEPARTMENTS,
-    Icon:  ApartmentIcon,
+    path: ROUTES.DEPARTMENTS,
+    Icon: ApartmentIcon,
     color: 'secondary',
     roles: [ROLES.ADMIN, ROLES.HR],
   },
   {
-    id:    'attendance',
+    id: 'attendance',
     label: 'Attendance',
-    path:  ROUTES.ATTENDANCE,
-    Icon:  AccessTimeIcon,
+    path: ROUTES.ATTENDANCE,
+    Icon: AccessTimeIcon,
     color: 'info',
     roles: [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   },
   {
-    id:    'reviews',
+    id: 'reviews',
     label: 'Reviews',
-    path:  ROUTES.REVIEWS,
-    Icon:  StarRateIcon,
+    path: ROUTES.REVIEWS,
+    Icon: StarRateIcon,
     color: 'success',
     roles: [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER],
   },
   {
-    id:    'employees',
+    id: 'employees',
     label: 'View Employees',
-    path:  ROUTES.EMPLOYEES,
-    Icon:  PeopleIcon,
+    path: ROUTES.EMPLOYEES,
+    Icon: PeopleIcon,
     color: 'primary',
     roles: [ROLES.ADMIN, ROLES.HR, ROLES.MANAGER, ROLES.EMPLOYEE],
   },

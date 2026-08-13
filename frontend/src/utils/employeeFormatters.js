@@ -31,7 +31,7 @@ export function formatFullName(firstName, lastName) {
  */
 export function formatInitials(firstName, lastName) {
   const f = firstName?.charAt(0)?.toUpperCase() ?? '';
-  const l = lastName?.charAt(0)?.toUpperCase()  ?? '';
+  const l = lastName?.charAt(0)?.toUpperCase() ?? '';
   return `${f}${l}` || '?';
 }
 
@@ -47,7 +47,7 @@ export function formatInitials(firstName, lastName) {
 export function formatSalary(salary, currency = 'USD') {
   if (salary == null) return '—';
   return new Intl.NumberFormat('en-US', {
-    style:    'currency',
+    style: 'currency',
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -97,9 +97,7 @@ export function buildCsvString(employees, headers, fields) {
   };
 
   const headerRow = headers.map(escapeCell).join(',');
-  const dataRows  = employees.map((emp) =>
-    fields.map((key) => escapeCell(emp[key])).join(','),
-  );
+  const dataRows = employees.map((emp) => fields.map((key) => escapeCell(emp[key])).join(','));
 
   return [headerRow, ...dataRows].join('\r\n');
 }
@@ -113,9 +111,9 @@ export function buildCsvString(employees, headers, fields) {
  */
 export function downloadCsv(csvContent, filename = 'employees.csv') {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href     = url;
+  link.href = url;
   link.download = filename;
   link.style.display = 'none';
   document.body.appendChild(link);
@@ -135,8 +133,14 @@ export function downloadCsv(csvContent, filename = 'employees.csv') {
  */
 export function avatarColorFromName(name) {
   const COLORS = [
-    '#1976d2', '#7c3aed', '#2e7d32', '#ed6c02',
-    '#0288d1', '#c62828', '#00796b', '#f57f17',
+    '#1976d2',
+    '#7c3aed',
+    '#2e7d32',
+    '#ed6c02',
+    '#0288d1',
+    '#c62828',
+    '#00796b',
+    '#f57f17',
   ];
   if (!name) return COLORS[0];
   const code = name.charCodeAt(0) % COLORS.length;
@@ -169,8 +173,8 @@ export function formatStatusLabel(status) {
  */
 export function formatYearsOfService(dateOfJoining) {
   if (!dateOfJoining) return '—';
-  const join  = new Date(dateOfJoining);
-  const now   = new Date();
+  const join = new Date(dateOfJoining);
+  const now = new Date();
   const years = Math.floor((now - join) / (365.25 * 24 * 60 * 60 * 1000));
   if (years < 1) return '< 1 yr';
   return `${years} ${years === 1 ? 'yr' : 'yrs'}`;

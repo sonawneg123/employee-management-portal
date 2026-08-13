@@ -14,10 +14,10 @@
  * @readonly
  */
 export const EMPLOYEE_QUERY_KEYS = /** @type {const} */ ({
-  all:    ()          => ['employees'],
-  lists:  ()          => ['employees', 'list'],
-  list:   (params)    => ['employees', 'list', params],
-  detail: (id)        => ['employees', 'detail', id],
+  all: () => ['employees'],
+  lists: () => ['employees', 'list'],
+  list: (params) => ['employees', 'list', params],
+  detail: (id) => ['employees', 'detail', id],
 });
 
 /**
@@ -26,7 +26,7 @@ export const EMPLOYEE_QUERY_KEYS = /** @type {const} */ ({
  * @readonly
  */
 export const DEPARTMENT_QUERY_KEYS = /** @type {const} */ ({
-  all:  () => ['departments'],
+  all: () => ['departments'],
   list: () => ['departments', 'list'],
 });
 
@@ -45,10 +45,10 @@ export const DEPARTMENT_QUERY_KEYS = /** @type {const} */ ({
  * @type {StatusOption[]}
  */
 export const EMPLOYEE_STATUS_OPTIONS = [
-  { value: 'ACTIVE',     label: 'Active',      color: 'success' },
-  { value: 'INACTIVE',   label: 'Inactive',    color: 'default' },
-  { value: 'ON_LEAVE',   label: 'On Leave',    color: 'info'    },
-  { value: 'TERMINATED', label: 'Terminated',  color: 'error'   },
+  { value: 'ACTIVE', label: 'Active', color: 'success' },
+  { value: 'INACTIVE', label: 'Inactive', color: 'default' },
+  { value: 'ON_LEAVE', label: 'On Leave', color: 'info' },
+  { value: 'TERMINATED', label: 'Terminated', color: 'error' },
 ];
 
 /**
@@ -74,11 +74,11 @@ export const EMPLOYEE_STATUS_MAP = Object.fromEntries(
  * @type {SortOption[]}
  */
 export const EMPLOYEE_SORT_OPTIONS = [
-  { value: 'createdAt',    label: 'Date Added'   },
+  { value: 'createdAt', label: 'Date Added' },
   { value: 'employeeCode', label: 'Employee Code' },
-  { value: 'jobTitle',     label: 'Job Title'    },
-  { value: 'dateOfJoining',label: 'Join Date'    },
-  { value: 'salary',       label: 'Salary'       },
+  { value: 'jobTitle', label: 'Job Title' },
+  { value: 'dateOfJoining', label: 'Join Date' },
+  { value: 'salary', label: 'Salary' },
 ];
 
 // ── Pagination ────────────────────────────────────────────────────────────────
@@ -120,14 +120,14 @@ export const EMPLOYEE_DEFAULT_DIRECTION = 'desc';
  * @enum {string}
  */
 export const EMPLOYEE_COLUMNS = /** @type {const} */ ({
-  EMPLOYEE_CODE:  'employeeCode',
-  FULL_NAME:      'firstName',
-  JOB_TITLE:      'jobTitle',
-  DEPARTMENT:     'departmentName',
-  STATUS:         'status',
-  DATE_OF_JOINING:'dateOfJoining',
-  SALARY:         'salary',
-  ACTIONS:        'actions',
+  EMPLOYEE_CODE: 'employeeCode',
+  FULL_NAME: 'firstName',
+  JOB_TITLE: 'jobTitle',
+  DEPARTMENT: 'departmentName',
+  STATUS: 'status',
+  DATE_OF_JOINING: 'dateOfJoining',
+  SALARY: 'salary',
+  ACTIONS: 'actions',
 });
 
 // ── CSV Export ────────────────────────────────────────────────────────────────
@@ -186,17 +186,17 @@ export const SEARCH_DEBOUNCE_MS = 400;
  * @type {Object}
  */
 export const EMPLOYEE_FORM_DEFAULTS = {
-  employeeCode:   '',
-  firstName:      '',
-  lastName:       '',
-  email:          '',
-  jobTitle:       '',
-  departmentId:   '',
-  phone:          '',
-  address:        '',
-  dateOfJoining:  '',
-  salary:         '',
-  status:         'ACTIVE',
-  managerId:      '',
-  profilePhotoUrl:'',
+  employeeCode: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  jobTitle: '',
+  departmentId: '',
+  phone: '',
+  address: '',
+  dateOfJoining: '',
+  salary: '',
+  status: 'ACTIVE',
+  managerId: '',
+  profilePhotoUrl: '',
 };

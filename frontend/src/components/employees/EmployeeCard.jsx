@@ -17,8 +17,8 @@ import {
   Typography,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import EmployeeAvatar        from './EmployeeAvatar';
-import EmployeeStatusChip    from './EmployeeStatusChip';
+import EmployeeAvatar from './EmployeeAvatar';
+import EmployeeStatusChip from './EmployeeStatusChip';
 import EmployeeDepartmentChip from './EmployeeDepartmentChip';
 import { formatFullName, formatJoinDate } from '@/utils/employeeFormatters';
 
@@ -74,7 +74,11 @@ export default function EmployeeCard({ employee, onClick, onMenuOpen, selected =
                 <EmployeeDepartmentChip departmentName={employee.departmentName} size="small" />
                 <EmployeeStatusChip status={employee.status} size="small" />
               </Box>
-              <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.disabled"
+                sx={{ mt: 0.5, display: 'block' }}
+              >
                 Joined {formatJoinDate(employee.dateOfJoining)}
               </Typography>
             </Box>

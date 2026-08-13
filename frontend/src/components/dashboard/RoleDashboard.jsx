@@ -19,14 +19,14 @@ import { Grid } from '@mui/material';
 import { ROLES } from '@/constants/roles';
 import { useAuth } from '@/contexts/AuthContext';
 
-import WelcomeCard                  from './WelcomeCard';
-import StatisticsCards              from './StatisticsCards';
-import QuickActions                 from './QuickActions';
-import RecentActivity               from './RecentActivity';
-import UpcomingLeavesWidget         from './UpcomingLeavesWidget';
-import AttendanceSummaryWidget      from './AttendanceSummaryWidget';
-import DepartmentDistributionChart  from './DepartmentDistributionChart';
-import EmployeeStatusChart          from './EmployeeStatusChart';
+import WelcomeCard from './WelcomeCard';
+import StatisticsCards from './StatisticsCards';
+import QuickActions from './QuickActions';
+import RecentActivity from './RecentActivity';
+import UpcomingLeavesWidget from './UpcomingLeavesWidget';
+import AttendanceSummaryWidget from './AttendanceSummaryWidget';
+import DepartmentDistributionChart from './DepartmentDistributionChart';
+import EmployeeStatusChart from './EmployeeStatusChart';
 
 // ── Role-priority helper ──────────────────────────────────────────────────────
 
@@ -38,9 +38,9 @@ import EmployeeStatusChart          from './EmployeeStatusChart';
  * @returns {string} The effective role string.
  */
 function resolveRole(roles = []) {
-  if (roles.includes(ROLES.ADMIN))    return ROLES.ADMIN;
-  if (roles.includes(ROLES.HR))       return ROLES.HR;
-  if (roles.includes(ROLES.MANAGER))  return ROLES.MANAGER;
+  if (roles.includes(ROLES.ADMIN)) return ROLES.ADMIN;
+  if (roles.includes(ROLES.HR)) return ROLES.HR;
+  if (roles.includes(ROLES.MANAGER)) return ROLES.MANAGER;
   return ROLES.EMPLOYEE;
 }
 
@@ -204,9 +204,9 @@ function EmployeeDashboard() {
 
 /** @type {Record<string, React.ComponentType>} */
 const ROLE_LAYOUT_MAP = {
-  [ROLES.ADMIN]:    AdminDashboard,
-  [ROLES.HR]:       HrDashboard,
-  [ROLES.MANAGER]:  ManagerDashboard,
+  [ROLES.ADMIN]: AdminDashboard,
+  [ROLES.HR]: HrDashboard,
+  [ROLES.MANAGER]: ManagerDashboard,
   [ROLES.EMPLOYEE]: EmployeeDashboard,
 };
 
@@ -220,8 +220,8 @@ const ROLE_LAYOUT_MAP = {
  */
 export default function RoleDashboard() {
   const { user } = useAuth();
-  const role     = resolveRole(user?.roles);
-  const Layout   = ROLE_LAYOUT_MAP[role] ?? EmployeeDashboard;
+  const role = resolveRole(user?.roles);
+  const Layout = ROLE_LAYOUT_MAP[role] ?? EmployeeDashboard;
 
   return <Layout />;
 }

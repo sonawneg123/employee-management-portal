@@ -21,7 +21,13 @@ import { LEAVE_TYPE_OPTIONS, LEAVE_STATUS_OPTIONS } from '@/constants/leaveConst
  * @param {LeaveFiltersProps} props
  * @returns {JSX.Element}
  */
-export default function LeaveFilters({ status, type, onStatusChange, onTypeChange, disabled = false }) {
+export default function LeaveFilters({
+  status,
+  type,
+  onStatusChange,
+  onTypeChange,
+  disabled = false,
+}) {
   return (
     <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
       <FormControl size="small" sx={{ minWidth: 150 }} disabled={disabled}>

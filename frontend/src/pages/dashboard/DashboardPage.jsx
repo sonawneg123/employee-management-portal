@@ -19,10 +19,10 @@ import { Alert, Box, Button } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { useDashboardSummary, useRefreshAllDashboard } from '@/hooks/useDashboard';
-import DashboardHeader   from '@/components/dashboard/DashboardHeader';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton';
-import EmptyDashboard    from '@/components/dashboard/EmptyDashboard';
-import RoleDashboard     from '@/components/dashboard/RoleDashboard';
+import EmptyDashboard from '@/components/dashboard/EmptyDashboard';
+import RoleDashboard from '@/components/dashboard/RoleDashboard';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -36,12 +36,12 @@ import RoleDashboard     from '@/components/dashboard/RoleDashboard';
  */
 export default function DashboardPage() {
   const {
-    data:       summary,
+    data: summary,
     isLoading,
     isFetching,
     isError,
     error,
-    refresh:    refreshSummary,
+    refresh: refreshSummary,
   } = useDashboardSummary();
 
   const refreshAll = useRefreshAllDashboard();
@@ -99,9 +99,7 @@ export default function DashboardPage() {
 
   // ── Empty state ────────────────────────────────────────────────────────────
 
-  const isEmpty =
-    !summary ||
-    (summary.totalEmployees === 0 && summary.totalDepartments === 0);
+  const isEmpty = !summary || (summary.totalEmployees === 0 && summary.totalDepartments === 0);
 
   if (isEmpty) {
     return (

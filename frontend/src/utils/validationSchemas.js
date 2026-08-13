@@ -22,14 +22,9 @@ import { z } from 'zod';
  * @type {z.ZodObject}
  */
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
 
-  password: z
-    .string()
-    .min(1, 'Password is required'),
+  password: z.string().min(1, 'Password is required'),
 
   rememberMe: z.boolean().optional(),
 });
@@ -53,18 +48,11 @@ export const registerSchema = z
       .min(1, 'Last name is required')
       .max(100, 'Last name must not exceed 100 characters'),
 
-    email: z
-      .string()
-      .min(1, 'Email is required')
-      .email('Please enter a valid email address'),
+    email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
 
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
 
-    confirmPassword: z
-      .string()
-      .min(1, 'Please confirm your password'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -99,10 +87,7 @@ export const employeeSchema = z.object({
     .min(1, 'Last name is required')
     .max(100, 'Last name must not exceed 100 characters'),
 
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
 
   employeeCode: z
     .string()
@@ -114,9 +99,7 @@ export const employeeSchema = z.object({
     .min(1, 'Job title is required')
     .max(100, 'Job title must not exceed 100 characters'),
 
-  departmentId: z
-    .string()
-    .min(1, 'Department is required'),
+  departmentId: z.string().min(1, 'Department is required'),
 
   phone: z
     .string()
@@ -130,9 +113,7 @@ export const employeeSchema = z.object({
     .optional()
     .or(z.literal('')),
 
-  dateOfJoining: z
-    .string()
-    .min(1, 'Hire date is required'),
+  dateOfJoining: z.string().min(1, 'Hire date is required'),
 
   salary: z
     .union([z.number(), z.string()])
@@ -140,11 +121,9 @@ export const employeeSchema = z.object({
     .refine((val) => !isNaN(val), { message: 'Salary is required' })
     .refine((val) => val >= 0, { message: 'Salary must be a positive number' }),
 
-  status: z
-    .enum(
-      ['ACTIVE', 'INACTIVE', 'ON_LEAVE', 'TERMINATED'],
-      { errorMap: () => ({ message: 'Please select a valid status' }) },
-    ),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'ON_LEAVE', 'TERMINATED'], {
+    errorMap: () => ({ message: 'Please select a valid status' }),
+  }),
 
   managerId: z.string().optional().or(z.literal('')),
 

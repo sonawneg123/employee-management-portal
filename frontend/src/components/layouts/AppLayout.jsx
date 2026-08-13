@@ -1,8 +1,8 @@
 /**
- * @fileoverview AppLayout — the authenticated application shell.
+ * @fileoverview AppLayout — authenticated application shell.
  *
- * Renders the persistent Sidebar and Topbar alongside the page content area.
- * The {@link Outlet} from React Router renders the active route's page component.
+ * Renders the dark persistent Sidebar alongside the main content area.
+ * The Topbar floats above the content. On mobile the sidebar is a temporary drawer.
  */
 
 import React, { useState } from 'react';
@@ -11,24 +11,18 @@ import { Box, useMediaQuery, useTheme } from '@mui/material';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
-/** Width of the sidebar when open (pixels). */
-const SIDEBAR_WIDTH = 260;
+/** Sidebar width in pixels. */
+const SIDEBAR_WIDTH = 256;
 
 /**
- * The main authenticated application layout.
- *
- * On mobile (< md breakpoint) the sidebar is rendered as a temporary drawer.
- * On desktop it is persistent and always visible.
+ * Authenticated application layout with dark sidebar + topbar.
  *
  * @returns {JSX.Element}
  */
 export default function AppLayout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
-
-  /** Toggles the sidebar open/closed state. */
-  const handleSidebarToggle = () => setSidebarOpen((prev) => !prev);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -49,20 +43,17 @@ export default function AppLayout() {
           flexDirection: 'column',
           minWidth: 0,
           ml: isMobile ? 0 : `${SIDEBAR_WIDTH}px`,
-          transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
         }}
       >
-        <Topbar onMenuClick={handleSidebarToggle} sidebarWidth={SIDEBAR_WIDTH} />
+        <Topbar onMenuClick={() => setSidebarOpen((prev) => !prev)} sidebarWidth={SIDEBAR_WIDTH} />
 
-        {/* Page content */}
+        {/* Page content — offset by topbar height */}
         <Box
           sx={{
             flexGrow: 1,
             p: { xs: 2, sm: 3 },
-            pt: { xs: 10, sm: 11 },
+            pt: { xs: 9, sm: 10 },
+            animation: 'fadeUp 0.3s ease',
           }}
         >
           <Outlet />

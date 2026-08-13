@@ -20,11 +20,11 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import AddIcon      from '@mui/icons-material/Add';
-import RefreshIcon  from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import DownloadIcon from '@mui/icons-material/Download';
-import SortIcon     from '@mui/icons-material/Sort';
-import EmployeeSearch  from './EmployeeSearch';
+import SortIcon from '@mui/icons-material/Sort';
+import EmployeeSearch from './EmployeeSearch';
 import EmployeeFilters from './EmployeeFilters';
 import {
   EMPLOYEE_SORT_OPTIONS,
@@ -85,18 +85,14 @@ export default function EmployeeToolbar({
       {/* Row 1: search + filters */}
       <Box
         sx={{
-          display:    'flex',
-          flexWrap:   'wrap',
-          gap:        1.5,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 1.5,
           alignItems: 'center',
           mb: 1.5,
         }}
       >
-        <EmployeeSearch
-          value={search}
-          onSearch={onSearchChange}
-          disabled={isFetching}
-        />
+        <EmployeeSearch value={search} onSearch={onSearchChange} disabled={isFetching} />
         <EmployeeFilters
           departmentId={departmentId}
           status={status}
@@ -160,8 +156,8 @@ export default function EmployeeToolbar({
       {/* Row 2: count + action buttons */}
       <Box
         sx={{
-          display:        'flex',
-          alignItems:     'center',
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           mt: 1.5,
           flexWrap: 'wrap',
@@ -169,7 +165,9 @@ export default function EmployeeToolbar({
         }}
       >
         <Typography variant="body2" color="text.secondary">
-          {totalElements != null ? `${totalElements} employee${totalElements !== 1 ? 's' : ''}` : ''}
+          {totalElements != null
+            ? `${totalElements} employee${totalElements !== 1 ? 's' : ''}`
+            : ''}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -182,7 +180,7 @@ export default function EmployeeToolbar({
               sx={{
                 animation: isFetching ? 'spin 1s linear infinite' : 'none',
                 '@keyframes spin': {
-                  '0%':   { transform: 'rotate(0deg)' },
+                  '0%': { transform: 'rotate(0deg)' },
                   '100%': { transform: 'rotate(360deg)' },
                 },
               }}

@@ -35,11 +35,11 @@ export function useRegister() {
   });
 
   return {
-    mutate:    mutation.mutateAsync,
+    mutate: mutation.mutateAsync,
     isPending: mutation.isPending,
-    isError:   mutation.isError,
+    isError: mutation.isError,
     isSuccess: mutation.isSuccess,
-    error:     /** @type {any} */ (mutation.error),
-    reset:     mutation.reset,
+    error: /** @type {any} */ (mutation.error),
+    reset: mutation.reset,
   };
 }

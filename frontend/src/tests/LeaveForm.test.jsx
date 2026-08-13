@@ -27,11 +27,11 @@ const theme = createTheme();
 
 function renderForm(overrides = {}) {
   const defaults = {
-    formId:        'test-leave-form',
-    defaultValues:  {},
-    onSubmit:       vi.fn(),
-    isSubmitting:   false,
-    serverErrors:   undefined,
+    formId: 'test-leave-form',
+    defaultValues: {},
+    onSubmit: vi.fn(),
+    isSubmitting: false,
+    serverErrors: undefined,
   };
   return render(
     <ThemeProvider theme={theme}>
@@ -91,7 +91,7 @@ describe('LeaveForm', () => {
   it('shows working-days chip after valid future dates are entered', async () => {
     renderForm();
     fireEvent.change(screen.getByLabelText(/start date/i), { target: { value: futureDate(1) } });
-    fireEvent.change(screen.getByLabelText(/end date/i),   { target: { value: futureDate(5) } });
+    fireEvent.change(screen.getByLabelText(/end date/i), { target: { value: futureDate(5) } });
     await waitFor(() => {
       // The chip label contains "working day"
       expect(screen.getByLabelText(/working day/i)).toBeInTheDocument();
@@ -129,7 +129,7 @@ describe('LeaveForm', () => {
     // LEAVE_FORM_DEFAULTS already sets leaveType=ANNUAL — no need to select it.
     // Just fill the required date fields.
     fireEvent.change(screen.getByLabelText(/start date/i), { target: { value: futureDate(2) } });
-    fireEvent.change(screen.getByLabelText(/end date/i),   { target: { value: futureDate(5) } });
+    fireEvent.change(screen.getByLabelText(/end date/i), { target: { value: futureDate(5) } });
 
     const form = document.getElementById('test-leave-form');
     fireEvent.submit(form);
@@ -154,7 +154,7 @@ describe('LeaveForm', () => {
 
     // Fill required date fields to pass those checks
     fireEvent.change(screen.getByLabelText(/start date/i), { target: { value: futureDate(2) } });
-    fireEvent.change(screen.getByLabelText(/end date/i),   { target: { value: futureDate(5) } });
+    fireEvent.change(screen.getByLabelText(/end date/i), { target: { value: futureDate(5) } });
 
     // Enter invalid URL
     fireEvent.change(screen.getByLabelText(/attachment url/i), { target: { value: 'not-a-url' } });

@@ -27,7 +27,7 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { HelmetProvider } from 'react-helmet-async';
 
 import { AuthProvider, AuthContext, useAuth } from '@/contexts/AuthContext';
-import LoginPage   from '@/pages/auth/LoginPage';
+import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import DashboardRedirect from '@/components/common/DashboardRedirect';
 
@@ -44,9 +44,9 @@ vi.mock('@/services/authApi');
 
 vi.mock('@/utils/jwtUtils', () => ({
   isTokenExpired: vi.fn(() => false),
-  getTokenRoles:  vi.fn(() => []),
-  decodeToken:    vi.fn(() => null),
-  getTokenSubject:vi.fn(() => null),
+  getTokenRoles: vi.fn(() => []),
+  decodeToken: vi.fn(() => null),
+  getTokenSubject: vi.fn(() => null),
   getTokenExpiry: vi.fn(() => null),
 }));
 
@@ -77,9 +77,7 @@ function renderWithRealAuth(ui, { initialPath = '/' } = {}) {
       <QueryClientProvider client={qc}>
         <ThemeProvider theme={testTheme}>
           <MemoryRouter initialEntries={[initialPath]}>
-            <AuthProvider>
-              {ui}
-            </AuthProvider>
+            <AuthProvider>{ui}</AuthProvider>
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -95,9 +93,15 @@ function renderWithMockedAuth(ui, { authContext = {}, initialPath = '/' } = {}) 
   const qc = makeQueryClient();
   const user = userEvent.setup();
   const defaultAuth = {
-    user: null, token: null, isAuthenticated: false, isLoading: false,
-    login: vi.fn(), register: vi.fn(), logout: vi.fn(),
-    hasRole: vi.fn(() => false), hasAnyRole: vi.fn(() => false),
+    user: null,
+    token: null,
+    isAuthenticated: false,
+    isLoading: false,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    hasRole: vi.fn(() => false),
+    hasAnyRole: vi.fn(() => false),
     ...authContext,
   };
   const result = render(
@@ -105,9 +109,7 @@ function renderWithMockedAuth(ui, { authContext = {}, initialPath = '/' } = {}) 
       <QueryClientProvider client={qc}>
         <ThemeProvider theme={testTheme}>
           <MemoryRouter initialEntries={[initialPath]}>
-            <AuthContext.Provider value={defaultAuth}>
-              {ui}
-            </AuthContext.Provider>
+            <AuthContext.Provider value={defaultAuth}>{ui}</AuthContext.Provider>
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -119,32 +121,46 @@ function renderWithMockedAuth(ui, { authContext = {}, initialPath = '/' } = {}) 
 // ── 1. Role-based login redirects ─────────────────────────────────────────────
 
 describe('Role-based login → dashboard redirect', () => {
-  beforeEach(() => { localStorage.clear(); vi.clearAllMocks(); });
-  afterEach(()  => { localStorage.clear(); });
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+  afterEach(() => {
+    localStorage.clear();
+  });
 
   const cases = [
-    { role: ROLES.ADMIN,    email: 'admin@company.com',   target: ROUTES.ADMIN_DASHBOARD },
-    { role: ROLES.HR,       email: 'hr@company.com',      target: ROUTES.HR_DASHBOARD },
-    { role: ROLES.MANAGER,  email: 'mgr@company.com',     target: ROUTES.HR_DASHBOARD },
-    { role: ROLES.EMPLOYEE, email: 'emp@example.com',     target: ROUTES.EMPLOYEE_DASHBOARD },
+    { role: ROLES.ADMIN, email: 'admin@company.com', target: ROUTES.ADMIN_DASHBOARD },
+    { role: ROLES.HR, email: 'hr@company.com', target: ROUTES.HR_DASHBOARD },
+    { role: ROLES.MANAGER, email: 'mgr@company.com', target: ROUTES.HR_DASHBOARD },
+    { role: ROLES.EMPLOYEE, email: 'emp@example.com', target: ROUTES.EMPLOYEE_DASHBOARD },
   ];
 
   cases.forEach(({ role, email, target }) => {
     it(`${role} navigates to ${target}`, async () => {
       vi.mocked(authApi.login).mockResolvedValueOnce({
-        accessToken: `tok-${role}`, tokenType: 'Bearer', expiresIn: 86400,
-        userId: `user-${role}`, email,
-        firstName: 'Test', lastName: 'User',
+        accessToken: `tok-${role}`,
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: `user-${role}`,
+        email,
+        firstName: 'Test',
+        lastName: 'User',
         roles: [role],
       });
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
           <MemoryRouter>
-            <AuthProvider><Capture /></AuthProvider>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
           </MemoryRouter>
         </QueryClientProvider>,
       );
@@ -163,12 +179,18 @@ describe('Role-based login → dashboard redirect', () => {
 // ── 2. Wrong password → 401 on login form ─────────────────────────────────────
 
 describe('LoginPage — wrong password (401)', () => {
-  afterEach(() => { vi.clearAllMocks(); localStorage.clear(); });
+  afterEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
 
   it('displays "Invalid email or password." for bad credentials', async () => {
     const error401 = {
-      status: 401, title: 'Authentication Failed',
-      message: 'Invalid email or password.', violations: null, isNetwork: false,
+      status: 401,
+      title: 'Authentication Failed',
+      message: 'Invalid email or password.',
+      violations: null,
+      isNetwork: false,
     };
     const loginMock = vi.fn().mockRejectedValue(error401);
 
@@ -191,7 +213,9 @@ describe('LoginPage — wrong password (401)', () => {
 
   it('displays network error message when server unreachable', async () => {
     const networkError = {
-      status: 0, message: 'Unable to reach the server. Please check your connection.', isNetwork: true,
+      status: 0,
+      message: 'Unable to reach the server. Please check your connection.',
+      isNetwork: true,
     };
     const loginMock = vi.fn().mockRejectedValue(networkError);
 
@@ -208,8 +232,11 @@ describe('LoginPage — wrong password (401)', () => {
 
   it('displays account-disabled message (401, title "Account Disabled")', async () => {
     const disabledError = {
-      status: 401, title: 'Account Disabled',
-      message: 'This account has been disabled.', violations: null, isNetwork: false,
+      status: 401,
+      title: 'Account Disabled',
+      message: 'This account has been disabled.',
+      violations: null,
+      isNetwork: false,
     };
     const loginMock = vi.fn().mockRejectedValue(disabledError);
 
@@ -226,7 +253,10 @@ describe('LoginPage — wrong password (401)', () => {
 
   it('preserves the email field after a failed login', async () => {
     const error401 = {
-      status: 401, message: 'Invalid email or password.', violations: null, isNetwork: false,
+      status: 401,
+      message: 'Invalid email or password.',
+      violations: null,
+      isNetwork: false,
     };
     const loginMock = vi.fn().mockRejectedValue(error401);
 
@@ -246,7 +276,10 @@ describe('LoginPage — wrong password (401)', () => {
 
   it('does not show a raw stack trace or exception class name', async () => {
     const error401 = {
-      status: 401, message: 'Invalid email or password.', violations: null, isNetwork: false,
+      status: 401,
+      message: 'Invalid email or password.',
+      violations: null,
+      isNetwork: false,
     };
     const loginMock = vi.fn().mockRejectedValue(error401);
 
@@ -269,11 +302,14 @@ describe('LoginPage — wrong password (401)', () => {
 // ── 3. Duplicate email on registration → 409 ──────────────────────────────────
 
 describe('RegisterPage — duplicate email (409)', () => {
-  afterEach(() => { vi.clearAllMocks(); localStorage.clear(); });
+  afterEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+  });
 
   async function fillAndSubmit(user) {
     await user.type(screen.getByLabelText(/first name/i), 'Jane');
-    await user.type(screen.getByLabelText(/last name/i),  'Doe');
+    await user.type(screen.getByLabelText(/last name/i), 'Doe');
     await user.type(screen.getByLabelText(/email address/i), 'existing@example.com');
     await user.type(screen.getByLabelText(/^password/i), 'StrongP@ss1');
     await user.type(screen.getByLabelText(/confirm password/i), 'StrongP@ss1');
@@ -282,8 +318,10 @@ describe('RegisterPage — duplicate email (409)', () => {
 
   it('shows duplicate-email message and stays on register page', async () => {
     const error409 = {
-      status: 409, title: 'Duplicate Resource',
-      message: 'User already exists with email: existing@example.com', violations: null,
+      status: 409,
+      title: 'Duplicate Resource',
+      message: 'User already exists with email: existing@example.com',
+      violations: null,
     };
     const registerMock = vi.fn().mockRejectedValue(error409);
 
@@ -294,9 +332,12 @@ describe('RegisterPage — duplicate email (409)', () => {
 
     await fillAndSubmit(user);
 
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent(/already registered/i);
-    }, { timeout: 10_000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('alert')).toHaveTextContent(/already registered/i);
+      },
+      { timeout: 10_000 },
+    );
 
     // No navigation to dashboard
     expect(mockNavigate).not.toHaveBeenCalled();
@@ -306,13 +347,18 @@ describe('RegisterPage — duplicate email (409)', () => {
     const error409 = { status: 409, message: 'User already exists', violations: null };
     const registerMock = vi.fn().mockRejectedValue(error409);
 
-    const { user } = renderWithMockedAuth(<RegisterPage />, { authContext: { register: registerMock } });
+    const { user } = renderWithMockedAuth(<RegisterPage />, {
+      authContext: { register: registerMock },
+    });
 
     await fillAndSubmit(user);
 
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toBeInTheDocument();
-    }, { timeout: 10_000 });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('alert')).toBeInTheDocument();
+      },
+      { timeout: 10_000 },
+    );
 
     // Fields should still be populated (React Hook Form doesn't reset on error)
     expect(screen.getByLabelText(/email address/i)).toHaveValue('existing@example.com');
@@ -326,13 +372,20 @@ describe('RegisterPage — duplicate email (409)', () => {
     };
     const registerMock = vi.fn().mockRejectedValue(errorWithViolations);
 
-    const { user } = renderWithMockedAuth(<RegisterPage />, { authContext: { register: registerMock } });
+    const { user } = renderWithMockedAuth(<RegisterPage />, {
+      authContext: { register: registerMock },
+    });
 
     await fillAndSubmit(user);
 
-    await waitFor(() => {
-      expect(screen.getByText('Password must be between 8 and 100 characters')).toBeInTheDocument();
-    }, { timeout: 10_000 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText('Password must be between 8 and 100 characters'),
+        ).toBeInTheDocument();
+      },
+      { timeout: 10_000 },
+    );
   }, 15_000);
 
   it('shows role info note about Employee-only account creation', () => {
@@ -345,14 +398,16 @@ describe('RegisterPage — duplicate email (409)', () => {
 // ── 4. DashboardRedirect — role routing ───────────────────────────────────────
 
 describe('DashboardRedirect — role routing', () => {
-  afterEach(() => { vi.clearAllMocks(); });
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
 
   const redirectCases = [
-    { roles: [ROLES.ADMIN],    expected: ROUTES.ADMIN_DASHBOARD,    label: 'ADMIN' },
-    { roles: [ROLES.HR],       expected: ROUTES.HR_DASHBOARD,       label: 'HR' },
-    { roles: [ROLES.MANAGER],  expected: ROUTES.HR_DASHBOARD,       label: 'MANAGER' },
+    { roles: [ROLES.ADMIN], expected: ROUTES.ADMIN_DASHBOARD, label: 'ADMIN' },
+    { roles: [ROLES.HR], expected: ROUTES.HR_DASHBOARD, label: 'HR' },
+    { roles: [ROLES.MANAGER], expected: ROUTES.HR_DASHBOARD, label: 'MANAGER' },
     { roles: [ROLES.EMPLOYEE], expected: ROUTES.EMPLOYEE_DASHBOARD, label: 'EMPLOYEE' },
-    { roles: [],               expected: ROUTES.EMPLOYEE_DASHBOARD, label: 'unknown role' },
+    { roles: [], expected: ROUTES.EMPLOYEE_DASHBOARD, label: 'unknown role' },
   ];
 
   redirectCases.forEach(({ roles, expected, label }) => {
@@ -363,17 +418,22 @@ describe('DashboardRedirect — role routing', () => {
         <QueryClientProvider client={qc}>
           <ThemeProvider theme={testTheme}>
             <MemoryRouter initialEntries={['/dashboard']}>
-              <AuthContext.Provider value={{
-                user: { userId: 'u1', email: 'u@u.com', firstName: 'U', lastName: 'U', roles },
-                isAuthenticated: true, isLoading: false,
-                login: vi.fn(), register: vi.fn(), logout: vi.fn(),
-                hasRole: (r) => roles.includes(r),
-                hasAnyRole: (rs) => rs.some((r) => roles.includes(r)),
-              }}>
+              <AuthContext.Provider
+                value={{
+                  user: { userId: 'u1', email: 'u@u.com', firstName: 'U', lastName: 'U', roles },
+                  isAuthenticated: true,
+                  isLoading: false,
+                  login: vi.fn(),
+                  register: vi.fn(),
+                  logout: vi.fn(),
+                  hasRole: (r) => roles.includes(r),
+                  hasAnyRole: (rs) => rs.some((r) => roles.includes(r)),
+                }}
+              >
                 <Routes>
                   <Route path="/dashboard" element={<DashboardRedirect />} />
-                  <Route path={ROUTES.ADMIN_DASHBOARD}    element={<div>Admin Dashboard</div>} />
-                  <Route path={ROUTES.HR_DASHBOARD}       element={<div>HR Dashboard</div>} />
+                  <Route path={ROUTES.ADMIN_DASHBOARD} element={<div>Admin Dashboard</div>} />
+                  <Route path={ROUTES.HR_DASHBOARD} element={<div>HR Dashboard</div>} />
                   <Route path={ROUTES.EMPLOYEE_DASHBOARD} element={<div>Employee Dashboard</div>} />
                 </Routes>
               </AuthContext.Provider>
@@ -384,8 +444,8 @@ describe('DashboardRedirect — role routing', () => {
 
       // Route target should be rendered
       const targets = {
-        [ROUTES.ADMIN_DASHBOARD]:    'Admin Dashboard',
-        [ROUTES.HR_DASHBOARD]:       'HR Dashboard',
+        [ROUTES.ADMIN_DASHBOARD]: 'Admin Dashboard',
+        [ROUTES.HR_DASHBOARD]: 'HR Dashboard',
         [ROUTES.EMPLOYEE_DASHBOARD]: 'Employee Dashboard',
       };
       expect(screen.getByText(targets[expected])).toBeInTheDocument();
@@ -396,24 +456,37 @@ describe('DashboardRedirect — role routing', () => {
 // ── 5. Session persistence ────────────────────────────────────────────────────
 
 describe('Session persistence', () => {
-  beforeEach(() => { localStorage.clear(); vi.clearAllMocks(); });
-  afterEach(()  => { localStorage.clear(); });
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+  afterEach(() => {
+    localStorage.clear();
+  });
 
   it('restores authenticated state from localStorage on mount', () => {
     const storedUser = {
-      userId: 'u1', email: 'restored@example.com',
-      firstName: 'Restored', lastName: 'User', roles: ['ROLE_EMPLOYEE'],
+      userId: 'u1',
+      email: 'restored@example.com',
+      firstName: 'Restored',
+      lastName: 'User',
+      roles: ['ROLE_EMPLOYEE'],
     };
     setItem(TOKEN_STORAGE_KEY, 'valid.token.here');
     setItem(USER_STORAGE_KEY, storedUser);
 
     let authCtx;
-    function Capture() { authCtx = useAuth(); return null; }
+    function Capture() {
+      authCtx = useAuth();
+      return null;
+    }
     const qc = makeQueryClient();
     render(
       <QueryClientProvider client={qc}>
         <MemoryRouter>
-          <AuthProvider><Capture /></AuthProvider>
+          <AuthProvider>
+            <Capture />
+          </AuthProvider>
         </MemoryRouter>
       </QueryClientProvider>,
     );
@@ -424,15 +497,26 @@ describe('Session persistence', () => {
 
   it('clears session and redirects to /login after logout', async () => {
     setItem(TOKEN_STORAGE_KEY, 'active-token');
-    setItem(USER_STORAGE_KEY, { userId: '1', email: 'a@b.com', firstName: 'A', lastName: 'B', roles: ['ROLE_EMPLOYEE'] });
+    setItem(USER_STORAGE_KEY, {
+      userId: '1',
+      email: 'a@b.com',
+      firstName: 'A',
+      lastName: 'B',
+      roles: ['ROLE_EMPLOYEE'],
+    });
 
     let authCtx;
-    function Capture() { authCtx = useAuth(); return null; }
+    function Capture() {
+      authCtx = useAuth();
+      return null;
+    }
     const qc = makeQueryClient();
     render(
       <QueryClientProvider client={qc}>
         <MemoryRouter>
-          <AuthProvider><Capture /></AuthProvider>
+          <AuthProvider>
+            <Capture />
+          </AuthProvider>
         </MemoryRouter>
       </QueryClientProvider>,
     );
@@ -449,15 +533,26 @@ describe('Session persistence', () => {
   it('is not authenticated when localStorage token is expired', () => {
     vi.mocked(jwtUtils.isTokenExpired).mockReturnValueOnce(true);
     setItem(TOKEN_STORAGE_KEY, 'expired.token');
-    setItem(USER_STORAGE_KEY, { userId: '1', email: 'a@b.com', firstName: 'A', lastName: 'B', roles: ['ROLE_EMPLOYEE'] });
+    setItem(USER_STORAGE_KEY, {
+      userId: '1',
+      email: 'a@b.com',
+      firstName: 'A',
+      lastName: 'B',
+      roles: ['ROLE_EMPLOYEE'],
+    });
 
     let authCtx;
-    function Capture() { authCtx = useAuth(); return null; }
+    function Capture() {
+      authCtx = useAuth();
+      return null;
+    }
     const qc = makeQueryClient();
     render(
       <QueryClientProvider client={qc}>
         <MemoryRouter>
-          <AuthProvider><Capture /></AuthProvider>
+          <AuthProvider>
+            <Capture />
+          </AuthProvider>
         </MemoryRouter>
       </QueryClientProvider>,
     );

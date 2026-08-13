@@ -27,20 +27,20 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
-import PersonIcon       from '@mui/icons-material/Person';
-import EventNoteIcon    from '@mui/icons-material/EventNote';
-import AccessTimeIcon   from '@mui/icons-material/AccessTime';
-import ApartmentIcon    from '@mui/icons-material/Apartment';
-import WorkIcon         from '@mui/icons-material/Work';
+import PersonIcon from '@mui/icons-material/Person';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import WorkIcon from '@mui/icons-material/Work';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
 import { getProfile } from '@/services/profileApi';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/contexts/AuthContext';
 
-import WelcomeCard              from '@/components/dashboard/WelcomeCard';
-import UpcomingLeavesWidget     from '@/components/dashboard/UpcomingLeavesWidget';
-import AttendanceSummaryWidget  from '@/components/dashboard/AttendanceSummaryWidget';
+import WelcomeCard from '@/components/dashboard/WelcomeCard';
+import UpcomingLeavesWidget from '@/components/dashboard/UpcomingLeavesWidget';
+import AttendanceSummaryWidget from '@/components/dashboard/AttendanceSummaryWidget';
 
 // ── Profile Summary Card ──────────────────────────────────────────────────────
 
@@ -92,10 +92,10 @@ function ProfileSummaryCard({ profile, isLoading }) {
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
           {[
-            { Icon: WorkIcon,         label: 'Job Title',    value: profile?.jobTitle },
-            { Icon: ApartmentIcon,    label: 'Department',   value: profile?.departmentName },
-            { Icon: PersonIcon,       label: 'Employee ID',  value: profile?.employeeCode },
-            { Icon: CalendarTodayIcon, label: 'Joined',      value: profile?.dateOfJoining },
+            { Icon: WorkIcon, label: 'Job Title', value: profile?.jobTitle },
+            { Icon: ApartmentIcon, label: 'Department', value: profile?.departmentName },
+            { Icon: PersonIcon, label: 'Employee ID', value: profile?.employeeCode },
+            { Icon: CalendarTodayIcon, label: 'Joined', value: profile?.dateOfJoining },
           ].map(({ Icon, label, value }) => (
             <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
               <Icon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
@@ -171,19 +171,21 @@ export default function EmployeeDashboardPage() {
   const { user } = useAuth();
 
   const {
-    data:      profile,
+    data: profile,
     isLoading: profileLoading,
-    isError:   profileError,
+    isError: profileError,
   } = useQuery({
     queryKey: ['profile', user?.userId],
-    queryFn:  getProfile,
-    enabled:  Boolean(user?.userId),
+    queryFn: getProfile,
+    enabled: Boolean(user?.userId),
     staleTime: 5 * 60_000,
   });
 
   return (
     <>
-      <Helmet><title>My Dashboard — Employee Portal</title></Helmet>
+      <Helmet>
+        <title>Dashboard — PeopleCore HR</title>
+      </Helmet>
 
       <Box sx={{ pb: 4 }}>
         {/* Welcome banner */}

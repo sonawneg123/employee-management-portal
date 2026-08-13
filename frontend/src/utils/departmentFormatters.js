@@ -99,9 +99,7 @@ export function buildDeptCsvString(departments, headers, fields) {
     return `"${str.replace(/"/g, '""')}"`;
   };
   const headerRow = headers.map(escape).join(',');
-  const dataRows  = departments.map((d) =>
-    fields.map((k) => escape(d[k])).join(','),
-  );
+  const dataRows = departments.map((d) => fields.map((k) => escape(d[k])).join(','));
   return [headerRow, ...dataRows].join('\r\n');
 }
 
@@ -114,9 +112,9 @@ export function buildDeptCsvString(departments, headers, fields) {
  */
 export function downloadDeptCsv(csvContent, filename = 'departments.csv') {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href     = url;
+  link.href = url;
   link.download = filename;
   link.style.display = 'none';
   document.body.appendChild(link);

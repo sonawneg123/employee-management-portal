@@ -17,27 +17,24 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import {
-  Lock as LockIcon,
-  Visibility,
-  VisibilityOff,
-} from '@mui/icons-material';
+import { Lock as LockIcon, Visibility, VisibilityOff } from '@mui/icons-material';
 import { changePassword } from '@/services/settingsApi';
 
 const INITIAL = { currentPassword: '', newPassword: '', confirmPassword: '' };
 
 export default function SettingsPage() {
-  const [form, setForm]       = useState(INITIAL);
-  const [errors, setErrors]   = useState({});
+  const [form, setForm] = useState(INITIAL);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [serverError, setServerError] = useState('');
-  const [showPw, setShowPw]   = useState({
-    current: false, new: false, confirm: false,
+  const [showPw, setShowPw] = useState({
+    current: false,
+    new: false,
+    confirm: false,
   });
 
-  const toggle = (field) =>
-    setShowPw((prev) => ({ ...prev, [field]: !prev[field] }));
+  const toggle = (field) => setShowPw((prev) => ({ ...prev, [field]: !prev[field] }));
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,13 +80,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 560, mx: 'auto', mt: 4 }}>
-      <Typography variant="h4" fontWeight={700} gutterBottom>
-        Settings
-      </Typography>
+    <Box sx={{ maxWidth: 560, mx: 'auto' }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
+          Settings
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Manage your account settings
+        </Typography>
+      </Box>
 
       {/* ── Change Password ─────────────────────────────────── */}
-      <Card elevation={2} sx={{ mt: 2 }}>
+      <Card>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <LockIcon color="primary" />

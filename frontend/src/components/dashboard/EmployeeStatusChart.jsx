@@ -88,9 +88,9 @@ export default function EmployeeStatusChart() {
   const rawData = charts?.employeeStatusBreakdown ?? [];
   const chartData = rawData.map((item) => ({
     status: item.status,
-    label:  toLabel(item.status),
-    value:  item.count,
-    fill:   EMPLOYEE_STATUS_COLORS[item.status] ?? '#1976d2',
+    label: toLabel(item.status),
+    value: item.count,
+    fill: EMPLOYEE_STATUS_COLORS[item.status] ?? '#1976d2',
   }));
 
   const isEmpty = !isLoading && chartData.length === 0;
@@ -114,12 +114,7 @@ export default function EmployeeStatusChart() {
           aria-label="Employee status chart"
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="label"
-            tick={{ fontSize: 12 }}
-            axisLine={false}
-            tickLine={false}
-          />
+          <XAxis dataKey="label" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
           <YAxis
             allowDecimals={false}
             tick={{ fontSize: 12 }}

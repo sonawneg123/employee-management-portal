@@ -7,14 +7,7 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Skeleton,
-} from '@mui/material';
+import { Box, FormControl, InputLabel, MenuItem, Select, Skeleton } from '@mui/material';
 import { EMPLOYEE_STATUS_OPTIONS } from '@/constants/employeeConstants';
 import { useDepartments } from '@/hooks/useDepartments';
 

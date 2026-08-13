@@ -35,13 +35,7 @@ import { formatFullName } from '@/utils/employeeFormatters';
  * @param {DeleteEmployeeDialogProps} props
  * @returns {JSX.Element}
  */
-export default function DeleteEmployeeDialog({
-  open,
-  employee,
-  isDeleting,
-  onConfirm,
-  onCancel,
-}) {
+export default function DeleteEmployeeDialog({ open, employee, isDeleting, onConfirm, onCancel }) {
   const fullName = employee
     ? formatFullName(employee.firstName, employee.lastName)
     : 'this employee';
@@ -55,7 +49,10 @@ export default function DeleteEmployeeDialog({
       aria-labelledby="delete-employee-title"
       aria-describedby="delete-employee-description"
     >
-      <DialogTitle id="delete-employee-title" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <DialogTitle
+        id="delete-employee-title"
+        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+      >
         <WarningAmberIcon color="error" />
         Delete Employee
       </DialogTitle>
@@ -83,11 +80,7 @@ export default function DeleteEmployeeDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button
-          onClick={onCancel}
-          disabled={isDeleting}
-          aria-label="Cancel deletion"
-        >
+        <Button onClick={onCancel} disabled={isDeleting} aria-label="Cancel deletion">
           Cancel
         </Button>
         <Button

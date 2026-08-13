@@ -157,11 +157,11 @@ describe('toPieChartData', () => {
   it('maps department array to Recharts format', () => {
     const input = [
       { name: 'Engineering', count: 20, code: 'ENG' },
-      { name: 'HR',          count: 5,  code: 'HR'  },
+      { name: 'HR', count: 5, code: 'HR' },
     ];
     expect(toPieChartData(input)).toEqual([
       { name: 'Engineering', value: 20 },
-      { name: 'HR',          value: 5  },
+      { name: 'HR', value: 5 },
     ]);
   });
 

@@ -51,10 +51,8 @@ export async function updateUserRole(userId, roleName) {
  * @returns {Promise<UserListResponse>}
  */
 export async function setUserEnabled(userId, enabled) {
-  const { data } = await axiosInstance.put(
-    `${BASE}/${userId}/enabled`,
-    null,
-    { params: { enabled } },
-  );
+  const { data } = await axiosInstance.put(`${BASE}/${userId}/enabled`, null, {
+    params: { enabled },
+  });
   return data;
 }

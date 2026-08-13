@@ -24,14 +24,23 @@ import SearchOffIcon from '@mui/icons-material/SearchOff';
 export default function LeaveEmptyState({ hasFilters = false, onClear, onAdd, canCreate = false }) {
   return (
     <Box
-      sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            py: 10, gap: 2, color: 'text.disabled' }}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        py: 10,
+        gap: 2,
+        color: 'text.disabled',
+      }}
       role="status"
       aria-label={hasFilters ? 'No leave results' : 'No leave requests'}
     >
-      {hasFilters
-        ? <SearchOffIcon sx={{ fontSize: 64, opacity: 0.3 }} />
-        : <EventNoteIcon sx={{ fontSize: 64, opacity: 0.3 }} />}
+      {hasFilters ? (
+        <SearchOffIcon sx={{ fontSize: 64, opacity: 0.3 }} />
+      ) : (
+        <EventNoteIcon sx={{ fontSize: 64, opacity: 0.3 }} />
+      )}
 
       <Typography variant="h6" fontWeight={700} color="text.secondary">
         {hasFilters ? 'No leave requests found' : 'No leave requests yet'}

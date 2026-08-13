@@ -5,7 +5,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { IconButton, InputAdornment, TextField, Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon  from '@mui/icons-material/Clear';
+import ClearIcon from '@mui/icons-material/Clear';
 import { DEPT_SEARCH_DEBOUNCE_MS } from '@/constants/departmentConstants';
 
 /**
@@ -31,7 +31,9 @@ export default function DepartmentSearch({
   const [local, setLocal] = useState(value);
   const timer = useRef(null);
 
-  useEffect(() => { setLocal(value); }, [value]);
+  useEffect(() => {
+    setLocal(value);
+  }, [value]);
 
   const handleChange = (e) => {
     const v = e.target.value;

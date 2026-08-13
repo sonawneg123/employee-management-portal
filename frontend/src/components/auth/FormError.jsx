@@ -22,12 +22,7 @@ import { Alert, AlertTitle, Collapse } from '@mui/material';
 export default function FormError({ message, title, severity = 'error' }) {
   return (
     <Collapse in={Boolean(message)} unmountOnExit>
-      <Alert
-        severity={severity}
-        sx={{ mb: 2.5, borderRadius: 2 }}
-        role="alert"
-        aria-live="polite"
-      >
+      <Alert severity={severity} sx={{ mb: 2.5, borderRadius: 2 }} role="alert" aria-live="polite">
         {title && <AlertTitle>{title}</AlertTitle>}
         {message}
       </Alert>

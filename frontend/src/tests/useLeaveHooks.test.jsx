@@ -20,14 +20,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 // ── Service mocks ─────────────────────────────────────────────────────────────
 
 vi.mock('@/services/leaveApi', () => ({
-  getLeaveRequests:    vi.fn(),
-  getMyLeaveRequests:  vi.fn(),
-  getLeaveById:        vi.fn(),
-  createLeaveRequest:  vi.fn(),
-  updateLeaveRequest:  vi.fn(),
-  cancelLeave:         vi.fn(),
-  approveLeave:        vi.fn(),
-  rejectLeave:         vi.fn(),
+  getLeaveRequests: vi.fn(),
+  getMyLeaveRequests: vi.fn(),
+  getLeaveById: vi.fn(),
+  createLeaveRequest: vi.fn(),
+  updateLeaveRequest: vi.fn(),
+  cancelLeave: vi.fn(),
+  approveLeave: vi.fn(),
+  rejectLeave: vi.fn(),
 }));
 
 vi.mock('@/contexts/AuthContext', () => ({
@@ -63,25 +63,29 @@ import {
 function makeWrapper() {
   const qc = new QueryClient({
     defaultOptions: {
-      queries:   { retry: false, gcTime: 0 },
+      queries: { retry: false, gcTime: 0 },
       mutations: { retry: false },
     },
   });
-  return ({ children }) => (
-    <QueryClientProvider client={qc}>{children}</QueryClientProvider>
-  );
+  return ({ children }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
 }
 
 const PAGE = {
-  content:       [{ id: 'leave-1', leaveType: 'ANNUAL', status: 'PENDING' }],
-  page:          0,
-  size:          20,
+  content: [{ id: 'leave-1', leaveType: 'ANNUAL', status: 'PENDING' }],
+  page: 0,
+  size: 20,
   totalElements: 1,
-  totalPages:    1,
-  last:          true,
+  totalPages: 1,
+  last: true,
 };
 
-const LEAVE_DETAIL = { id: 'leave-1', leaveType: 'ANNUAL', status: 'PENDING', startDate: '2025-01-10', endDate: '2025-01-12' };
+const LEAVE_DETAIL = {
+  id: 'leave-1',
+  leaveType: 'ANNUAL',
+  status: 'PENDING',
+  startDate: '2025-01-10',
+  endDate: '2025-01-12',
+};
 
 // ── useLeaves ─────────────────────────────────────────────────────────────────
 
@@ -191,7 +195,13 @@ describe('useCreateLeave', () => {
 
   it('isSuccess becomes true after mutation', async () => {
     const { result } = renderHook(() => useCreateLeave(), { wrapper: makeWrapper() });
-    await act(() => result.current.mutateAsync({ leaveType: 'ANNUAL', startDate: '2025-03-01', endDate: '2025-03-05' }));
+    await act(() =>
+      result.current.mutateAsync({
+        leaveType: 'ANNUAL',
+        startDate: '2025-03-01',
+        endDate: '2025-03-05',
+      }),
+    );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
   });
 
@@ -199,7 +209,9 @@ describe('useCreateLeave', () => {
     createLeaveRequest.mockRejectedValue(new Error('Conflict'));
     const { result } = renderHook(() => useCreateLeave(), { wrapper: makeWrapper() });
     await act(async () => {
-      try { await result.current.mutateAsync({}); } catch {}
+      try {
+        await result.current.mutateAsync({});
+      } catch {}
     });
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
@@ -250,7 +262,9 @@ describe('useDeleteLeave', () => {
     cancelLeave.mockRejectedValue(new Error('Not found'));
     const { result } = renderHook(() => useDeleteLeave(), { wrapper: makeWrapper() });
     await act(async () => {
-      try { await result.current.mutateAsync('leave-1'); } catch {}
+      try {
+        await result.current.mutateAsync('leave-1');
+      } catch {}
     });
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
@@ -280,7 +294,9 @@ describe('useApproveLeave', () => {
     approveLeave.mockRejectedValue(new Error('Forbidden'));
     const { result } = renderHook(() => useApproveLeave(), { wrapper: makeWrapper() });
     await act(async () => {
-      try { await result.current.mutateAsync('leave-1'); } catch {}
+      try {
+        await result.current.mutateAsync('leave-1');
+      } catch {}
     });
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
@@ -311,7 +327,9 @@ describe('useRejectLeave', () => {
     rejectLeave.mockRejectedValue(new Error('Forbidden'));
     const { result } = renderHook(() => useRejectLeave(), { wrapper: makeWrapper() });
     await act(async () => {
-      try { await result.current.mutateAsync({ id: 'leave-1', reason: 'x' }); } catch {}
+      try {
+        await result.current.mutateAsync({ id: 'leave-1', reason: 'x' });
+      } catch {}
     });
     await waitFor(() => expect(result.current.isError).toBe(true));
   });

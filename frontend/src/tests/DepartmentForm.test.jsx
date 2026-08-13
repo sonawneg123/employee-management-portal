@@ -23,8 +23,8 @@ const theme = createTheme();
 function renderForm(props = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const defaults = {
-    formId:       'test-form',
-    onSubmit:     vi.fn(),
+    formId: 'test-form',
+    onSubmit: vi.fn(),
     isSubmitting: false,
     ...props,
   };
@@ -32,7 +32,9 @@ function renderForm(props = {}) {
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={qc}>
         <DepartmentForm {...defaults} />
-        <button type="submit" form="test-form" data-testid="submit-btn">Submit</button>
+        <button type="submit" form="test-form" data-testid="submit-btn">
+          Submit
+        </button>
       </QueryClientProvider>
     </ThemeProvider>,
   );
@@ -61,8 +63,10 @@ describe('DepartmentForm', () => {
   it('does not show a required error on description when blank', async () => {
     renderForm();
     // Fill required fields
-    fireEvent.change(screen.getByLabelText(/department name/i), { target: { value: 'Engineering' } });
-    fireEvent.change(screen.getByLabelText(/code/i),            { target: { value: 'ENG' } });
+    fireEvent.change(screen.getByLabelText(/department name/i), {
+      target: { value: 'Engineering' },
+    });
+    fireEvent.change(screen.getByLabelText(/code/i), { target: { value: 'ENG' } });
     await act(async () => {
       fireEvent.click(screen.getByTestId('submit-btn'));
     });

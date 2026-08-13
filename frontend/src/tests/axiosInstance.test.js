@@ -12,24 +12,24 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // ── Mocks must come before the module under test is imported ──────────────────
 
 vi.mock('@/utils/localStorage', () => ({
-  getItem:    vi.fn(() => 'mock-token'),
-  setItem:    vi.fn(),
+  getItem: vi.fn(() => 'mock-token'),
+  setItem: vi.fn(),
   removeItem: vi.fn(),
-  clearAll:   vi.fn(),
+  clearAll: vi.fn(),
 }));
 
 vi.mock('@/constants/api', () => ({
-  API_BASE_URL:       '/api',
+  API_BASE_URL: '/api',
   REQUEST_TIMEOUT_MS: 15_000,
-  TOKEN_STORAGE_KEY:  'emp_portal_token',
-  USER_STORAGE_KEY:   'emp_portal_user',
+  TOKEN_STORAGE_KEY: 'emp_portal_token',
+  USER_STORAGE_KEY: 'emp_portal_user',
 }));
 
 vi.mock('@/constants/routes', () => ({
   ROUTES: {
-    LOGIN:         '/login',
+    LOGIN: '/login',
     ACCESS_DENIED: '/403',
-    DASHBOARD:     '/dashboard',
+    DASHBOARD: '/dashboard',
   },
 }));
 

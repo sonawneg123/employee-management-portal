@@ -4,15 +4,23 @@
 
 import React, { useState } from 'react';
 import {
-  IconButton, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, TableSortLabel, Tooltip,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Tooltip,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { getLeaveColumns }   from '@/utils/leaveColumns';
-import LeaveActionsMenu      from './LeaveActionsMenu';
-import LeaveSkeleton         from './LeaveSkeleton';
-import LeaveEmptyState       from './LeaveEmptyState';
-import LeaveErrorState       from './LeaveErrorState';
+import { getLeaveColumns } from '@/utils/leaveColumns';
+import LeaveActionsMenu from './LeaveActionsMenu';
+import LeaveSkeleton from './LeaveSkeleton';
+import LeaveEmptyState from './LeaveEmptyState';
+import LeaveErrorState from './LeaveErrorState';
 
 /**
  * @typedef {Object} LeaveTableProps
@@ -46,19 +54,43 @@ import LeaveErrorState       from './LeaveErrorState';
  * @returns {JSX.Element}
  */
 export default function LeaveTable({
-  leaves, isLoading, isFetching, isError, error,
-  sort, direction, hasFilters,
-  canApprove, canEdit, canCancel,
-  onSort, onView, onApprove, onReject, onEdit, onCancel,
-  onRetry, onClearFilters, onAdd, canCreate,
+  leaves,
+  isLoading,
+  isFetching,
+  isError,
+  error,
+  sort,
+  direction,
+  hasFilters,
+  canApprove,
+  canEdit,
+  canCancel,
+  onSort,
+  onView,
+  onApprove,
+  onReject,
+  onEdit,
+  onCancel,
+  onRetry,
+  onClearFilters,
+  onAdd,
+  canCreate,
 }) {
   const columns = getLeaveColumns();
   const [menuAnchor, setMenuAnchor] = useState(null);
-  const [menuLeave,  setMenuLeave]  = useState(null);
+  const [menuLeave, setMenuLeave] = useState(null);
 
-  const handleMenuOpen  = (e, leave) => { e.stopPropagation(); setMenuAnchor(e.currentTarget); setMenuLeave(leave); };
-  const handleMenuClose = () => { setMenuAnchor(null); setMenuLeave(null); };
-  const handleSort      = (field) => onSort(field, field === sort ? (direction === 'asc' ? 'desc' : 'asc') : 'asc');
+  const handleMenuOpen = (e, leave) => {
+    e.stopPropagation();
+    setMenuAnchor(e.currentTarget);
+    setMenuLeave(leave);
+  };
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setMenuLeave(null);
+  };
+  const handleSort = (field) =>
+    onSort(field, field === sort ? (direction === 'asc' ? 'desc' : 'asc') : 'asc');
 
   if (isError) return <LeaveErrorState error={error} onRetry={onRetry} />;
 
@@ -85,7 +117,9 @@ export default function LeaveTable({
                     >
                       {col.label}
                     </TableSortLabel>
-                  ) : col.label}
+                  ) : (
+                    col.label
+                  )}
                 </TableCell>
               ))}
               <TableCell sx={{ width: 48, bgcolor: 'background.default' }} />
@@ -102,7 +136,12 @@ export default function LeaveTable({
             ) : leaves.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length + 1} sx={{ border: 'none' }}>
-                  <LeaveEmptyState hasFilters={hasFilters} onClear={onClearFilters} onAdd={onAdd} canCreate={canCreate} />
+                  <LeaveEmptyState
+                    hasFilters={hasFilters}
+                    onClear={onClearFilters}
+                    onAdd={onAdd}
+                    canCreate={canCreate}
+                  />
                 </TableCell>
               </TableRow>
             ) : (
@@ -121,8 +160,11 @@ export default function LeaveTable({
                   ))}
                   <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                     <Tooltip title="Actions">
-                      <IconButton size="small" onClick={(e) => handleMenuOpen(e, leave)}
-                        aria-label={`Actions for ${leave.employeeName ?? 'leave'}`}>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => handleMenuOpen(e, leave)}
+                        aria-label={`Actions for ${leave.employeeName ?? 'leave'}`}
+                      >
                         <MoreVertIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>

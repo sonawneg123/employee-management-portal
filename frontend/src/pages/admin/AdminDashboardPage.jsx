@@ -2,83 +2,84 @@
  * @fileoverview AdminDashboardPage — full-visibility dashboard for ROLE_ADMIN users.
  *
  * Displays the complete operational picture:
- * - Four KPI cards: Total Employees, Active Employees, Total Departments, Pending Leaves
- * - Department distribution chart + Employee status chart
- * - Recent activity feed
- * - Quick action buttons: Add Employee, Manage Departments, Approve Leaves
+ * - Welcome banner
+ * - Four KPI cards: Total Employees, Active Departments, Pending Leaves, Present Today
+ * - Quick action buttons
+ * - Department distribution + Employee status charts
+ * - Recent activity + upcoming leaves widgets
  *
- * All data is fetched via the existing dashboard hooks (real backend data).
+ * All data fetched via existing dashboard hooks (real backend data, no mocks).
  */
 
 import React, { useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Button,
-  Grid,
-} from '@mui/material';
-import RefreshIcon         from '@mui/icons-material/Refresh';
-import PersonAddIcon       from '@mui/icons-material/PersonAdd';
-import ApartmentIcon       from '@mui/icons-material/Apartment';
-import EventNoteIcon       from '@mui/icons-material/EventNote';
-import AssessmentIcon      from '@mui/icons-material/Assessment';
-import AccessTimeIcon      from '@mui/icons-material/AccessTime';
-import ManageAccountsIcon  from '@mui/icons-material/ManageAccounts';
+import { Alert, Box, Button, Grid, Typography } from '@mui/material';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
+import EventNoteRoundedIcon from '@mui/icons-material/EventNoteRounded';
+import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
+import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
+import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
 
 import { useDashboardSummary, useRefreshAllDashboard } from '@/hooks/useDashboard';
 import { ROUTES } from '@/constants/routes';
 
-import DashboardHeader              from '@/components/dashboard/DashboardHeader';
-import DashboardSkeleton            from '@/components/dashboard/DashboardSkeleton';
-import WelcomeCard                  from '@/components/dashboard/WelcomeCard';
-import StatisticsCards              from '@/components/dashboard/StatisticsCards';
-import DepartmentDistributionChart  from '@/components/dashboard/DepartmentDistributionChart';
-import EmployeeStatusChart          from '@/components/dashboard/EmployeeStatusChart';
-import RecentActivity               from '@/components/dashboard/RecentActivity';
-import UpcomingLeavesWidget         from '@/components/dashboard/UpcomingLeavesWidget';
-import AttendanceSummaryWidget      from '@/components/dashboard/AttendanceSummaryWidget';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton';
+import WelcomeCard from '@/components/dashboard/WelcomeCard';
+import StatisticsCards from '@/components/dashboard/StatisticsCards';
+import DepartmentDistributionChart from '@/components/dashboard/DepartmentDistributionChart';
+import EmployeeStatusChart from '@/components/dashboard/EmployeeStatusChart';
+import RecentActivity from '@/components/dashboard/RecentActivity';
+import UpcomingLeavesWidget from '@/components/dashboard/UpcomingLeavesWidget';
+import AttendanceSummaryWidget from '@/components/dashboard/AttendanceSummaryWidget';
 
 /**
- * Admin dashboard page — full operational view.
- *
  * @returns {JSX.Element}
  */
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
   const {
-    data:      summary,
+    data: summary,
     isLoading,
     isFetching,
     isError,
     error,
-    refresh:   refreshSummary,
+    refresh: refreshSummary,
   } = useDashboardSummary();
 
   const refreshAll = useRefreshAllDashboard();
   const handleRefresh = useCallback(() => refreshAll(), [refreshAll]);
 
-  // ── Loading ────────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <>
-        <Helmet><title>Admin Dashboard — Employee Portal</title></Helmet>
+        <Helmet>
+          <title>Dashboard — PeopleCore HR</title>
+        </Helmet>
         <DashboardSkeleton />
       </>
     );
   }
 
-  // ── Error ──────────────────────────────────────────────────────────────────
   if (isError) {
     return (
       <>
-        <Helmet><title>Admin Dashboard — Employee Portal</title></Helmet>
+        <Helmet>
+          <title>Dashboard — PeopleCore HR</title>
+        </Helmet>
         <Box sx={{ p: 2 }}>
           <Alert
             severity="error"
             action={
-              <Button color="inherit" size="small" startIcon={<RefreshIcon />} onClick={refreshSummary}>
+              <Button
+                color="inherit"
+                size="small"
+                startIcon={<RefreshRoundedIcon />}
+                onClick={refreshSummary}
+              >
                 Retry
               </Button>
             }
@@ -90,10 +91,11 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // ── Data ───────────────────────────────────────────────────────────────────
   return (
     <>
-      <Helmet><title>Admin Dashboard — Employee Portal</title></Helmet>
+      <Helmet>
+        <title>Dashboard — PeopleCore HR</title>
+      </Helmet>
 
       <Box sx={{ pb: 4 }}>
         <DashboardHeader
@@ -102,7 +104,7 @@ export default function AdminDashboardPage() {
           onRefresh={handleRefresh}
         />
 
-        {/* Welcome banner */}
+        {/* Welcome */}
         <WelcomeCard />
 
         {/* KPI cards */}
@@ -110,9 +112,12 @@ export default function AdminDashboardPage() {
 
         {/* Quick actions */}
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 3 }}>
+          <Typography variant="overline" color="text.secondary" sx={{ width: '100%', mb: -0.5 }}>
+            Quick actions
+          </Typography>
           <Button
             variant="contained"
-            startIcon={<PersonAddIcon />}
+            startIcon={<PersonAddRoundedIcon />}
             onClick={() => navigate(ROUTES.ADMIN_EMPLOYEES)}
             size="small"
           >
@@ -120,7 +125,7 @@ export default function AdminDashboardPage() {
           </Button>
           <Button
             variant="outlined"
-            startIcon={<ApartmentIcon />}
+            startIcon={<ApartmentRoundedIcon />}
             onClick={() => navigate(ROUTES.ADMIN_DEPARTMENTS)}
             size="small"
           >
@@ -129,7 +134,7 @@ export default function AdminDashboardPage() {
           <Button
             variant="outlined"
             color="warning"
-            startIcon={<EventNoteIcon />}
+            startIcon={<EventNoteRoundedIcon />}
             onClick={() => navigate(ROUTES.ADMIN_LEAVES)}
             size="small"
           >
@@ -137,7 +142,7 @@ export default function AdminDashboardPage() {
           </Button>
           <Button
             variant="outlined"
-            startIcon={<AccessTimeIcon />}
+            startIcon={<AccessTimeRoundedIcon />}
             onClick={() => navigate(ROUTES.ADMIN_ATTENDANCE)}
             size="small"
           >
@@ -145,7 +150,7 @@ export default function AdminDashboardPage() {
           </Button>
           <Button
             variant="outlined"
-            startIcon={<AssessmentIcon />}
+            startIcon={<AssessmentRoundedIcon />}
             onClick={() => navigate(ROUTES.ADMIN_REVIEWS)}
             size="small"
           >
@@ -154,7 +159,7 @@ export default function AdminDashboardPage() {
           <Button
             variant="outlined"
             color="secondary"
-            startIcon={<ManageAccountsIcon />}
+            startIcon={<ManageAccountsRoundedIcon />}
             onClick={() => navigate(ROUTES.ADMIN_USERS)}
             size="small"
           >
@@ -162,7 +167,7 @@ export default function AdminDashboardPage() {
           </Button>
         </Box>
 
-        {/* Charts row */}
+        {/* Charts */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <DepartmentDistributionChart />

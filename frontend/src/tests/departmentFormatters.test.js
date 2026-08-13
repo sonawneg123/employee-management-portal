@@ -110,14 +110,14 @@ describe('formatHeadName', () => {
 
 describe('buildDeptCsvString', () => {
   const headers = ['Name', 'Code', 'Head'];
-  const fields  = ['name', 'code', 'headName'];
-  const depts   = [
+  const fields = ['name', 'code', 'headName'];
+  const depts = [
     { name: 'Engineering', code: 'ENG', headName: 'Alice' },
-    { name: 'HR',          code: 'HR',  headName: null    },
+    { name: 'HR', code: 'HR', headName: null },
   ];
 
   it('creates a CSV with header row and data rows', () => {
-    const csv   = buildDeptCsvString(depts, headers, fields);
+    const csv = buildDeptCsvString(depts, headers, fields);
     const lines = csv.split('\r\n');
     expect(lines[0]).toBe('"Name","Code","Head"');
     expect(lines[1]).toBe('"Engineering","ENG","Alice"');
@@ -126,7 +126,7 @@ describe('buildDeptCsvString', () => {
 
   it('escapes double quotes in values', () => {
     const data = [{ name: 'A "Test" Dept', code: 'X', headName: '' }];
-    const csv  = buildDeptCsvString(data, headers, fields);
+    const csv = buildDeptCsvString(data, headers, fields);
     expect(csv).toContain('"A ""Test"" Dept"');
   });
 });

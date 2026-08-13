@@ -1,54 +1,42 @@
 /**
- * @fileoverview AuthLayout — full-page layout wrapper for authentication pages.
+ * @fileoverview AuthLayout — premium split-screen authentication layout.
  *
- * Renders a responsive two-column layout:
- * - Left panel: brand illustration / feature highlights (hidden on mobile).
- * - Right panel: the auth form card passed as children.
+ * LEFT  (desktop): brand panel with gradient, feature bullets, animated accents.
+ * RIGHT (all):     form panel with card content.
  *
- * Uses the MUI theme exclusively — no inline CSS values.
+ * Responsive: single column on mobile (form only, logo top).
  */
 
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import {
-  Box,
-  Grid,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import PeopleAltIcon      from '@mui/icons-material/PeopleAlt';
-import AssignmentIndIcon  from '@mui/icons-material/AssignmentInd';
+import { Box, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import BarChartIcon       from '@mui/icons-material/BarChart';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
-/**
- * @typedef {Object} FeatureItem
- * @property {JSX.Element} icon  - MUI icon element.
- * @property {string}      label - Short feature description.
- */
-
-/** @type {FeatureItem[]} */
+/** @type {{ icon: JSX.Element, label: string }[]} */
 const FEATURES = [
-  { icon: <PeopleAltIcon />,      label: 'Manage your entire workforce from one place' },
-  { icon: <AssignmentIndIcon />,  label: 'Role-based access for Admins, HR, and Managers' },
-  { icon: <EventAvailableIcon />, label: 'Track attendance and leave requests in real time' },
-  { icon: <BarChartIcon />,       label: 'Conduct and review performance evaluations' },
+  { icon: <PeopleAltIcon fontSize="small" />, label: 'Centralised employee management' },
+  { icon: <EventAvailableIcon fontSize="small" />, label: 'Leave & attendance tracking' },
+  { icon: <AssessmentIcon fontSize="small" />, label: 'Performance reviews & ratings' },
+  { icon: <AdminPanelSettingsIcon fontSize="small" />, label: 'Role-based access control' },
 ];
 
 /**
  * Full-page authentication layout.
  *
  * @param {{
- *   children: React.ReactNode,
- *   title?: string,
- *   subtitle?: string,
+ *   children:   React.ReactNode,
+ *   title?:     string,
+ *   subtitle?:  string,
  * }} props
  * @returns {JSX.Element}
  */
 export default function AuthLayout({ children, title, subtitle }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  // isDark intentionally read via theme in sx callbacks
 
   return (
     <Box
@@ -59,48 +47,93 @@ export default function AuthLayout({ children, title, subtitle }) {
       }}
     >
       <Grid container sx={{ flexGrow: 1 }}>
-        {/* ── Left branding panel (desktop only) ── */}
+        {/* ── Left brand panel (desktop only) ─────────────────────────── */}
         {!isMobile && (
           <Grid
             size={5}
             sx={{
-              bgcolor: 'primary.main',
+              background: 'linear-gradient(145deg, #3730A3 0%, #4F46E5 40%, #7C3AED 100%)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              p: 6,
+              p: { md: 5, lg: 7 },
               position: 'relative',
               overflow: 'hidden',
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                width: 400,
-                height: 400,
-                borderRadius: '50%',
-                bgcolor: 'rgba(255,255,255,0.06)',
-                bottom: -80,
-                right: -80,
-              },
             }}
           >
+            {/* Decorative blobs */}
+            <Box
+              aria-hidden="true"
+              sx={{
+                position: 'absolute',
+                width: 340,
+                height: 340,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.05)',
+                top: -80,
+                right: -80,
+                pointerEvents: 'none',
+              }}
+            />
+            <Box
+              aria-hidden="true"
+              sx={{
+                position: 'absolute',
+                width: 220,
+                height: 220,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.04)',
+                bottom: -60,
+                left: -60,
+                pointerEvents: 'none',
+              }}
+            />
+
             {/* Logo */}
-            <Box sx={{ mb: 6 }}>
-              <Typography
-                component={RouterLink}
-                to="/"
-                variant="h5"
-                fontWeight={800}
-                sx={{ color: 'primary.contrastText', textDecoration: 'none' }}
+            <Box
+              component={RouterLink}
+              to="/"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.25,
+                textDecoration: 'none',
+                mb: 7,
+              }}
+            >
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '9px',
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(4px)',
+                }}
               >
-                EMP Portal
+                <PeopleAltIcon sx={{ color: '#fff', fontSize: 20 }} />
+              </Box>
+              <Typography
+                variant="h6"
+                fontWeight={800}
+                sx={{ color: '#fff', letterSpacing: '-0.02em' }}
+              >
+                PeopleCore HR
               </Typography>
             </Box>
 
             {/* Hero copy */}
             <Typography
-              variant="h3"
-              fontWeight={700}
-              sx={{ color: 'primary.contrastText', mb: 2, lineHeight: 1.2 }}
+              variant="h2"
+              fontWeight={800}
+              sx={{
+                color: '#fff',
+                mb: 1.5,
+                lineHeight: 1.2,
+                letterSpacing: '-0.025em',
+              }}
             >
               {title ?? 'Manage your workforce smarter'}
             </Typography>
@@ -108,32 +141,40 @@ export default function AuthLayout({ children, title, subtitle }) {
             {subtitle && (
               <Typography
                 variant="body1"
-                sx={{ color: 'rgba(255,255,255,0.8)', mb: 5, maxWidth: 360 }}
+                sx={{
+                  color: 'rgba(255,255,255,0.75)',
+                  mb: 5,
+                  maxWidth: 340,
+                  lineHeight: 1.65,
+                }}
               >
                 {subtitle}
               </Typography>
             )}
 
-            {/* Feature list */}
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+            {/* Feature bullets */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {FEATURES.map(({ icon, label }) => (
-                <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.75 }}>
                   <Box
                     sx={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: '9px',
+                      bgcolor: 'rgba(255,255,255,0.15)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      width: 40,
-                      height: 40,
-                      borderRadius: 2,
-                      bgcolor: 'rgba(255,255,255,0.15)',
-                      color: 'primary.contrastText',
+                      color: '#fff',
                       flexShrink: 0,
                     }}
                   >
-                    {React.cloneElement(icon, { fontSize: 'small' })}
+                    {icon}
                   </Box>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ color: 'rgba(255,255,255,0.88)', fontWeight: 500 }}
+                  >
                     {label}
                   </Typography>
                 </Box>
@@ -142,7 +183,7 @@ export default function AuthLayout({ children, title, subtitle }) {
           </Grid>
         )}
 
-        {/* ── Right form panel ── */}
+        {/* ── Right form panel ─────────────────────────────────────────── */}
         <Grid
           size={{ xs: 12, md: 7 }}
           sx={{
@@ -150,26 +191,47 @@ export default function AuthLayout({ children, title, subtitle }) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            p: { xs: 3, sm: 6 },
+            p: { xs: 3, sm: 5 },
+            animation: 'scaleIn 0.3s ease',
           }}
         >
           {/* Mobile logo */}
           {isMobile && (
-            <Typography
+            <Box
               component={RouterLink}
               to="/"
-              variant="h5"
-              fontWeight={800}
-              color="primary.main"
-              sx={{ textDecoration: 'none', mb: 4 }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                textDecoration: 'none',
+                mb: 4,
+              }}
             >
-              EMP Portal
-            </Typography>
+              <Box
+                sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '8px',
+                  bgcolor: 'primary.main',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <PeopleAltIcon sx={{ color: '#fff', fontSize: 18 }} />
+              </Box>
+              <Typography
+                variant="h6"
+                fontWeight={800}
+                sx={{ color: 'text.primary', letterSpacing: '-0.02em' }}
+              >
+                PeopleCore HR
+              </Typography>
+            </Box>
           )}
 
-          <Box sx={{ width: '100%', maxWidth: 460 }}>
-            {children}
-          </Box>
+          <Box sx={{ width: '100%', maxWidth: 460 }}>{children}</Box>
         </Grid>
       </Grid>
     </Box>

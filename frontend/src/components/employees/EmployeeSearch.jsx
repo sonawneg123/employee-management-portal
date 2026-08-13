@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { IconButton, InputAdornment, TextField, Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon  from '@mui/icons-material/Clear';
+import ClearIcon from '@mui/icons-material/Clear';
 import { SEARCH_DEBOUNCE_MS } from '@/constants/employeeConstants';
 
 /**
@@ -82,12 +82,7 @@ export default function EmployeeSearch({
           endAdornment: localValue ? (
             <InputAdornment position="end">
               <Tooltip title="Clear search">
-                <IconButton
-                  size="small"
-                  onClick={handleClear}
-                  aria-label="Clear search"
-                  edge="end"
-                >
+                <IconButton size="small" onClick={handleClear} aria-label="Clear search" edge="end">
                   <ClearIcon fontSize="small" />
                 </IconButton>
               </Tooltip>

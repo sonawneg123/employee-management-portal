@@ -30,30 +30,30 @@ export const REQUEST_TIMEOUT_MS = 15_000;
 export const API_ENDPOINTS = /** @type {const} */ ({
   // Auth
   AUTH_REGISTER: '/auth/register',
-  AUTH_LOGIN:    '/auth/login',
+  AUTH_LOGIN: '/auth/login',
 
   // Employees
-  EMPLOYEES:     '/employees',
+  EMPLOYEES: '/employees',
   EMPLOYEE_BY_ID: (id) => `/employees/${id}`,
 
   // Departments
-  DEPARTMENTS:     '/departments',
+  DEPARTMENTS: '/departments',
   DEPARTMENT_BY_ID: (id) => `/departments/${id}`,
 
   // Leave requests
-  LEAVES:        '/leaves',
-  LEAVES_MY:     '/leaves/my',
-  LEAVE_BY_ID:   (id) => `/leaves/${id}`,
+  LEAVES: '/leaves',
+  LEAVES_MY: '/leaves/my',
+  LEAVE_BY_ID: (id) => `/leaves/${id}`,
   LEAVE_APPROVE: (id) => `/leaves/${id}/approve`,
-  LEAVE_REJECT:  (id) => `/leaves/${id}/reject`,
+  LEAVE_REJECT: (id) => `/leaves/${id}/reject`,
 
   // Attendance
-  ATTENDANCE:        '/attendance',
-  ATTENDANCE_MY:     '/attendance/my',
-  ATTENDANCE_BY_ID:  (id) => `/attendance/${id}`,
+  ATTENDANCE: '/attendance',
+  ATTENDANCE_MY: '/attendance/my',
+  ATTENDANCE_BY_ID: (id) => `/attendance/${id}`,
 
   // Performance reviews
-  REVIEWS:     '/reviews',
+  REVIEWS: '/reviews',
   REVIEW_BY_ID: (id) => `/reviews/${id}`,
 });
 

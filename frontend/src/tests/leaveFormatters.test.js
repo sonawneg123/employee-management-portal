@@ -122,7 +122,7 @@ describe('formatLeaveStartRelative', () => {
     // The formatter uses dayjs().diff(today, 'day') which compares date strings.
     // Add 2 days to guarantee we're at least 1 full day ahead even late at night.
     const tomorrow = dayjs().add(2, 'day').startOf('day').format('YYYY-MM-DD');
-    const result   = formatLeaveStartRelative(tomorrow);
+    const result = formatLeaveStartRelative(tomorrow);
     // Accept 'Tomorrow' (diff=1) or 'In 2 days' (rare edge near midnight)
     expect(['Tomorrow', 'In 2 days']).toContain(result);
   });
@@ -134,7 +134,10 @@ describe('formatLeaveStartRelative', () => {
 
   it('returns "In X days" for a future date', () => {
     // Add 6 days worth of hours to ensure it never rounds down to 4 days
-    const future = dayjs().add(6 * 24, 'hour').startOf('day').format('YYYY-MM-DD');
+    const future = dayjs()
+      .add(6 * 24, 'hour')
+      .startOf('day')
+      .format('YYYY-MM-DD');
     const result = formatLeaveStartRelative(future);
     expect(result).toMatch(/^In \d+ days$/);
     const n = parseInt(result.replace('In ', '').replace(' days', ''), 10);
@@ -179,10 +182,10 @@ describe('formatLeaveDays', () => {
 
 describe('buildLeaveCsvString', () => {
   const headers = ['Employee', 'Type', 'Status'];
-  const fields  = ['employeeName', 'leaveType', 'status'];
-  const leaves  = [
-    { employeeName: 'Alice',   leaveType: 'ANNUAL', status: 'APPROVED' },
-    { employeeName: 'Bob',     leaveType: 'SICK',   status: 'PENDING'  },
+  const fields = ['employeeName', 'leaveType', 'status'];
+  const leaves = [
+    { employeeName: 'Alice', leaveType: 'ANNUAL', status: 'APPROVED' },
+    { employeeName: 'Bob', leaveType: 'SICK', status: 'PENDING' },
   ];
 
   it('includes the header row as the first line', () => {
@@ -192,13 +195,13 @@ describe('buildLeaveCsvString', () => {
   });
 
   it('includes a data row for each leave', () => {
-    const csv   = buildLeaveCsvString(leaves, headers, fields);
+    const csv = buildLeaveCsvString(leaves, headers, fields);
     const lines = csv.split('\r\n');
     expect(lines.length).toBe(3); // 1 header + 2 data
   });
 
   it('renders Alice as the first data row', () => {
-    const csv   = buildLeaveCsvString(leaves, headers, fields);
+    const csv = buildLeaveCsvString(leaves, headers, fields);
     const lines = csv.split('\r\n');
     expect(lines[1]).toContain('Alice');
     expect(lines[1]).toContain('ANNUAL');
@@ -215,7 +218,7 @@ describe('buildLeaveCsvString', () => {
 
   it('escapes double-quotes within values', () => {
     const tricky = [{ employeeName: 'O"Brien', leaveType: 'SICK', status: 'PENDING' }];
-    const csv    = buildLeaveCsvString(tricky, headers, fields);
+    const csv = buildLeaveCsvString(tricky, headers, fields);
     expect(csv).toContain('O""Brien');
   });
 
@@ -226,7 +229,7 @@ describe('buildLeaveCsvString', () => {
   });
 
   it('returns only the header row for an empty leave list', () => {
-    const csv   = buildLeaveCsvString([], headers, fields);
+    const csv = buildLeaveCsvString([], headers, fields);
     const lines = csv.split('\r\n');
     expect(lines.length).toBe(1);
     expect(lines[0]).toBe('"Employee","Type","Status"');
@@ -237,11 +240,11 @@ describe('buildLeaveCsvString', () => {
 
 describe('toCalendarEvent', () => {
   const leave = {
-    id:           'leave-uuid-1',
-    leaveType:    'ANNUAL',
-    status:       'APPROVED',
-    startDate:    '2024-01-08',
-    endDate:      '2024-01-12',
+    id: 'leave-uuid-1',
+    leaveType: 'ANNUAL',
+    status: 'APPROVED',
+    startDate: '2024-01-08',
+    endDate: '2024-01-12',
     employeeName: 'Alice Smith',
   };
 
@@ -263,7 +266,7 @@ describe('toCalendarEvent', () => {
 
   it('uses leaveType-based fallback when employeeName is absent', () => {
     const noName = { ...leave, employeeName: undefined };
-    const evt    = toCalendarEvent(noName, '#4caf50');
+    const evt = toCalendarEvent(noName, '#4caf50');
     expect(typeof evt.title).toBe('string');
     expect(evt.title.trim().length).toBeGreaterThan(0);
   });

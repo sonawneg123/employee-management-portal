@@ -3,25 +3,16 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Skeleton,
-  Typography,
-} from '@mui/material';
+import { Box, Card, CardContent, Chip, Divider, Grid, Skeleton, Typography } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import PersonIcon        from '@mui/icons-material/Person';
-import ApartmentIcon     from '@mui/icons-material/Apartment';
-import NotesIcon         from '@mui/icons-material/Notes';
-import AssignmentIcon    from '@mui/icons-material/Assignment';
-import WarningAmberIcon  from '@mui/icons-material/WarningAmber';
-import LinkIcon          from '@mui/icons-material/Link';
-import LeaveStatusChip   from './LeaveStatusChip';
-import LeaveTypeChip     from './LeaveTypeChip';
+import PersonIcon from '@mui/icons-material/Person';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import NotesIcon from '@mui/icons-material/Notes';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import LinkIcon from '@mui/icons-material/Link';
+import LeaveStatusChip from './LeaveStatusChip';
+import LeaveTypeChip from './LeaveTypeChip';
 import { formatLeaveDateRange, formatLeaveWorkingDays } from '@/utils/leaveFormatters';
 import { formatDate, formatDateTime } from '@/utils/dateUtils';
 
@@ -33,8 +24,12 @@ function DetailRow({ icon, label, value }) {
     <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', py: 1 }}>
       <Box sx={{ color: 'text.secondary', mt: 0.3, flexShrink: 0 }}>{icon}</Box>
       <Box>
-        <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-        <Typography variant="body2" fontWeight={500}>{value}</Typography>
+        <Typography variant="caption" color="text.secondary" display="block">
+          {label}
+        </Typography>
+        <Typography variant="body2" fontWeight={500}>
+          {value}
+        </Typography>
       </Box>
     </Box>
   );
@@ -58,7 +53,15 @@ export default function LeaveDetails({ leave, isLoading }) {
       <Card>
         <CardContent>
           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-            {[0, 1].map((i) => <Skeleton key={i} variant="rectangular" width={100} height={28} sx={{ borderRadius: 4 }} />)}
+            {[0, 1].map((i) => (
+              <Skeleton
+                key={i}
+                variant="rectangular"
+                width={100}
+                height={28}
+                sx={{ borderRadius: 4 }}
+              />
+            ))}
           </Box>
           {[0, 1, 2, 3, 4].map((i) => (
             <Box key={i} sx={{ display: 'flex', gap: 2, mb: 1.5 }}>

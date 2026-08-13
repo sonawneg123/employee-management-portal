@@ -6,25 +6,16 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Skeleton,
-  Typography,
-} from '@mui/material';
-import EmailIcon    from '@mui/icons-material/Email';
-import PhoneIcon    from '@mui/icons-material/Phone';
+import { Box, Card, CardContent, Chip, Divider, Grid, Skeleton, Typography } from '@mui/material';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import WorkIcon     from '@mui/icons-material/Work';
+import WorkIcon from '@mui/icons-material/Work';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import AttachMoneyIcon   from '@mui/icons-material/AttachMoney';
-import BadgeIcon         from '@mui/icons-material/Badge';
-import EmployeeAvatar      from './EmployeeAvatar';
-import EmployeeStatusChip  from './EmployeeStatusChip';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import BadgeIcon from '@mui/icons-material/Badge';
+import EmployeeAvatar from './EmployeeAvatar';
+import EmployeeStatusChip from './EmployeeStatusChip';
 import EmployeeDepartmentChip from './EmployeeDepartmentChip';
 import {
   formatFullName,
@@ -85,7 +76,12 @@ export default function EmployeeDetails({ employee, isLoading }) {
             <Box sx={{ flex: 1 }}>
               <Skeleton variant="text" width="50%" height={32} />
               <Skeleton variant="text" width="35%" />
-              <Skeleton variant="rectangular" width={80} height={24} sx={{ mt: 1, borderRadius: 4 }} />
+              <Skeleton
+                variant="rectangular"
+                width={80}
+                height={24}
+                sx={{ mt: 1, borderRadius: 4 }}
+              />
             </Box>
           </Box>
           {[0, 1, 2, 3, 4].map((i) => (

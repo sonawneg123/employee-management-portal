@@ -19,8 +19,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
  * @returns {JSX.Element}
  */
 export default function EmployeeErrorState({ error, onRetry }) {
-  const message =
-    error?.message ?? 'Failed to load employees. Please try again.';
+  const message = error?.message ?? 'Failed to load employees. Please try again.';
 
   return (
     <Box sx={{ p: 3 }}>

@@ -13,8 +13,8 @@
  * @enum {string}
  */
 export const ROLES = /** @type {const} */ ({
-  ADMIN:    'ROLE_ADMIN',
-  HR:       'ROLE_HR',
-  MANAGER:  'ROLE_MANAGER',
+  ADMIN: 'ROLE_ADMIN',
+  HR: 'ROLE_HR',
+  MANAGER: 'ROLE_MANAGER',
   EMPLOYEE: 'ROLE_EMPLOYEE',
 });

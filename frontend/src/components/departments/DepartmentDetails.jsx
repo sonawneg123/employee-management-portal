@@ -6,22 +6,13 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Skeleton,
-  Typography,
-} from '@mui/material';
-import BadgeIcon         from '@mui/icons-material/Badge';
-import DescriptionIcon   from '@mui/icons-material/Description';
-import PersonIcon        from '@mui/icons-material/Person';
-import PeopleIcon        from '@mui/icons-material/People';
+import { Box, Card, CardContent, Chip, Divider, Grid, Skeleton, Typography } from '@mui/material';
+import BadgeIcon from '@mui/icons-material/Badge';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PersonIcon from '@mui/icons-material/Person';
+import PeopleIcon from '@mui/icons-material/People';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import UpdateIcon        from '@mui/icons-material/Update';
+import UpdateIcon from '@mui/icons-material/Update';
 import DepartmentAvatar from './DepartmentAvatar';
 import {
   formatDeptCode,
@@ -46,8 +37,12 @@ function DetailRow({ icon, label, value }) {
     <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', py: 1 }}>
       <Box sx={{ color: 'text.secondary', mt: 0.3, flexShrink: 0 }}>{icon}</Box>
       <Box>
-        <Typography variant="caption" color="text.secondary" display="block">{label}</Typography>
-        <Typography variant="body2" fontWeight={500}>{value}</Typography>
+        <Typography variant="caption" color="text.secondary" display="block">
+          {label}
+        </Typography>
+        <Typography variant="body2" fontWeight={500}>
+          {value}
+        </Typography>
       </Box>
     </Box>
   );
@@ -74,7 +69,12 @@ export default function DepartmentDetails({ department, isLoading }) {
             <Skeleton variant="circular" width={80} height={80} />
             <Box sx={{ flex: 1 }}>
               <Skeleton variant="text" width="50%" height={32} />
-              <Skeleton variant="rectangular" width={60} height={24} sx={{ mt: 0.5, borderRadius: 4 }} />
+              <Skeleton
+                variant="rectangular"
+                width={60}
+                height={24}
+                sx={{ mt: 0.5, borderRadius: 4 }}
+              />
             </Box>
           </Box>
           {[0, 1, 2, 3].map((i) => (

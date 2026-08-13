@@ -8,14 +8,9 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Divider,
-  Skeleton,
-  Typography,
-} from '@mui/material';
-import EventNoteIcon  from '@mui/icons-material/EventNote';
-import PendingIcon    from '@mui/icons-material/HourglassEmpty';
+import { Box, Divider, Skeleton, Typography } from '@mui/material';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import PendingIcon from '@mui/icons-material/HourglassEmpty';
 import { useDashboardSummary } from '@/hooks/useDashboard';
 import SectionCard from './SectionCard';
 
@@ -32,12 +27,12 @@ export default function UpcomingLeavesWidget() {
     {
       label: 'On Leave Today',
       value: summary?.onLeaveToday,
-      Icon:  EventNoteIcon,
+      Icon: EventNoteIcon,
     },
     {
       label: 'Pending Requests',
       value: summary?.pendingLeaves,
-      Icon:  PendingIcon,
+      Icon: PendingIcon,
     },
   ];
 
@@ -56,22 +51,22 @@ export default function UpcomingLeavesWidget() {
             {idx > 0 && <Divider />}
             <Box
               sx={{
-                display:        'flex',
-                alignItems:     'center',
-                gap:            2,
-                py:             2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                py: 2,
               }}
             >
               <Box
                 sx={{
-                  display:         'flex',
-                  alignItems:      'center',
-                  justifyContent:  'center',
-                  width:           40,
-                  height:          40,
-                  borderRadius:    1,
-                  bgcolor:         'action.hover',
-                  flexShrink:      0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 40,
+                  height: 40,
+                  borderRadius: 1,
+                  bgcolor: 'action.hover',
+                  flexShrink: 0,
                 }}
               >
                 <Icon sx={{ fontSize: 22, color: 'text.secondary' }} />

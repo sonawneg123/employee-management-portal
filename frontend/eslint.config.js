@@ -45,10 +45,42 @@ export default [
       'react/react-in-jsx-scope':       'off',       // Not needed with React 19 JSX transform
       'react/prop-types':               'off',       // Using JSDoc instead
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'no-unused-vars':                 ['warn', { argsIgnorePattern: '^_' }],
+      'no-unused-vars':                 ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-console':                     ['warn', { allow: ['warn', 'error'] }],
       'prefer-const':                   'error',
       'no-var':                         'error',
+    },
+  },
+
+  // ── Test-file overrides ────────────────────────────────────────────────────
+  // Must come AFTER the main block so these rules take precedence.
+  // Test files run in a jsdom/vitest environment that exposes Node globals
+  // such as `global`, and commonly use intentional empty catch blocks and
+  // anonymous wrapper components.
+  {
+    files: ['src/tests/**/*.{js,jsx}'],
+    plugins: {
+      react: reactPlugin,
+    },
+    languageOptions: {
+      ecmaVersion: 2024,
+      sourceType:  'module',
+      globals: {
+        ...globals.browser,
+        ...globals.es2024,
+        ...globals.node,
+      },
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
+    },
+    rules: {
+      'no-empty':                         'off',
+      'react/display-name':               'off',
+      // Test files intentionally import testing utilities that may not all be
+      // used in every suite; suppress unused-var noise rather than cluttering
+      // each test file with eslint-disable comments.
+      'no-unused-vars':                   'off',
     },
   },
 ];

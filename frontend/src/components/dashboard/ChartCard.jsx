@@ -9,7 +9,7 @@
 import React from 'react';
 import { Box, Skeleton, Typography } from '@mui/material';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import SectionCard  from './SectionCard';
+import SectionCard from './SectionCard';
 
 /**
  * @typedef {Object} ChartCardProps

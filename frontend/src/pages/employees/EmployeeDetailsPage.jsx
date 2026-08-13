@@ -14,24 +14,19 @@
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Button,
-  Snackbar,
-  Typography,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EditIcon      from '@mui/icons-material/Edit';
-import DeleteIcon    from '@mui/icons-material/Delete';
+import { Alert, Box, Button, Snackbar, Typography, alpha } from '@mui/material';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 
-import { useAuth }           from '@/contexts/AuthContext';
-import { ROLES }             from '@/constants/roles';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/constants/roles';
 import { useEmployee, useUpdateEmployee, useDeleteEmployee } from '@/hooks/useEmployees';
-import { formatFullName }    from '@/utils/employeeFormatters';
+import { formatFullName } from '@/utils/employeeFormatters';
 
-import EmployeeDetails      from '@/components/employees/EmployeeDetails';
-import EmployeeDialog       from '@/components/employees/EmployeeDialog';
+import EmployeeDetails from '@/components/employees/EmployeeDetails';
+import EmployeeDialog from '@/components/employees/EmployeeDialog';
 import DeleteEmployeeDialog from '@/components/employees/DeleteEmployeeDialog';
 
 /**
@@ -47,9 +42,9 @@ import DeleteEmployeeDialog from '@/components/employees/DeleteEmployeeDialog';
  * @returns {JSX.Element}
  */
 export default function EmployeeDetailsPage() {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { hasAnyRole } = useAuth();
 
   // Derive the list path by removing the /:id segment from the current URL.
@@ -57,17 +52,17 @@ export default function EmployeeDetailsPage() {
   const listPath = location.pathname.replace(`/${id}`, '');
 
   // ── Permissions ────────────────────────────────────────────────────────────
-  const canEdit   = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canDelete = hasAnyRole([ROLES.ADMIN]);           // DELETE /employees/** → ADMIN only
+  const canEdit = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
+  const canDelete = hasAnyRole([ROLES.ADMIN]); // DELETE /employees/** → ADMIN only
 
   // ── Data ───────────────────────────────────────────────────────────────────
-  const { data: employee, isLoading, isError, error, isFetching } = useEmployee(id);
+  const { data: employee, isLoading, isError, error } = useEmployee(id);
 
   const updateMutation = useUpdateEmployee();
   const deleteMutation = useDeleteEmployee();
 
   // ── Dialog state ───────────────────────────────────────────────────────────
-  const [editOpen,   setEditOpen]   = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   // ── Snackbar ───────────────────────────────────────────────────────────────
@@ -82,17 +77,20 @@ export default function EmployeeDetailsPage() {
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
-  const handleEditSubmit = useCallback(async (payload) => {
-    try {
-      await updateMutation.mutateAsync({ id, payload });
-      showSnackbar('success', 'Employee updated successfully.');
-      setEditOpen(false);
-    } catch (err) {
-      if (!err?.violations) {
-        showSnackbar('error', err?.message ?? 'Failed to update employee.');
+  const handleEditSubmit = useCallback(
+    async (payload) => {
+      try {
+        await updateMutation.mutateAsync({ id, payload });
+        showSnackbar('success', 'Employee updated successfully.');
+        setEditOpen(false);
+      } catch (err) {
+        if (!err?.violations) {
+          showSnackbar('error', err?.message ?? 'Failed to update employee.');
+        }
       }
-    }
-  }, [id, updateMutation, showSnackbar]);
+    },
+    [id, updateMutation, showSnackbar],
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     try {
@@ -103,7 +101,7 @@ export default function EmployeeDetailsPage() {
       showSnackbar('error', err?.message ?? 'Failed to delete employee.');
       setDeleteOpen(false);
     }
-  }, [id, deleteMutation, navigate, showSnackbar]);
+  }, [id, deleteMutation, navigate, showSnackbar, listPath]);
 
   // ── Page title ─────────────────────────────────────────────────────────────
   const pageTitle = employee
@@ -114,32 +112,52 @@ export default function EmployeeDetailsPage() {
   return (
     <>
       <Helmet>
-        <title>{pageTitle} — Employee Portal</title>
+        <title>{pageTitle} — PeopleCore HR</title>
       </Helmet>
 
       {/* Header row */}
       <Box
         sx={{
-          display:        'flex',
-          alignItems:     'center',
+          display: 'flex',
+          alignItems: 'flex-start',
           justifyContent: 'space-between',
-          mb: 3,
+          mb: 4,
           flexWrap: 'wrap',
-          gap: 1,
+          gap: 2,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(listPath)}
-            variant="text"
-            aria-label="Back to employees list"
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: '12px',
+              bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'primary.main',
+            }}
           >
-            Back
-          </Button>
-          <Typography variant="h5" fontWeight={700}>
-            {isLoading ? 'Loading…' : pageTitle}
-          </Typography>
+            <PeopleAltRoundedIcon />
+          </Box>
+          <Box>
+            <Box sx={{ mb: 0.5 }}>
+              <Button
+                startIcon={<ArrowBackRoundedIcon />}
+                onClick={() => navigate(listPath)}
+                variant="outlined"
+                size="small"
+                aria-label="Back to employees list"
+                sx={{ borderRadius: '8px', fontWeight: 600 }}
+              >
+                Back
+              </Button>
+            </Box>
+            <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em' }}>
+              {isLoading ? 'Loading…' : pageTitle}
+            </Typography>
+          </Box>
         </Box>
 
         {!isLoading && !isError && employee && (
@@ -147,9 +165,10 @@ export default function EmployeeDetailsPage() {
             {canEdit && (
               <Button
                 variant="outlined"
-                startIcon={<EditIcon />}
+                startIcon={<EditRoundedIcon />}
                 onClick={() => setEditOpen(true)}
                 aria-label="Edit employee"
+                sx={{ borderRadius: '8px', fontWeight: 600 }}
               >
                 Edit
               </Button>
@@ -158,9 +177,10 @@ export default function EmployeeDetailsPage() {
               <Button
                 variant="outlined"
                 color="error"
-                startIcon={<DeleteIcon />}
+                startIcon={<DeleteRoundedIcon />}
                 onClick={() => setDeleteOpen(true)}
                 aria-label="Delete employee"
+                sx={{ borderRadius: '8px', fontWeight: 600 }}
               >
                 Delete
               </Button>
@@ -180,7 +200,7 @@ export default function EmployeeDetailsPage() {
               </Button>
             )
           }
-          sx={{ mb: 2 }}
+          sx={{ mb: 3, borderRadius: '10px' }}
         >
           {error?.status === 404
             ? 'Employee not found. They may have been deleted.'

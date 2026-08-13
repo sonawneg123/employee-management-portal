@@ -50,7 +50,7 @@ export default function EmployeeDialog({
   onClose,
 }) {
   const isEdit = mode === 'edit';
-  const title  = isEdit ? 'Edit Employee' : 'Add New Employee';
+  const title = isEdit ? 'Edit Employee' : 'Add New Employee';
 
   return (
     <Dialog
@@ -89,11 +89,7 @@ export default function EmployeeDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button
-          onClick={onClose}
-          disabled={isSubmitting}
-          aria-label="Cancel"
-        >
+        <Button onClick={onClose} disabled={isSubmitting} aria-label="Cancel">
           Cancel
         </Button>
         <Button

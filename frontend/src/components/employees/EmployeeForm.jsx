@@ -29,12 +29,9 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { employeeSchema }            from '@/utils/validationSchemas';
-import { useDepartments }            from '@/hooks/useDepartments';
-import {
-  EMPLOYEE_STATUS_OPTIONS,
-  EMPLOYEE_FORM_DEFAULTS,
-} from '@/constants/employeeConstants';
+import { employeeSchema } from '@/utils/validationSchemas';
+import { useDepartments } from '@/hooks/useDepartments';
+import { EMPLOYEE_STATUS_OPTIONS, EMPLOYEE_FORM_DEFAULTS } from '@/constants/employeeConstants';
 
 /**
  * @typedef {Object} EmployeeFormProps
@@ -68,7 +65,7 @@ export default function EmployeeForm({
     setError,
     formState: { errors },
   } = useForm({
-    resolver:      zodResolver(employeeSchema),
+    resolver: zodResolver(employeeSchema),
     defaultValues: { ...EMPLOYEE_FORM_DEFAULTS, ...defaultValues },
   });
 
@@ -89,16 +86,14 @@ export default function EmployeeForm({
   const handleFormSubmit = (values) => {
     const payload = {
       ...values,
-      salary:          Number(values.salary),
-      phone:           values.phone           || undefined,
-      address:         values.address         || undefined,
-      managerId:       values.managerId       || undefined,
+      salary: Number(values.salary),
+      phone: values.phone || undefined,
+      address: values.address || undefined,
+      managerId: values.managerId || undefined,
       profilePhotoUrl: values.profilePhotoUrl || undefined,
     };
     onSubmit(payload);
   };
-
-  const selectedDept = departments?.find((d) => d.id === control._formValues?.departmentId) ?? null;
 
   return (
     <Box
@@ -283,9 +278,7 @@ export default function EmployeeForm({
             disabled={isSubmitting}
             slotProps={{
               input: {
-                startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
-                ),
+                startAdornment: <InputAdornment position="start">$</InputAdornment>,
               },
             }}
             inputProps={{ 'aria-label': 'Salary', min: 0, step: '0.01' }}
@@ -296,7 +289,12 @@ export default function EmployeeForm({
             name="status"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth required error={Boolean(errors.status)} disabled={isSubmitting}>
+              <FormControl
+                fullWidth
+                required
+                error={Boolean(errors.status)}
+                disabled={isSubmitting}
+              >
                 <InputLabel id="status-label">Status</InputLabel>
                 <Select
                   {...field}
@@ -310,9 +308,7 @@ export default function EmployeeForm({
                     </MenuItem>
                   ))}
                 </Select>
-                {errors.status && (
-                  <FormHelperText>{errors.status.message}</FormHelperText>
-                )}
+                {errors.status && <FormHelperText>{errors.status.message}</FormHelperText>}
               </FormControl>
             )}
           />

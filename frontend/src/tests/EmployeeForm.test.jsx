@@ -26,7 +26,7 @@ vi.mock('@/hooks/useDepartments', () => ({
   useDepartments: vi.fn(() => ({
     data: [
       { id: 'dept-1', name: 'Engineering', code: 'ENG' },
-      { id: 'dept-2', name: 'HR',          code: 'HR'  },
+      { id: 'dept-2', name: 'HR', code: 'HR' },
     ],
     isLoading: false,
   })),
@@ -39,9 +39,9 @@ const theme = createTheme();
 function renderForm(props = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const defaults = {
-    formId:      'test-form',
-    onSubmit:    vi.fn(),
-    isSubmitting:false,
+    formId: 'test-form',
+    onSubmit: vi.fn(),
+    isSubmitting: false,
     ...props,
   };
   return render(
@@ -90,9 +90,7 @@ describe('EmployeeForm', () => {
       fireEvent.click(screen.getByTestId('submit-btn'));
     });
     await waitFor(() => {
-      expect(
-        screen.getByText('Please enter a valid email address'),
-      ).toBeInTheDocument();
+      expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
     });
   });
 

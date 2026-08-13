@@ -6,16 +6,7 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Skeleton,
-  Typography,
-} from '@mui/material';
+import { Box, Card, CardContent, Chip, Grid, Skeleton, Typography } from '@mui/material';
 import { aggregateByType, aggregateByStatus } from '@/utils/leaveCalculations';
 import { formatLeaveType, formatLeaveStatus } from '@/utils/leaveFormatters';
 import { LEAVE_STATUS_MAP, LEAVE_TYPE_MAP } from '@/constants/leaveConstants';
@@ -34,7 +25,7 @@ import { LEAVE_STATUS_MAP, LEAVE_TYPE_MAP } from '@/constants/leaveConstants';
  */
 export default function LeaveStatistics({ leaves = [], isLoading = false }) {
   const byStatus = aggregateByStatus(leaves);
-  const byType   = aggregateByType(leaves);
+  const byType = aggregateByType(leaves);
 
   if (isLoading) {
     return (
@@ -42,7 +33,13 @@ export default function LeaveStatistics({ leaves = [], isLoading = false }) {
         <CardContent>
           <Box sx={{ display: 'flex', gap: 1 }}>
             {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} variant="rectangular" width={90} height={32} sx={{ borderRadius: 4 }} />
+              <Skeleton
+                key={i}
+                variant="rectangular"
+                width={90}
+                height={32}
+                sx={{ borderRadius: 4 }}
+              />
             ))}
           </Box>
         </CardContent>
@@ -58,7 +55,12 @@ export default function LeaveStatistics({ leaves = [], isLoading = false }) {
         <Grid container spacing={2}>
           {/* By status */}
           <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              fontWeight={600}
+              sx={{ mb: 1, display: 'block' }}
+            >
               BY STATUS
             </Typography>
             <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
@@ -79,7 +81,12 @@ export default function LeaveStatistics({ leaves = [], isLoading = false }) {
           </Grid>
 
           <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="caption" color="text.secondary" fontWeight={600} sx={{ mb: 1, display: 'block' }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              fontWeight={600}
+              sx={{ mb: 1, display: 'block' }}
+            >
               BY TYPE
             </Typography>
             <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>

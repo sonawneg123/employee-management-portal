@@ -14,7 +14,7 @@
 export function formatCompactNumber(value) {
   if (value == null) return '—';
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000)     return `${(value / 1_000).toFixed(1)}K`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
   return String(value);
 }
 
@@ -52,8 +52,8 @@ export function calcAttendanceRate(present, total) {
  * @returns {'success.main' | 'text.secondary' | 'error.main'} MUI colour path.
  */
 export function trendColor(change) {
-  if (change > 0)  return 'success.main';
-  if (change < 0)  return 'error.main';
+  if (change > 0) return 'success.main';
+  if (change < 0) return 'error.main';
   return 'text.secondary';
 }
 
@@ -105,8 +105,8 @@ export function toPieChartData(departments) {
 export function toAttendanceLineData(trend) {
   if (!Array.isArray(trend)) return [];
   return trend.map((t) => ({
-    date:    t.date,
+    date: t.date,
     Present: t.present,
-    Absent:  t.absent,
+    Absent: t.absent,
   }));
 }

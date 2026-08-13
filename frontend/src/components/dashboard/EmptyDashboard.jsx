@@ -36,15 +36,10 @@ export default function EmptyDashboard() {
         Your dashboard is empty
       </Typography>
       <Typography variant="body1" color="text.secondary" maxWidth={420}>
-        Start by adding departments and employees to see statistics, charts,
-        and activity feeds here.
+        Start by adding departments and employees to see statistics, charts, and activity feeds
+        here.
       </Typography>
-      <Button
-        component={RouterLink}
-        to={ROUTES.EMPLOYEES}
-        variant="contained"
-        size="large"
-      >
+      <Button component={RouterLink} to={ROUTES.EMPLOYEES} variant="contained" size="large">
         Add First Employee
       </Button>
     </Box>

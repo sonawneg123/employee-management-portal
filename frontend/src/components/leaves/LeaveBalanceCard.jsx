@@ -15,10 +15,7 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
-import {
-  LEAVE_TYPE_OPTIONS,
-  LEAVE_DEFAULT_ENTITLEMENT,
-} from '@/constants/leaveConstants';
+import { LEAVE_TYPE_OPTIONS, LEAVE_DEFAULT_ENTITLEMENT } from '@/constants/leaveConstants';
 import { usedDaysByType } from '@/utils/leaveCalculations';
 
 /**
@@ -58,12 +55,12 @@ export default function LeaveBalanceCard({ approvedLeaves = [], isLoading = fals
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {LEAVE_TYPE_OPTIONS.filter((t) =>
-              ['ANNUAL', 'SICK', 'MATERNITY', 'PATERNITY', 'EMERGENCY'].includes(t.value)
+              ['ANNUAL', 'SICK', 'MATERNITY', 'PATERNITY', 'EMERGENCY'].includes(t.value),
             ).map((typeOpt) => {
               const entitlement = LEAVE_DEFAULT_ENTITLEMENT[typeOpt.value] ?? 0;
-              const used        = usedDaysByType(approvedLeaves, typeOpt.value);
-              const remaining   = Math.max(0, entitlement - used);
-              const pct         = entitlement > 0 ? Math.min(100, (used / entitlement) * 100) : 0;
+              const used = usedDaysByType(approvedLeaves, typeOpt.value);
+              const remaining = Math.max(0, entitlement - used);
+              const pct = entitlement > 0 ? Math.min(100, (used / entitlement) * 100) : 0;
 
               return (
                 <Box key={typeOpt.value}>

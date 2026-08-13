@@ -18,9 +18,9 @@ import axiosInstance from '@/api/axiosInstance';
 const BASE = '/dashboard';
 
 const ENDPOINTS = {
-  SUMMARY:  `${BASE}/summary`,
+  SUMMARY: `${BASE}/summary`,
   ACTIVITY: `${BASE}/activity`,
-  CHARTS:   `${BASE}/charts`,
+  CHARTS: `${BASE}/charts`,
 };
 
 // ── Type definitions ──────────────────────────────────────────────────────────

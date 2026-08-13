@@ -12,9 +12,7 @@ import App from './App';
 const container = document.getElementById('root');
 
 if (!container) {
-  throw new Error(
-    '[main.jsx] Root element #root not found in DOM. Check index.html.',
-  );
+  throw new Error('[main.jsx] Root element #root not found in DOM. Check index.html.');
 }
 
 createRoot(container).render(

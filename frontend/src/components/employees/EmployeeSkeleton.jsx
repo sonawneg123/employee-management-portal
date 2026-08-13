@@ -6,14 +6,7 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@mui/material';
+import { Box, Skeleton, Table, TableBody, TableCell, TableRow } from '@mui/material';
 
 /**
  * @typedef {Object} EmployeeSkeletonProps

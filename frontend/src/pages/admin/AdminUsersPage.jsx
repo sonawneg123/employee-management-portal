@@ -21,7 +21,6 @@ import {
   CircularProgress,
   FormControl,
   IconButton,
-  InputLabel,
   MenuItem,
   Paper,
   Select,
@@ -38,8 +37,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import CheckIcon  from '@mui/icons-material/Check';
-import CloseIcon  from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { getUsers, updateUserRole, setUserEnabled } from '@/services/adminApi';
 import { ROLES } from '@/constants/roles';
@@ -47,16 +46,16 @@ import { ROLES } from '@/constants/roles';
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const ALL_ROLES = [
-  { value: ROLES.ADMIN,    label: 'Admin' },
-  { value: ROLES.HR,       label: 'HR' },
-  { value: ROLES.MANAGER,  label: 'Manager' },
+  { value: ROLES.ADMIN, label: 'Admin' },
+  { value: ROLES.HR, label: 'HR' },
+  { value: ROLES.MANAGER, label: 'Manager' },
   { value: ROLES.EMPLOYEE, label: 'Employee' },
 ];
 
 const ROLE_COLOR_MAP = {
-  [ROLES.ADMIN]:    'error',
-  [ROLES.HR]:       'warning',
-  [ROLES.MANAGER]:  'info',
+  [ROLES.ADMIN]: 'error',
+  [ROLES.HR]: 'warning',
+  [ROLES.MANAGER]: 'info',
   [ROLES.EMPLOYEE]: 'default',
 };
 
@@ -70,7 +69,7 @@ const QUERY_KEY = ['admin', 'users'];
  *
  * @param {{ userId: string, currentRoles: string[], onSave: (role: string) => void, isSaving: boolean }} props
  */
-function RoleCell({ userId, currentRoles, onSave, isSaving }) {
+function RoleCell({ currentRoles, onSave, isSaving }) {
   const [selected, setSelected] = useState(currentRoles[0] ?? ROLES.EMPLOYEE);
   const changed = selected !== currentRoles[0];
 
@@ -83,7 +82,9 @@ function RoleCell({ userId, currentRoles, onSave, isSaving }) {
           inputProps={{ 'aria-label': 'Select role' }}
         >
           {ALL_ROLES.map(({ value, label }) => (
-            <MenuItem key={value} value={value}>{label}</MenuItem>
+            <MenuItem key={value} value={value}>
+              {label}
+            </MenuItem>
           ))}
         </Select>
       </FormControl>
@@ -114,15 +115,16 @@ function RoleCell({ userId, currentRoles, onSave, isSaving }) {
           </Tooltip>
         </>
       )}
-      {!changed && currentRoles.map((r) => (
-        <Chip
-          key={r}
-          label={r.replace('ROLE_', '')}
-          color={ROLE_COLOR_MAP[r] ?? 'default'}
-          size="small"
-          sx={{ fontWeight: 600 }}
-        />
-      ))}
+      {!changed &&
+        currentRoles.map((r) => (
+          <Chip
+            key={r}
+            label={r.replace('ROLE_', '')}
+            color={ROLE_COLOR_MAP[r] ?? 'default'}
+            size="small"
+            sx={{ fontWeight: 600 }}
+          />
+        ))}
     </Box>
   );
 }
@@ -141,7 +143,10 @@ export default function AdminUsersPage() {
   const [size, setSize] = useState(20);
   const [snack, setSnack] = useState({ open: false, severity: 'success', message: '' });
 
-  const showSnack  = useCallback((severity, message) => setSnack({ open: true, severity, message }), []);
+  const showSnack = useCallback(
+    (severity, message) => setSnack({ open: true, severity, message }),
+    [],
+  );
   const closeSnack = useCallback(() => setSnack((s) => ({ ...s, open: false })), []);
 
   // ── Query ─────────────────────────────────────────────────────────────────
@@ -157,7 +162,10 @@ export default function AdminUsersPage() {
     mutationFn: ({ userId, roleName }) => updateUserRole(userId, roleName),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      showSnack('success', `Role updated to ${updated.roles[0]?.replace('ROLE_', '') ?? ''} for ${updated.email}.`);
+      showSnack(
+        'success',
+        `Role updated to ${updated.roles[0]?.replace('ROLE_', '') ?? ''} for ${updated.email}.`,
+      );
     },
     onError: (err) => showSnack('error', err?.message ?? 'Failed to update role.'),
   });
@@ -167,21 +175,28 @@ export default function AdminUsersPage() {
     mutationFn: ({ userId, enabled }) => setUserEnabled(userId, enabled),
     onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-      showSnack('success', `${updated.email} has been ${updated.isEnabled ? 'enabled' : 'disabled'}.`);
+      showSnack(
+        'success',
+        `${updated.email} has been ${updated.isEnabled ? 'enabled' : 'disabled'}.`,
+      );
     },
     onError: (err) => showSnack('error', err?.message ?? 'Failed to update account status.'),
   });
 
-  const users        = data?.content       ?? [];
+  const users = data?.content ?? [];
   const totalElements = data?.totalElements ?? 0;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      <Helmet><title>User Management — Employee Portal</title></Helmet>
+      <Helmet>
+        <title>User Management — PeopleCore HR</title>
+      </Helmet>
 
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>User Management</Typography>
+        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
+          User Management
+        </Typography>
         <Typography variant="body2" color="text.secondary">
           View and manage all registered user accounts and their roles.
         </Typography>
@@ -193,73 +208,85 @@ export default function AdminUsersPage() {
         </Alert>
       )}
 
-      <TableContainer component={Paper} variant="outlined">
+      <TableContainer component={Paper}>
         <Table size="small" aria-label="User accounts">
           <TableHead>
             <TableRow>
-              <TableCell><strong>Email</strong></TableCell>
-              <TableCell><strong>Name</strong></TableCell>
-              <TableCell><strong>Role</strong></TableCell>
-              <TableCell align="center"><strong>Enabled</strong></TableCell>
-              <TableCell><strong>Joined</strong></TableCell>
+              <TableCell>
+                <strong>Email</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Name</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Role</strong>
+              </TableCell>
+              <TableCell align="center">
+                <strong>Enabled</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Joined</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {isLoading
-              ? Array.from({ length: size }, (_, i) => (
-                  <TableRow key={i}>
-                    {Array.from({ length: 5 }, (__, j) => (
-                      <TableCell key={j}><Skeleton variant="text" /></TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              : users.length === 0
-                ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 6, color: 'text.secondary' }}>
-                      No user accounts found.
+            {isLoading ? (
+              Array.from({ length: size }, (_, i) => (
+                <TableRow key={i}>
+                  {Array.from({ length: 5 }, (__, j) => (
+                    <TableCell key={j}>
+                      <Skeleton variant="text" />
                     </TableCell>
-                  </TableRow>
-                )
-                : users.map((user) => (
-                  <TableRow key={user.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={500}>{user.email}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      {user.firstName} {user.lastName}
-                    </TableCell>
-                    <TableCell>
-                      <RoleCell
-                        userId={user.id}
-                        currentRoles={user.roles}
-                        onSave={(roleName) => roleMutation.mutate({ userId: user.id, roleName })}
-                        isSaving={roleMutation.isPending && roleMutation.variables?.userId === user.id}
+                  ))}
+                </TableRow>
+              ))
+            ) : users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                  No user accounts found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              users.map((user) => (
+                <TableRow key={user.id} hover>
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={500}>
+                      {user.email}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    {user.firstName} {user.lastName}
+                  </TableCell>
+                  <TableCell>
+                    <RoleCell
+                      currentRoles={user.roles}
+                      onSave={(roleName) => roleMutation.mutate({ userId: user.id, roleName })}
+                      isSaving={
+                        roleMutation.isPending && roleMutation.variables?.userId === user.id
+                      }
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title={user.isEnabled ? 'Click to disable' : 'Click to enable'}>
+                      <Switch
+                        checked={user.isEnabled}
+                        onChange={(e) =>
+                          enabledMutation.mutate({ userId: user.id, enabled: e.target.checked })
+                        }
+                        disabled={
+                          enabledMutation.isPending && enabledMutation.variables?.userId === user.id
+                        }
+                        size="small"
+                        inputProps={{ 'aria-label': `Toggle account for ${user.email}` }}
                       />
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip title={user.isEnabled ? 'Click to disable' : 'Click to enable'}>
-                        <Switch
-                          checked={user.isEnabled}
-                          onChange={(e) =>
-                            enabledMutation.mutate({ userId: user.id, enabled: e.target.checked })
-                          }
-                          disabled={
-                            enabledMutation.isPending &&
-                            enabledMutation.variables?.userId === user.id
-                          }
-                          size="small"
-                          inputProps={{ 'aria-label': `Toggle account for ${user.email}` }}
-                        />
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString()
-                        : '—'}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
 
@@ -269,7 +296,10 @@ export default function AdminUsersPage() {
           page={page}
           onPageChange={(_e, newPage) => setPage(newPage)}
           rowsPerPage={size}
-          onRowsPerPageChange={(e) => { setSize(parseInt(e.target.value, 10)); setPage(0); }}
+          onRowsPerPageChange={(e) => {
+            setSize(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
           rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
           labelRowsPerPage="Rows:"
           aria-label="User table pagination"
@@ -282,7 +312,12 @@ export default function AdminUsersPage() {
         onClose={closeSnack}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={closeSnack} severity={snack.severity} variant="filled" sx={{ width: '100%' }}>
+        <Alert
+          onClose={closeSnack}
+          severity={snack.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
           {snack.message}
         </Alert>
       </Snackbar>

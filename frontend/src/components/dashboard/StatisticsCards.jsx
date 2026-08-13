@@ -22,24 +22,24 @@ export default function StatisticsCards() {
 
   const stats = [
     {
-      key:   'totalEmployees',
-      value:  data?.totalEmployees ?? 0,
-      trend:  data?.trendEmployees,
+      key: 'totalEmployees',
+      value: data?.totalEmployees ?? 0,
+      trend: data?.trendEmployees,
     },
     {
-      key:   'totalDepartments',
-      value:  data?.totalDepartments ?? 0,
-      trend:  undefined,
+      key: 'totalDepartments',
+      value: data?.totalDepartments ?? 0,
+      trend: undefined,
     },
     {
-      key:   'pendingLeaves',
-      value:  data?.pendingLeaves ?? 0,
-      trend:  data?.trendLeaves,
+      key: 'pendingLeaves',
+      value: data?.pendingLeaves ?? 0,
+      trend: data?.trendLeaves,
     },
     {
-      key:   'presentToday',
-      value:  data?.presentToday ?? 0,
-      trend:  data?.trendAttendance,
+      key: 'presentToday',
+      value: data?.presentToday ?? 0,
+      trend: data?.trendAttendance,
       trendLabel: 'vs yesterday',
     },
   ];

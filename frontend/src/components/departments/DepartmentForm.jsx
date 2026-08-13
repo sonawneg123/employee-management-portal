@@ -14,7 +14,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Grid, TextField, Typography } from '@mui/material';
-import { departmentSchema }        from '@/utils/validationSchemas';
+import { departmentSchema } from '@/utils/validationSchemas';
 import { DEPARTMENT_FORM_DEFAULTS } from '@/constants/departmentConstants';
 
 /**
@@ -45,7 +45,7 @@ export default function DepartmentForm({
     setError,
     formState: { errors },
   } = useForm({
-    resolver:      zodResolver(departmentSchema),
+    resolver: zodResolver(departmentSchema),
     defaultValues: { ...DEPARTMENT_FORM_DEFAULTS, ...defaultValues },
   });
 
@@ -121,7 +121,9 @@ export default function DepartmentForm({
             label="Department Head"
             fullWidth
             error={Boolean(errors.headName)}
-            helperText={errors.headName?.message ?? 'Optional: name of the person leading this department'}
+            helperText={
+              errors.headName?.message ?? 'Optional: name of the person leading this department'
+            }
             disabled={isSubmitting}
             inputProps={{ 'aria-label': 'Department head name' }}
           />

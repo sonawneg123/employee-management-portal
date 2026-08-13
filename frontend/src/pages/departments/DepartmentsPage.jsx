@@ -18,20 +18,12 @@
  *   EMPLOYEE    → redirected by ProtectedRoute (no access)
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Card,
-  Snackbar,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import { useAuth }         from '@/contexts/AuthContext';
-import { ROLES }           from '@/constants/roles';
+import { Alert, Box, Card, Snackbar, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/constants/roles';
 import {
   DEPARTMENT_DEFAULT_PAGE_SIZE,
   DEPARTMENT_DEFAULT_SORT,
@@ -47,11 +39,11 @@ import {
 } from '@/hooks/useDepartmentHooks';
 import { buildDeptCsvString, downloadDeptCsv } from '@/utils/departmentFormatters';
 
-import DepartmentToolbar      from '@/components/departments/DepartmentToolbar';
-import DepartmentTable        from '@/components/departments/DepartmentTable';
-import DepartmentCard         from '@/components/departments/DepartmentCard';
-import DepartmentPagination   from '@/components/departments/DepartmentPagination';
-import DepartmentDialog       from '@/components/departments/DepartmentDialog';
+import DepartmentToolbar from '@/components/departments/DepartmentToolbar';
+import DepartmentTable from '@/components/departments/DepartmentTable';
+import DepartmentCard from '@/components/departments/DepartmentCard';
+import DepartmentPagination from '@/components/departments/DepartmentPagination';
+import DepartmentDialog from '@/components/departments/DepartmentDialog';
 import DeleteDepartmentDialog from '@/components/departments/DeleteDepartmentDialog';
 
 /**
@@ -64,7 +56,7 @@ import DeleteDepartmentDialog from '@/components/departments/DeleteDepartmentDia
  * @returns {JSX.Element}
  */
 export default function DepartmentsPage() {
-  const theme    = useTheme();
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
@@ -77,41 +69,40 @@ export default function DepartmentsPage() {
 
   // ── Role permissions ───────────────────────────────────────────────────────
   const canCreate = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canEdit   = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canDelete = hasAnyRole([ROLES.ADMIN]);           // DELETE /departments/** → ADMIN only
+  const canEdit = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
+  const canDelete = hasAnyRole([ROLES.ADMIN]); // DELETE /departments/** → ADMIN only
 
   // ── Query params ───────────────────────────────────────────────────────────
-  const [page,      setPage]      = useState(0);
-  const [pageSize,  setPageSize]  = useState(DEPARTMENT_DEFAULT_PAGE_SIZE);
-  const [sort,      setSort]      = useState(DEPARTMENT_DEFAULT_SORT);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEPARTMENT_DEFAULT_PAGE_SIZE);
+  const [sort, setSort] = useState(DEPARTMENT_DEFAULT_SORT);
   const [direction, setDirection] = useState(DEPARTMENT_DEFAULT_DIRECTION);
-  const [search,    setSearch]    = useState('');
+  const [search, setSearch] = useState('');
 
   // ── Dialog state ───────────────────────────────────────────────────────────
   /** @type {[DialogMode, Function]} */
-  const [dialogMode,   setDialogMode]   = useState(null);
-  const [editDept,     setEditDept]     = useState(null);
-  const [deleteDept,   setDeleteDept]   = useState(null);
+  const [dialogMode, setDialogMode] = useState(null);
+  const [editDept, setEditDept] = useState(null);
+  const [deleteDept, setDeleteDept] = useState(null);
 
   // ── Snackbar state ─────────────────────────────────────────────────────────
   const [snackbar, setSnackbar] = useState({ open: false, severity: 'success', message: '' });
 
   // ── Data ───────────────────────────────────────────────────────────────────
-  const {
-    data,
-    isLoading,
-    isFetching,
-    isError,
-    error,
-    refresh,
-  } = useDepartmentList({ page, size: pageSize, sort, direction, search });
+  const { data, isLoading, isFetching, isError, error, refresh } = useDepartmentList({
+    page,
+    size: pageSize,
+    sort,
+    direction,
+    search,
+  });
 
   const createMutation = useCreateDepartment();
   const updateMutation = useUpdateDepartment();
   const deleteMutation = useDeleteDepartment();
 
-  const departments   = data?.content        ?? [];
-  const totalElements = data?.totalElements  ?? 0;
+  const departments = useMemo(() => data?.content ?? [], [data?.content]);
+  const totalElements = data?.totalElements ?? 0;
 
   // ── Snackbar helpers ───────────────────────────────────────────────────────
 
@@ -125,10 +116,23 @@ export default function DepartmentsPage() {
 
   // ── Filter / sort handlers ─────────────────────────────────────────────────
 
-  const handleSearchChange    = useCallback((v) => { setSearch(v);  setPage(0); }, []);
-  const handleSortChange      = useCallback((field, dir) => { setSort(field); setDirection(dir); setPage(0); }, []);
-  const handleDirectionChange = useCallback((dir) => { setDirection(dir); setPage(0); }, []);
-  const handleClearSearch     = useCallback(() => { setSearch(''); setPage(0); }, []);
+  const handleSearchChange = useCallback((v) => {
+    setSearch(v);
+    setPage(0);
+  }, []);
+  const handleSortChange = useCallback((field, dir) => {
+    setSort(field);
+    setDirection(dir);
+    setPage(0);
+  }, []);
+  const handleDirectionChange = useCallback((dir) => {
+    setDirection(dir);
+    setPage(0);
+  }, []);
+  const handleClearSearch = useCallback(() => {
+    setSearch('');
+    setPage(0);
+  }, []);
 
   // ── Dialog handlers ────────────────────────────────────────────────────────
 
@@ -149,24 +153,27 @@ export default function DepartmentsPage() {
 
   // ── CRUD handlers ──────────────────────────────────────────────────────────
 
-  const handleSubmit = useCallback(async (payload) => {
-    try {
-      if (dialogMode === 'create') {
-        await createMutation.mutateAsync(payload);
-        showSnackbar('success', 'Department created successfully.');
-      } else {
-        await updateMutation.mutateAsync({ id: editDept.id, payload });
-        showSnackbar('success', 'Department updated successfully.');
+  const handleSubmit = useCallback(
+    async (payload) => {
+      try {
+        if (dialogMode === 'create') {
+          await createMutation.mutateAsync(payload);
+          showSnackbar('success', 'Department created successfully.');
+        } else {
+          await updateMutation.mutateAsync({ id: editDept.id, payload });
+          showSnackbar('success', 'Department updated successfully.');
+        }
+        handleCloseDialog();
+      } catch (err) {
+        if (!err?.violations) {
+          showSnackbar('error', err?.message ?? 'An error occurred. Please try again.');
+        }
       }
-      handleCloseDialog();
-    } catch (err) {
-      if (!err?.violations) {
-        showSnackbar('error', err?.message ?? 'An error occurred. Please try again.');
-      }
-    }
-  }, [dialogMode, editDept, createMutation, updateMutation, showSnackbar, handleCloseDialog]);
+    },
+    [dialogMode, editDept, createMutation, updateMutation, showSnackbar, handleCloseDialog],
+  );
 
-  const handleOpenDelete  = useCallback((dept) => setDeleteDept(dept), []);
+  const handleOpenDelete = useCallback((dept) => setDeleteDept(dept), []);
   const handleCloseDelete = useCallback(() => setDeleteDept(null), []);
 
   const handleConfirmDelete = useCallback(async () => {
@@ -180,9 +187,12 @@ export default function DepartmentsPage() {
     }
   }, [deleteDept, deleteMutation, showSnackbar, handleCloseDelete]);
 
-  const handleView = useCallback((dept) => {
-    navigate(`${listBase}/${dept.id}`);
-  }, [navigate, listBase]);
+  const handleView = useCallback(
+    (dept) => {
+      navigate(`${listBase}/${dept.id}`);
+    },
+    [navigate, listBase],
+  );
 
   // ── CSV Export ─────────────────────────────────────────────────────────────
 
@@ -202,17 +212,19 @@ export default function DepartmentsPage() {
   return (
     <>
       <Helmet>
-        <title>Departments — Employee Portal</title>
+        <title>Departments — PeopleCore HR</title>
       </Helmet>
 
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={700}>Departments</Typography>
+        <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em', mb: 0.25 }}>
+          Departments
+        </Typography>
         <Typography variant="body2" color="text.secondary">
           Manage all organisational departments
         </Typography>
       </Box>
 
-      <Card variant="outlined">
+      <Card>
         <DepartmentToolbar
           search={search}
           sort={sort}
@@ -258,7 +270,10 @@ export default function DepartmentsPage() {
           <Box sx={{ p: 2 }}>
             {isLoading
               ? Array.from({ length: 5 }, (_, i) => (
-                  <Box key={i} sx={{ mb: 1.5, height: 90, bgcolor: 'action.hover', borderRadius: 2 }} />
+                  <Box
+                    key={i}
+                    sx={{ mb: 1.5, height: 90, bgcolor: 'action.hover', borderRadius: 2 }}
+                  />
                 ))
               : departments.map((dept) => (
                   <DepartmentCard
@@ -276,7 +291,10 @@ export default function DepartmentsPage() {
           pageSize={pageSize}
           totalElements={totalElements}
           onPageChange={setPage}
-          onPageSizeChange={(size) => { setPageSize(size); setPage(0); }}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(0);
+          }}
           disabled={isLoading || isFetching}
         />
       </Card>
@@ -308,7 +326,12 @@ export default function DepartmentsPage() {
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={closeSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

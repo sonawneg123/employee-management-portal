@@ -30,10 +30,7 @@ export default function ProtectedRoute() {
 
   if (!isAuthenticated) {
     return (
-      <Navigate
-        to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname)}`}
-        replace
-      />
+      <Navigate to={`${ROUTES.LOGIN}?redirect=${encodeURIComponent(location.pathname)}`} replace />
     );
   }
 

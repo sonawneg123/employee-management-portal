@@ -135,10 +135,10 @@ describe('avatarColorFromName', () => {
 
 describe('buildCsvString', () => {
   const headers = ['First Name', 'Last Name', 'Email'];
-  const fields  = ['firstName', 'lastName', 'email'];
+  const fields = ['firstName', 'lastName', 'email'];
   const employees = [
     { firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com' },
-    { firstName: 'Bob',  lastName: 'Jones', email: 'bob@example.com'  },
+    { firstName: 'Bob', lastName: 'Jones', email: 'bob@example.com' },
   ];
 
   it('creates a CSV with header row and data rows', () => {
@@ -151,13 +151,13 @@ describe('buildCsvString', () => {
 
   it('escapes double quotes in values', () => {
     const data = [{ firstName: 'O"Brien', lastName: 'X', email: 'a@b.com' }];
-    const csv  = buildCsvString(data, headers, fields);
+    const csv = buildCsvString(data, headers, fields);
     expect(csv).toContain('"O""Brien"');
   });
 
   it('handles null/undefined values as empty strings', () => {
     const data = [{ firstName: null, lastName: undefined, email: 'a@b.com' }];
-    const csv  = buildCsvString(data, headers, fields);
+    const csv = buildCsvString(data, headers, fields);
     expect(csv).toContain('"","",');
   });
 });
@@ -172,8 +172,8 @@ describe('downloadCsv', () => {
   let clickSpy;
 
   beforeEach(() => {
-    createObjectURL  = vi.fn().mockReturnValue('blob:mock');
-    revokeObjectURL  = vi.fn();
+    createObjectURL = vi.fn().mockReturnValue('blob:mock');
+    revokeObjectURL = vi.fn();
     global.URL.createObjectURL = createObjectURL;
     global.URL.revokeObjectURL = revokeObjectURL;
 

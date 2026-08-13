@@ -61,7 +61,9 @@ export default function RecentActivity() {
     >
       {isLoading ? (
         <List disablePadding>
-          {[0, 1, 2, 3, 4].map((i) => <ActivityItemSkeleton key={i} />)}
+          {[0, 1, 2, 3, 4].map((i) => (
+            <ActivityItemSkeleton key={i} />
+          ))}
         </List>
       ) : isEmpty ? (
         <Box
@@ -84,11 +86,7 @@ export default function RecentActivity() {
             const meta = ACTIVITY_TYPE_META[item.type] ?? ACTIVITY_TYPE_META.EMPLOYEE_JOINED;
             const IconComponent = meta.icon;
             return (
-              <ListItem
-                key={item.id}
-                alignItems="flex-start"
-                sx={{ px: 0, py: 0.75 }}
-              >
+              <ListItem key={item.id} alignItems="flex-start" sx={{ px: 0, py: 0.75 }}>
                 <ListItemAvatar sx={{ minWidth: 44 }}>
                   <Avatar
                     sx={{

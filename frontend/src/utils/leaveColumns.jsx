@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { Box, Chip, Typography } from '@mui/material';
-import WarningAmberIcon    from '@mui/icons-material/WarningAmber';
-import LeaveStatusChip     from '@/components/leaves/LeaveStatusChip';
-import LeaveTypeChip       from '@/components/leaves/LeaveTypeChip';
+import { Box, Typography } from '@mui/material';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import LeaveStatusChip from '@/components/leaves/LeaveStatusChip';
+import LeaveTypeChip from '@/components/leaves/LeaveTypeChip';
 import { formatLeaveDateRange, formatLeaveWorkingDays } from '@/utils/leaveFormatters';
 import { formatDate } from '@/utils/dateUtils';
 import { LEAVE_COLUMNS } from '@/constants/leaveConstants';
@@ -31,18 +31,22 @@ import { LEAVE_COLUMNS } from '@/constants/leaveConstants';
 export function getLeaveColumns() {
   return [
     {
-      id:       LEAVE_COLUMNS.EMPLOYEE,
-      label:    'Employee',
+      id: LEAVE_COLUMNS.EMPLOYEE,
+      label: 'Employee',
       sortable: false,
-      width:    '200px',
-      render:   (row) => (
+      width: '200px',
+      render: (row) => (
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Typography variant="body2" fontWeight={600} noWrap>
               {row.employeeName ?? '—'}
             </Typography>
             {row.isEmergency && (
-              <WarningAmberIcon fontSize="small" sx={{ color: 'error.main' }} titleAccess="Emergency leave" />
+              <WarningAmberIcon
+                fontSize="small"
+                sx={{ color: 'error.main' }}
+                titleAccess="Emergency leave"
+              />
             )}
           </Box>
           <Typography variant="caption" color="text.secondary" noWrap>
@@ -52,20 +56,22 @@ export function getLeaveColumns() {
       ),
     },
     {
-      id:       LEAVE_COLUMNS.TYPE,
-      label:    'Type',
+      id: LEAVE_COLUMNS.TYPE,
+      label: 'Type',
       sortable: true,
-      width:    '140px',
-      render:   (row) => <LeaveTypeChip type={row.leaveType} size="small" />,
+      width: '140px',
+      render: (row) => <LeaveTypeChip type={row.leaveType} size="small" />,
     },
     {
-      id:       LEAVE_COLUMNS.START_DATE,
-      label:    'Period',
+      id: LEAVE_COLUMNS.START_DATE,
+      label: 'Period',
       sortable: true,
-      width:    '200px',
-      render:   (row) => (
+      width: '200px',
+      render: (row) => (
         <Box>
-          <Typography variant="body2">{formatLeaveDateRange(row.startDate, row.endDate)}</Typography>
+          <Typography variant="body2">
+            {formatLeaveDateRange(row.startDate, row.endDate)}
+          </Typography>
           <Typography variant="caption" color="text.secondary">
             {formatLeaveWorkingDays(row.startDate, row.endDate)}
           </Typography>
@@ -73,19 +79,19 @@ export function getLeaveColumns() {
       ),
     },
     {
-      id:       LEAVE_COLUMNS.STATUS,
-      label:    'Status',
+      id: LEAVE_COLUMNS.STATUS,
+      label: 'Status',
       sortable: true,
-      align:    'center',
-      width:    '120px',
-      render:   (row) => <LeaveStatusChip status={row.status} size="small" />,
+      align: 'center',
+      width: '120px',
+      render: (row) => <LeaveStatusChip status={row.status} size="small" />,
     },
     {
-      id:       LEAVE_COLUMNS.SUBMITTED,
-      label:    'Submitted',
+      id: LEAVE_COLUMNS.SUBMITTED,
+      label: 'Submitted',
       sortable: true,
-      width:    '120px',
-      render:   (row) => (
+      width: '120px',
+      render: (row) => (
         <Typography variant="body2" color="text.secondary">
           {formatDate(row.createdAt)}
         </Typography>

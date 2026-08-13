@@ -24,15 +24,15 @@ import { deptInitials, deptAvatarColor } from '@/utils/departmentFormatters';
  */
 export default function DepartmentAvatar({ name, size = 40, tooltip = false }) {
   const initials = deptInitials(name);
-  const bgColor  = deptAvatarColor(name);
+  const bgColor = deptAvatarColor(name);
 
   const avatar = (
     <Avatar
       sx={{
-        width:      size,
-        height:     size,
-        bgcolor:    bgColor,
-        fontSize:   size * 0.36,
+        width: size,
+        height: size,
+        bgcolor: bgColor,
+        fontSize: size * 0.36,
         fontWeight: 700,
         flexShrink: 0,
       }}

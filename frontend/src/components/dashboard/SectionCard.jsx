@@ -1,35 +1,25 @@
 /**
- * @fileoverview SectionCard — generic titled section container.
+ * @fileoverview SectionCard — premium titled section container.
  *
- * Wraps dashboard sections (e.g., Recent Activity, Upcoming Leaves) with
- * a consistent card header including title, optional subtitle, optional
- * action slot, and the children content area.
+ * Wraps dashboard widgets with a consistent card header, optional refresh,
+ * and children content area.
  */
 
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  CardHeader,
-  Divider,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import { Box, Card, CardContent, Divider, IconButton, Tooltip, Typography } from '@mui/material';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 
 /**
  * @typedef {Object} SectionCardProps
- * @property {string}           title          - Card section title.
- * @property {string}           [subtitle]     - Optional subtitle below the title.
- * @property {React.ReactNode}  [action]       - Optional JSX rendered in the header action slot.
- * @property {boolean}          [showRefresh]  - Shows a refresh icon button if true.
- * @property {() => void}       [onRefresh]    - Callback for the refresh button.
- * @property {boolean}          [isFetching]   - Animates the refresh icon when true.
- * @property {React.ReactNode}  children       - Card body content.
- * @property {object}           [sx]           - Additional MUI sx overrides for the Card.
- * @property {object}           [contentSx]    - Additional MUI sx overrides for CardContent.
+ * @property {string}          title
+ * @property {string}          [subtitle]
+ * @property {React.ReactNode} [action]
+ * @property {boolean}         [showRefresh]
+ * @property {() => void}      [onRefresh]
+ * @property {boolean}         [isFetching]
+ * @property {React.ReactNode} children
+ * @property {object}          [sx]
+ * @property {object}          [contentSx]
  */
 
 /**
@@ -51,45 +41,67 @@ export default function SectionCard({
 }) {
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', ...sx }}>
-      <CardHeader
-        title={
-          <Typography variant="h6" fontWeight={600}>
+      {/* Header */}
+      <Box
+        sx={{
+          px: 2.5,
+          pt: 2.5,
+          pb: 1.5,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 1,
+        }}
+      >
+        <Box>
+          <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.005em' }}>
             {title}
           </Typography>
-        }
-        subheader={subtitle && (
-          <Typography variant="caption" color="text.secondary">
-            {subtitle}
-          </Typography>
-        )}
-        action={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            {action}
-            {showRefresh && (
-              <Tooltip title="Refresh">
-                <IconButton
-                  size="small"
-                  onClick={onRefresh}
-                  aria-label={`Refresh ${title}`}
-                  sx={{
-                    animation: isFetching ? 'spin 1s linear infinite' : 'none',
-                    '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
-                  }}
-                >
-                  <RefreshIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
-        }
-        sx={{ pb: 0 }}
-      />
-      <Divider sx={{ mx: 2, mt: 1 }} />
+          {subtitle && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 0.25, display: 'block' }}
+            >
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+          {action}
+          {showRefresh && (
+            <Tooltip title={`Refresh ${title}`}>
+              <IconButton
+                size="small"
+                onClick={onRefresh}
+                aria-label={`Refresh ${title}`}
+                sx={{
+                  bgcolor: 'action.hover',
+                  borderRadius: '8px',
+                  width: 30,
+                  height: 30,
+                  animation: isFetching ? 'spin 1s linear infinite' : 'none',
+                  '@keyframes spin': {
+                    '0%': { transform: 'rotate(0deg)' },
+                    '100%': { transform: 'rotate(360deg)' },
+                  },
+                }}
+              >
+                <RefreshRoundedIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      </Box>
+
+      <Divider />
+
       <CardContent
         sx={{
           flexGrow: 1,
-          p: 2,
-          '&:last-child': { pb: 2 },
+          p: 2.5,
+          '&:last-child': { pb: 2.5 },
           ...contentSx,
         }}
       >

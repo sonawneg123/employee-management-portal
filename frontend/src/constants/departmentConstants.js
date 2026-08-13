@@ -15,10 +15,10 @@
  * @readonly
  */
 export const DEPT_QUERY_KEYS = /** @type {const} */ ({
-  all:    ()       => ['dept-mgmt'],
-  lists:  ()       => ['dept-mgmt', 'list'],
-  list:   (params) => ['dept-mgmt', 'list', params],
-  detail: (id)     => ['dept-mgmt', 'detail', id],
+  all: () => ['dept-mgmt'],
+  lists: () => ['dept-mgmt', 'list'],
+  list: (params) => ['dept-mgmt', 'list', params],
+  detail: (id) => ['dept-mgmt', 'detail', id],
 });
 
 // ── Sort fields ───────────────────────────────────────────────────────────────
@@ -35,8 +35,8 @@ export const DEPT_QUERY_KEYS = /** @type {const} */ ({
  * @type {SortOption[]}
  */
 export const DEPARTMENT_SORT_OPTIONS = [
-  { value: 'name',      label: 'Name'        },
-  { value: 'code',      label: 'Code'        },
+  { value: 'name', label: 'Name' },
+  { value: 'code', label: 'Code' },
   { value: 'createdAt', label: 'Date Created' },
 ];
 
@@ -79,13 +79,13 @@ export const DEPARTMENT_DEFAULT_DIRECTION = 'asc';
  * @enum {string}
  */
 export const DEPARTMENT_COLUMNS = /** @type {const} */ ({
-  AVATAR:         'avatar',
-  NAME:           'name',
-  CODE:           'code',
+  AVATAR: 'avatar',
+  NAME: 'name',
+  CODE: 'code',
   EMPLOYEE_COUNT: 'employeeCount',
-  HEAD:           'headName',
-  CREATED_AT:     'createdAt',
-  ACTIONS:        'actions',
+  HEAD: 'headName',
+  CREATED_AT: 'createdAt',
+  ACTIONS: 'actions',
 });
 
 // ── CSV Export ────────────────────────────────────────────────────────────────
@@ -136,8 +136,14 @@ export const DEPT_SEARCH_DEBOUNCE_MS = 400;
  * @type {string[]}
  */
 export const DEPT_AVATAR_COLORS = [
-  '#1976d2', '#7c3aed', '#2e7d32', '#ed6c02',
-  '#0288d1', '#c62828', '#00796b', '#f57f17',
+  '#1976d2',
+  '#7c3aed',
+  '#2e7d32',
+  '#ed6c02',
+  '#0288d1',
+  '#c62828',
+  '#00796b',
+  '#f57f17',
 ];
 
 // ── Form defaults ─────────────────────────────────────────────────────────────
@@ -148,8 +154,8 @@ export const DEPT_AVATAR_COLORS = [
  * @type {Object}
  */
 export const DEPARTMENT_FORM_DEFAULTS = {
-  name:        '',
-  code:        '',
+  name: '',
+  code: '',
   description: '',
-  headName:    '',
+  headName: '',
 };

@@ -39,9 +39,15 @@ function makeQueryClient() {
 
 function makeAuthContext(overrides = {}) {
   return {
-    user: null, token: null, isAuthenticated: false, isLoading: false,
-    login: vi.fn(), register: vi.fn(), logout: vi.fn(),
-    hasRole: vi.fn(() => false), hasAnyRole: vi.fn(() => false),
+    user: null,
+    token: null,
+    isAuthenticated: false,
+    isLoading: false,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    hasRole: vi.fn(() => false),
+    hasAnyRole: vi.fn(() => false),
     ...overrides,
   };
 }
@@ -56,9 +62,7 @@ function renderWithProviders(ui, { authContext = {} } = {}) {
       <QueryClientProvider client={qc}>
         <ThemeProvider theme={testTheme}>
           <MemoryRouter initialEntries={['/register']}>
-            <AuthContext.Provider value={auth}>
-              {ui}
-            </AuthContext.Provider>
+            <AuthContext.Provider value={auth}>{ui}</AuthContext.Provider>
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -72,15 +76,15 @@ function renderWithProviders(ui, { authContext = {} } = {}) {
 async function fillValidForm(user, overrides = {}) {
   const defaults = {
     firstName: 'Jane',
-    lastName:  'Smith',
-    email:     'jane@example.com',
-    password:  'StrongP@ss1',
-    confirm:   'StrongP@ss1',
+    lastName: 'Smith',
+    email: 'jane@example.com',
+    password: 'StrongP@ss1',
+    confirm: 'StrongP@ss1',
   };
   const values = { ...defaults, ...overrides };
 
   await user.type(screen.getByLabelText(/first name/i), values.firstName);
-  await user.type(screen.getByLabelText(/last name/i),  values.lastName);
+  await user.type(screen.getByLabelText(/last name/i), values.lastName);
   await user.type(screen.getByLabelText(/email address/i), values.email);
   await user.type(screen.getByLabelText(/^password/i), values.password);
   await user.type(screen.getByLabelText(/confirm password/i), values.confirm);
@@ -198,7 +202,9 @@ describe('RegisterPage', () => {
   describe('Successful registration', () => {
     it('calls register with correct payload on valid submit', async () => {
       const registerMock = vi.fn().mockResolvedValue(undefined);
-      const { user } = renderWithProviders(<RegisterPage />, { authContext: { register: registerMock } });
+      const { user } = renderWithProviders(<RegisterPage />, {
+        authContext: { register: registerMock },
+      });
 
       await fillValidForm(user);
       await user.click(screen.getByRole('button', { name: /create account/i }));
@@ -206,16 +212,18 @@ describe('RegisterPage', () => {
       await waitFor(() => {
         expect(registerMock).toHaveBeenCalledWith({
           firstName: 'Jane',
-          lastName:  'Smith',
-          email:     'jane@example.com',
-          password:  'StrongP@ss1',
+          lastName: 'Smith',
+          email: 'jane@example.com',
+          password: 'StrongP@ss1',
         });
       });
     }, 15_000);
 
     it('disables submit button while loading', async () => {
       const registerMock = vi.fn(() => new Promise(() => {}));
-      const { user } = renderWithProviders(<RegisterPage />, { authContext: { register: registerMock } });
+      const { user } = renderWithProviders(<RegisterPage />, {
+        authContext: { register: registerMock },
+      });
 
       await fillValidForm(user);
       await user.click(screen.getByRole('button', { name: /create account/i }));
@@ -230,7 +238,9 @@ describe('RegisterPage', () => {
     it('shows 409 duplicate email message at form level', async () => {
       const error409 = { status: 409, message: 'User already exists with email', violations: null };
       const registerMock = vi.fn().mockRejectedValue(error409);
-      const { user } = renderWithProviders(<RegisterPage />, { authContext: { register: registerMock } });
+      const { user } = renderWithProviders(<RegisterPage />, {
+        authContext: { register: registerMock },
+      });
 
       await fillValidForm(user);
       await user.click(screen.getByRole('button', { name: /create account/i }));
@@ -247,7 +257,9 @@ describe('RegisterPage', () => {
         violations: { email: 'Email domain is not allowed' },
       };
       const registerMock = vi.fn().mockRejectedValue(errorWithViolations);
-      const { user } = renderWithProviders(<RegisterPage />, { authContext: { register: registerMock } });
+      const { user } = renderWithProviders(<RegisterPage />, {
+        authContext: { register: registerMock },
+      });
 
       await fillValidForm(user);
       await user.click(screen.getByRole('button', { name: /create account/i }));
@@ -258,9 +270,15 @@ describe('RegisterPage', () => {
     }, 15_000);
 
     it('shows generic 500 error at form level', async () => {
-      const error500 = { status: 500, message: 'An unexpected server error occurred.', violations: null };
+      const error500 = {
+        status: 500,
+        message: 'An unexpected server error occurred.',
+        violations: null,
+      };
       const registerMock = vi.fn().mockRejectedValue(error500);
-      const { user } = renderWithProviders(<RegisterPage />, { authContext: { register: registerMock } });
+      const { user } = renderWithProviders(<RegisterPage />, {
+        authContext: { register: registerMock },
+      });
 
       await fillValidForm(user);
       await user.click(screen.getByRole('button', { name: /create account/i }));

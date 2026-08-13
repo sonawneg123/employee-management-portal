@@ -31,24 +31,25 @@ import {
   Typography,
 } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import {
-  LEAVE_TYPE_OPTIONS,
-  LEAVE_FORM_DEFAULTS,
-} from '@/constants/leaveConstants';
+import { LEAVE_TYPE_OPTIONS, LEAVE_FORM_DEFAULTS } from '@/constants/leaveConstants';
 import { countWorkingDays, validateDateRange } from '@/utils/leaveCalculations';
 
 // ── Zod schema ────────────────────────────────────────────────────────────────
 
 const leaveFormSchema = z
   .object({
-    leaveType:     z.enum(
-      ['ANNUAL','SICK','MATERNITY','PATERNITY','UNPAID','EMERGENCY','STUDY','OTHER'],
+    leaveType: z.enum(
+      ['ANNUAL', 'SICK', 'MATERNITY', 'PATERNITY', 'UNPAID', 'EMERGENCY', 'STUDY', 'OTHER'],
       { errorMap: () => ({ message: 'Please select a leave type' }) },
     ),
-    startDate:     z.string().min(1, 'Start date is required'),
-    endDate:       z.string().min(1, 'End date is required'),
-    reason:        z.string().max(500, 'Reason must not exceed 500 characters').optional().or(z.literal('')),
-    isEmergency:   z.boolean().optional(),
+    startDate: z.string().min(1, 'Start date is required'),
+    endDate: z.string().min(1, 'End date is required'),
+    reason: z
+      .string()
+      .max(500, 'Reason must not exceed 500 characters')
+      .optional()
+      .or(z.literal('')),
+    isEmergency: z.boolean().optional(),
     attachmentUrl: z.string().url('Must be a valid URL').optional().or(z.literal('')),
   })
   .refine(
@@ -58,7 +59,7 @@ const leaveFormSchema = z
     },
     (data) => ({
       message: validateDateRange(data.startDate, data.endDate).message,
-      path:    ['endDate'],
+      path: ['endDate'],
     }),
   );
 
@@ -79,7 +80,13 @@ const leaveFormSchema = z
  * @param {LeaveFormProps} props
  * @returns {JSX.Element}
  */
-export default function LeaveForm({ formId, defaultValues, onSubmit, isSubmitting = false, serverErrors }) {
+export default function LeaveForm({
+  formId,
+  defaultValues,
+  onSubmit,
+  isSubmitting = false,
+  serverErrors,
+}) {
   const {
     register,
     handleSubmit,
@@ -88,7 +95,7 @@ export default function LeaveForm({ formId, defaultValues, onSubmit, isSubmittin
     setError,
     formState: { errors },
   } = useForm({
-    resolver:      zodResolver(leaveFormSchema),
+    resolver: zodResolver(leaveFormSchema),
     defaultValues: { ...LEAVE_FORM_DEFAULTS, ...defaultValues },
   });
 
@@ -99,10 +106,8 @@ export default function LeaveForm({ formId, defaultValues, onSubmit, isSubmittin
   }, [serverErrors, setError]);
 
   const startDate = watch('startDate');
-  const endDate   = watch('endDate');
-  const workingDays = (startDate && endDate)
-    ? countWorkingDays(startDate, endDate)
-    : null;
+  const endDate = watch('endDate');
+  const workingDays = startDate && endDate ? countWorkingDays(startDate, endDate) : null;
 
   return (
     <Box
@@ -119,7 +124,12 @@ export default function LeaveForm({ formId, defaultValues, onSubmit, isSubmittin
             name="leaveType"
             control={control}
             render={({ field }) => (
-              <FormControl fullWidth required error={Boolean(errors.leaveType)} disabled={isSubmitting}>
+              <FormControl
+                fullWidth
+                required
+                error={Boolean(errors.leaveType)}
+                disabled={isSubmitting}
+              >
                 <InputLabel id="leave-type-label">Leave Type</InputLabel>
                 <Select
                   {...field}

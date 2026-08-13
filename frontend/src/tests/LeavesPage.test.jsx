@@ -29,12 +29,22 @@ import LeavesPage from '@/pages/leaves/LeavesPage';
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock('@/hooks/useLeaveHooks', () => ({
-  useLeaves:       vi.fn(),
-  useCreateLeave:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, isError: false, error: null })),
-  useUpdateLeave:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, isError: false, error: null })),
-  useDeleteLeave:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useLeaves: vi.fn(),
+  useCreateLeave: vi.fn(() => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  })),
+  useUpdateLeave: vi.fn(() => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  })),
+  useDeleteLeave: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
   useApproveLeave: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
-  useRejectLeave:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useRejectLeave: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
 }));
 
 // Mock profileApi so the useQuery({ queryFn: getProfile }) added to LeavesPage
@@ -42,9 +52,9 @@ vi.mock('@/hooks/useLeaveHooks', () => ({
 vi.mock('@/services/profileApi', () => ({
   getProfile: vi.fn().mockResolvedValue({
     employeeId: 'emp-uuid-1',
-    firstName:  'Admin',
-    lastName:   'User',
-    email:      'admin@example.com',
+    firstName: 'Admin',
+    lastName: 'User',
+    email: 'admin@example.com',
   }),
 }));
 
@@ -58,28 +68,28 @@ vi.mock('@/utils/leaveFormatters', async (importOriginal) => {
   return { ...original, downloadLeaveCsv: vi.fn() };
 });
 
-import { useLeaves }           from '@/hooks/useLeaveHooks';
-import { useAuth }             from '@/contexts/AuthContext';
-import { downloadLeaveCsv }    from '@/utils/leaveFormatters';
+import { useLeaves } from '@/hooks/useLeaveHooks';
+import { useAuth } from '@/contexts/AuthContext';
+import { downloadLeaveCsv } from '@/utils/leaveFormatters';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const LEAVE = {
-  id:           'leave-uuid-1',
+  id: 'leave-uuid-1',
   employeeName: 'Alice Smith',
-  leaveType:    'ANNUAL',
-  status:       'PENDING',
-  startDate:    '2025-06-02',
-  endDate:      '2025-06-06',
+  leaveType: 'ANNUAL',
+  status: 'PENDING',
+  startDate: '2025-06-02',
+  endDate: '2025-06-06',
 };
 
 const PAGE_RESPONSE = {
-  content:       [LEAVE],
-  page:          0,
-  size:          20,
+  content: [LEAVE],
+  page: 0,
+  size: 20,
   totalElements: 1,
-  totalPages:    1,
-  last:          true,
+  totalPages: 1,
+  last: true,
 };
 
 const EMPTY_PAGE = { content: [], page: 0, size: 20, totalElements: 0, totalPages: 0, last: true };
@@ -87,7 +97,7 @@ const EMPTY_PAGE = { content: [], page: 0, size: 20, totalElements: 0, totalPage
 // ── Wrapper ───────────────────────────────────────────────────────────────────
 
 function renderPage(authOverrides = {}) {
-  const qc    = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const theme = createTheme();
 
   useAuth.mockReturnValue({
@@ -115,12 +125,12 @@ function renderPage(authOverrides = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   useLeaves.mockReturnValue({
-    data:       PAGE_RESPONSE,
-    isLoading:  false,
+    data: PAGE_RESPONSE,
+    isLoading: false,
     isFetching: false,
-    isError:    false,
-    error:      null,
-    refresh:    vi.fn(),
+    isError: false,
+    error: null,
+    refresh: vi.fn(),
   });
 });
 
@@ -132,8 +142,12 @@ describe('LeavesPage', () => {
 
   it('shows skeleton while loading', () => {
     useLeaves.mockReturnValue({
-      data: undefined, isLoading: true, isFetching: true,
-      isError: false, error: null, refresh: vi.fn(),
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
     renderPage();
     // Table should be in loading state — no leave rows visible
@@ -142,8 +156,12 @@ describe('LeavesPage', () => {
 
   it('shows empty state when no leaves', () => {
     useLeaves.mockReturnValue({
-      data: EMPTY_PAGE, isLoading: false, isFetching: false,
-      isError: false, error: null, refresh: vi.fn(),
+      data: EMPTY_PAGE,
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByText(/no leave requests yet/i)).toBeInTheDocument();
@@ -151,8 +169,12 @@ describe('LeavesPage', () => {
 
   it('shows error state when query fails', () => {
     useLeaves.mockReturnValue({
-      data: undefined, isLoading: false, isFetching: false,
-      isError: true, error: { message: 'Service unavailable' }, refresh: vi.fn(),
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { message: 'Service unavailable' },
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByText('Service unavailable')).toBeInTheDocument();

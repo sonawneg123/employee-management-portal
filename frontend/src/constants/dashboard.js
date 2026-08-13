@@ -6,14 +6,14 @@
  * labels. Import from this module exclusively to avoid duplication.
  */
 
-import PeopleIcon          from '@mui/icons-material/People';
-import ApartmentIcon       from '@mui/icons-material/Apartment';
-import EventNoteIcon       from '@mui/icons-material/EventNote';
-import AccessTimeIcon      from '@mui/icons-material/AccessTime';
-import TrendingUpIcon      from '@mui/icons-material/TrendingUp';
-import CheckCircleIcon     from '@mui/icons-material/CheckCircle';
-import PendingActionsIcon  from '@mui/icons-material/PendingActions';
-import CancelIcon          from '@mui/icons-material/Cancel';
+import PeopleIcon from '@mui/icons-material/People';
+import ApartmentIcon from '@mui/icons-material/Apartment';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 // ── React Query cache keys ────────────────────────────────────────────────────
 
@@ -25,10 +25,10 @@ import CancelIcon          from '@mui/icons-material/Cancel';
  * @readonly
  */
 export const DASHBOARD_QUERY_KEYS = /** @type {const} */ ({
-  all:      () => ['dashboard'],
-  summary:  () => ['dashboard', 'summary'],
+  all: () => ['dashboard'],
+  summary: () => ['dashboard', 'summary'],
   activity: () => ['dashboard', 'activity'],
-  charts:   () => ['dashboard', 'charts'],
+  charts: () => ['dashboard', 'charts'],
 });
 
 /**
@@ -48,14 +48,14 @@ export const DASHBOARD_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
  * @type {string[]}
  */
 export const CHART_COLORS = [
-  '#1976d2',
-  '#7c3aed',
-  '#2e7d32',
-  '#ed6c02',
-  '#0288d1',
-  '#c62828',
-  '#00796b',
-  '#f57f17',
+  '#4F46E5',
+  '#7C3AED',
+  '#10B981',
+  '#F59E0B',
+  '#3B82F6',
+  '#EF4444',
+  '#06B6D4',
+  '#8B5CF6',
 ];
 
 /**
@@ -64,10 +64,10 @@ export const CHART_COLORS = [
  * @type {Record<string, string>}
  */
 export const EMPLOYEE_STATUS_COLORS = {
-  ACTIVE:     '#2e7d32',
-  INACTIVE:   '#ed6c02',
-  ON_LEAVE:   '#0288d1',
-  TERMINATED: '#c62828',
+  ACTIVE: '#10B981',
+  INACTIVE: '#F59E0B',
+  ON_LEAVE: '#3B82F6',
+  TERMINATED: '#EF4444',
 };
 
 /**
@@ -76,10 +76,10 @@ export const EMPLOYEE_STATUS_COLORS = {
  * @type {Record<string, string>}
  */
 export const LEAVE_STATUS_COLORS = {
-  PENDING:   '#ed6c02',
-  APPROVED:  '#2e7d32',
-  REJECTED:  '#c62828',
-  CANCELLED: '#757575',
+  PENDING: '#F59E0B',
+  APPROVED: '#10B981',
+  REJECTED: '#EF4444',
+  CANCELLED: '#94A3B8',
 };
 
 // ── Activity type metadata ────────────────────────────────────────────────────
@@ -96,13 +96,13 @@ export const LEAVE_STATUS_COLORS = {
  * @type {Record<string, ActivityTypeMeta>}
  */
 export const ACTIVITY_TYPE_META = {
-  EMPLOYEE_JOINED:    { color: 'success', icon: PeopleIcon },
-  LEAVE_SUBMITTED:    { color: 'warning', icon: EventNoteIcon },
-  LEAVE_APPROVED:     { color: 'success', icon: CheckCircleIcon },
-  LEAVE_REJECTED:     { color: 'error',   icon: CancelIcon },
-  ATTENDANCE_MARKED:  { color: 'info',    icon: AccessTimeIcon },
-  REVIEW_COMPLETED:   { color: 'primary', icon: TrendingUpIcon },
-  LEAVE_PENDING:      { color: 'warning', icon: PendingActionsIcon },
+  EMPLOYEE_JOINED: { color: 'success', icon: PeopleIcon },
+  LEAVE_SUBMITTED: { color: 'warning', icon: EventNoteIcon },
+  LEAVE_APPROVED: { color: 'success', icon: CheckCircleIcon },
+  LEAVE_REJECTED: { color: 'error', icon: CancelIcon },
+  ATTENDANCE_MARKED: { color: 'info', icon: AccessTimeIcon },
+  REVIEW_COMPLETED: { color: 'primary', icon: TrendingUpIcon },
+  LEAVE_PENDING: { color: 'warning', icon: PendingActionsIcon },
 };
 
 // ── Stat card metadata ────────────────────────────────────────────────────────
@@ -120,10 +120,30 @@ export const ACTIVITY_TYPE_META = {
  * @type {Record<string, StatCardMeta>}
  */
 export const STAT_CARD_META = {
-  totalEmployees:    { label: 'Total Employees',    color: '#e3f2fd', iconColor: '#1976d2', Icon: PeopleIcon },
-  totalDepartments:  { label: 'Departments',        color: '#f3e5f5', iconColor: '#7c3aed', Icon: ApartmentIcon },
-  pendingLeaves:     { label: 'Pending Leaves',     color: '#fff3e0', iconColor: '#ed6c02', Icon: EventNoteIcon },
-  presentToday:      { label: 'Present Today',      color: '#e8f5e9', iconColor: '#2e7d32', Icon: AccessTimeIcon },
+  totalEmployees: {
+    label: 'Total Employees',
+    color: 'rgba(79,70,229,0.1)',
+    iconColor: '#4F46E5',
+    Icon: PeopleIcon,
+  },
+  totalDepartments: {
+    label: 'Departments',
+    color: 'rgba(124,58,237,0.1)',
+    iconColor: '#7C3AED',
+    Icon: ApartmentIcon,
+  },
+  pendingLeaves: {
+    label: 'Pending Leaves',
+    color: 'rgba(245,158,11,0.12)',
+    iconColor: '#F59E0B',
+    Icon: EventNoteIcon,
+  },
+  presentToday: {
+    label: 'Present Today',
+    color: 'rgba(16,185,129,0.1)',
+    iconColor: '#10B981',
+    Icon: AccessTimeIcon,
+  },
 };
 
 // ── Quick action definitions ──────────────────────────────────────────────────

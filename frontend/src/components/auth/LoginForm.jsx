@@ -31,7 +31,7 @@ import { useLogin } from '@/hooks/useLogin';
 import { getItem, setItem, removeItem } from '@/utils/localStorage';
 import { ROUTES } from '@/constants/routes';
 import PasswordField from '@/components/auth/PasswordField';
-import FormError     from '@/components/auth/FormError';
+import FormError from '@/components/auth/FormError';
 import LoadingButton from '@/components/auth/LoadingButton';
 
 /** localStorage key for the "remember me" email value. */
@@ -62,8 +62,8 @@ export default function LoginForm() {
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email:      '',
-      password:   '',
+      email: '',
+      password: '',
       rememberMe: false,
     },
   });
@@ -123,12 +123,7 @@ export default function LoginForm() {
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(onSubmit)}
-      noValidate
-      aria-label="Login form"
-    >
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate aria-label="Login form">
       {/* Form-level error alert */}
       <FormError message={getFormErrorMessage()} />
 
@@ -150,7 +145,10 @@ export default function LoginForm() {
             error={Boolean(errors.email)}
             helperText={errors.email?.message}
             sx={{ mb: 2.5 }}
-            inputProps={{ 'aria-required': true, 'aria-describedby': errors.email ? 'login-email-error' : undefined }}
+            inputProps={{
+              'aria-required': true,
+              'aria-describedby': errors.email ? 'login-email-error' : undefined,
+            }}
             FormHelperTextProps={{ id: 'login-email-error', role: 'alert' }}
           />
         )}
@@ -201,7 +199,11 @@ export default function LoginForm() {
       </Box>
 
       {/* Submit button */}
-      <LoadingButton loading={isLoading} startIcon={<LoginIcon />} aria-label="Sign in to your account">
+      <LoadingButton
+        loading={isLoading}
+        startIcon={<LoginIcon />}
+        aria-label="Sign in to your account"
+      >
         Sign In
       </LoadingButton>
 

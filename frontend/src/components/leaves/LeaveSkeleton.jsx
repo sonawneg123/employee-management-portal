@@ -3,14 +3,7 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@mui/material';
+import { Box, Skeleton, Table, TableBody, TableCell, TableRow } from '@mui/material';
 
 /**
  * @typedef {Object} LeaveSkeletonProps
@@ -38,7 +31,12 @@ export default function LeaveSkeleton({ rows = 8, columns = 5 }) {
                     <Skeleton variant="text" width="45%" />
                   </Box>
                 ) : ci === 1 ? (
-                  <Skeleton variant="rectangular" width={120} height={24} sx={{ borderRadius: 4 }} />
+                  <Skeleton
+                    variant="rectangular"
+                    width={120}
+                    height={24}
+                    sx={{ borderRadius: 4 }}
+                  />
                 ) : (
                   <Skeleton variant="text" width="70%" />
                 )}

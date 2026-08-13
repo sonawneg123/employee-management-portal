@@ -26,9 +26,9 @@ vi.mock('@/services/authApi');
 // because mock tokens like 'mock.access.token' cannot be decoded.
 vi.mock('@/utils/jwtUtils', () => ({
   isTokenExpired: vi.fn(() => false),
-  getTokenRoles:  vi.fn(() => []),
-  decodeToken:    vi.fn(() => null),
-  getTokenSubject:vi.fn(() => null),
+  getTokenRoles: vi.fn(() => []),
+  decodeToken: vi.fn(() => null),
+  getTokenSubject: vi.fn(() => null),
   getTokenExpiry: vi.fn(() => null),
 }));
 
@@ -102,8 +102,15 @@ describe('AuthContext', () => {
       // Override the file-level mock to return true (expired) for this test only
       vi.mocked(jwtUtils.isTokenExpired).mockReturnValueOnce(true);
 
-      const expiredToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZXMiOlsiUk9MRV9FTVBMWUVFIl0sImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxNjAwMDAwMDAxfQ.fake';
-      const user = { userId: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User', roles: ['ROLE_EMPLOYEE'] };
+      const expiredToken =
+        'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZXMiOlsiUk9MRV9FTVBMWUVFIl0sImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxNjAwMDAwMDAxfQ.fake';
+      const user = {
+        userId: '1',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        roles: ['ROLE_EMPLOYEE'],
+      };
       setItem(TOKEN_STORAGE_KEY, expiredToken);
       setItem(USER_STORAGE_KEY, user);
 
@@ -114,7 +121,13 @@ describe('AuthContext', () => {
     it('restores session from localStorage when token is valid', () => {
       // We cannot easily generate a real JWT in tests, so we mock isTokenExpired
       // at the utility level. This test verifies state is read from localStorage.
-      const user = { userId: '123', email: 'restored@example.com', firstName: 'Alice', lastName: 'B', roles: ['ROLE_ADMIN'] };
+      const user = {
+        userId: '123',
+        email: 'restored@example.com',
+        firstName: 'Alice',
+        lastName: 'B',
+        roles: ['ROLE_ADMIN'],
+      };
       // Store a placeholder token string — we control expiry via mock in real scenarios
       setItem(USER_STORAGE_KEY, user);
       // For this assertion we only check user restoration (token expiry mocked elsewhere)
@@ -150,7 +163,9 @@ describe('AuthContext', () => {
       render(
         <QueryClientProvider client={qc}>
           <MemoryRouter>
-            <AuthProvider><Capture /></AuthProvider>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
           </MemoryRouter>
         </QueryClientProvider>,
       );
@@ -170,11 +185,18 @@ describe('AuthContext', () => {
       vi.mocked(authApi.login).mockRejectedValueOnce(apiError);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -185,19 +207,30 @@ describe('AuthContext', () => {
 
     it('redirects ROLE_ADMIN to /admin/dashboard', async () => {
       const mockResponse = {
-        accessToken: 'tok-admin', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'admin-1', email: 'admin@company.com',
-        firstName: 'Admin', lastName: 'User',
+        accessToken: 'tok-admin',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'admin-1',
+        email: 'admin@company.com',
+        firstName: 'Admin',
+        lastName: 'User',
         roles: ['ROLE_ADMIN'],
       };
       vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -212,19 +245,30 @@ describe('AuthContext', () => {
 
     it('redirects ROLE_HR to /hr/dashboard', async () => {
       const mockResponse = {
-        accessToken: 'tok-hr', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'hr-1', email: 'hr@company.com',
-        firstName: 'HR', lastName: 'User',
+        accessToken: 'tok-hr',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'hr-1',
+        email: 'hr@company.com',
+        firstName: 'HR',
+        lastName: 'User',
         roles: ['ROLE_HR'],
       };
       vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -239,19 +283,30 @@ describe('AuthContext', () => {
 
     it('redirects ROLE_MANAGER to /hr/dashboard', async () => {
       const mockResponse = {
-        accessToken: 'tok-mgr', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'mgr-1', email: 'manager@company.com',
-        firstName: 'Manager', lastName: 'User',
+        accessToken: 'tok-mgr',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'mgr-1',
+        email: 'manager@company.com',
+        firstName: 'Manager',
+        lastName: 'User',
         roles: ['ROLE_MANAGER'],
       };
       vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -266,19 +321,30 @@ describe('AuthContext', () => {
 
     it('redirects ROLE_EMPLOYEE to /employee/dashboard', async () => {
       const mockResponse = {
-        accessToken: 'tok-emp', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'emp-1', email: 'employee@example.com',
-        firstName: 'Employee', lastName: 'User',
+        accessToken: 'tok-emp',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'emp-1',
+        email: 'employee@example.com',
+        firstName: 'Employee',
+        lastName: 'User',
         roles: ['ROLE_EMPLOYEE'],
       };
       vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -294,17 +360,29 @@ describe('AuthContext', () => {
     it('clears stale user state after logout and accepts new role on re-login', async () => {
       // Login as admin
       vi.mocked(authApi.login).mockResolvedValueOnce({
-        accessToken: 'tok-admin', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'admin-1', email: 'admin@company.com',
-        firstName: 'Admin', lastName: 'User', roles: ['ROLE_ADMIN'],
+        accessToken: 'tok-admin',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'admin-1',
+        email: 'admin@company.com',
+        firstName: 'Admin',
+        lastName: 'User',
+        roles: ['ROLE_ADMIN'],
       });
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -321,9 +399,14 @@ describe('AuthContext', () => {
 
       // Re-login as employee — should get employee dashboard, NOT admin
       vi.mocked(authApi.login).mockResolvedValueOnce({
-        accessToken: 'tok-emp', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'emp-1', email: 'employee@example.com',
-        firstName: 'Employee', lastName: 'User', roles: ['ROLE_EMPLOYEE'],
+        accessToken: 'tok-emp',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'emp-1',
+        email: 'employee@example.com',
+        firstName: 'Employee',
+        lastName: 'User',
+        roles: ['ROLE_EMPLOYEE'],
       });
 
       await act(async () => {
@@ -341,14 +424,27 @@ describe('AuthContext', () => {
   describe('logout()', () => {
     it('clears localStorage and navigates to /login', async () => {
       setItem(TOKEN_STORAGE_KEY, 'some-token');
-      setItem(USER_STORAGE_KEY, { userId: '1', email: 'a@b.com', firstName: 'A', lastName: 'B', roles: [] });
+      setItem(USER_STORAGE_KEY, {
+        userId: '1',
+        email: 'a@b.com',
+        firstName: 'A',
+        lastName: 'B',
+        roles: [],
+      });
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -366,23 +462,40 @@ describe('AuthContext', () => {
   describe('register()', () => {
     it('persists session and navigates to dashboard on success', async () => {
       const mockResponse = {
-        accessToken: 'new.token', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'uuid-2', email: 'new@example.com',
-        firstName: 'New', lastName: 'User', roles: ['ROLE_EMPLOYEE'],
+        accessToken: 'new.token',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'uuid-2',
+        email: 'new@example.com',
+        firstName: 'New',
+        lastName: 'User',
+        roles: ['ROLE_EMPLOYEE'],
       };
       vi.mocked(authApi.register).mockResolvedValueOnce(mockResponse);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
       await act(async () => {
-        await authCtx.register({ firstName: 'New', lastName: 'User', email: 'new@example.com', password: 'pass' });
+        await authCtx.register({
+          firstName: 'New',
+          lastName: 'User',
+          email: 'new@example.com',
+          password: 'pass',
+        });
       });
 
       await waitFor(() => {
@@ -398,18 +511,30 @@ describe('AuthContext', () => {
   describe('hasRole() and hasAnyRole()', () => {
     it('hasRole returns true when user has the role', async () => {
       const mockResponse = {
-        accessToken: 'tok', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'u1', email: 'a@b.com', firstName: 'A', lastName: 'B',
+        accessToken: 'tok',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'u1',
+        email: 'a@b.com',
+        firstName: 'A',
+        lastName: 'B',
         roles: ['ROLE_ADMIN', 'ROLE_HR'],
       };
       vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 
@@ -425,18 +550,30 @@ describe('AuthContext', () => {
 
     it('hasAnyRole returns true when at least one role matches', async () => {
       const mockResponse = {
-        accessToken: 'tok2', tokenType: 'Bearer', expiresIn: 86400,
-        userId: 'u2', email: 'b@b.com', firstName: 'B', lastName: 'C',
+        accessToken: 'tok2',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'u2',
+        email: 'b@b.com',
+        firstName: 'B',
+        lastName: 'C',
         roles: ['ROLE_HR'],
       };
       vi.mocked(authApi.login).mockResolvedValueOnce(mockResponse);
 
       let authCtx;
-      function Capture() { authCtx = useAuth(); return null; }
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
       const qc = makeQueryClient();
       render(
         <QueryClientProvider client={qc}>
-          <MemoryRouter><AuthProvider><Capture /></AuthProvider></MemoryRouter>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
         </QueryClientProvider>,
       );
 

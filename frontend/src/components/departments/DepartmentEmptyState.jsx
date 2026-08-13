@@ -30,9 +30,9 @@ export default function DepartmentEmptyState({
   return (
     <Box
       sx={{
-        display:        'flex',
-        flexDirection:  'column',
-        alignItems:     'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
         justifyContent: 'center',
         py: 10,
         gap: 2,

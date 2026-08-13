@@ -5,7 +5,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { IconButton, InputAdornment, TextField, Tooltip } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon  from '@mui/icons-material/Clear';
+import ClearIcon from '@mui/icons-material/Clear';
 import { LEAVE_SEARCH_DEBOUNCE_MS } from '@/constants/leaveConstants';
 
 /**
@@ -25,7 +25,9 @@ export default function LeaveSearch({ value, onSearch, disabled = false }) {
   const [local, setLocal] = useState(value);
   const timer = useRef(null);
 
-  useEffect(() => { setLocal(value); }, [value]);
+  useEffect(() => {
+    setLocal(value);
+  }, [value]);
 
   const handleChange = (e) => {
     const v = e.target.value;
@@ -34,7 +36,11 @@ export default function LeaveSearch({ value, onSearch, disabled = false }) {
     timer.current = setTimeout(() => onSearch(v), LEAVE_SEARCH_DEBOUNCE_MS);
   };
 
-  const handleClear = () => { clearTimeout(timer.current); setLocal(''); onSearch(''); };
+  const handleClear = () => {
+    clearTimeout(timer.current);
+    setLocal('');
+    onSearch('');
+  };
   useEffect(() => () => clearTimeout(timer.current), []);
 
   return (

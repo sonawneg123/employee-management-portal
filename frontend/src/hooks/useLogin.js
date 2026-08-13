@@ -44,12 +44,12 @@ export function useLogin() {
   });
 
   return {
-    mutate:    mutation.mutateAsync,
+    mutate: mutation.mutateAsync,
     variables: mutation.variables,
     isPending: mutation.isPending,
-    isError:   mutation.isError,
+    isError: mutation.isError,
     isSuccess: mutation.isSuccess,
-    error:     /** @type {any} */ (mutation.error),
-    reset:     mutation.reset,
+    error: /** @type {any} */ (mutation.error),
+    reset: mutation.reset,
   };
 }

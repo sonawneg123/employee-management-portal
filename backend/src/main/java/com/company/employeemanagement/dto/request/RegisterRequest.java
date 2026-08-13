@@ -12,10 +12,17 @@ import jakarta.validation.constraints.Size;
  * violation causes Spring to return a {@code 400 Bad Request} with a
  * {@code ProblemDetail} body listing each failing field.
  *
+ * <p>The optional {@code role} field may be {@code "ROLE_HR"} or
+ * {@code "ROLE_EMPLOYEE"} only. If omitted or {@code null}, the service
+ * defaults to {@code ROLE_EMPLOYEE}.  {@code ROLE_ADMIN} and
+ * {@code ROLE_MANAGER} are never assignable via public registration.
+ *
  * @param email     unique email address that will serve as the login username
  * @param password  plaintext password (minimum 8 characters); hashed before persistence
  * @param firstName user's first name
  * @param lastName  user's last name
+ * @param role      optional role override — {@code "ROLE_HR"} or {@code "ROLE_EMPLOYEE"};
+ *                  defaults to {@code "ROLE_EMPLOYEE"} when {@code null}
  *
  * @author Employee Management Portal Team
  */
@@ -43,6 +50,28 @@ public record RegisterRequest(
         @Schema(description = "User's last name", example = "Doe")
         @NotBlank(message = "Last name is required")
         @Size(max = 100, message = "Last name must not exceed 100 characters")
-        String lastName
+        String lastName,
+
+        @Schema(description = "Optional role for the new account — ROLE_HR or ROLE_EMPLOYEE only",
+                example = "ROLE_EMPLOYEE",
+                allowableValues = {"ROLE_HR", "ROLE_EMPLOYEE"})
+        String role
 ) {
+    /**
+     * Backward-compatible constructor that omits {@code role}.
+     * Equivalent to calling the canonical constructor with {@code role = null},
+     * which causes {@link com.company.employeemanagement.service.impl.AuthServiceImpl}
+     * to default to {@code ROLE_EMPLOYEE}.
+     *
+     * @param email     login email
+     * @param password  plaintext password
+     * @param firstName first name
+     * @param lastName  last name
+     */
+    public RegisterRequest(final String email,
+                           final String password,
+                           final String firstName,
+                           final String lastName) {
+        this(email, password, firstName, lastName, null);
+    }
 }

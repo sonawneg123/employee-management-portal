@@ -83,6 +83,7 @@ export function ThemeProvider({ children }) {
  *
  * @returns {ThemeContextValue}
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useThemeMode() {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error('useThemeMode must be used inside <ThemeProvider>');

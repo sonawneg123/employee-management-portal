@@ -6,16 +6,10 @@
  */
 
 import React from 'react';
-import {
-  Divider,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-} from '@mui/material';
+import { Divider, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon       from '@mui/icons-material/Edit';
-import DeleteIcon     from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 /**
  * @typedef {Object} EmployeeActionsMenuProps
@@ -42,7 +36,7 @@ export default function EmployeeActionsMenu({
   onView,
   onEdit,
   onDelete,
-  canEdit   = false,
+  canEdit = false,
   canDelete = false,
 }) {
   /**
@@ -62,22 +56,26 @@ export default function EmployeeActionsMenu({
       open={open}
       onClose={onClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      transformOrigin={{ vertical: 'top',    horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       slotProps={{ paper: { sx: { minWidth: 160 } } }}
     >
       <MenuItem onClick={handle(onView)} aria-label="View employee details">
-        <ListItemIcon><VisibilityIcon fontSize="small" /></ListItemIcon>
+        <ListItemIcon>
+          <VisibilityIcon fontSize="small" />
+        </ListItemIcon>
         <ListItemText>View Details</ListItemText>
       </MenuItem>
 
       {canEdit && (
         <MenuItem onClick={handle(onEdit)} aria-label="Edit employee">
-          <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
           <ListItemText>Edit</ListItemText>
         </MenuItem>
       )}
 
-      {(canEdit && canDelete) && <Divider />}
+      {canEdit && canDelete && <Divider />}
 
       {canDelete && (
         <MenuItem

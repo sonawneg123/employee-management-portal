@@ -57,6 +57,7 @@ export default function App() {
                 draggable
                 pauseOnHover
                 theme="colored"
+                toastStyle={{ borderRadius: '12px', fontFamily: 'Inter, sans-serif' }}
               />
             </AuthProvider>
           </BrowserRouter>

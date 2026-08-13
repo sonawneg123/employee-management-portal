@@ -48,7 +48,7 @@ export default function DepartmentDialog({
   onClose,
 }) {
   const isEdit = mode === 'edit';
-  const title  = isEdit ? 'Edit Department' : 'Add New Department';
+  const title = isEdit ? 'Edit Department' : 'Add New Department';
 
   return (
     <Dialog

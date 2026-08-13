@@ -12,7 +12,6 @@
 import axios from 'axios';
 import { API_BASE_URL, REQUEST_TIMEOUT_MS, TOKEN_STORAGE_KEY } from '@/constants/api';
 import { getItem, clearAll } from '@/utils/localStorage';
-import { ROUTES } from '@/constants/routes';
 
 /**
  * The shared Axios instance used by every API service module.
@@ -24,7 +23,7 @@ const axiosInstance = axios.create({
   timeout: REQUEST_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
-    Accept:         'application/json',
+    Accept: 'application/json',
   },
 });
 
@@ -54,10 +53,7 @@ axiosInstance.interceptors.response.use(
     const requestUrl = error.config?.url ?? '';
     if (status === 401 && !requestUrl.includes('/auth/login')) {
       clearAll();
-      // Redirect to login while preserving the attempted URL for post-login redirect
-      const current = window.location.pathname;
-      const redirect = current !== ROUTES.LOGIN ? `?redirect=${encodeURIComponent(current)}` : '';
-      window.location.href = `${ROUTES.LOGIN}${redirect}`;
+      window.location.href = '/login';
       return Promise.reject(normaliseError(error));
     }
 
@@ -90,9 +86,9 @@ axiosInstance.interceptors.response.use(
 export function normaliseError(error) {
   if (!error.response) {
     return {
-      status:    0,
-      title:     'Network Error',
-      message:   'Unable to reach the server. Please check your connection.',
+      status: 0,
+      title: 'Network Error',
+      message: 'Unable to reach the server. Please check your connection.',
       isNetwork: true,
     };
   }
@@ -106,10 +102,10 @@ export function normaliseError(error) {
   if (data && data.title) {
     return {
       status,
-      title:      data.title,
-      message:    data.detail ?? data.title,
+      title: data.title,
+      message: data.detail ?? data.title,
       violations: data.violations ?? null,
-      isNetwork:  false,
+      isNetwork: false,
     };
   }
 
@@ -125,8 +121,8 @@ export function normaliseError(error) {
 
   return {
     status,
-    title:     'Error',
-    message:   defaultMessages[status] ?? 'An unexpected error occurred.',
+    title: 'Error',
+    message: defaultMessages[status] ?? 'An unexpected error occurred.',
     isNetwork: false,
   };
 }

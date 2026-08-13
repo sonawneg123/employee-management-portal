@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { TablePagination } from '@mui/material';
-import {
-  EMPLOYEE_PAGE_SIZE_OPTIONS,
-  EMPLOYEE_DEFAULT_PAGE_SIZE,
-} from '@/constants/employeeConstants';
+import { EMPLOYEE_PAGE_SIZE_OPTIONS } from '@/constants/employeeConstants';
 
 /**
  * @typedef {Object} EmployeePaginationProps

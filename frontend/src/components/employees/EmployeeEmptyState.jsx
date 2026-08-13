@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import PeopleIcon  from '@mui/icons-material/People';
+import PeopleIcon from '@mui/icons-material/People';
 import SearchOffIcon from '@mui/icons-material/SearchOff';
 
 /**
@@ -34,21 +34,20 @@ export default function EmployeeEmptyState({
   return (
     <Box
       sx={{
-        display:        'flex',
-        flexDirection:  'column',
-        alignItems:     'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
         justifyContent: 'center',
         py: 10,
         gap: 2,
-        color: 'text.disabled',
       }}
       role="status"
       aria-label={hasFilters ? 'No search results' : 'No employees'}
     >
       {hasFilters ? (
-        <SearchOffIcon sx={{ fontSize: 64, opacity: 0.3 }} />
+        <SearchOffIcon sx={{ fontSize: 52, opacity: 0.2, color: 'text.secondary' }} />
       ) : (
-        <PeopleIcon sx={{ fontSize: 64, opacity: 0.3 }} />
+        <PeopleIcon sx={{ fontSize: 52, opacity: 0.2, color: 'text.secondary' }} />
       )}
 
       <Typography variant="h6" fontWeight={700} color="text.secondary">

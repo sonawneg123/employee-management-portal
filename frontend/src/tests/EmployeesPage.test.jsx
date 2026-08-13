@@ -26,10 +26,10 @@ import EmployeesPage from '@/pages/employees/EmployeesPage';
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock('@/hooks/useEmployees', () => ({
-  useEmployees:       vi.fn(),
-  useCreateEmployee:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
-  useUpdateEmployee:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
-  useDeleteEmployee:  vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useEmployees: vi.fn(),
+  useCreateEmployee: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
+  useUpdateEmployee: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
+  useDeleteEmployee: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
 }));
 
 vi.mock('@/hooks/useDepartments', () => ({
@@ -42,30 +42,30 @@ vi.mock('@/contexts/AuthContext', () => ({
 }));
 
 import { useEmployees } from '@/hooks/useEmployees';
-import { useAuth }      from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const EMPLOYEE = {
-  id:             'emp-1',
-  employeeCode:   'EMP001',
-  firstName:      'Jane',
-  lastName:       'Smith',
-  email:          'jane@example.com',
-  jobTitle:       'Engineer',
+  id: 'emp-1',
+  employeeCode: 'EMP001',
+  firstName: 'Jane',
+  lastName: 'Smith',
+  email: 'jane@example.com',
+  jobTitle: 'Engineer',
   departmentName: 'Engineering',
-  status:         'ACTIVE',
-  dateOfJoining:  '2022-01-15',
-  salary:         85000,
+  status: 'ACTIVE',
+  dateOfJoining: '2022-01-15',
+  salary: 85000,
 };
 
 const PAGE_RESPONSE = {
-  content:       [EMPLOYEE],
-  page:          0,
-  size:          20,
+  content: [EMPLOYEE],
+  page: 0,
+  size: 20,
   totalElements: 1,
-  totalPages:    1,
-  last:          true,
+  totalPages: 1,
+  last: true,
 };
 
 // ── Wrapper ───────────────────────────────────────────────────────────────────
@@ -76,8 +76,10 @@ function renderPage(authOverrides = {}) {
 
   useAuth.mockReturnValue({
     user: {
-      userId: 'u1', email: 'admin@example.com',
-      firstName: 'Admin', lastName: 'User',
+      userId: 'u1',
+      email: 'admin@example.com',
+      firstName: 'Admin',
+      lastName: 'User',
       roles: ['ROLE_ADMIN'],
     },
     isAuthenticated: true,
@@ -103,12 +105,12 @@ function renderPage(authOverrides = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   useEmployees.mockReturnValue({
-    data:       PAGE_RESPONSE,
-    isLoading:  false,
+    data: PAGE_RESPONSE,
+    isLoading: false,
     isFetching: false,
-    isError:    false,
-    error:      null,
-    refresh:    vi.fn(),
+    isError: false,
+    error: null,
+    refresh: vi.fn(),
   });
 });
 
@@ -125,8 +127,12 @@ describe('EmployeesPage', () => {
 
   it('shows skeleton while loading', () => {
     useEmployees.mockReturnValue({
-      data: undefined, isLoading: true, isFetching: true,
-      isError: false, error: null, refresh: vi.fn(),
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByLabelText('Loading employees')).toBeInTheDocument();
@@ -135,7 +141,11 @@ describe('EmployeesPage', () => {
   it('shows empty state when no employees', () => {
     useEmployees.mockReturnValue({
       data: { content: [], totalElements: 0, page: 0, size: 20, totalPages: 0, last: true },
-      isLoading: false, isFetching: false, isError: false, error: null, refresh: vi.fn(),
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByText('No employees yet')).toBeInTheDocument();
@@ -143,8 +153,12 @@ describe('EmployeesPage', () => {
 
   it('shows error alert when query fails', () => {
     useEmployees.mockReturnValue({
-      data: undefined, isLoading: false, isFetching: false,
-      isError: true, error: { message: 'Service unavailable' }, refresh: vi.fn(),
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { message: 'Service unavailable' },
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByText('Service unavailable')).toBeInTheDocument();

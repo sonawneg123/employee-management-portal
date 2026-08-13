@@ -1,22 +1,22 @@
 /**
- * @fileoverview DashboardHeader — page header with title, last-updated time, and refresh button.
+ * @fileoverview DashboardHeader — page header with title, live indicator, and refresh.
  */
 
 import React from 'react';
-import { Box, Chip, IconButton, Tooltip, Typography } from '@mui/material';
-import RefreshIcon    from '@mui/icons-material/Refresh';
-import CircleIcon     from '@mui/icons-material/Circle';
+import { Box, IconButton, Tooltip, Typography } from '@mui/material';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import FiberManualRecordRoundedIcon from '@mui/icons-material/FiberManualRecord';
 import { formatRelative } from '@/utils/dateUtils';
 
 /**
  * @typedef {Object} DashboardHeaderProps
- * @property {string}    [lastUpdated]   - ISO-8601 timestamp of the most recent data fetch.
- * @property {boolean}   [isFetching]    - Whether any dashboard query is currently refetching.
- * @property {() => void} onRefresh      - Callback to trigger a manual data refresh.
+ * @property {string}    [lastUpdated]
+ * @property {boolean}   [isFetching]
+ * @property {() => void} onRefresh
  */
 
 /**
- * Dashboard page header with live-indicator, last-updated time, and refresh button.
+ * Dashboard page header.
  *
  * @param {DashboardHeaderProps} props
  * @returns {JSX.Element}
@@ -34,7 +34,12 @@ export default function DashboardHeader({ lastUpdated, isFetching, onRefresh }) 
       }}
     >
       <Box>
-        <Typography variant="h4" fontWeight={700} gutterBottom>
+        <Typography
+          variant="h2"
+          fontWeight={800}
+          gutterBottom
+          sx={{ letterSpacing: '-0.02em', mb: 0.25 }}
+        >
           Dashboard
         </Typography>
         {lastUpdated && (
@@ -44,45 +49,64 @@ export default function DashboardHeader({ lastUpdated, isFetching, onRefresh }) 
         )}
       </Box>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         {/* Live indicator */}
-        <Chip
-          icon={
-            <CircleIcon
-              sx={{
-                fontSize: '10px !important',
-                color: isFetching ? 'warning.main' : 'success.main',
-                animation: isFetching ? 'pulse 1.5s ease-in-out infinite' : 'none',
-                '@keyframes pulse': {
-                  '0%, 100%': { opacity: 1 },
-                  '50%':      { opacity: 0.3 },
-                },
-              }}
-            />
-          }
-          label={isFetching ? 'Updating…' : 'Live'}
-          size="small"
-          variant="outlined"
-          sx={{ borderRadius: 2 }}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.6,
+            border: '1px solid',
+            borderColor: isFetching ? 'warning.main' : 'success.main',
+            borderRadius: '8px',
+            px: 1,
+            py: 0.4,
+            bgcolor: isFetching ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)',
+          }}
           aria-live="polite"
           aria-label={isFetching ? 'Dashboard is updating' : 'Dashboard data is live'}
-        />
+        >
+          <FiberManualRecordRoundedIcon
+            sx={{
+              fontSize: 8,
+              color: isFetching ? 'warning.main' : 'success.main',
+              animation: isFetching ? 'pulse 1.2s ease-in-out infinite' : 'none',
+              '@keyframes pulse': {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.3 },
+              },
+            }}
+          />
+          <Typography
+            variant="caption"
+            fontWeight={600}
+            color={isFetching ? 'warning.main' : 'success.main'}
+            sx={{ fontSize: '0.7rem' }}
+          >
+            {isFetching ? 'Updating…' : 'Live'}
+          </Typography>
+        </Box>
 
         {/* Refresh button */}
-        <Tooltip title="Refresh all data">
+        <Tooltip title="Refresh data">
           <IconButton
             onClick={onRefresh}
             disabled={isFetching}
+            size="small"
             aria-label="Refresh dashboard data"
             sx={{
+              bgcolor: 'action.hover',
+              borderRadius: '8px',
+              width: 34,
+              height: 34,
               animation: isFetching ? 'spin 1s linear infinite' : 'none',
               '@keyframes spin': {
-                '0%':   { transform: 'rotate(0deg)' },
+                '0%': { transform: 'rotate(0deg)' },
                 '100%': { transform: 'rotate(360deg)' },
               },
             }}
           >
-            <RefreshIcon />
+            <RefreshRoundedIcon sx={{ fontSize: 17 }} />
           </IconButton>
         </Tooltip>
       </Box>

@@ -34,18 +34,18 @@ import SectionCard from './SectionCard';
 export default function AttendanceSummaryWidget() {
   const { data: summary, isLoading, isFetching, refresh } = useDashboardSummary();
 
-  const present   = summary?.presentToday   ?? 0;
-  const total     = summary?.totalEmployees ?? 0;
-  const onLeave   = summary?.onLeaveToday   ?? 0;
-  const absent    = Math.max(0, total - present - onLeave);
-  const rate      = calcAttendanceRate(present, total);
+  const present = summary?.presentToday ?? 0;
+  const total = summary?.totalEmployees ?? 0;
+  const onLeave = summary?.onLeaveToday ?? 0;
+  const absent = Math.max(0, total - present - onLeave);
+  const rate = calcAttendanceRate(present, total);
   const rateValue = total > 0 ? (present / total) * 100 : 0;
 
   /** @type {AttendanceRow[]} */
   const rows = [
-    { label: 'Present',  count: present, color: 'success.main' },
-    { label: 'Absent',   count: absent,  color: 'error.main'   },
-    { label: 'On Leave', count: onLeave, color: 'info.main'    },
+    { label: 'Present', count: present, color: 'success.main' },
+    { label: 'Absent', count: absent, color: 'error.main' },
+    { label: 'On Leave', count: onLeave, color: 'info.main' },
   ];
 
   return (

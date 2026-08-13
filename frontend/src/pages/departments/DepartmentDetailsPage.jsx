@@ -12,31 +12,25 @@
 import React, { useCallback, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Button,
-  Grid,
-  Snackbar,
-  Typography,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EditIcon      from '@mui/icons-material/Edit';
-import DeleteIcon    from '@mui/icons-material/Delete';
+import { Alert, Box, Button, Grid, Snackbar, Typography, alpha } from '@mui/material';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
+import CorporateFareRoundedIcon from '@mui/icons-material/CorporateFareRounded';
 
-import { useAuth }         from '@/contexts/AuthContext';
-import { ROLES }           from '@/constants/roles';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/constants/roles';
 import {
   useDepartment,
   useUpdateDepartment,
   useDeleteDepartment,
 } from '@/hooks/useDepartmentHooks';
 
-import DepartmentDetails        from '@/components/departments/DepartmentDetails';
+import DepartmentDetails from '@/components/departments/DepartmentDetails';
 import DepartmentStatisticsCard from '@/components/departments/DepartmentStatisticsCard';
-import DepartmentEmployeeList   from '@/components/departments/DepartmentEmployeeList';
-import DepartmentDialog         from '@/components/departments/DepartmentDialog';
-import DeleteDepartmentDialog   from '@/components/departments/DeleteDepartmentDialog';
+import DepartmentEmployeeList from '@/components/departments/DepartmentEmployeeList';
+import DepartmentDialog from '@/components/departments/DepartmentDialog';
+import DeleteDepartmentDialog from '@/components/departments/DeleteDepartmentDialog';
 
 /**
  * Individual department detail page.
@@ -44,41 +38,47 @@ import DeleteDepartmentDialog   from '@/components/departments/DeleteDepartmentD
  * @returns {JSX.Element}
  */
 export default function DepartmentDetailsPage() {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { hasAnyRole } = useAuth();
 
   // Derive the list path by removing the /:id segment from the current URL.
   // Works for /admin/departments/:id, /hr/departments/:id, and /departments/:id.
   const listPath = location.pathname.replace(`/${id}`, '');
 
-  const canEdit   = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
-  const canDelete = hasAnyRole([ROLES.ADMIN]);           // DELETE /departments/** → ADMIN only
+  const canEdit = hasAnyRole([ROLES.ADMIN, ROLES.HR]);
+  const canDelete = hasAnyRole([ROLES.ADMIN]); // DELETE /departments/** → ADMIN only
 
   const { data: department, isLoading, isError, error } = useDepartment(id);
 
   const updateMutation = useUpdateDepartment();
   const deleteMutation = useDeleteDepartment();
 
-  const [editOpen,   setEditOpen]   = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [snackbar,   setSnackbar]   = useState({ open: false, severity: 'success', message: '' });
+  const [snackbar, setSnackbar] = useState({ open: false, severity: 'success', message: '' });
 
-  const showSnackbar  = useCallback((severity, message) => setSnackbar({ open: true, severity, message }), []);
+  const showSnackbar = useCallback(
+    (severity, message) => setSnackbar({ open: true, severity, message }),
+    [],
+  );
   const closeSnackbar = useCallback(() => setSnackbar((s) => ({ ...s, open: false })), []);
 
-  const handleEditSubmit = useCallback(async (payload) => {
-    try {
-      await updateMutation.mutateAsync({ id, payload });
-      showSnackbar('success', 'Department updated successfully.');
-      setEditOpen(false);
-    } catch (err) {
-      if (!err?.violations) {
-        showSnackbar('error', err?.message ?? 'Failed to update department.');
+  const handleEditSubmit = useCallback(
+    async (payload) => {
+      try {
+        await updateMutation.mutateAsync({ id, payload });
+        showSnackbar('success', 'Department updated successfully.');
+        setEditOpen(false);
+      } catch (err) {
+        if (!err?.violations) {
+          showSnackbar('error', err?.message ?? 'Failed to update department.');
+        }
       }
-    }
-  }, [id, updateMutation, showSnackbar]);
+    },
+    [id, updateMutation, showSnackbar],
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     try {
@@ -89,39 +89,59 @@ export default function DepartmentDetailsPage() {
       showSnackbar('error', err?.message ?? 'Failed to delete department.');
       setDeleteOpen(false);
     }
-  }, [id, deleteMutation, navigate, showSnackbar]);
+  }, [id, deleteMutation, navigate, showSnackbar, listPath]);
 
   const pageTitle = department?.name ?? 'Department Details';
 
   return (
     <>
       <Helmet>
-        <title>{pageTitle} — Employee Portal</title>
+        <title>{pageTitle} — PeopleCore HR</title>
       </Helmet>
 
       {/* Header */}
       <Box
         sx={{
-          display:        'flex',
-          alignItems:     'center',
+          display: 'flex',
+          alignItems: 'flex-start',
           justifyContent: 'space-between',
-          mb: 3,
+          mb: 4,
           flexWrap: 'wrap',
-          gap: 1,
+          gap: 2,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate(listPath)}
-            variant="text"
-            aria-label="Back to departments list"
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: '12px',
+              bgcolor: (t) => alpha(t.palette.primary.main, 0.1),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'primary.main',
+            }}
           >
-            Back
-          </Button>
-          <Typography variant="h5" fontWeight={700}>
-            {isLoading ? 'Loading…' : pageTitle}
-          </Typography>
+            <CorporateFareRoundedIcon />
+          </Box>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+              <Button
+                startIcon={<ArrowBackRoundedIcon />}
+                onClick={() => navigate(listPath)}
+                variant="outlined"
+                size="small"
+                aria-label="Back to departments list"
+                sx={{ borderRadius: '8px', fontWeight: 600 }}
+              >
+                Back
+              </Button>
+            </Box>
+            <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em' }}>
+              {isLoading ? 'Loading…' : pageTitle}
+            </Typography>
+          </Box>
         </Box>
 
         {!isLoading && !isError && department && (
@@ -129,9 +149,10 @@ export default function DepartmentDetailsPage() {
             {canEdit && (
               <Button
                 variant="outlined"
-                startIcon={<EditIcon />}
+                startIcon={<EditRoundedIcon />}
                 onClick={() => setEditOpen(true)}
                 aria-label="Edit department"
+                sx={{ borderRadius: '8px', fontWeight: 600 }}
               >
                 Edit
               </Button>
@@ -140,9 +161,10 @@ export default function DepartmentDetailsPage() {
               <Button
                 variant="outlined"
                 color="error"
-                startIcon={<DeleteIcon />}
+                startIcon={<DeleteRoundedIcon />}
                 onClick={() => setDeleteOpen(true)}
                 aria-label="Delete department"
+                sx={{ borderRadius: '8px', fontWeight: 600 }}
               >
                 Delete
               </Button>
@@ -162,7 +184,7 @@ export default function DepartmentDetailsPage() {
               </Button>
             )
           }
-          sx={{ mb: 2 }}
+          sx={{ mb: 3, borderRadius: '10px' }}
         >
           {error?.status === 404
             ? 'Department not found.'
@@ -176,9 +198,7 @@ export default function DepartmentDetailsPage() {
         <Grid size={{ xs: 12, lg: 8 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <DepartmentDetails department={department} isLoading={isLoading} />
-            {!isLoading && department && (
-              <DepartmentEmployeeList departmentId={id} />
-            )}
+            {!isLoading && department && <DepartmentEmployeeList departmentId={id} />}
           </Box>
         </Grid>
 
@@ -215,7 +235,12 @@ export default function DepartmentDetailsPage() {
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={closeSnackbar} severity={snackbar.severity} variant="filled" sx={{ width: '100%' }}>
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

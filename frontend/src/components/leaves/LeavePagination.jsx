@@ -22,7 +22,14 @@ import { LEAVE_PAGE_SIZE_OPTIONS } from '@/constants/leaveConstants';
  * @param {LeavePaginationProps} props
  * @returns {JSX.Element}
  */
-export default function LeavePagination({ page, pageSize, totalElements, onPageChange, onPageSizeChange, disabled = false }) {
+export default function LeavePagination({
+  page,
+  pageSize,
+  totalElements,
+  onPageChange,
+  onPageSizeChange,
+  disabled = false,
+}) {
   return (
     <TablePagination
       component="div"
@@ -31,14 +38,18 @@ export default function LeavePagination({ page, pageSize, totalElements, onPageC
       rowsPerPage={pageSize}
       rowsPerPageOptions={LEAVE_PAGE_SIZE_OPTIONS}
       onPageChange={(_e, p) => onPageChange(p)}
-      onRowsPerPageChange={(e) => { onPageSizeChange(parseInt(e.target.value, 10)); onPageChange(0); }}
+      onRowsPerPageChange={(e) => {
+        onPageSizeChange(parseInt(e.target.value, 10));
+        onPageChange(0);
+      }}
       disabled={disabled}
       showFirstButton
       showLastButton
       labelRowsPerPage="Rows:"
       aria-label="Leave list pagination"
       sx={{
-        borderTop: '1px solid', borderColor: 'divider',
+        borderTop: '1px solid',
+        borderColor: 'divider',
         '.MuiTablePagination-selectLabel': { mb: 0 },
         '.MuiTablePagination-displayedRows': { mb: 0 },
       }}

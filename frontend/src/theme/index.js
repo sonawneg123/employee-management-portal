@@ -19,11 +19,11 @@ import { getComponentOverrides } from './components';
  */
 const breakpoints = {
   values: {
-    xs:  0,
-    sm:  600,
-    md:  900,
-    lg:  1200,
-    xl:  1536,
+    xs: 0,
+    sm: 600,
+    md: 900,
+    lg: 1200,
+    xl: 1536,
   },
 };
 
@@ -40,11 +40,11 @@ export function createAppTheme(mode) {
     palette,
     typography,
     breakpoints,
-    shape: { borderRadius: 8 },
+    shape: { borderRadius: 10 },
     spacing: 8,
     components: getComponentOverrides(mode),
   });
 }
 
 export const lightTheme = createAppTheme('light');
-export const darkTheme  = createAppTheme('dark');
+export const darkTheme = createAppTheme('dark');

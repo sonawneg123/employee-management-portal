@@ -58,11 +58,11 @@ export function useDepartmentList(params = {}) {
   const queryClient = useQueryClient();
 
   const effectiveParams = {
-    page:      params.page      ?? 0,
-    size:      params.size      ?? DEPARTMENT_DEFAULT_PAGE_SIZE,
-    sort:      params.sort      ?? DEPARTMENT_DEFAULT_SORT,
+    page: params.page ?? 0,
+    size: params.size ?? DEPARTMENT_DEFAULT_PAGE_SIZE,
+    sort: params.sort ?? DEPARTMENT_DEFAULT_SORT,
     direction: params.direction ?? DEPARTMENT_DEFAULT_DIRECTION,
-    keyword:   params.search    || undefined,
+    keyword: params.search || undefined,
   };
 
   // Strip undefined keys
@@ -71,9 +71,9 @@ export function useDepartmentList(params = {}) {
   );
 
   const query = useQuery({
-    queryKey:        DEPT_QUERY_KEYS.list(effectiveParams),
-    queryFn:         () => getDepartmentsPaged(effectiveParams),
-    staleTime:       30_000,
+    queryKey: DEPT_QUERY_KEYS.list(effectiveParams),
+    queryFn: () => getDepartmentsPaged(effectiveParams),
+    staleTime: 30_000,
     placeholderData: (prev) => prev,
   });
 
@@ -82,11 +82,11 @@ export function useDepartmentList(params = {}) {
   }, [queryClient]);
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
     refresh,
   };
 }
@@ -108,17 +108,17 @@ export function useDepartmentList(params = {}) {
 export function useDepartment(id) {
   const query = useQuery({
     queryKey: DEPT_QUERY_KEYS.detail(id),
-    queryFn:  () => getDepartmentById(id),
-    enabled:  Boolean(id),
+    queryFn: () => getDepartmentById(id),
+    enabled: Boolean(id),
     staleTime: 60_000,
   });
 
   return {
-    data:       query.data,
-    isLoading:  query.isLoading,
+    data: query.data,
+    isLoading: query.isLoading,
     isFetching: query.isFetching,
-    isError:    query.isError,
-    error:      query.error,
+    isError: query.isError,
+    error: query.error,
   };
 }
 
@@ -203,7 +203,7 @@ export function useDeleteDepartment() {
         if (!old?.content) return old;
         return {
           ...old,
-          content:       old.content.filter((d) => d.id !== id),
+          content: old.content.filter((d) => d.id !== id),
           totalElements: Math.max(0, (old.totalElements ?? 1) - 1),
         };
       });

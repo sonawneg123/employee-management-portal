@@ -36,7 +36,8 @@ import java.util.Set;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-    private static final String DEFAULT_ROLE = "ROLE_EMPLOYEE";
+    private static final String DEFAULT_ROLE    = "ROLE_EMPLOYEE";
+    private static final String ALLOWED_ROLE_HR = "ROLE_HR";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -79,8 +80,11 @@ public class AuthServiceImpl implements AuthService {
      * <p>Steps:
      * <ol>
      *   <li>Guard against duplicate email.</li>
+     *   <li>Validate the requested role — only {@code ROLE_HR} and
+     *       {@code ROLE_EMPLOYEE} are permitted; anything else triggers a
+     *       {@code 400 Bad Request}.</li>
      *   <li>Hash the password with BCrypt (strength 12).</li>
-     *   <li>Resolve the default {@code ROLE_EMPLOYEE} role.</li>
+     *   <li>Resolve the target role.</li>
      *   <li>Persist the new {@link User}.</li>
      *   <li>Generate and return a JWT token.</li>
      * </ol>
@@ -92,8 +96,23 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateResourceException("User", "email", request.email());
         }
 
-        Role defaultRole = roleRepository.findByName(DEFAULT_ROLE)
-                .orElseThrow(() -> new ResourceNotFoundException("Role", "name", DEFAULT_ROLE));
+        // Determine the role to assign. Only ROLE_EMPLOYEE and ROLE_HR are
+        // accepted from the public registration endpoint. Any other value
+        // (including ROLE_ADMIN and ROLE_MANAGER) is rejected with 400.
+        String requestedRole = request.role();
+        final String roleName;
+        if (requestedRole == null || requestedRole.isBlank()) {
+            roleName = DEFAULT_ROLE;
+        } else if (ALLOWED_ROLE_HR.equals(requestedRole) || DEFAULT_ROLE.equals(requestedRole)) {
+            roleName = requestedRole;
+        } else {
+            throw new IllegalArgumentException(
+                    "Role '" + requestedRole + "' cannot be assigned via registration. "
+                    + "Allowed values: ROLE_EMPLOYEE, ROLE_HR.");
+        }
+
+        Role defaultRole = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "name", roleName));
 
         User user = User.builder()
                 .email(request.email())

@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Divider,
-  Skeleton,
-  Typography,
-} from '@mui/material';
-import PeopleIcon        from '@mui/icons-material/People';
-import PersonIcon        from '@mui/icons-material/Person';
+import { Box, Card, CardContent, Divider, Skeleton, Typography } from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { formatEmployeeCount, formatHeadName, formatDeptCreatedAt } from '@/utils/departmentFormatters';
+import {
+  formatEmployeeCount,
+  formatHeadName,
+  formatDeptCreatedAt,
+} from '@/utils/departmentFormatters';
 
 /**
  * @typedef {Object} StatRowProps

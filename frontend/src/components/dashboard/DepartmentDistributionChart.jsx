@@ -7,14 +7,7 @@
  */
 
 import React from 'react';
-import {
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from 'recharts';
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import { useDashboardCharts } from '@/hooks/useDashboard';
 import { toPieChartData } from '@/utils/dashboardFormatters';
@@ -97,18 +90,11 @@ export default function DepartmentDistributionChart() {
             aria-label="Department distribution chart"
           >
             {pieData.map((entry, index) => (
-              <Cell
-                key={`cell-${entry.name}`}
-                fill={CHART_COLORS[index % CHART_COLORS.length]}
-              />
+              <Cell key={`cell-${entry.name}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
             ))}
           </Pie>
           <Tooltip content={<DeptTooltip />} />
-          <Legend
-            formatter={(value) => (
-              <span style={{ fontSize: 12 }}>{value}</span>
-            )}
-          />
+          <Legend formatter={(value) => <span style={{ fontSize: 12 }}>{value}</span>} />
         </PieChart>
       </ResponsiveContainer>
     </ChartCard>

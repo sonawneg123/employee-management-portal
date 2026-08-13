@@ -4,8 +4,15 @@
 
 import React, { useState } from 'react';
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle, TextField, Typography,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  Typography,
 } from '@mui/material';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { formatLeaveType } from '@/utils/leaveFormatters';
@@ -80,7 +87,9 @@ export default function RejectLeaveDialog({ open, leave, isRejecting, onConfirm,
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={handleCancel} disabled={isRejecting} aria-label="Cancel">Cancel</Button>
+        <Button onClick={handleCancel} disabled={isRejecting} aria-label="Cancel">
+          Cancel
+        </Button>
         <Button
           variant="contained"
           color="error"

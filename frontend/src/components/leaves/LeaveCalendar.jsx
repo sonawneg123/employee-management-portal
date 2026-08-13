@@ -7,17 +7,8 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import ChevronLeftIcon  from '@mui/icons-material/ChevronLeft';
+import { Box, Card, CardContent, Chip, Grid, IconButton, Tooltip, Typography } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import dayjs from 'dayjs';
 import { isDateInLeaveRange } from '@/utils/leaveCalculations';
@@ -42,12 +33,12 @@ export default function LeaveCalendar({ leaves = [], onLeaveClick }) {
 
   const prevMonth = () => setCurrentMonth((m) => m.subtract(1, 'month'));
   const nextMonth = () => setCurrentMonth((m) => m.add(1, 'month'));
-  const today     = dayjs();
+  const today = dayjs();
 
   // Build calendar day cells (including leading/trailing blanks)
   const startOfMonth = currentMonth.startOf('month');
-  const daysInMonth  = currentMonth.daysInMonth();
-  const startDow     = startOfMonth.day(); // 0=Sun
+  const daysInMonth = currentMonth.daysInMonth();
+  const startDow = startOfMonth.day(); // 0=Sun
 
   const cells = [
     ...Array.from({ length: startDow }, () => null),
@@ -91,7 +82,13 @@ export default function LeaveCalendar({ leaves = [], onLeaveClick }) {
         <Grid container columns={7} sx={{ mb: 0.5 }}>
           {WEEKDAY_LABELS.map((d) => (
             <Grid key={d} size={1}>
-              <Typography variant="caption" fontWeight={700} color="text.secondary" textAlign="center" display="block">
+              <Typography
+                variant="caption"
+                fontWeight={700}
+                color="text.secondary"
+                textAlign="center"
+                display="block"
+              >
                 {d}
               </Typography>
             </Grid>
@@ -101,28 +98,44 @@ export default function LeaveCalendar({ leaves = [], onLeaveClick }) {
         {/* Day cells */}
         <Grid container columns={7}>
           {cells.map((day, idx) => {
-            if (!day) return <Grid key={`blank-${idx}`} size={1} sx={{ minHeight: 80, borderTop: '1px solid', borderColor: 'divider' }} />;
+            if (!day)
+              return (
+                <Grid
+                  key={`blank-${idx}`}
+                  size={1}
+                  sx={{ minHeight: 80, borderTop: '1px solid', borderColor: 'divider' }}
+                />
+              );
 
-            const dateStr     = day.format('YYYY-MM-DD');
-            const isToday     = day.isSame(today, 'day');
-            const dayLeaves   = leavesOnDate(day);
-            const isWeekend   = day.day() === 0 || day.day() === 6;
+            const dateStr = day.format('YYYY-MM-DD');
+            const isToday = day.isSame(today, 'day');
+            const dayLeaves = leavesOnDate(day);
+            const isWeekend = day.day() === 0 || day.day() === 6;
 
             return (
-              <Grid key={dateStr} size={1} sx={{
-                minHeight: 80,
-                borderTop: '1px solid',
-                borderColor: 'divider',
-                p: 0.5,
-                bgcolor: isWeekend ? 'action.hover' : 'transparent',
-              }}>
-                <Box sx={{
-                  width: 26, height: 26,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  borderRadius: '50%',
-                  bgcolor: isToday ? 'primary.main' : 'transparent',
-                  mb: 0.25,
-                }}>
+              <Grid
+                key={dateStr}
+                size={1}
+                sx={{
+                  minHeight: 80,
+                  borderTop: '1px solid',
+                  borderColor: 'divider',
+                  p: 0.5,
+                  bgcolor: isWeekend ? 'action.hover' : 'transparent',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 26,
+                    height: 26,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '50%',
+                    bgcolor: isToday ? 'primary.main' : 'transparent',
+                    mb: 0.25,
+                  }}
+                >
                   <Typography
                     variant="caption"
                     fontWeight={isToday ? 700 : 400}

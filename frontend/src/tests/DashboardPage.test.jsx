@@ -23,20 +23,20 @@ import DashboardPage from '@/pages/dashboard/DashboardPage';
 // ── Mock hooks ────────────────────────────────────────────────────────────────
 
 vi.mock('@/hooks/useDashboard', () => ({
-  useDashboardSummary:    vi.fn(),
-  useDashboardActivity:   vi.fn(),
-  useDashboardCharts:     vi.fn(),
+  useDashboardSummary: vi.fn(),
+  useDashboardActivity: vi.fn(),
+  useDashboardCharts: vi.fn(),
   useRefreshAllDashboard: vi.fn(),
 }));
 
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(() => ({
     user: {
-      userId:    'user-1',
-      email:     'admin@example.com',
+      userId: 'user-1',
+      email: 'admin@example.com',
       firstName: 'Admin',
-      lastName:  'User',
-      roles:     ['ROLE_ADMIN'],
+      lastName: 'User',
+      roles: ['ROLE_ADMIN'],
     },
     isAuthenticated: true,
   })),
@@ -53,17 +53,17 @@ import {
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const MOCK_SUMMARY = {
-  totalEmployees:   42,
+  totalEmployees: 42,
   totalDepartments: 5,
-  pendingLeaves:    3,
-  presentToday:     38,
-  activeEmployees:  40,
-  onLeaveToday:     2,
-  newThisMonth:     4,
-  trendEmployees:   2,
-  trendLeaves:      -1,
-  trendAttendance:  0.05,
-  attendanceRate:   0.9,
+  pendingLeaves: 3,
+  presentToday: 38,
+  activeEmployees: 40,
+  onLeaveToday: 2,
+  newThisMonth: 4,
+  trendEmployees: 2,
+  trendLeaves: -1,
+  trendAttendance: 0.05,
+  attendanceRate: 0.9,
 };
 
 // ── Test wrapper ──────────────────────────────────────────────────────────────
@@ -82,9 +82,7 @@ function renderPage(ui) {
     <HelmetProvider>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
-          <MemoryRouter>
-            {ui}
-          </MemoryRouter>
+          <MemoryRouter>{ui}</MemoryRouter>
         </QueryClientProvider>
       </ThemeProvider>
     </HelmetProvider>,
@@ -96,20 +94,30 @@ function renderPage(ui) {
 beforeEach(() => {
   vi.clearAllMocks();
   // Default: all hooks return idle/empty
-  useDashboardActivity.mockReturnValue({ data: [], isLoading: false, isFetching: false, refresh: vi.fn() });
-  useDashboardCharts.mockReturnValue({ data: null, isLoading: false, isFetching: false, refresh: vi.fn() });
+  useDashboardActivity.mockReturnValue({
+    data: [],
+    isLoading: false,
+    isFetching: false,
+    refresh: vi.fn(),
+  });
+  useDashboardCharts.mockReturnValue({
+    data: null,
+    isLoading: false,
+    isFetching: false,
+    refresh: vi.fn(),
+  });
   useRefreshAllDashboard.mockReturnValue(vi.fn());
 });
 
 describe('DashboardPage — loading state', () => {
   it('renders DashboardSkeleton while data is loading', () => {
     useDashboardSummary.mockReturnValue({
-      data:       undefined,
-      isLoading:  true,
+      data: undefined,
+      isLoading: true,
       isFetching: true,
-      isError:    false,
-      error:      null,
-      refresh:    vi.fn(),
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
 
     renderPage(<DashboardPage />);
@@ -121,12 +129,12 @@ describe('DashboardPage — loading state', () => {
 describe('DashboardPage — error state', () => {
   it('renders an error alert with a Retry button', () => {
     useDashboardSummary.mockReturnValue({
-      data:       undefined,
-      isLoading:  false,
+      data: undefined,
+      isLoading: false,
       isFetching: false,
-      isError:    true,
-      error:      { message: 'Service unavailable' },
-      refresh:    vi.fn(),
+      isError: true,
+      error: { message: 'Service unavailable' },
+      refresh: vi.fn(),
     });
 
     renderPage(<DashboardPage />);
@@ -139,11 +147,11 @@ describe('DashboardPage — error state', () => {
   it('calls refresh when Retry is clicked', () => {
     const refresh = vi.fn();
     useDashboardSummary.mockReturnValue({
-      data:       undefined,
-      isLoading:  false,
+      data: undefined,
+      isLoading: false,
       isFetching: false,
-      isError:    true,
-      error:      { message: 'Oops' },
+      isError: true,
+      error: { message: 'Oops' },
       refresh,
     });
 
@@ -157,12 +165,12 @@ describe('DashboardPage — error state', () => {
 describe('DashboardPage — empty state', () => {
   it('renders EmptyDashboard when totalEmployees and totalDepartments are 0', () => {
     useDashboardSummary.mockReturnValue({
-      data:       { totalEmployees: 0, totalDepartments: 0 },
-      isLoading:  false,
+      data: { totalEmployees: 0, totalDepartments: 0 },
+      isLoading: false,
       isFetching: false,
-      isError:    false,
-      error:      null,
-      refresh:    vi.fn(),
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
 
     renderPage(<DashboardPage />);
@@ -173,12 +181,12 @@ describe('DashboardPage — empty state', () => {
 
   it('renders EmptyDashboard when summary is null', () => {
     useDashboardSummary.mockReturnValue({
-      data:       null,
-      isLoading:  false,
+      data: null,
+      isLoading: false,
       isFetching: false,
-      isError:    false,
-      error:      null,
-      refresh:    vi.fn(),
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
 
     renderPage(<DashboardPage />);
@@ -190,12 +198,12 @@ describe('DashboardPage — empty state', () => {
 describe('DashboardPage — live data state', () => {
   beforeEach(() => {
     useDashboardSummary.mockReturnValue({
-      data:       MOCK_SUMMARY,
-      isLoading:  false,
+      data: MOCK_SUMMARY,
+      isLoading: false,
       isFetching: false,
-      isError:    false,
-      error:      null,
-      refresh:    vi.fn(),
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
   });
 
@@ -211,9 +219,7 @@ describe('DashboardPage — live data state', () => {
 
   it('renders the global refresh button', () => {
     renderPage(<DashboardPage />);
-    expect(
-      screen.getByRole('button', { name: /refresh dashboard data/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /refresh dashboard data/i })).toBeInTheDocument();
   });
 
   it('calls refreshAll when the global refresh button is clicked', () => {

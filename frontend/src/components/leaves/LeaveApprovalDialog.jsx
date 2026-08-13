@@ -4,11 +4,16 @@
 
 import React from 'react';
 import {
-  Button, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle, Typography,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { formatFullName } from '@/utils/employeeFormatters';
 import { formatLeaveDateRange, formatLeaveType } from '@/utils/leaveFormatters';
 
 /**
@@ -57,7 +62,9 @@ export default function LeaveApprovalDialog({ open, leave, isApproving, onConfir
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onCancel} disabled={isApproving} aria-label="Cancel">Cancel</Button>
+        <Button onClick={onCancel} disabled={isApproving} aria-label="Cancel">
+          Cancel
+        </Button>
         <Button
           variant="contained"
           color="success"

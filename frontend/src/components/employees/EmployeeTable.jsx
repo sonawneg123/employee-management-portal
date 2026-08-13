@@ -12,7 +12,6 @@
 
 import React, { useState } from 'react';
 import {
-  Box,
   Paper,
   Table,
   TableBody,
@@ -21,15 +20,14 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
-  Typography,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { IconButton, Tooltip } from '@mui/material';
-import { getEmployeeColumns }    from '@/utils/employeeColumns';
-import EmployeeActionsMenu       from './EmployeeActionsMenu';
-import EmployeeSkeleton          from './EmployeeSkeleton';
-import EmployeeEmptyState        from './EmployeeEmptyState';
-import EmployeeErrorState        from './EmployeeErrorState';
+import { getEmployeeColumns } from '@/utils/employeeColumns';
+import EmployeeActionsMenu from './EmployeeActionsMenu';
+import EmployeeSkeleton from './EmployeeSkeleton';
+import EmployeeEmptyState from './EmployeeEmptyState';
+import EmployeeErrorState from './EmployeeErrorState';
 
 /**
  * @typedef {Object} EmployeeTableProps
@@ -82,7 +80,7 @@ export default function EmployeeTable({
   const columns = getEmployeeColumns();
 
   // ── Actions menu state ────────────────────────────────────────────────────
-  const [menuAnchor, setMenuAnchor]     = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
   const [menuEmployee, setMenuEmployee] = useState(null);
 
   /**
@@ -123,23 +121,23 @@ export default function EmployeeTable({
 
   return (
     <>
-      <TableContainer
-        component={Paper}
-        variant="outlined"
-        sx={{ borderRadius: 0, border: 'none' }}
-      >
-        <Table
-          stickyHeader
-          aria-label="Employee list table"
-          aria-busy={isLoading || isFetching}
-        >
+      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 0, border: 'none' }}>
+        <Table stickyHeader aria-label="Employee list table" aria-busy={isLoading || isFetching}>
           <TableHead>
             <TableRow>
               {columns.map((col) => (
                 <TableCell
                   key={col.id}
                   align={col.align ?? 'left'}
-                  sx={{ minWidth: col.width, fontWeight: 700, bgcolor: 'background.default' }}
+                  sx={{
+                    minWidth: col.width,
+                    fontWeight: 700,
+                    bgcolor: 'background.default',
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: 'text.secondary',
+                  }}
                 >
                   {col.sortable ? (
                     <TableSortLabel
@@ -184,7 +182,11 @@ export default function EmployeeTable({
                   key={emp.id}
                   hover
                   onClick={() => onView(emp)}
-                  sx={{ cursor: 'pointer' }}
+                  sx={{
+                    cursor: 'pointer',
+                    '&:hover': { bgcolor: (t) => `${t.palette.primary.main}08` },
+                    transition: 'background-color 150ms ease',
+                  }}
                   aria-label={`Row for ${emp.firstName} ${emp.lastName}`}
                 >
                   {columns.map((col) => (

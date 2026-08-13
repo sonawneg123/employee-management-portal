@@ -26,10 +26,10 @@ import DepartmentsPage from '@/pages/departments/DepartmentsPage';
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock('@/hooks/useDepartmentHooks', () => ({
-  useDepartmentList:     vi.fn(),
-  useCreateDepartment:   vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
-  useUpdateDepartment:   vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
-  useDeleteDepartment:   vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
+  useDepartmentList: vi.fn(),
+  useCreateDepartment: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
+  useUpdateDepartment: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false, error: null })),
+  useDeleteDepartment: vi.fn(() => ({ mutateAsync: vi.fn(), isPending: false })),
 }));
 
 vi.mock('@/contexts/AuthContext', () => ({
@@ -38,38 +38,44 @@ vi.mock('@/contexts/AuthContext', () => ({
 }));
 
 import { useDepartmentList } from '@/hooks/useDepartmentHooks';
-import { useAuth }           from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const DEPT = {
-  id:            'dept-1',
-  name:          'Engineering',
-  code:          'ENG',
-  description:   'Software team',
-  headName:      'Alice',
+  id: 'dept-1',
+  name: 'Engineering',
+  code: 'ENG',
+  description: 'Software team',
+  headName: 'Alice',
   employeeCount: 20,
-  createdAt:     '2022-01-01T00:00:00Z',
-  updatedAt:     '2022-01-01T00:00:00Z',
+  createdAt: '2022-01-01T00:00:00Z',
+  updatedAt: '2022-01-01T00:00:00Z',
 };
 
 const PAGE_RESPONSE = {
-  content:       [DEPT],
-  page:          0,
-  size:          20,
+  content: [DEPT],
+  page: 0,
+  size: 20,
   totalElements: 1,
-  totalPages:    1,
-  last:          true,
+  totalPages: 1,
+  last: true,
 };
 
 // ── Wrapper ───────────────────────────────────────────────────────────────────
 
 function renderPage(authOverrides = {}) {
-  const qc    = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const theme = createTheme();
 
   useAuth.mockReturnValue({
-    user: { userId: 'u1', email: 'admin@example.com', firstName: 'Admin', lastName: 'User', roles: ['ROLE_ADMIN'] },
+    user: {
+      userId: 'u1',
+      email: 'admin@example.com',
+      firstName: 'Admin',
+      lastName: 'User',
+      roles: ['ROLE_ADMIN'],
+    },
     isAuthenticated: true,
     hasAnyRole: (roles) => roles.some((r) => ['ROLE_ADMIN', 'ROLE_HR'].includes(r)),
     ...authOverrides,
@@ -93,12 +99,12 @@ function renderPage(authOverrides = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   useDepartmentList.mockReturnValue({
-    data:       PAGE_RESPONSE,
-    isLoading:  false,
+    data: PAGE_RESPONSE,
+    isLoading: false,
     isFetching: false,
-    isError:    false,
-    error:      null,
-    refresh:    vi.fn(),
+    isError: false,
+    error: null,
+    refresh: vi.fn(),
   });
 });
 
@@ -115,8 +121,12 @@ describe('DepartmentsPage', () => {
 
   it('shows skeleton while loading', () => {
     useDepartmentList.mockReturnValue({
-      data: undefined, isLoading: true, isFetching: true,
-      isError: false, error: null, refresh: vi.fn(),
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByLabelText('Loading departments')).toBeInTheDocument();
@@ -125,7 +135,11 @@ describe('DepartmentsPage', () => {
   it('shows empty state when no departments', () => {
     useDepartmentList.mockReturnValue({
       data: { content: [], totalElements: 0, page: 0, size: 20, totalPages: 0, last: true },
-      isLoading: false, isFetching: false, isError: false, error: null, refresh: vi.fn(),
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      error: null,
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByText('No departments yet')).toBeInTheDocument();
@@ -133,8 +147,12 @@ describe('DepartmentsPage', () => {
 
   it('shows error alert when query fails', () => {
     useDepartmentList.mockReturnValue({
-      data: undefined, isLoading: false, isFetching: false,
-      isError: true, error: { message: 'Service unavailable' }, refresh: vi.fn(),
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      isError: true,
+      error: { message: 'Service unavailable' },
+      refresh: vi.fn(),
     });
     renderPage();
     expect(screen.getByText('Service unavailable')).toBeInTheDocument();

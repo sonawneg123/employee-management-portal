@@ -95,7 +95,7 @@ describe('countCalendarDays', () => {
 describe('validateDateRange', () => {
   it('returns valid for today → next week', () => {
     const start = dayjs().format('YYYY-MM-DD');
-    const end   = dayjs().add(7, 'day').format('YYYY-MM-DD');
+    const end = dayjs().add(7, 'day').format('YYYY-MM-DD');
     const result = validateDateRange(start, end);
     expect(result.valid).toBe(true);
     expect(result.message).toBe('');
@@ -103,7 +103,7 @@ describe('validateDateRange', () => {
 
   it('returns invalid when start date is in the past', () => {
     const past = dayjs().subtract(1, 'day').format('YYYY-MM-DD');
-    const end  = dayjs().add(3, 'day').format('YYYY-MM-DD');
+    const end = dayjs().add(3, 'day').format('YYYY-MM-DD');
     const result = validateDateRange(past, end);
     expect(result.valid).toBe(false);
     expect(result.message).toMatch(/past/i);
@@ -111,7 +111,7 @@ describe('validateDateRange', () => {
 
   it('returns invalid when end is before start', () => {
     const start = dayjs().add(5, 'day').format('YYYY-MM-DD');
-    const end   = dayjs().add(2, 'day').format('YYYY-MM-DD');
+    const end = dayjs().add(2, 'day').format('YYYY-MM-DD');
     const result = validateDateRange(start, end);
     expect(result.valid).toBe(false);
     expect(result.message).toMatch(/on or after/i);
@@ -135,7 +135,7 @@ describe('validateDateRange', () => {
 
 describe('isDateInLeaveRange', () => {
   const start = '2024-01-10';
-  const end   = '2024-01-15';
+  const end = '2024-01-15';
 
   it('returns true for a date inside the range', () => {
     expect(isDateInLeaveRange('2024-01-12', start, end)).toBe(true);
@@ -194,9 +194,9 @@ describe('doLeavesOverlap', () => {
 
 describe('aggregateByType', () => {
   const leaves = [
-    { leaveType: 'ANNUAL', status: 'APPROVED',  startDate: '2024-01-08', endDate: '2024-01-08' },
-    { leaveType: 'ANNUAL', status: 'PENDING',   startDate: '2024-01-09', endDate: '2024-01-09' },
-    { leaveType: 'SICK',   status: 'APPROVED',  startDate: '2024-01-10', endDate: '2024-01-10' },
+    { leaveType: 'ANNUAL', status: 'APPROVED', startDate: '2024-01-08', endDate: '2024-01-08' },
+    { leaveType: 'ANNUAL', status: 'PENDING', startDate: '2024-01-09', endDate: '2024-01-09' },
+    { leaveType: 'SICK', status: 'APPROVED', startDate: '2024-01-10', endDate: '2024-01-10' },
   ];
 
   it('returns one entry per leave type', () => {
@@ -228,8 +228,8 @@ describe('aggregateByType', () => {
 
 describe('aggregateByStatus', () => {
   const leaves = [
-    { status: 'PENDING'  },
-    { status: 'PENDING'  },
+    { status: 'PENDING' },
+    { status: 'PENDING' },
     { status: 'APPROVED' },
     { status: 'REJECTED' },
   ];
@@ -249,9 +249,9 @@ describe('aggregateByStatus', () => {
 
 describe('usedDaysByType', () => {
   const leaves = [
-    { leaveType: 'ANNUAL', status: 'APPROVED',  startDate: '2024-01-08', endDate: '2024-01-12' }, // 5 days
-    { leaveType: 'ANNUAL', status: 'PENDING',   startDate: '2024-01-15', endDate: '2024-01-15' }, // not APPROVED
-    { leaveType: 'SICK',   status: 'APPROVED',  startDate: '2024-01-08', endDate: '2024-01-08' }, // 1 day
+    { leaveType: 'ANNUAL', status: 'APPROVED', startDate: '2024-01-08', endDate: '2024-01-12' }, // 5 days
+    { leaveType: 'ANNUAL', status: 'PENDING', startDate: '2024-01-15', endDate: '2024-01-15' }, // not APPROVED
+    { leaveType: 'SICK', status: 'APPROVED', startDate: '2024-01-08', endDate: '2024-01-08' }, // 1 day
   ];
 
   it('sums working days for APPROVED leaves of the given type', () => {

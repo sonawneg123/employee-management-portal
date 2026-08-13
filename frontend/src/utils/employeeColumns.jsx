@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import EmployeeAvatar       from '@/components/employees/EmployeeAvatar';
-import EmployeeStatusChip   from '@/components/employees/EmployeeStatusChip';
+import EmployeeAvatar from '@/components/employees/EmployeeAvatar';
+import EmployeeStatusChip from '@/components/employees/EmployeeStatusChip';
 import EmployeeDepartmentChip from '@/components/employees/EmployeeDepartmentChip';
 import { formatFullName, formatSalary, formatJoinDate } from '@/utils/employeeFormatters';
-import { EMPLOYEE_COLUMNS }   from '@/constants/employeeConstants';
+import { EMPLOYEE_COLUMNS } from '@/constants/employeeConstants';
 
 /**
  * @typedef {Object} TableColumn
@@ -36,22 +36,22 @@ import { EMPLOYEE_COLUMNS }   from '@/constants/employeeConstants';
 export function getEmployeeColumns() {
   return [
     {
-      id:       EMPLOYEE_COLUMNS.EMPLOYEE_CODE,
-      label:    'Code',
+      id: EMPLOYEE_COLUMNS.EMPLOYEE_CODE,
+      label: 'Code',
       sortable: false,
-      width:    '100px',
-      render:   (row) => (
+      width: '100px',
+      render: (row) => (
         <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
           {row.employeeCode}
         </Typography>
       ),
     },
     {
-      id:       EMPLOYEE_COLUMNS.FULL_NAME,
-      label:    'Employee',
+      id: EMPLOYEE_COLUMNS.FULL_NAME,
+      label: 'Employee',
       sortable: false,
-      width:    '220px',
-      render:   (row) => (
+      width: '220px',
+      render: (row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <EmployeeAvatar
             firstName={row.firstName}
@@ -71,54 +71,45 @@ export function getEmployeeColumns() {
       ),
     },
     {
-      id:       EMPLOYEE_COLUMNS.JOB_TITLE,
-      label:    'Job Title',
+      id: EMPLOYEE_COLUMNS.JOB_TITLE,
+      label: 'Job Title',
       sortable: true,
-      width:    '180px',
-      render:   (row) => (
+      width: '180px',
+      render: (row) => (
         <Typography variant="body2" noWrap>
           {row.jobTitle ?? '—'}
         </Typography>
       ),
     },
     {
-      id:       EMPLOYEE_COLUMNS.DEPARTMENT,
-      label:    'Department',
+      id: EMPLOYEE_COLUMNS.DEPARTMENT,
+      label: 'Department',
       sortable: false,
-      width:    '160px',
-      render:   (row) => (
-        <EmployeeDepartmentChip
-          departmentName={row.departmentName}
-          size="small"
-        />
-      ),
+      width: '160px',
+      render: (row) => <EmployeeDepartmentChip departmentName={row.departmentName} size="small" />,
     },
     {
-      id:       EMPLOYEE_COLUMNS.STATUS,
-      label:    'Status',
+      id: EMPLOYEE_COLUMNS.STATUS,
+      label: 'Status',
       sortable: false,
-      align:    'center',
-      width:    '120px',
-      render:   (row) => <EmployeeStatusChip status={row.status} size="small" />,
+      align: 'center',
+      width: '120px',
+      render: (row) => <EmployeeStatusChip status={row.status} size="small" />,
     },
     {
-      id:       EMPLOYEE_COLUMNS.DATE_OF_JOINING,
-      label:    'Joined',
+      id: EMPLOYEE_COLUMNS.DATE_OF_JOINING,
+      label: 'Joined',
       sortable: true,
-      width:    '130px',
-      render:   (row) => (
-        <Typography variant="body2">
-          {formatJoinDate(row.dateOfJoining)}
-        </Typography>
-      ),
+      width: '130px',
+      render: (row) => <Typography variant="body2">{formatJoinDate(row.dateOfJoining)}</Typography>,
     },
     {
-      id:       EMPLOYEE_COLUMNS.SALARY,
-      label:    'Salary',
+      id: EMPLOYEE_COLUMNS.SALARY,
+      label: 'Salary',
       sortable: true,
-      align:    'right',
-      width:    '130px',
-      render:   (row) => (
+      align: 'right',
+      width: '130px',
+      render: (row) => (
         <Typography variant="body2" fontWeight={500}>
           {formatSalary(row.salary)}
         </Typography>

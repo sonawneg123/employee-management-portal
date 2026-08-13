@@ -26,11 +26,11 @@ import {
 
 vi.mock('@/services/departmentApi', () => ({
   getDepartmentsPaged: vi.fn(),
-  getDepartmentById:   vi.fn(),
-  createDepartment:    vi.fn(),
-  updateDepartment:    vi.fn(),
-  deleteDepartment:    vi.fn(),
-  getDepartments:      vi.fn(),
+  getDepartmentById: vi.fn(),
+  createDepartment: vi.fn(),
+  updateDepartment: vi.fn(),
+  deleteDepartment: vi.fn(),
+  getDepartments: vi.fn(),
 }));
 
 import {
@@ -44,23 +44,23 @@ import {
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const DEPT_1 = {
-  id:            'dept-1',
-  name:          'Engineering',
-  code:          'ENG',
-  description:   'Software engineering team',
-  headName:      'Alice',
+  id: 'dept-1',
+  name: 'Engineering',
+  code: 'ENG',
+  description: 'Software engineering team',
+  headName: 'Alice',
   employeeCount: 20,
-  createdAt:     '2022-01-01T00:00:00Z',
-  updatedAt:     '2022-01-01T00:00:00Z',
+  createdAt: '2022-01-01T00:00:00Z',
+  updatedAt: '2022-01-01T00:00:00Z',
 };
 
 const PAGE_RESPONSE = {
-  content:       [DEPT_1],
-  page:          0,
-  size:          20,
+  content: [DEPT_1],
+  page: 0,
+  size: 20,
   totalElements: 1,
-  totalPages:    1,
-  last:          true,
+  totalPages: 1,
+  last: true,
 };
 
 // ── Wrapper ───────────────────────────────────────────────────────────────────
@@ -68,15 +68,13 @@ const PAGE_RESPONSE = {
 function makeWrapper() {
   const qc = new QueryClient({
     defaultOptions: {
-      queries:   { retry: false, refetchInterval: false },
+      queries: { retry: false, refetchInterval: false },
       mutations: { retry: false },
     },
   });
   return {
     qc,
-    wrapper: ({ children }) => (
-      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
-    ),
+    wrapper: ({ children }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>,
   };
 }
 
@@ -88,7 +86,7 @@ describe('useDepartmentList', () => {
   it('returns paginated data on success', async () => {
     getDepartmentsPaged.mockResolvedValue(PAGE_RESPONSE);
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDepartmentList(), { wrapper });
+    const { result } = renderHook(() => useDepartmentList(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toEqual(PAGE_RESPONSE);
@@ -99,16 +97,14 @@ describe('useDepartmentList', () => {
     const { wrapper } = makeWrapper();
     renderHook(() => useDepartmentList({ search: 'Eng' }), { wrapper });
     await waitFor(() =>
-      expect(getDepartmentsPaged).toHaveBeenCalledWith(
-        expect.objectContaining({ keyword: 'Eng' }),
-      ),
+      expect(getDepartmentsPaged).toHaveBeenCalledWith(expect.objectContaining({ keyword: 'Eng' })),
     );
   });
 
   it('exposes isError on failure', async () => {
     getDepartmentsPaged.mockRejectedValue(new Error('Server error'));
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDepartmentList(), { wrapper });
+    const { result } = renderHook(() => useDepartmentList(), { wrapper });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
@@ -121,9 +117,7 @@ describe('useDepartmentList', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     result.current.refresh();
-    expect(spy).toHaveBeenCalledWith(
-      expect.objectContaining({ queryKey: ['dept-mgmt', 'list'] }),
-    );
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ['dept-mgmt', 'list'] }));
   });
 });
 
@@ -135,7 +129,7 @@ describe('useDepartment', () => {
   it('fetches a single department', async () => {
     getDepartmentById.mockResolvedValue(DEPT_1);
     const { wrapper } = makeWrapper();
-    const { result }  = renderHook(() => useDepartment('dept-1'), { wrapper });
+    const { result } = renderHook(() => useDepartment('dept-1'), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data).toEqual(DEPT_1);
@@ -164,9 +158,7 @@ describe('useCreateDepartment', () => {
     });
 
     expect(createDepartment).toHaveBeenCalledOnce();
-    expect(spy).toHaveBeenCalledWith(
-      expect.objectContaining({ queryKey: ['dept-mgmt', 'list'] }),
-    );
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ['dept-mgmt', 'list'] }));
   });
 });
 
@@ -186,9 +178,7 @@ describe('useUpdateDepartment', () => {
     });
 
     expect(updateDepartment).toHaveBeenCalledWith('dept-1', { name: 'Updated' });
-    expect(spy).toHaveBeenCalledWith(
-      expect.objectContaining({ queryKey: ['dept-mgmt', 'list'] }),
-    );
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ queryKey: ['dept-mgmt', 'list'] }));
   });
 });
 

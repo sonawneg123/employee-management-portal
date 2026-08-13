@@ -83,4 +83,3 @@ export async function updateAttendance(id, payload) {
   const { data } = await axiosInstance.put(API_ENDPOINTS.ATTENDANCE_BY_ID(id), payload);
   return data;
 }
-

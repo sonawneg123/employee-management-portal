@@ -63,7 +63,8 @@ export default function DeleteDepartmentDialog({
           </Typography>
           {department?.code && (
             <Typography component="span" variant="body2" color="text.secondary">
-              {' '}({department.code})
+              {' '}
+              ({department.code})
             </Typography>
           )}
           ? This may affect employees assigned to this department. This action{' '}

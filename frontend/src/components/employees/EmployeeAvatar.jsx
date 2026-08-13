@@ -33,16 +33,16 @@ export default function EmployeeAvatar({
   tooltip = false,
   tooltipText,
 }) {
-  const initials  = formatInitials(firstName, lastName);
-  const bgColor   = avatarColorFromName(firstName);
-  const fullName  = [firstName, lastName].filter(Boolean).join(' ') || 'Employee';
+  const initials = formatInitials(firstName, lastName);
+  const bgColor = avatarColorFromName(firstName);
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Employee';
 
   const avatar = (
     <Avatar
       src={profilePhotoUrl ?? undefined}
       alt={fullName}
       sx={{
-        width:  size,
+        width: size,
         height: size,
         bgcolor: bgColor,
         fontSize: size * 0.38,
