@@ -149,13 +149,21 @@ export default function ProfilePage() {
   const saveMutation = useMutation({
     mutationFn: updatePersonalInfo,
     onSuccess: (updatedProfile) => {
-      // Sync firstName/lastName back into AuthContext so topbar/sidebar
-      // reflect the new name immediately without a re-login.
+      // 1. Immediately write the fresh data into the React Query cache so the
+      //    profile card re-renders without waiting for a background refetch.
+      queryClient.setQueryData(['profile', user?.userId], updatedProfile);
+
+      // 2. Sync firstName/lastName back into AuthContext so topbar/sidebar
+      //    reflect the new name immediately without a re-login.
       updateUser({
         firstName: updatedProfile.firstName,
         lastName: updatedProfile.lastName,
       });
-      queryClient.invalidateQueries({ queryKey: ['profile', user?.userId] });
+
+      // 3. Schedule a background refetch so any other observers (e.g. LeavesPage
+      //    profile query) also see the fresh data.
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+
       setEditMode(false);
       showSnack('success', 'Profile updated successfully 🎉');
     },

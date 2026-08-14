@@ -134,6 +134,45 @@ export const employeeSchema = z.object({
     .or(z.literal('')),
 });
 
+// ── Forgot password / OTP / reset-password schemas ────────────────────────────
+
+/**
+ * Zod schema for the "enter email" step of the forgot-password flow.
+ *
+ * @type {z.ZodObject}
+ */
+export const forgotPasswordSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
+});
+
+/**
+ * Zod schema for the "enter OTP" step.
+ *
+ * @type {z.ZodObject}
+ */
+export const verifyOtpSchema = z.object({
+  otp: z
+    .string()
+    .min(1, 'OTP is required')
+    .length(6, 'OTP must be exactly 6 digits')
+    .regex(/^\d{6}$/, 'OTP must contain only digits'),
+});
+
+/**
+ * Zod schema for the "set new password" step.
+ *
+ * @type {z.ZodObject}
+ */
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
 // ── Department schema ─────────────────────────────────────────────────────────
 
 /**

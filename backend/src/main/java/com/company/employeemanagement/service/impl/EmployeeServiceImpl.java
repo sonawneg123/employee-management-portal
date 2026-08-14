@@ -142,9 +142,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     /**
      * {@inheritDoc}
      *
-     * <p>The optional {@code userId} field, when present, is resolved to a
-     * {@link User} entity before persisting. If the user ID is supplied but
-     * the user does not exist, a {@link ResourceNotFoundException} is thrown.
+     * <p>User linking is attempted in this order:
+     * <ol>
+     *   <li>If {@code userId} is supplied, the user is fetched by UUID (throws 404 if missing).</li>
+     *   <li>Otherwise, if {@code email} is supplied, the user is looked up by email address.
+     *       If no matching user exists the employee is still created without a link — no error.</li>
+     * </ol>
+     * Linking the User record allows the {@link com.company.employeemanagement.mapper.EmployeeMapper}
+     * to expose the email in the {@link com.company.employeemanagement.dto.response.EmployeeResponse}.
      */
     @Override
     @Transactional
@@ -157,10 +162,15 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Department", request.departmentId()));
 
+        // Resolve user: prefer explicit userId; fall back to email-based lookup.
         User user = null;
         if (request.userId() != null) {
             user = userRepository.findById(request.userId())
                     .orElseThrow(() -> new ResourceNotFoundException("User", request.userId()));
+        } else if (request.email() != null && !request.email().isBlank()) {
+            // Auto-link by email so that EmployeeMapper can surface the email in the response.
+            // No error if no user with this email exists yet — the link can be made later.
+            user = userRepository.findByEmail(request.email()).orElse(null);
         }
 
         Employee employee = Employee.builder()

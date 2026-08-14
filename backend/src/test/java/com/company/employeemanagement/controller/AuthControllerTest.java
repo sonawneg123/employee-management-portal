@@ -4,6 +4,7 @@ import com.company.employeemanagement.dto.request.LoginRequest;
 import com.company.employeemanagement.dto.response.AuthResponse;
 import com.company.employeemanagement.exception.GlobalExceptionHandler;
 import com.company.employeemanagement.service.AuthService;
+import com.company.employeemanagement.service.PasswordResetService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,6 +49,9 @@ class AuthControllerTest {
 
     @Mock
     private AuthService authService;
+
+    @Mock
+    private PasswordResetService passwordResetService;
 
     @InjectMocks
     private AuthController authController;

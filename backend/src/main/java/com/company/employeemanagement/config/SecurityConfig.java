@@ -105,7 +105,10 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         // ── Public endpoints ────────────────────────────
-                        .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/auth/register", "/auth/login",
+                                "/auth/forgot-password", "/auth/verify-otp", "/auth/reset-password"
+                        ).permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**",
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/health").permitAll()

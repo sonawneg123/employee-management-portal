@@ -31,6 +31,9 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   // Auth
   AUTH_REGISTER: '/auth/register',
   AUTH_LOGIN: '/auth/login',
+  AUTH_FORGOT_PASSWORD: '/auth/forgot-password',
+  AUTH_VERIFY_OTP: '/auth/verify-otp',
+  AUTH_RESET_PASSWORD: '/auth/reset-password',
 
   // Employees
   EMPLOYEES: '/employees',

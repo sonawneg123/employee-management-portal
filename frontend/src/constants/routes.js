@@ -15,6 +15,7 @@ export const ROUTES = /** @type {const} */ ({
   // ── Public ──────────────────────────────────────────────────────
   LOGIN: '/login',
   REGISTER: '/register',
+  FORGOT_PASSWORD: '/forgot-password',
   LOGIN_ADMIN: '/login/admin',
   LOGIN_HR: '/login/hr',
   LOGIN_EMPLOYEE: '/login/employee',

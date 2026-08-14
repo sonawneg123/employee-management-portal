@@ -38,4 +38,16 @@ public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(final String resourceName, final UUID id) {
         this(resourceName, "id", id);
     }
+
+    /**
+     * Convenience overload that accepts a fully-formed message directly.
+     *
+     * <p>Use when the caller constructs the detail message itself (e.g., a
+     * user-facing message that should not expose internal field names).
+     *
+     * @param message the detail message
+     */
+    public ResourceNotFoundException(final String message) {
+        super(message);
+    }
 }

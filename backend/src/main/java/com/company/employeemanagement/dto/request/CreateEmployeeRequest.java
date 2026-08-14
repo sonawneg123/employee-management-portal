@@ -3,6 +3,7 @@ package com.company.employeemanagement.dto.request;
 import com.company.employeemanagement.entity.enums.EmployeeStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -20,7 +21,14 @@ import java.util.UUID;
  * {@code lastName} are stored directly on the employee record so that
  * HR-created employees have a displayable name even without a user account.
  *
+ * <p>The optional {@code email} field is used to look up and automatically
+ * link an existing portal {@link com.company.employeemanagement.entity.User}
+ * account so that the employee's email appears in the API response. If no
+ * user with that email exists the record is still created and the email field
+ * in the response will be {@code null} until the user registers.
+ *
  * @param userId        optional UUID of an existing {@link com.company.employeemanagement.entity.User}
+ * @param email         optional email address used to auto-link a portal user account
  * @param firstName     employee first name
  * @param lastName      employee last name
  * @param employeeCode  unique short identifier assigned by HR (e.g., {@code EMP-0001})
@@ -40,6 +48,12 @@ public record CreateEmployeeRequest(
         @Schema(description = "UUID of an existing user account to link to this employee",
                 example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
         UUID userId,
+
+        @Schema(description = "Email address used to look up and auto-link an existing portal user account",
+                example = "john.doe@example.com")
+        @Email(message = "Email must be a valid email address")
+        @Size(max = 255, message = "Email must not exceed 255 characters")
+        String email,
 
         @Schema(description = "First name of the employee", example = "John")
         @NotBlank(message = "First name is required")

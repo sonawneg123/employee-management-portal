@@ -55,3 +55,36 @@ export async function login(payload) {
   const { data } = await axiosInstance.post(API_ENDPOINTS.AUTH_LOGIN, payload);
   return data;
 }
+
+/**
+ * Requests a password-reset OTP for the given email address.
+ *
+ * @param {{ email: string }} payload
+ * @returns {Promise<{ message: string }>}
+ */
+export async function forgotPassword(payload) {
+  const { data } = await axiosInstance.post(API_ENDPOINTS.AUTH_FORGOT_PASSWORD, payload);
+  return data;
+}
+
+/**
+ * Verifies the OTP submitted by the user.
+ *
+ * @param {{ email: string, otp: string }} payload
+ * @returns {Promise<{ message: string }>}
+ */
+export async function verifyOtp(payload) {
+  const { data } = await axiosInstance.post(API_ENDPOINTS.AUTH_VERIFY_OTP, payload);
+  return data;
+}
+
+/**
+ * Resets the user's password after OTP verification.
+ *
+ * @param {{ email: string, newPassword: string, confirmPassword: string }} payload
+ * @returns {Promise<{ message: string }>}
+ */
+export async function resetPassword(payload) {
+  const { data } = await axiosInstance.post(API_ENDPOINTS.AUTH_RESET_PASSWORD, payload);
+  return data;
+}

@@ -228,7 +228,7 @@ class EmployeeServiceTest {
             EmployeeResponse response = buildEmployeeResponse(empId, deptId);
 
             CreateEmployeeRequest request = new CreateEmployeeRequest(
-                    null, "Jane", "Smith", "EMP-001", deptId, "Software Engineer",
+                    null, null, "Jane", "Smith", "EMP-001", deptId, "Software Engineer",
                     null, null, LocalDate.of(2024, 1, 15),
                     new BigDecimal("75000.00"), EmployeeStatus.ACTIVE
             );
@@ -249,7 +249,7 @@ class EmployeeServiceTest {
         void throwsOnDuplicateCode() {
             UUID deptId = UUID.randomUUID();
             CreateEmployeeRequest request = new CreateEmployeeRequest(
-                    null, "Jane", "Smith", "EMP-001", deptId, "Engineer",
+                    null, null, "Jane", "Smith", "EMP-001", deptId, "Engineer",
                     null, null, LocalDate.now(), BigDecimal.ZERO, EmployeeStatus.ACTIVE
             );
 
@@ -267,7 +267,7 @@ class EmployeeServiceTest {
         void throwsWhenDepartmentMissing() {
             UUID deptId = UUID.randomUUID();
             CreateEmployeeRequest request = new CreateEmployeeRequest(
-                    null, "Jane", "Smith", "EMP-002", deptId, "Engineer",
+                    null, null, "Jane", "Smith", "EMP-002", deptId, "Engineer",
                     null, null, LocalDate.now(), BigDecimal.ZERO, EmployeeStatus.ACTIVE
             );
 

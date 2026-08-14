@@ -15,6 +15,7 @@ import com.company.employeemanagement.service.AuthService;
 import com.company.employeemanagement.service.DepartmentService;
 import com.company.employeemanagement.service.EmployeeService;
 import com.company.employeemanagement.service.LeaveRequestService;
+import com.company.employeemanagement.service.PasswordResetService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -132,6 +133,9 @@ class ApiDocumentationTest {
 
     @MockBean
     private AuthService authService;
+
+    @MockBean
+    private PasswordResetService passwordResetService;
 
     @MockBean
     private EmployeeService employeeService;

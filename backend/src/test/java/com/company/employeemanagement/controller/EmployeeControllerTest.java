@@ -166,7 +166,7 @@ class EmployeeControllerTest {
             UUID deptId = UUID.randomUUID();
 
             CreateEmployeeRequest request = new CreateEmployeeRequest(
-                    null, "Jane", "Smith", "EMP-001", deptId, "Software Engineer",
+                    null, null, "Jane", "Smith", "EMP-001", deptId, "Software Engineer",
                     null, null, LocalDate.of(2024, 1, 15),
                     new BigDecimal("75000.00"), EmployeeStatus.ACTIVE
             );
@@ -185,7 +185,7 @@ class EmployeeControllerTest {
         @DisplayName("400 Bad Request when employeeCode is blank")
         void returns400WhenCodeMissing() throws Exception {
             CreateEmployeeRequest request = new CreateEmployeeRequest(
-                    null, "Jane", "Smith", "", UUID.randomUUID(), "Title",
+                    null, null, "Jane", "Smith", "", UUID.randomUUID(), "Title",
                     null, null, LocalDate.now(), BigDecimal.ONE, EmployeeStatus.ACTIVE
             );
 

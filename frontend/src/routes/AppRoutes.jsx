@@ -33,6 +33,7 @@ import DashboardRedirect from '@/components/common/DashboardRedirect';
 const LandingPage = lazy(() => import('@/pages/LandingPage'));
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/pages/auth/ForgotPasswordPage'));
 const EmployeesPage = lazy(() => import('@/pages/employees/EmployeesPage'));
 const EmployeeDetailsPage = lazy(() => import('@/pages/employees/EmployeeDetailsPage'));
 const DepartmentsPage = lazy(() => import('@/pages/departments/DepartmentsPage'));
@@ -80,6 +81,7 @@ export default function AppRoutes() {
       <Route element={<PublicRoute />}>
         <Route path={ROUTES.LOGIN} element={withSuspense(<LoginPage />)} />
         <Route path={ROUTES.REGISTER} element={withSuspense(<RegisterPage />)} />
+        <Route path={ROUTES.FORGOT_PASSWORD} element={withSuspense(<ForgotPasswordPage />)} />
         {/* Role-specific login routes */}
         <Route
           path={ROUTES.LOGIN_ADMIN}
