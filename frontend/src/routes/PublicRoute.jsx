@@ -3,13 +3,18 @@
  *
  * Prevents already-logged-in users from seeing /login or /register.
  * If authenticated, they are sent to /dashboard (or the redirect param).
+ *
+ * NOTE: isLoading from AuthContext is intentionally NOT used here.
+ * AuthContext.isLoading becomes true while a login mutation is in flight.
+ * Gating on isLoading would unmount the <Outlet /> (LoginForm) during
+ * submission, destroying its mutation error state so the "Invalid email or
+ * password." message can never be displayed after a failed attempt.
  */
 
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
-import LoadingScreen from '@/components/common/LoadingScreen';
 
 /**
  * Route guard that keeps authenticated users away from public auth pages.
@@ -20,12 +25,8 @@ import LoadingScreen from '@/components/common/LoadingScreen';
  * @returns {JSX.Element}
  */
 export default function PublicRoute() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   if (isAuthenticated) {
     const params = new URLSearchParams(location.search);

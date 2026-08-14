@@ -48,6 +48,7 @@ function resolveDashboard(roles = []) {
  * @property {(payload: import('@/services/authApi').LoginPayload) => Promise<void>} login
  * @property {(payload: import('@/services/authApi').RegisterPayload) => Promise<void>} register
  * @property {() => void}    logout            - Clears session and redirects to /login.
+ * @property {(patch: Partial<AuthUser>) => void} updateUser - Merges a patch into the stored user without re-login.
  * @property {(role: string) => boolean}        hasRole       - Returns true if the user has the given role.
  * @property {(roles: string[]) => boolean}     hasAnyRole    - Returns true if the user has at least one of the given roles.
  */
@@ -158,6 +159,24 @@ export function AuthProvider({ children }) {
   }, [navigate]);
 
   /**
+   * Merges a partial patch into the persisted user object (state + localStorage).
+   *
+   * Used by profile-edit flows to reflect name changes in the topbar/sidebar
+   * without requiring a full re-login.
+   *
+   * @param {Partial<AuthUser>} patch - Fields to merge (e.g. { firstName, lastName }).
+   * @returns {void}
+   */
+  const updateUser = useCallback((patch) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      setItem(USER_STORAGE_KEY, next);
+      return next;
+    });
+  }, []);
+
+  /**
    * Returns whether the authenticated user possesses the given role.
    *
    * @param {string} role - Role string to check (e.g., {@code "ROLE_ADMIN"}).
@@ -185,10 +204,22 @@ export function AuthProvider({ children }) {
       login,
       register,
       logout,
+      updateUser,
       hasRole,
       hasAnyRole,
     }),
-    [user, token, isAuthenticated, isLoading, login, register, logout, hasRole, hasAnyRole],
+    [
+      user,
+      token,
+      isAuthenticated,
+      isLoading,
+      login,
+      register,
+      logout,
+      updateUser,
+      hasRole,
+      hasAnyRole,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

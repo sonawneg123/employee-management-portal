@@ -166,14 +166,19 @@ export default function LeavesPage() {
     async (formPayload) => {
       try {
         if (dialogMode === 'create') {
-          if (!profile?.employeeId) {
+          // profile.employeeId is the UUID of the employee record linked to the
+          // authenticated user. It is populated by GET /profile once the user's
+          // Employee record exists. If it is missing the employee was not auto-created
+          // at registration — direct the user to HR for manual linking.
+          const employeeId = profile?.employeeId ?? null;
+          if (!employeeId) {
             showSnackbar(
               'error',
-              'Unable to submit leave: your employee record could not be found. Contact HR.',
+              'Your employee record could not be found. Please contact HR to link your account.',
             );
             return;
           }
-          const payload = { ...formPayload, employeeId: profile.employeeId };
+          const payload = { ...formPayload, employeeId };
           await createMutation.mutateAsync(payload);
           showSnackbar('success', 'Leave request submitted.');
         } else {

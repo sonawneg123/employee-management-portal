@@ -149,7 +149,7 @@ export default function ReviewsPage() {
 
   const { data: employeeData } = useQuery({
     queryKey: ['employees', 'all-for-review'],
-    queryFn: () => getEmployees({ size: 200, sortBy: 'firstName', sortDir: 'asc' }),
+    queryFn: () => getEmployees({ size: 200, sortBy: 'employeeCode', sortDir: 'asc' }),
     enabled: canManage,
     staleTime: 5 * 60_000,
   });
@@ -562,11 +562,12 @@ export default function ReviewsPage() {
           {!editTarget && (
             <Autocomplete
               options={employeeOptions}
-              getOptionLabel={(opt) =>
-                opt.firstName && opt.lastName
-                  ? `${opt.firstName} ${opt.lastName} (${opt.employeeCode})`
-                  : (opt.employeeCode ?? opt.id)
-              }
+              getOptionLabel={(opt) => {
+                const name = [opt.firstName, opt.lastName].filter(Boolean).join(' ');
+                return name
+                  ? `${name} (${opt.employeeCode})`
+                  : (opt.employeeCode ?? String(opt.id));
+              }}
               isOptionEqualToValue={(opt, val) => opt.id === val.id}
               value={employeeOptions.find((e) => e.id === formData.employeeId) ?? null}
               onChange={(_e, emp) => {

@@ -104,7 +104,7 @@ function InfoRow({ Icon, label, value, loading }) {
  * @returns {JSX.Element}
  */
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const queryClient = useQueryClient();
   const [editMode, setEditMode] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, severity: 'success', message: '' });
@@ -148,7 +148,13 @@ export default function ProfilePage() {
   // ── Save mutation ──────────────────────────────────────────────────────────
   const saveMutation = useMutation({
     mutationFn: updatePersonalInfo,
-    onSuccess: () => {
+    onSuccess: (updatedProfile) => {
+      // Sync firstName/lastName back into AuthContext so topbar/sidebar
+      // reflect the new name immediately without a re-login.
+      updateUser({
+        firstName: updatedProfile.firstName,
+        lastName: updatedProfile.lastName,
+      });
       queryClient.invalidateQueries({ queryKey: ['profile', user?.userId] });
       setEditMode(false);
       showSnack('success', 'Profile updated successfully 🎉');

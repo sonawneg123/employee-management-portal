@@ -109,10 +109,17 @@ export function normaliseError(error) {
     };
   }
 
-  // Fallback for non-ProblemDetail error bodies
+  // Fallback for non-ProblemDetail error bodies.
+  // Special-case the login endpoint: a raw 401 here always means bad credentials,
+  // not an expired session (the session doesn't exist yet at login time).
+  const requestUrl = error.config?.url ?? '';
+  const isLoginRequest = requestUrl.includes('/auth/login');
+
   const defaultMessages = {
     400: 'The request contains invalid data.',
-    401: 'Your session has expired. Please log in again.',
+    401: isLoginRequest
+      ? 'Invalid email or password.'
+      : 'Your session has expired. Please log in again.',
     403: 'You do not have permission to perform this action.',
     404: 'The requested resource was not found.',
     409: 'This resource already exists.',
@@ -121,7 +128,7 @@ export function normaliseError(error) {
 
   return {
     status,
-    title: 'Error',
+    title: isLoginRequest && status === 401 ? 'Authentication Failed' : 'Error',
     message: defaultMessages[status] ?? 'An unexpected error occurred.',
     isNetwork: false,
   };

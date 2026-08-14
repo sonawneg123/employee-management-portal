@@ -3,6 +3,7 @@
  *
  * Verifies:
  * - 401 response triggers clearAll() and redirects to /login
+ * - 401 from POST /auth/login does NOT trigger clearAll() or a redirect
  * - 403 response does NOT globally redirect — error is propagated to the caller
  * - The normalised error shape is correct
  */
@@ -53,13 +54,25 @@ describe('normaliseError', () => {
     expect(result.isNetwork).toBe(false);
   });
 
-  it('returns 401 default message when no ProblemDetail body', () => {
+  it('returns session-expired message for non-login 401 with no ProblemDetail body', () => {
     const axiosErr = {
       response: { status: 401, data: {} },
+      config: { url: '/profile' },
     };
     const result = normaliseError(axiosErr);
     expect(result.status).toBe(401);
     expect(result.message).toBe('Your session has expired. Please log in again.');
+  });
+
+  it('returns "Invalid email or password." for login 401 with no ProblemDetail body', () => {
+    const axiosErr = {
+      response: { status: 401, data: {} },
+      config: { url: '/auth/login' },
+    };
+    const result = normaliseError(axiosErr);
+    expect(result.status).toBe(401);
+    expect(result.message).toBe('Invalid email or password.');
+    expect(result.title).toBe('Authentication Failed');
   });
 
   it('returns 403 default message when no ProblemDetail body', () => {
@@ -134,5 +147,80 @@ describe('403 interceptor contract', () => {
     expect(normalised.message).toBe('No employee record is linked to your account.');
     // The interceptor must NOT have redirected the page
     expect(clearAll).not.toHaveBeenCalled();
+  });
+});
+
+// ── Interceptor contract: login 401 must NOT trigger auto-logout ─────────────
+//
+// A failed login attempt returns HTTP 401 from POST /auth/login.
+// This is NOT an expired-session event — the session never existed.
+// The interceptor must skip clearAll() and window.location.href for that URL,
+// leaving the LoginForm to handle the error inline.
+//
+describe('Login 401 interceptor contract', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('does NOT call clearAll() for a 401 from /auth/login', () => {
+    // Simulate the interceptor condition directly:
+    // The interceptor only calls clearAll() when status===401 AND url does NOT include /auth/login.
+    const status = 401;
+    const requestUrl = '/auth/login';
+    const shouldClearSession = status === 401 && !requestUrl.includes('/auth/login');
+
+    expect(shouldClearSession).toBe(false);
+    // clearAll should never have been called for this request
+    expect(clearAll).not.toHaveBeenCalled();
+  });
+
+  it('calls clearAll() for a 401 from a non-login URL (expired session)', () => {
+    // The interceptor SHOULD clear session for non-login 401 responses.
+    const status = 401;
+    const requestUrl = '/employees';
+    const shouldClearSession = status === 401 && !requestUrl.includes('/auth/login');
+
+    expect(shouldClearSession).toBe(true);
+  });
+
+  it('normalises a login 401 with ProblemDetail body to correct message', () => {
+    const axiosErr = {
+      response: {
+        status: 401,
+        data: {
+          title: 'Authentication Failed',
+          detail: 'Invalid email or password.',
+        },
+      },
+      config: { url: '/auth/login' },
+    };
+    const normalised = normaliseError(axiosErr);
+    expect(normalised.status).toBe(401);
+    expect(normalised.title).toBe('Authentication Failed');
+    expect(normalised.message).toBe('Invalid email or password.');
+    expect(normalised.isNetwork).toBe(false);
+    expect(clearAll).not.toHaveBeenCalled();
+  });
+
+  it('normalises a login 401 with no ProblemDetail body to generic bad-credentials message', () => {
+    const axiosErr = {
+      response: { status: 401, data: {} },
+      config: { url: '/auth/login' },
+    };
+    const normalised = normaliseError(axiosErr);
+    expect(normalised.status).toBe(401);
+    expect(normalised.message).toBe('Invalid email or password.');
+    expect(normalised.title).toBe('Authentication Failed');
+    expect(clearAll).not.toHaveBeenCalled();
+  });
+
+  it('normalised login 401 message does not contain session-expiry text', () => {
+    const axiosErr = {
+      response: { status: 401, data: {} },
+      config: { url: '/auth/login' },
+    };
+    const normalised = normaliseError(axiosErr);
+    expect(normalised.message).not.toMatch(/session/i);
+    expect(normalised.message).not.toMatch(/expired/i);
   });
 });

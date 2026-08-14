@@ -205,6 +205,80 @@ describe('AuthContext', () => {
       ).rejects.toThrow('Bad credentials');
     });
 
+    it('failed login (wrong credentials) does NOT call navigate("/login") — no auto-logout', async () => {
+      // A 401 from POST /auth/login is a failed login attempt, NOT an expired session.
+      // AuthContext.login() re-throws the error; it must never call navigate('/login')
+      // as a session-expiry side effect. Only the Axios interceptor on non-login 401s
+      // triggers that redirect.
+      const error401 = Object.assign(new Error('Invalid email or password.'), {
+        status: 401,
+        title: 'Authentication Failed',
+        message: 'Invalid email or password.',
+        isNetwork: false,
+      });
+      vi.mocked(authApi.login).mockRejectedValueOnce(error401);
+
+      let authCtx;
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      try {
+        await act(async () => authCtx.login({ email: 'admin@company.com', password: 'wrong' }));
+      } catch {
+        // expected to throw
+      }
+
+      // navigate('/login') must NOT have been called — that would be an unintended logout
+      expect(mockNavigate).not.toHaveBeenCalledWith('/login', expect.anything());
+      // navigate('/login') should not have been called at all
+      expect(mockNavigate).not.toHaveBeenCalledWith('/login');
+    });
+
+    it('failed login does not persist a token to localStorage', async () => {
+      const error401 = Object.assign(new Error('Invalid email or password.'), {
+        status: 401,
+        message: 'Invalid email or password.',
+      });
+      vi.mocked(authApi.login).mockRejectedValueOnce(error401);
+
+      let authCtx;
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      try {
+        await act(async () => authCtx.login({ email: 'admin@company.com', password: 'wrong' }));
+      } catch {
+        // expected to throw
+      }
+
+      // No token should have been written to localStorage after a failed login
+      expect(localStorage.getItem('emp_portal_token')).toBeNull();
+    });
+
     it('redirects ROLE_ADMIN to /admin/dashboard', async () => {
       const mockResponse = {
         accessToken: 'tok-admin',
@@ -585,6 +659,115 @@ describe('AuthContext', () => {
         expect(authCtx.hasAnyRole(['ROLE_ADMIN', 'ROLE_HR'])).toBe(true);
         expect(authCtx.hasAnyRole(['ROLE_ADMIN', 'ROLE_EMPLOYEE'])).toBe(false);
       });
+    });
+  });
+
+  // ── updateUser() ───────────────────────────────────────────────────────────
+
+  describe('updateUser()', () => {
+    it('merges patch fields into the stored user without changing other fields', async () => {
+      vi.mocked(authApi.login).mockResolvedValueOnce({
+        accessToken: 'tok-upd',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'upd-1',
+        email: 'upd@example.com',
+        firstName: 'Old',
+        lastName: 'Name',
+        roles: ['ROLE_EMPLOYEE'],
+      });
+
+      let authCtx;
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      await act(async () => {
+        await authCtx.login({ email: 'upd@example.com', password: 'pass' });
+      });
+
+      // Apply patch
+      act(() => authCtx.updateUser({ firstName: 'New', lastName: 'Name' }));
+
+      await waitFor(() => {
+        expect(authCtx.user?.firstName).toBe('New');
+        expect(authCtx.user?.lastName).toBe('Name');
+        // Email must be unchanged
+        expect(authCtx.user?.email).toBe('upd@example.com');
+      });
+    });
+
+    it('persists updated name to localStorage', async () => {
+      vi.mocked(authApi.login).mockResolvedValueOnce({
+        accessToken: 'tok-ls',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        userId: 'ls-1',
+        email: 'ls@example.com',
+        firstName: 'Stored',
+        lastName: 'User',
+        roles: ['ROLE_EMPLOYEE'],
+      });
+
+      let authCtx;
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      await act(async () => {
+        await authCtx.login({ email: 'ls@example.com', password: 'pass' });
+      });
+
+      act(() => authCtx.updateUser({ firstName: 'Updated' }));
+
+      await waitFor(() => {
+        const stored = JSON.parse(localStorage.getItem(USER_STORAGE_KEY));
+        expect(stored?.firstName).toBe('Updated');
+      });
+    });
+
+    it('does nothing when called with no current user', () => {
+      let authCtx;
+      function Capture() {
+        authCtx = useAuth();
+        return null;
+      }
+      const qc = makeQueryClient();
+      render(
+        <QueryClientProvider client={qc}>
+          <MemoryRouter>
+            <AuthProvider>
+              <Capture />
+            </AuthProvider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+
+      // Should not throw
+      expect(() => act(() => authCtx.updateUser({ firstName: 'X' }))).not.toThrow();
+      expect(authCtx.user).toBeNull();
     });
   });
 });
