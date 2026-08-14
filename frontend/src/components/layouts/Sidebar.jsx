@@ -37,6 +37,7 @@ import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
@@ -178,6 +179,11 @@ const NAV_ITEMS = [
 
 /** @type {NavItem[]} */
 const BOTTOM_ITEMS = [
+  {
+    label: 'AI Assistant',
+    path: ROUTES.AI_ASSISTANT,
+    icon: <SmartToyRoundedIcon />,
+  },
   { label: 'Profile', path: ROUTES.PROFILE, icon: <PersonRoundedIcon /> },
   { label: 'Settings', path: ROUTES.SETTINGS, icon: <SettingsRoundedIcon /> },
 ];

@@ -64,6 +64,9 @@ export const ROUTES = /** @type {const} */ ({
   EMPLOYEE_PROFILE: '/employee/profile',
   EMPLOYEE_REVIEWS: '/employee/reviews',
 
+  // ── AI Assistant ────────────────────────────────────────────────
+  AI_ASSISTANT: '/ai/assistant',
+
   // ── Fallback ─────────────────────────────────────────────────────
   NOT_FOUND: '/404',
   ACCESS_DENIED: '/403',

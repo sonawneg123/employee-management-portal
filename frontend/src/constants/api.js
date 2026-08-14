@@ -60,6 +60,9 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   // Performance reviews
   REVIEWS: '/reviews',
   REVIEW_BY_ID: (id) => `/reviews/${id}`,
+
+  // AI Assistant
+  AI_CHAT: '/ai/chat',
 });
 
 /**

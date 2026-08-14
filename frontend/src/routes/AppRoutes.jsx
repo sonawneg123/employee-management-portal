@@ -54,6 +54,9 @@ const AdminUsersPage = lazy(() => import('@/pages/admin/AdminUsersPage'));
 const HRDashboardPage = lazy(() => import('@/pages/hr/HRDashboardPage'));
 const EmployeeDashboardPage = lazy(() => import('@/pages/employee/EmployeeDashboardPage'));
 
+// ── AI Assistant page ─────────────────────────────────────────────────────────
+const AiAssistantPage = lazy(() => import('@/pages/ai/AiAssistantPage'));
+
 // ── Suspense wrapper ─────────────────────────────────────────────────────────
 
 /**
@@ -175,6 +178,8 @@ export default function AppRoutes() {
           <Route path={ROUTES.REVIEWS} element={withSuspense(<ReviewsPage />)} />
           <Route path={ROUTES.PROFILE} element={withSuspense(<ProfilePage />)} />
           <Route path={ROUTES.SETTINGS} element={withSuspense(<SettingsPage />)} />
+          {/* ── AI Assistant (all authenticated roles) ─────────────────── */}
+          <Route path={ROUTES.AI_ASSISTANT} element={withSuspense(<AiAssistantPage />)} />
         </Route>
       </Route>
 
