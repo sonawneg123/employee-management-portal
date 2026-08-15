@@ -176,6 +176,19 @@ public class SecurityConfig {
                         // ── Profile — all authenticated roles ────────────────
                         .requestMatchers("/profile/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── AI chat — any authenticated user ─────────────────
+                        .requestMatchers(HttpMethod.POST, "/ai/chat")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── RAG document management — ADMIN or HR only ────────
+                        .requestMatchers(HttpMethod.POST, "/ai/rag/documents")
+                                .hasAnyRole("ADMIN", "HR")
+                        .requestMatchers(HttpMethod.GET, "/ai/rag/documents/**")
+                                .hasAnyRole("ADMIN", "HR")
+                        .requestMatchers(HttpMethod.DELETE, "/ai/rag/documents/**")
+                                .hasRole("ADMIN")
+                        // ── RAG search — any authenticated user ───────────────
+                        .requestMatchers(HttpMethod.POST, "/ai/rag/search")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         // ── All other requests require authentication ────
                         .anyRequest().authenticated()
                 )

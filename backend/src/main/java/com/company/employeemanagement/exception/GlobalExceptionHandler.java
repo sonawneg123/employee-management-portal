@@ -245,6 +245,22 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles {@link com.company.employeemanagement.ai.rag.exception.RagException} — RAG knowledge-base errors (400).
+     */
+    @ExceptionHandler(com.company.employeemanagement.ai.rag.exception.RagException.class)
+    public ResponseEntity<ProblemDetail> handleRagException(
+            final com.company.employeemanagement.ai.rag.exception.RagException ex,
+            final WebRequest request) {
+        log.warn("RAG error: {}", ex.getMessage());
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problem.setTitle("Knowledge Base Error");
+        problem.setType(URI.create("https://company.com/errors/rag-error"));
+        problem.setProperty("timestamp", Instant.now());
+        problem.setProperty("path", extractPath(request));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem);
+    }
+
+    /**
      * Catch-all handler for any unrecognised runtime exceptions (500).
      */
     @ExceptionHandler(Exception.class)
