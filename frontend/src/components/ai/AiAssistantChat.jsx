@@ -1,10 +1,11 @@
 /**
  * @fileoverview AI HR Assistant chat interface.
  *
- * A minimal, self-contained chat UI that:
+ * A self-contained chat UI that:
  * - Accepts a message from the user
  * - Sends it to POST /api/ai/chat via the backend (not directly to Groq)
  * - Displays the AI response, loading state, and errors
+ * - Shows an empty state with suggested HR questions
  * - Allows clearing the conversation
  *
  * Consistent with the existing MUI-based design system.
@@ -22,6 +23,7 @@ import {
   Tooltip,
   Divider,
   Stack,
+  Chip,
 } from '@mui/material';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
@@ -32,6 +34,20 @@ import { sendAiMessage } from '@/services/aiApi';
 /** @typedef {{ role: 'user' | 'assistant'; text: string }} ChatMessage */
 
 const MAX_MESSAGE_LENGTH = 4000;
+
+/**
+ * Suggested HR questions shown in the empty state.
+ * Clicking one populates the input and sends immediately.
+ *
+ * @type {string[]}
+ */
+const SUGGESTED_QUESTIONS = [
+  'How many days in advance should I request remote work?',
+  'Does my manager need to approve remote work?',
+  'When can remote work be denied?',
+  'What is the annual leave entitlement?',
+  'How do I submit a leave request?',
+];
 
 /**
  * Formats a raw API error into a friendly display string.
@@ -49,6 +65,9 @@ function friendlyError(err) {
     if (err.status === 401) {
       return 'Your session has expired. Please log in again.';
     }
+    if (err.status === 403) {
+      return 'You do not have permission to use the AI Assistant.';
+    }
   }
   // Message from the error object
   if (err.message) return err.message;
@@ -57,6 +76,13 @@ function friendlyError(err) {
 
 /**
  * AI HR Assistant chat component.
+ *
+ * Renders the full chat interface including:
+ * - Empty state with suggested questions
+ * - Message bubbles for user and assistant turns
+ * - Loading indicator while awaiting a response
+ * - Error banner for API/network failures
+ * - Textarea input with Enter-to-send
  *
  * @returns {JSX.Element}
  */
@@ -77,6 +103,11 @@ export default function AiAssistantChat() {
 
   const canSend = input.trim().length > 0 && input.length <= MAX_MESSAGE_LENGTH && !loading;
 
+  /**
+   * Sends the current input value as a user message and awaits the AI response.
+   *
+   * @returns {Promise<void>}
+   */
   const handleSend = async () => {
     const text = input.trim();
     if (!text || loading) return;
@@ -98,6 +129,11 @@ export default function AiAssistantChat() {
     }
   };
 
+  /**
+   * Handles Enter-to-send (Shift+Enter inserts a newline).
+   *
+   * @param {React.KeyboardEvent<HTMLDivElement>} e
+   */
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -105,11 +141,37 @@ export default function AiAssistantChat() {
     }
   };
 
+  /** Clears all messages and resets the input. */
   const handleClear = () => {
     setMessages([]);
     setError('');
     setInput('');
     inputRef.current?.focus();
+  };
+
+  /**
+   * Populates the input with a suggested question and sends it immediately.
+   *
+   * @param {string} question
+   */
+  const handleSuggestedQuestion = (question) => {
+    if (loading) return;
+    setError('');
+    setInput('');
+    setMessages((prev) => [...prev, { role: 'user', text: question }]);
+    setLoading(true);
+
+    sendAiMessage(question)
+      .then((response) => {
+        setMessages((prev) => [...prev, { role: 'assistant', text: response.answer }]);
+      })
+      .catch((err) => {
+        setError(friendlyError(err));
+      })
+      .finally(() => {
+        setLoading(false);
+        setTimeout(() => inputRef.current?.focus(), 0);
+      });
   };
 
   return (
@@ -121,7 +183,7 @@ export default function AiAssistantChat() {
         borderRadius: 2,
         display: 'flex',
         flexDirection: 'column',
-        height: '70vh',
+        height: { xs: '75vh', sm: '70vh' },
         minHeight: 420,
         maxHeight: 720,
         overflow: 'hidden',
@@ -146,7 +208,7 @@ export default function AiAssistantChat() {
             HR AI Assistant
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            (Beta · Phase 1)
+            (Beta)
           </Typography>
         </Stack>
 
@@ -175,6 +237,7 @@ export default function AiAssistantChat() {
           gap: 1.5,
         }}
       >
+        {/* ── Empty state ─────────────────────────────────────────────────── */}
         {messages.length === 0 && !loading && (
           <Box
             sx={{
@@ -185,20 +248,64 @@ export default function AiAssistantChat() {
               justifyContent: 'center',
               color: 'text.secondary',
               textAlign: 'center',
-              gap: 1,
+              gap: 2,
               py: 4,
             }}
           >
             <SmartToyRoundedIcon sx={{ fontSize: 48, opacity: 0.25 }} />
-            <Typography variant="body2" color="text.secondary">
-              Ask me anything about HR policies, leave, attendance, or general workplace guidance.
-            </Typography>
-            <Typography variant="caption" color="text.disabled">
-              I do not have access to private employee records in this phase.
-            </Typography>
+
+            <Box>
+              <Typography variant="h6" fontWeight={600} color="text.primary" gutterBottom>
+                How can I help you?
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Ask me about HR policies, leave, remote work, or workplace procedures.
+              </Typography>
+            </Box>
+
+            {/* ── Suggested questions ───────────────────────────────────── */}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1,
+                width: '100%',
+                maxWidth: 480,
+                mt: 1,
+              }}
+            >
+              <Typography variant="caption" color="text.disabled" sx={{ mb: 0.5 }}>
+                Try asking:
+              </Typography>
+              {SUGGESTED_QUESTIONS.map((question) => (
+                <Chip
+                  key={question}
+                  label={question}
+                  variant="outlined"
+                  size="small"
+                  onClick={() => handleSuggestedQuestion(question)}
+                  disabled={loading}
+                  aria-label={`Suggested question: ${question}`}
+                  sx={{
+                    cursor: 'pointer',
+                    height: 'auto',
+                    '& .MuiChip-label': {
+                      whiteSpace: 'normal',
+                      textAlign: 'center',
+                      py: 0.75,
+                      px: 1,
+                    },
+                    maxWidth: '100%',
+                    fontSize: '0.75rem',
+                  }}
+                />
+              ))}
+            </Box>
           </Box>
         )}
 
+        {/* ── Messages ────────────────────────────────────────────────────── */}
         {messages.map((msg, idx) => (
           <Box
             key={idx}
@@ -255,7 +362,7 @@ export default function AiAssistantChat() {
           </Box>
         ))}
 
-        {/* Loading indicator */}
+        {/* ── Loading indicator ────────────────────────────────────────────── */}
         {loading && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box
@@ -272,7 +379,12 @@ export default function AiAssistantChat() {
             >
               <SmartToyRoundedIcon sx={{ fontSize: 16 }} />
             </Box>
-            <CircularProgress size={16} />
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <CircularProgress size={14} />
+              <Typography variant="caption" color="text.secondary">
+                AI Assistant is thinking…
+              </Typography>
+            </Stack>
           </Box>
         )}
 
@@ -312,7 +424,7 @@ export default function AiAssistantChat() {
           multiline
           maxRows={4}
           size="small"
-          placeholder="Ask a HR question… (Shift+Enter for new line)"
+          placeholder="Ask an HR question… (Shift+Enter for new line)"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
