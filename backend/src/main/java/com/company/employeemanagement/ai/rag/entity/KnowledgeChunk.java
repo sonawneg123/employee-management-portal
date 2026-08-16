@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -83,6 +84,15 @@ public class KnowledgeChunk {
      */
     @Column(name = "token_count")
     private Integer tokenCount;
+
+    /**
+     * Serialised dense embedding vector for this chunk (big-endian IEEE 754 floats).
+     * Stored as a BLOB; null when embeddings have not yet been generated.
+     * <p>Never logged — vectors are large and contain no diagnostic value.
+     */
+    @Lob
+    @Column(name = "embedding_vector", columnDefinition = "LONGBLOB")
+    private byte[] embeddingVector;
 
     /**
      * Optional JSON string carrying arbitrary metadata about this chunk

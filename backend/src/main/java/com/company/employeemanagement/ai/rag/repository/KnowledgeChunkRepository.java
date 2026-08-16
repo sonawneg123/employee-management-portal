@@ -47,4 +47,33 @@ public interface KnowledgeChunkRepository extends JpaRepository<KnowledgeChunk, 
     List<KnowledgeChunk> searchByContentKeyword(
             @Param("query") String query,
             @Param("activeStatus") KnowledgeDocumentStatus activeStatus);
+
+    /**
+     * Returns all chunks belonging to ACTIVE documents that have a stored embedding vector.
+     * Used by {@link com.company.employeemanagement.ai.rag.service.VectorKnowledgeRetrievalService}
+     * to perform in-memory cosine similarity search.
+     */
+    @Query("""
+            SELECT c FROM KnowledgeChunk c
+            JOIN FETCH c.document d
+            WHERE d.status = :activeStatus
+              AND c.embeddingVector IS NOT NULL
+            ORDER BY d.id, c.chunkIndex
+            """)
+    List<KnowledgeChunk> findAllEmbeddedByDocumentStatus(
+            @Param("activeStatus") KnowledgeDocumentStatus activeStatus);
+
+    /**
+     * Returns all chunks belonging to ACTIVE documents that do NOT yet have
+     * an embedding vector. Used to identify documents that need to be re-indexed.
+     */
+    @Query("""
+            SELECT c FROM KnowledgeChunk c
+            JOIN c.document d
+            WHERE d.status = :activeStatus
+              AND c.embeddingVector IS NULL
+            ORDER BY d.id, c.chunkIndex
+            """)
+    List<KnowledgeChunk> findAllWithoutEmbedding(
+            @Param("activeStatus") KnowledgeDocumentStatus activeStatus);
 }

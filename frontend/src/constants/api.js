@@ -63,6 +63,10 @@ export const API_ENDPOINTS = /** @type {const} */ ({
 
   // AI Assistant
   AI_CHAT: '/ai/chat',
+
+  // RAG Knowledge Base (Company Policies)
+  KNOWLEDGE_DOCUMENTS: '/ai/rag/documents',
+  KNOWLEDGE_DOCUMENT_BY_ID: (id) => `/ai/rag/documents/${id}`,
 });
 
 /**

@@ -339,6 +339,104 @@ class KnowledgeControllerTest {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // POST /ai/rag/documents/reindex — bulk re-index all ACTIVE documents
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("POST /ai/rag/documents/reindex — bulk re-index all ACTIVE documents")
+    class ReindexAll {
+
+        @Test
+        @DisplayName("returns 200 with list of successfully re-indexed documents")
+        void returns200WithReindexedDocuments() throws Exception {
+            List<KnowledgeDocumentResponse> results = List.of(
+                    buildDocResponse("Policy A"),
+                    buildDocResponse("Policy B")
+            );
+            when(ingestionService.reindexAllActiveDocuments()).thenReturn(results);
+
+            mockMvc.perform(post("/ai/rag/documents/reindex")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(2)))
+                    .andExpect(jsonPath("$[0].title", is("Policy A")))
+                    .andExpect(jsonPath("$[1].title", is("Policy B")));
+
+            verify(ingestionService).reindexAllActiveDocuments();
+        }
+
+        @Test
+        @DisplayName("returns 200 with empty list when no ACTIVE documents exist")
+        void returns200WithEmptyListWhenNoDocuments() throws Exception {
+            when(ingestionService.reindexAllActiveDocuments()).thenReturn(Collections.emptyList());
+
+            mockMvc.perform(post("/ai/rag/documents/reindex")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(0)));
+        }
+
+        @Test
+        @DisplayName("service RagException during reindex → returns 400")
+        void serviceExceptionReturns400() throws Exception {
+            when(ingestionService.reindexAllActiveDocuments())
+                    .thenThrow(new RagException("embedding provider unavailable"));
+
+            mockMvc.perform(post("/ai/rag/documents/reindex")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // POST /ai/rag/documents/{id}/reindex — re-index one document
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("POST /ai/rag/documents/{id}/reindex — re-index single document")
+    class ReindexOne {
+
+        @Test
+        @DisplayName("returns 200 with re-indexed document response")
+        void returns200WithReindexedDocument() throws Exception {
+            UUID id = UUID.randomUUID();
+            KnowledgeDocumentResponse response = buildDocResponse("Attendance Policy");
+            when(ingestionService.reindexDocument(id)).thenReturn(response);
+
+            mockMvc.perform(post("/ai/rag/documents/{id}/reindex", id)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.title", is("Attendance Policy")));
+
+            verify(ingestionService).reindexDocument(id);
+        }
+
+        @Test
+        @DisplayName("returns 400 when document not found")
+        void returns400WhenDocumentNotFound() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(ingestionService.reindexDocument(id))
+                    .thenThrow(new RagException("not found: " + id));
+
+            mockMvc.perform(post("/ai/rag/documents/{id}/reindex", id)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("returns 400 when embedding fails during reindex")
+        void returns400WhenEmbeddingFails() throws Exception {
+            UUID id = UUID.randomUUID();
+            when(ingestionService.reindexDocument(id))
+                    .thenThrow(new RagException("Re-index embedding generation failed"));
+
+            mockMvc.perform(post("/ai/rag/documents/{id}/reindex", id)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────────────────
 

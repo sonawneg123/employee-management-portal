@@ -61,7 +61,7 @@ public class AiChatController {
     @PostMapping(value = "/chat",
                  consumes = MediaType.APPLICATION_JSON_VALUE,
                  produces = MediaType.APPLICATION_JSON_VALUE)
-    @SecurityRequirement(name = "bearerAuth")
+    @SecurityRequirement(name = "BearerAuth")
     @Operation(
             summary = "Send a message to the AI HR Assistant",
             description = "Forwards the user's message to a Groq-hosted LLM and returns the generated response. "

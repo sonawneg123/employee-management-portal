@@ -38,6 +38,7 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
+import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
@@ -105,6 +106,12 @@ const NAV_ITEMS = [
     icon: <ManageAccountsRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
   },
+  {
+    label: 'Company Policies',
+    path: ROUTES.ADMIN_POLICIES,
+    icon: <AutoStoriesRoundedIcon />,
+    allowedRoles: [ROLES.ADMIN],
+  },
 
   // ── HR / Manager ──────────────────────────────────────────────────────────
   {
@@ -142,6 +149,12 @@ const NAV_ITEMS = [
     path: ROUTES.HR_REVIEWS,
     icon: <AssessmentRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Company Policies',
+    path: ROUTES.HR_POLICIES,
+    icon: <AutoStoriesRoundedIcon />,
+    allowedRoles: [ROLES.HR],
   },
 
   // ── Employee ──────────────────────────────────────────────────────────────

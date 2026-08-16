@@ -57,6 +57,9 @@ const EmployeeDashboardPage = lazy(() => import('@/pages/employee/EmployeeDashbo
 // ── AI Assistant page ─────────────────────────────────────────────────────────
 const AiAssistantPage = lazy(() => import('@/pages/ai/AiAssistantPage'));
 
+// ── Company Policies page (Admin + HR) ────────────────────────────────────────
+const CompanyPoliciesPage = lazy(() => import('@/pages/admin/CompanyPoliciesPage'));
+
 // ── Suspense wrapper ─────────────────────────────────────────────────────────
 
 /**
@@ -131,6 +134,7 @@ export default function AppRoutes() {
             <Route path={ROUTES.ADMIN_ATTENDANCE} element={withSuspense(<AttendancePage />)} />
             <Route path={ROUTES.ADMIN_REVIEWS} element={withSuspense(<ReviewsPage />)} />
             <Route path={ROUTES.ADMIN_USERS} element={withSuspense(<AdminUsersPage />)} />
+            <Route path={ROUTES.ADMIN_POLICIES} element={withSuspense(<CompanyPoliciesPage />)} />
           </Route>
 
           {/* ── HR/Manager routes (/hr/*) ─────────────────────────────── */}
@@ -149,6 +153,7 @@ export default function AppRoutes() {
             <Route path={ROUTES.HR_LEAVES} element={withSuspense(<LeavesPage />)} />
             <Route path={ROUTES.HR_ATTENDANCE} element={withSuspense(<AttendancePage />)} />
             <Route path={ROUTES.HR_REVIEWS} element={withSuspense(<ReviewsPage />)} />
+            <Route path={ROUTES.HR_POLICIES} element={withSuspense(<CompanyPoliciesPage />)} />
           </Route>
 
           {/* ── Employee self-service routes (/employee/*) ────────────── */}

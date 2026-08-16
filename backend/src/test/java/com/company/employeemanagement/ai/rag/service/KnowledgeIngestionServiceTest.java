@@ -3,6 +3,8 @@ package com.company.employeemanagement.ai.rag.service;
 import com.company.employeemanagement.ai.rag.config.RagProperties;
 import com.company.employeemanagement.ai.rag.dto.IngestDocumentRequest;
 import com.company.employeemanagement.ai.rag.dto.KnowledgeDocumentResponse;
+import com.company.employeemanagement.ai.rag.embedding.EmbeddingException;
+import com.company.employeemanagement.ai.rag.entity.KnowledgeChunk;
 import com.company.employeemanagement.ai.rag.entity.KnowledgeDocument;
 import com.company.employeemanagement.ai.rag.entity.enums.KnowledgeDocumentStatus;
 import com.company.employeemanagement.ai.rag.entity.enums.KnowledgeSourceType;
@@ -27,6 +29,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,16 +49,24 @@ class KnowledgeIngestionServiceTest {
     @Mock
     private KnowledgeChunkRepository chunkRepository;
 
+    @Mock
+    private com.company.employeemanagement.ai.rag.embedding.EmbeddingService embeddingService;
+
     private KnowledgeIngestionService ingestionService;
-    private DocumentChunkingService chunkingService;
+    private DocumentChunkingService   chunkingService;
+    private RagProperties             ragProperties;
 
     @BeforeEach
     void setUp() {
-        RagProperties props = new RagProperties();
-        props.setChunkSize(50);
-        props.setChunkOverlap(10);
-        chunkingService = new DocumentChunkingService(props);
-        ingestionService = new KnowledgeIngestionService(documentRepository, chunkRepository, chunkingService);
+        ragProperties = new RagProperties();
+        ragProperties.setChunkSize(50);
+        ragProperties.setChunkOverlap(10);
+        // Disable embeddings by default so existing tests are unaffected
+        ragProperties.getEmbedding().setEnabled(false);
+        chunkingService  = new DocumentChunkingService(ragProperties);
+        ingestionService = new KnowledgeIngestionService(
+                documentRepository, chunkRepository, chunkingService,
+                embeddingService, ragProperties);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -202,6 +213,200 @@ class KnowledgeIngestionServiceTest {
             assertThatThrownBy(() -> ingestionService.deleteDocument(id))
                     .isInstanceOf(RagException.class)
                     .hasMessageContaining(id.toString());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Phase 3 — Embedding integration tests
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("Phase 3 — Embedding during ingestion")
+    class EmbeddingDuringIngestion {
+
+        @BeforeEach
+        void enableEmbedding() {
+            ragProperties.getEmbedding().setEnabled(true);
+            ingestionService = new KnowledgeIngestionService(
+                    documentRepository, chunkRepository, chunkingService,
+                    embeddingService, ragProperties);
+        }
+
+        @Test
+        @DisplayName("embedding is generated for each chunk when enabled")
+        void embeddingGeneratedForEachChunk() {
+            String content = "Short content here";
+            IngestDocumentRequest request = new IngestDocumentRequest(
+                    "Policy", null, KnowledgeSourceType.POLICY, null, content);
+            KnowledgeDocument saved = buildDocument(request, KnowledgeDocumentStatus.ACTIVE);
+            when(documentRepository.save(any())).thenReturn(saved);
+            when(chunkRepository.saveAll(any())).thenReturn(Collections.emptyList());
+            // Return a 3-dim vector for each chunk text
+            when(embeddingService.embedBatch(any()))
+                    .thenReturn(List.of(new float[]{0.1f, 0.2f, 0.3f}));
+
+            ingestionService.ingestDocument(request);
+
+            verify(embeddingService).embedBatch(any());
+            // chunkRepository.saveAll called at least twice: once for chunks, once for embeddings
+            verify(chunkRepository, times(2)).saveAll(any());
+        }
+
+        @Test
+        @DisplayName("document is ACTIVE after successful embedding")
+        void documentActiveAfterEmbedding() {
+            String content = "Policy content";
+            IngestDocumentRequest request = new IngestDocumentRequest(
+                    "Policy", null, KnowledgeSourceType.POLICY, null, content);
+            KnowledgeDocument saved = buildDocument(request, KnowledgeDocumentStatus.ACTIVE);
+            when(documentRepository.save(any())).thenReturn(saved);
+            when(chunkRepository.saveAll(any())).thenReturn(Collections.emptyList());
+            when(embeddingService.embedBatch(any()))
+                    .thenReturn(List.of(new float[]{0.1f, 0.2f, 0.3f}));
+
+            KnowledgeDocumentResponse response = ingestionService.ingestDocument(request);
+
+            assertThat(response.status()).isEqualTo(KnowledgeDocumentStatus.ACTIVE);
+        }
+
+        @Test
+        @DisplayName("document set to ERROR and RagException thrown when embedding fails")
+        void embeddingFailureSetsErrorStatus() {
+            String content = "Policy content";
+            IngestDocumentRequest request = new IngestDocumentRequest(
+                    "Policy", null, KnowledgeSourceType.POLICY, null, content);
+            KnowledgeDocument processingDoc = buildDocument(request, KnowledgeDocumentStatus.PROCESSING);
+            when(documentRepository.save(any())).thenReturn(processingDoc);
+            when(chunkRepository.saveAll(any())).thenReturn(Collections.emptyList());
+            when(embeddingService.embedBatch(any()))
+                    .thenThrow(new EmbeddingException("API down"));
+
+            assertThatThrownBy(() -> ingestionService.ingestDocument(request))
+                    .isInstanceOf(RagException.class)
+                    .hasMessageContaining("embedding generation failed");
+
+            // document.setStatus(ERROR) + save must have been called
+            ArgumentCaptor<KnowledgeDocument> docCaptor =
+                    ArgumentCaptor.forClass(KnowledgeDocument.class);
+            verify(documentRepository, times(2)).save(docCaptor.capture());
+            // The second save should be for the ERROR state
+            List<KnowledgeDocument> savedDocs = docCaptor.getAllValues();
+            assertThat(savedDocs.get(1).getStatus()).isEqualTo(KnowledgeDocumentStatus.ERROR);
+        }
+
+        @Test
+        @DisplayName("embedding not called when embedding is disabled")
+        void embeddingNotCalledWhenDisabled() {
+            ragProperties.getEmbedding().setEnabled(false);
+            ingestionService = new KnowledgeIngestionService(
+                    documentRepository, chunkRepository, chunkingService,
+                    embeddingService, ragProperties);
+
+            String content = "Policy content";
+            IngestDocumentRequest request = new IngestDocumentRequest(
+                    "Policy", null, KnowledgeSourceType.POLICY, null, content);
+            KnowledgeDocument saved = buildDocument(request, KnowledgeDocumentStatus.ACTIVE);
+            when(documentRepository.save(any())).thenReturn(saved);
+            when(chunkRepository.saveAll(any())).thenReturn(Collections.emptyList());
+
+            ingestionService.ingestDocument(request);
+
+            verify(embeddingService, never()).embedBatch(any());
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Phase 3 — Re-index
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("Phase 3 — reindexDocument")
+    class ReindexDocument {
+
+        @BeforeEach
+        void enableEmbedding() {
+            ragProperties.getEmbedding().setEnabled(true);
+            ingestionService = new KnowledgeIngestionService(
+                    documentRepository, chunkRepository, chunkingService,
+                    embeddingService, ragProperties);
+        }
+
+        @Test
+        @DisplayName("reindexDocument generates embeddings for all chunks")
+        void reindexGeneratesEmbeddings() {
+            UUID docId = UUID.randomUUID();
+            IngestDocumentRequest req = new IngestDocumentRequest(
+                    "Policy", null, KnowledgeSourceType.POLICY, null, "content");
+            KnowledgeDocument doc = buildDocument(req, KnowledgeDocumentStatus.ACTIVE);
+            try {
+                java.lang.reflect.Field idField =
+                        com.company.employeemanagement.entity.BaseEntity.class.getDeclaredField("id");
+                idField.setAccessible(true);
+                idField.set(doc, docId);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            KnowledgeChunk chunk = KnowledgeChunk.builder()
+                    .id(UUID.randomUUID()).document(doc).chunkIndex(0)
+                    .content("policy content").tokenCount(2).build();
+
+            when(documentRepository.findById(docId)).thenReturn(Optional.of(doc));
+            when(chunkRepository.findByDocumentIdOrderByChunkIndex(docId))
+                    .thenReturn(List.of(chunk));
+            when(embeddingService.embedBatch(any()))
+                    .thenReturn(List.of(new float[]{0.1f, 0.2f, 0.3f}));
+            when(chunkRepository.saveAll(any())).thenReturn(Collections.emptyList());
+            // documentRepository.save() is only called when status != ACTIVE;
+            // doc is already ACTIVE so that stub is not needed here.
+
+            KnowledgeDocumentResponse response = ingestionService.reindexDocument(docId);
+
+            assertThat(response).isNotNull();
+            verify(embeddingService).embedBatch(any());
+        }
+
+        @Test
+        @DisplayName("reindexDocument throws RagException for unknown ID")
+        void reindexUnknownIdThrows() {
+            UUID id = UUID.randomUUID();
+            when(documentRepository.findById(id)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> ingestionService.reindexDocument(id))
+                    .isInstanceOf(RagException.class)
+                    .hasMessageContaining(id.toString());
+        }
+
+        @Test
+        @DisplayName("reindexDocument throws RagException when embedding fails")
+        void reindexEmbeddingFailureThrows() {
+            UUID docId = UUID.randomUUID();
+            IngestDocumentRequest req = new IngestDocumentRequest(
+                    "Policy", null, KnowledgeSourceType.POLICY, null, "content");
+            KnowledgeDocument doc = buildDocument(req, KnowledgeDocumentStatus.ACTIVE);
+            try {
+                java.lang.reflect.Field idField =
+                        com.company.employeemanagement.entity.BaseEntity.class.getDeclaredField("id");
+                idField.setAccessible(true);
+                idField.set(doc, docId);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            KnowledgeChunk chunk = KnowledgeChunk.builder()
+                    .id(UUID.randomUUID()).document(doc).chunkIndex(0)
+                    .content("policy content").tokenCount(2).build();
+
+            when(documentRepository.findById(docId)).thenReturn(Optional.of(doc));
+            when(chunkRepository.findByDocumentIdOrderByChunkIndex(docId))
+                    .thenReturn(List.of(chunk));
+            when(embeddingService.embedBatch(any()))
+                    .thenThrow(new EmbeddingException("provider down"));
+            when(documentRepository.save(any())).thenReturn(doc);
+
+            assertThatThrownBy(() -> ingestionService.reindexDocument(docId))
+                    .isInstanceOf(RagException.class)
+                    .hasMessageContaining("Re-index embedding generation failed");
         }
     }
 

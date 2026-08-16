@@ -27,11 +27,13 @@ import java.util.UUID;
  *
  * <h2>Endpoint summary</h2>
  * <ul>
- *   <li>{@code POST  /ai/rag/documents}      — ingest a document (ADMIN, HR)</li>
- *   <li>{@code GET   /ai/rag/documents}      — list all documents (ADMIN, HR)</li>
- *   <li>{@code GET   /ai/rag/documents/{id}} — get one document  (ADMIN, HR)</li>
- *   <li>{@code DELETE /ai/rag/documents/{id}} — delete a document (ADMIN)</li>
- *   <li>{@code POST  /ai/rag/search}         — keyword search    (any authenticated user)</li>
+ *   <li>{@code POST  /ai/rag/documents}              — ingest a document (ADMIN, HR)</li>
+ *   <li>{@code GET   /ai/rag/documents}              — list all documents (ADMIN, HR)</li>
+ *   <li>{@code GET   /ai/rag/documents/{id}}         — get one document  (ADMIN, HR)</li>
+ *   <li>{@code DELETE /ai/rag/documents/{id}}        — delete a document (ADMIN)</li>
+ *   <li>{@code POST  /ai/rag/documents/reindex}      — re-index all ACTIVE documents (ADMIN, HR)</li>
+ *   <li>{@code POST  /ai/rag/documents/{id}/reindex} — re-index one document (ADMIN, HR)</li>
+ *   <li>{@code POST  /ai/rag/search}                 — vector/keyword search (any authenticated user)</li>
  * </ul>
  *
  * @author Employee Management Portal Team
@@ -104,6 +106,40 @@ public class KnowledgeController {
     public ResponseEntity<Void> deleteDocument(@PathVariable final UUID id) {
         ingestionService.deleteDocument(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Re-index endpoints (ADMIN / HR) — used after embedding provider switch
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Re-indexes all ACTIVE documents by regenerating embeddings using the current
+     * provider (Hugging Face). Use this after switching embedding providers.
+     *
+     * <p>Documents that fail to embed are marked {@code ERROR} and excluded from the
+     * response. The operation never deletes policy content.
+     *
+     * @return list of successfully re-indexed documents (HTTP 200)
+     */
+    @PostMapping("/documents/reindex")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    public ResponseEntity<List<KnowledgeDocumentResponse>> reindexAllDocuments() {
+        List<KnowledgeDocumentResponse> results = ingestionService.reindexAllActiveDocuments();
+        return ResponseEntity.ok(results);
+    }
+
+    /**
+     * Re-indexes a single document by ID, regenerating embeddings for all its chunks.
+     *
+     * @param id document UUID
+     * @return the updated document (HTTP 200)
+     */
+    @PostMapping("/documents/{id}/reindex")
+    @PreAuthorize("hasAnyRole('ADMIN','HR')")
+    public ResponseEntity<KnowledgeDocumentResponse> reindexDocument(
+            @PathVariable final UUID id) {
+        KnowledgeDocumentResponse response = ingestionService.reindexDocument(id);
+        return ResponseEntity.ok(response);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
