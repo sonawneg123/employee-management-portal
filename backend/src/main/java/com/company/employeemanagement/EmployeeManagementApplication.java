@@ -2,6 +2,7 @@ package com.company.employeemanagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 /**
@@ -12,11 +13,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * {@code createdBy}, and {@code updatedBy} fields on all entities
  * that extend {@link com.company.employeemanagement.entity.BaseEntity}.
  *
+ * <p>{@link EnableScheduling} activates the {@code @Scheduled} tasks,
+ * including {@link com.company.employeemanagement.service.TaskDeadlineReminderService}.
+ *
  * @author Employee Management Portal Team
  * @version 1.0.0
  */
 @SpringBootApplication
-
+@EnableScheduling
 public class EmployeeManagementApplication {
 
     /**

@@ -71,6 +71,15 @@ export const ROUTES = /** @type {const} */ ({
   ADMIN_POLICIES: '/admin/policies',
   HR_POLICIES: '/hr/policies',
 
+  // ── Task Management ──────────────────────────────────────────────
+  MANAGER_TASKS: '/hr/tasks',
+  MANAGER_TASK_DETAIL: (id) => `/hr/tasks/${id}`,
+  MANAGER_TASK_REVIEWS: '/hr/task-reviews',
+  EMPLOYEE_TASKS: '/employee/tasks',
+  EMPLOYEE_TASK_DETAIL: (id) => `/employee/tasks/${id}`,
+  ADMIN_TASKS: '/admin/tasks',
+  ADMIN_TASK_DETAIL: (id) => `/admin/tasks/${id}`,
+
   // ── Fallback ─────────────────────────────────────────────────────
   NOT_FOUND: '/404',
   ACCESS_DENIED: '/403',

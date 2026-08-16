@@ -37,6 +37,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useThemeMode } from '@/theme/ThemeContext';
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 /**
  * Maps roles to a short human-readable label.
@@ -126,6 +127,9 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
 
         {/* Breadcrumb-style page context */}
         <Box sx={{ flexGrow: 1 }} />
+
+        {/* Notification bell */}
+        <NotificationBell />
 
         {/* Theme toggle */}
         <Tooltip title={mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>

@@ -67,6 +67,47 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   // RAG Knowledge Base (Company Policies)
   KNOWLEDGE_DOCUMENTS: '/ai/rag/documents',
   KNOWLEDGE_DOCUMENT_BY_ID: (id) => `/ai/rag/documents/${id}`,
+
+  // Tasks
+  TASKS: '/tasks',
+  TASK_BY_ID: (id) => `/tasks/${id}`,
+  TASKS_MY: '/tasks/my',
+  TASKS_CREATED: '/tasks/created',
+  TASK_STATUS: (id) => `/tasks/${id}/status`,
+
+  // Task Comments
+  TASK_COMMENTS: (taskId) => `/tasks/${taskId}/comments`,
+
+  // Task Attachments
+  TASK_ATTACHMENTS: (taskId) => `/tasks/${taskId}/attachments`,
+  TASK_ATTACHMENT_DOWNLOAD: (taskId, attachmentId) => `/tasks/${taskId}/attachments/${attachmentId}/download`,
+  TASK_ATTACHMENT_BY_ID: (taskId, attachmentId) => `/tasks/${taskId}/attachments/${attachmentId}`,
+
+  // Task Activities
+  TASK_ACTIVITIES: (taskId) => `/tasks/${taskId}/activities`,
+
+  // Task Reassignment
+  TASK_REASSIGN: (taskId) => `/tasks/${taskId}/reassign`,
+
+  // Employee Availability & Workload
+  TASK_EMPLOYEE_AVAILABILITY: '/tasks/employee-availability',
+  TASK_DASHBOARD_STATS: '/tasks/dashboard-stats',
+  TASK_WORKLOAD_SUMMARY: '/tasks/workload-summary',
+  TASK_WORKLOAD: (employeeId) => `/tasks/workload/${employeeId}`,
+
+  // Task Submissions
+  TASK_SUBMISSIONS: (taskId) => `/tasks/${taskId}/submissions`,
+  TASK_SUBMISSIONS_LATEST: (taskId) => `/tasks/${taskId}/submissions/latest`,
+  TASK_SUBMISSION_RESUBMIT: (submissionId) => `/task-submissions/${submissionId}/resubmit`,
+  TASK_SUBMISSION_APPROVE: (submissionId) => `/task-submissions/${submissionId}/approve`,
+  TASK_SUBMISSION_REQUEST_CHANGES: (submissionId) => `/task-submissions/${submissionId}/request-changes`,
+  TASK_SUBMISSION_ATTACHMENT: (submissionId) => `/task-submissions/${submissionId}/attachment`,
+
+  // Notifications
+  NOTIFICATIONS: '/notifications',
+  NOTIFICATIONS_UNREAD_COUNT: '/notifications/unread-count',
+  NOTIFICATION_READ: (id) => `/notifications/${id}/read`,
+  NOTIFICATIONS_READ_ALL: '/notifications/read-all',
 });
 
 /**

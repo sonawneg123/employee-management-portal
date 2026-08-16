@@ -39,10 +39,13 @@ import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
+import TaskRoundedIcon from '@mui/icons-material/TaskRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
 
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTodayAttendance } from '@/hooks/useAttendanceStatus';
 
 /** Sidebar background colour — intentionally hardcoded to avoid theme leakage. */
 const SIDEBAR_BG = '#0F172A';
@@ -151,6 +154,18 @@ const NAV_ITEMS = [
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
   },
   {
+    label: 'Task Management',
+    path: ROUTES.MANAGER_TASKS,
+    icon: <TaskRoundedIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Task Reviews',
+    path: ROUTES.MANAGER_TASK_REVIEWS,
+    icon: <PeopleAltIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
     label: 'Company Policies',
     path: ROUTES.HR_POLICIES,
     icon: <AutoStoriesRoundedIcon />,
@@ -180,6 +195,12 @@ const NAV_ITEMS = [
     label: 'My Reviews',
     path: ROUTES.EMPLOYEE_REVIEWS,
     icon: <AssessmentRoundedIcon />,
+    allowedRoles: [ROLES.EMPLOYEE],
+  },
+  {
+    label: 'My Tasks',
+    path: ROUTES.EMPLOYEE_TASKS,
+    icon: <TaskRoundedIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
   },
   {
@@ -240,6 +261,11 @@ export default function Sidebar({
 }) {
   const location = useLocation();
   const { user, hasAnyRole } = useAuth();
+  const { isCheckedOut } = useTodayAttendance();
+
+  const isEmployee = Boolean(user)
+    && hasAnyRole([ROLES.EMPLOYEE])
+    && !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
 
   const visibleNavItems = NAV_ITEMS.filter(
     ({ allowedRoles }) => !allowedRoles || hasAnyRole(allowedRoles),
@@ -408,68 +434,100 @@ export default function Sidebar({
           {visibleNavItems.map(({ label, path, icon }) => {
             const isActive = location.pathname === path || location.pathname.startsWith(path + '/');
 
+            // Disable the employee Tasks item when the employee has checked out
+            const isTasksItem = path === ROUTES.EMPLOYEE_TASKS;
+            const isDisabled = isEmployee && isTasksItem && isCheckedOut;
+
+            const tooltipTitle = collapsed
+              ? isDisabled ? `${label} (Checked out — check in to access tasks)` : label
+              : isDisabled ? 'You have checked out. Check in again to access tasks.' : '';
+
             return (
               <ListItem key={path} disablePadding sx={{ mb: 0.25 }}>
                 <Tooltip
-                  title={collapsed ? label : ''}
+                  title={tooltipTitle}
                   placement="right"
-                  disableHoverListener={!collapsed}
+                  disableHoverListener={!isDisabled && !collapsed}
                 >
-                  <ListItemButton
-                    component={NavLink}
-                    to={path}
-                    onClick={variant === 'temporary' ? onClose : undefined}
-                    sx={{
-                      borderRadius: '10px',
-                      py: 0.85,
-                      px: collapsed ? 0 : 1.25,
-                      minHeight: 40,
-                      justifyContent: collapsed ? 'center' : 'flex-start',
-                      color: isActive ? ACTIVE_COLOR : TEXT_COLOR,
-                      bgcolor: isActive ? ACTIVE_BG : 'transparent',
-                      '&:hover': {
-                        bgcolor: isActive ? ACTIVE_BG : HOVER_BG,
-                        color: isActive ? ACTIVE_COLOR : '#F1F5F9',
-                      },
-                      transition: 'all 0.15s ease',
-                    }}
-                    aria-current={isActive ? 'page' : undefined}
-                  >
-                    <ListItemIcon
+                  {/* span wrapper needed so Tooltip works on disabled elements */}
+                  <span style={{ display: 'block', width: '100%' }}>
+                    <ListItemButton
+                      component={isDisabled ? 'div' : NavLink}
+                      to={isDisabled ? undefined : path}
+                      onClick={
+                        isDisabled ? undefined
+                          : variant === 'temporary' ? onClose : undefined
+                      }
                       sx={{
-                        minWidth: collapsed ? 0 : 34,
-                        color: isActive ? ACTIVE_COLOR : TEXT_MUTED,
-                        '& .MuiSvgIcon-root': { fontSize: 18 },
-                        justifyContent: 'center',
+                        borderRadius: '10px',
+                        py: 0.85,
+                        px: collapsed ? 0 : 1.25,
+                        minHeight: 40,
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        color: isDisabled
+                          ? 'rgba(148,163,184,0.3)'
+                          : isActive ? ACTIVE_COLOR : TEXT_COLOR,
+                        bgcolor: isActive && !isDisabled ? ACTIVE_BG : 'transparent',
+                        opacity: isDisabled ? 0.5 : 1,
+                        cursor: isDisabled ? 'not-allowed' : 'pointer',
+                        pointerEvents: isDisabled ? 'none' : 'auto',
+                        '&:hover': isDisabled ? {} : {
+                          bgcolor: isActive ? ACTIVE_BG : HOVER_BG,
+                          color: isActive ? ACTIVE_COLOR : '#F1F5F9',
+                        },
+                        transition: 'all 0.15s ease',
                       }}
+                      aria-current={isActive && !isDisabled ? 'page' : undefined}
+                      aria-disabled={isDisabled}
                     >
-                      {icon}
-                    </ListItemIcon>
-                    {!collapsed && (
-                      <>
-                        <ListItemText
-                          primary={label}
-                          primaryTypographyProps={{
-                            fontSize: '0.8375rem',
-                            fontWeight: isActive ? 600 : 500,
-                            letterSpacing: '0.005em',
-                          }}
-                        />
-                        {isActive && (
-                          <Box
-                            sx={{
-                              width: 3,
-                              height: 20,
-                              borderRadius: '3px',
-                              background: 'linear-gradient(180deg, #4F46E5, #7C3AED)',
-                              ml: 1,
-                              flexShrink: 0,
+                      <ListItemIcon
+                        sx={{
+                          minWidth: collapsed ? 0 : 34,
+                          color: isDisabled
+                            ? 'rgba(148,163,184,0.3)'
+                            : isActive ? ACTIVE_COLOR : TEXT_MUTED,
+                          '& .MuiSvgIcon-root': { fontSize: 18 },
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {icon}
+                      </ListItemIcon>
+                      {!collapsed && (
+                        <>
+                          <ListItemText
+                            primary={label}
+                            primaryTypographyProps={{
+                              fontSize: '0.8375rem',
+                              fontWeight: isActive ? 600 : 500,
+                              letterSpacing: '0.005em',
                             }}
                           />
-                        )}
-                      </>
-                    )}
-                  </ListItemButton>
+                          {isDisabled && (
+                            <LockRoundedIcon
+                              sx={{
+                                fontSize: 14,
+                                color: 'rgba(148,163,184,0.35)',
+                                ml: 1,
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
+                          {isActive && !isDisabled && (
+                            <Box
+                              sx={{
+                                width: 3,
+                                height: 20,
+                                borderRadius: '3px',
+                                background: 'linear-gradient(180deg, #4F46E5, #7C3AED)',
+                                ml: 1,
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
+                        </>
+                      )}
+                    </ListItemButton>
+                  </span>
                 </Tooltip>
               </ListItem>
             );

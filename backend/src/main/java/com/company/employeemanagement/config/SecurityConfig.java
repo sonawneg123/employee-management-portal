@@ -66,7 +66,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-@EnableConfigurationProperties(JwtProperties.class)   // registers JwtProperties bean for JwtService
+@EnableConfigurationProperties({JwtProperties.class,
+        com.company.employeemanagement.config.FileStorageProperties.class})
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
@@ -188,6 +189,66 @@ public class SecurityConfig {
                                 .hasRole("ADMIN")
                         // ── RAG search — any authenticated user ───────────────
                         .requestMatchers(HttpMethod.POST, "/ai/rag/search")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── Task management endpoints ─────────────────────────
+                        // Status update — all authenticated roles (employee scoped + limited transitions)
+                        .requestMatchers(HttpMethod.PATCH, "/tasks/*/status")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Task reassign — privileged roles only
+                        .requestMatchers(HttpMethod.POST, "/tasks/*/reassign")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // Task submission (employee submits work) — all authenticated roles
+                        .requestMatchers(HttpMethod.POST, "/tasks/*/submissions")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Task submission queries — all authenticated roles
+                        .requestMatchers(HttpMethod.GET, "/tasks/*/submissions/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Task comments — all authenticated roles (IDOR enforced in service)
+                        .requestMatchers(HttpMethod.GET, "/tasks/*/comments")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/tasks/*/comments")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Task activity timeline — all authenticated roles (IDOR enforced in service)
+                        .requestMatchers(HttpMethod.GET, "/tasks/*/activities")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Task attachments — upload/delete privileged only; download/list for all
+                        .requestMatchers(HttpMethod.POST, "/tasks/*/attachments")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/tasks/*/attachments/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/tasks/*/attachments/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Dashboard / workload stats — privileged roles only
+                        .requestMatchers(HttpMethod.GET, "/tasks/dashboard-stats",
+                                "/tasks/workload-summary", "/tasks/workload/**",
+                                "/tasks/employee-availability")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // Task queries — all authenticated roles (employees scoped server-side)
+                        .requestMatchers(HttpMethod.GET, "/tasks/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Task creation / full update — privileged roles only
+                        .requestMatchers(HttpMethod.POST, "/tasks/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/tasks/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // Task deletion — privileged roles only
+                        .requestMatchers(HttpMethod.DELETE, "/tasks/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // ── Task submission review endpoints ─────────────────────
+                        // Resubmit — employee (own submission only, enforced in service)
+                        .requestMatchers(HttpMethod.PUT, "/task-submissions/*/resubmit")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Approve / request-changes — privileged only (enforced at controller + service)
+                        .requestMatchers(HttpMethod.POST, "/task-submissions/*/approve",
+                                "/task-submissions/*/request-changes")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // Attachment download — all authenticated roles (ownership enforced in service)
+                        .requestMatchers(HttpMethod.GET, "/task-submissions/*/attachment")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── Notification endpoints — all authenticated roles (self-scoped) ──
+                        .requestMatchers(HttpMethod.GET, "/notifications/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.PATCH, "/notifications/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         // ── All other requests require authentication ────
                         .anyRequest().authenticated()
