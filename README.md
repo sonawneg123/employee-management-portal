@@ -1,6 +1,6 @@
 # Employee Management Portal
 
-A production-ready, enterprise-grade Employee Management Portal built with **Spring Boot 3** (backend) and **React 19** (frontend), deployed via **Docker**, **Jenkins CI/CD**, and **AWS EC2 + Nginx**.
+A production-ready, full-stack **Employee Management Portal** built with **Spring Boot 3 / Java 21** (backend) and **React 19** (frontend). The portal covers the complete HR lifecycle: employee & department management, attendance, leave, task management with submissions and reviews, real-time notifications, an AI HR Assistant with RAG/vector search, and a rich task analytics dashboard.
 
 ---
 
@@ -9,39 +9,65 @@ A production-ready, enterprise-grade Employee Management Portal built with **Spr
 1. [Project Overview](#project-overview)
 2. [Technology Stack](#technology-stack)
 3. [Architecture](#architecture)
-4. [Completed Modules](#completed-modules)
+4. [Completed Modules & Roadmap](#completed-modules--roadmap)
 5. [Project Structure](#project-structure)
-6. [Frontend Features](#frontend-features)
-7. [Backend Features](#backend-features)
-8. [Database Overview](#database-overview)
-9. [Authentication](#authentication)
-10. [API Overview](#api-overview)
-11. [Installation](#installation)
-12. [Development Setup](#development-setup)
-13. [Docker Setup](#docker-setup)
-14. [Environment Variables](#environment-variables)
-15. [NPM Scripts](#npm-scripts)
-16. [Maven Commands](#maven-commands)
-17. [Testing](#testing)
-18. [Screenshots](#screenshots)
-19. [Roadmap](#roadmap)
-20. [Changelog](#changelog)
-21. [License](#license)
-22. [Author](#author)
+6. [Authentication & Authorization](#authentication--authorization)
+7. [Core Modules](#core-modules)
+   - [Employee Management](#employee-management)
+   - [Department Management](#department-management)
+   - [Attendance Management](#attendance-management)
+   - [Leave Management](#leave-management)
+8. [Task Management — Phase 6A](#task-management--phase-6a)
+   - [Attendance-Aware Task Assignment](#attendance-aware-task-assignment)
+   - [Task Status & Activity Timeline](#task-status--activity-timeline)
+   - [Task Comments](#task-comments)
+   - [Task Categories & Priority](#task-categories--priority)
+   - [Task Attachments](#task-attachments)
+9. [Task Submission System — Phase 6B / 6B.1](#task-submission-system--phase-6b--6b1)
+10. [Notifications — Phase 6A.1](#notifications--phase-6a1)
+11. [Deadline Reminders](#deadline-reminders)
+12. [Employee Workload Protection](#employee-workload-protection)
+13. [Task Dashboard — Phase 6C–6E](#task-dashboard--phase-6c6e)
+14. [Manager & HR Module](#manager--hr-module)
+15. [AI Assistant / RAG Infrastructure](#ai-assistant--rag-infrastructure)
+16. [File Storage Architecture](#file-storage-architecture)
+17. [Database & Flyway Migrations](#database--flyway-migrations)
+18. [API Documentation](#api-documentation)
+19. [Security](#security)
+20. [Testing](#testing)
+21. [Build & Run Instructions](#build--run-instructions)
+22. [Environment Variables](#environment-variables)
+23. [Docker Setup](#docker-setup)
+24. [NPM Scripts](#npm-scripts)
+25. [Maven Commands](#maven-commands)
+26. [Phase 7 — Upcoming: AI Task Analysis](#phase-7--upcoming-ai-task-analysis)
+27. [Screenshots](#screenshots)
+28. [License](#license)
+29. [Author](#author)
 
 ---
 
 ## Project Overview
 
-The **Employee Management Portal** is a full-stack enterprise application that enables organisations to manage:
+The **Employee Management Portal** is a full-stack enterprise application for organisations to manage their entire employee lifecycle:
 
-- **Employees** — complete lifecycle CRUD with role-based access
-- **Departments** — organisational structure with employee assignment
-- **Leave Requests** — full approval/rejection workflow
-- **Attendance** — daily check-in/out tracking and reporting
-- **Performance Reviews** — review cycles, ratings, and comments
-- **Profile** — employee self-service profile view
-- **Settings** — authenticated password change with validation
+| Domain | Capability |
+|---|---|
+| **Employee Management** | Full CRUD, profile, department assignment, role assignment |
+| **Department Management** | Organisational hierarchy with embedded employee lists |
+| **Leave Management** | Request, approval/rejection workflow, calendar view |
+| **Attendance** | Daily check-in/out tracking, role-aware visibility |
+| **Task Management** | Manager/HR task creation, assignment, monitoring, reassignment |
+| **Task Submissions** | Employee work submission with file attachments, manager review cycle |
+| **Task Comments** | Threaded discussion between employees and managers per task |
+| **Task Activity Timeline** | Immutable audit log of all task lifecycle events |
+| **Task Attachments** | Manager-uploaded task reference files, employee download |
+| **Notifications** | In-app bell, sound alerts, unread count, mark-as-read |
+| **Deadline Reminders** | Scheduled 24h, 2h, and overdue reminders via notifications |
+| **AI HR Assistant** | Chat with a Groq/Llama-backed HR assistant using RAG/vector retrieval |
+| **Performance Reviews** | Review records, ratings, role-aware CRUD |
+| **Profile & Settings** | Self-service profile view and password change |
+| **Task Dashboard** | Manager/HR task analytics, workload summary, overdue/urgent statistics |
 
 The system enforces **role-based access control (RBAC)** with four roles: `ADMIN`, `HR`, `MANAGER`, `EMPLOYEE`.
 
@@ -50,22 +76,23 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 ## Technology Stack
 
 ### Backend
+
 | Technology | Version | Purpose |
 |---|---|---|
 | Java | 21 | Core language |
-| Spring Boot | 3.5.3 | Application framework |
-| Spring Security | 6.x | Auth + RBAC |
-| Spring Data JPA | 3.x | ORM layer |
-| Hibernate | 6.x | JPA implementation |
-| JWT (JJWT) | 0.12.x | Stateless auth tokens |
+| Spring Boot | 3.5.x | Application framework |
+| Spring Security | 6.x | Authentication + RBAC |
+| Spring Data JPA / Hibernate | 3.x / 6.x | ORM layer |
+| JWT (JJWT) | 0.12.x | Stateless auth tokens (HS256) |
 | MapStruct | 1.6.3 | DTO/entity mapping |
 | Lombok | 1.18.x | Boilerplate reduction |
-| Flyway | 10.x | Database migrations |
+| Flyway | 10.x | Database migrations (V1–V26) |
 | MySQL | 8.0 | Relational database |
 | Maven | 3.9+ | Build tool |
-| Testcontainers | 1.19.x | Integration tests |
+| OpenAPI 3 / SpringDoc | latest | Swagger UI + API specification |
 
 ### Frontend
+
 | Technology | Version | Purpose |
 |---|---|---|
 | React | 19.x | UI library |
@@ -78,67 +105,80 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 | Axios | v1 | HTTP client |
 | Day.js | v1 | Date utilities |
 | Recharts | v2 | Data visualisation |
-| React Helmet Async | v2 | Document head management |
-| Vitest | v2 | Unit/component testing |
+| Vitest | v2 | Unit / component testing |
 | React Testing Library | v16 | Component testing utilities |
 
-### DevOps
-| Technology | Purpose |
+### AI / RAG Infrastructure
+
+| Component | Technology | Notes |
+|---|---|---|
+| Chat completions | Groq API (Llama) | `llama-3.1-8b-instant` (default) |
+| Embeddings | Hugging Face Inference API | `nomic-ai/nomic-embed-text-v1.5` (768-dim) |
+| Vector store | MySQL (persisted embeddings) | `knowledge_chunks` table |
+| Retrieval strategy | Vector (cosine similarity) or keyword | Configurable via `RAG_RETRIEVAL_STRATEGY` |
+| Similarity threshold | Cosine similarity ≥ 0.70 (default) | Configurable |
+| Knowledge ingestion | REST API (ADMIN/HR only) | Document chunking + embedding |
+
+> **Note:** The AI infrastructure currently powers the **HR Assistant chat** feature. Task-submission AI analysis (Phase 7) is **not yet implemented**.
+
+### DevOps / Infrastructure
+
+| Tool | Purpose |
 |---|---|
-| Docker + Docker Compose | Local containerised development + production deployment |
+| Docker + Docker Compose | Local containerised development |
+| `docker-compose.prod.yml` | Production deployment (ECR images + RDS) |
 | GitHub Actions | CI/CD pipeline (test → build → publish → deploy) |
 | Amazon ECR | Private container registry |
 | Amazon EC2 | Production application host (Amazon Linux 2023) |
 | Amazon RDS MySQL 8 | Production managed database |
 | AWS IAM + OIDC | Keyless authentication between GitHub Actions and AWS |
 | Nginx | Reverse proxy + static serving |
+| Jenkins | Alternative CI pipeline (`jenkins/Jenkinsfile`) |
 
 ---
 
 ## Architecture
 
 ```
-  GitHub Actions
-       │  OIDC (no static keys)
-       ▼
-  AWS IAM (GitHubActions-ECRPush-Role)
-       │
-       ▼
-  Amazon ECR
-   ├── employee-management-backend:<sha>
-   └── employee-management-frontend:<sha>
-       │  docker pull (EC2 instance role)
-       ▼
-  ┌─────────────────────────────────────────────────────────────┐
-  │                     AWS EC2 Instance                        │
-  │  ┌─────────────────────────────────────────────────────┐   │
-  │  │  Docker Compose (docker-compose.prod.yml)            │   │
-  │  │                                                      │   │
-  │  │  frontend container (Nginx :80)                      │   │
-  │  │    ├── /*        → React SPA (static)                │   │
-  │  │    └── /api/*    → backend:8080 (proxy)              │   │
-  │  │                                                      │   │
-  │  │  backend container (Spring Boot :8080)               │   │
-  │  │    └── SPRING_PROFILES_ACTIVE=prod                   │   │
-  │  └───────────────────────────┬──────────────────────────┘   │
-  └──────────────────────────────│──────────────────────────────┘
-                                 │ SSL/TLS
-                                 ▼
-                       Amazon RDS MySQL 8
-                       (private subnet, not publicly accessible)
+Browser
+  │
+  ▼  :80
+Nginx  (frontend container)
+  ├── /          →  React SPA (static files)
+  └── /api/*     →  backend:8080  (Spring Boot)
+                             │
+                 ┌───────────┴───────────────────────────────┐
+                 │         Spring Boot Application            │
+                 │                                            │
+                 │  SecurityFilterChain (JWT Bearer)          │
+                 │  Controllers (REST API)                    │
+                 │  Services (Business Logic)                 │
+                 │  Repositories (Spring Data JPA)            │
+                 │  FileStorageService → LocalFileStorage     │
+                 │  TaskDeadlineReminderService (@Scheduled)  │
+                 │  AiChatService → Groq API                  │
+                 │  HuggingFaceEmbeddingService → HF API      │
+                 └───────────────────────────────────────────┘
+                             │
+                       MySQL 8 / RDS
+                  (Flyway V1–V26 migrations)
 ```
 
 **Key design decisions:**
-- Backend returns **RFC 7807 ProblemDetail** for all errors
-- All PKs are **UUID** (no sequential integer IDs exposed)
+
+- Backend returns **RFC 7807 ProblemDetail** for all errors (`application/problem+json`)
+- All PKs are **UUID** (no sequential integer IDs exposed in the API)
 - DTOs only — JPA entities are never serialised to the API
 - JWT is stateless — no server-side session storage
 - Frontend uses **TanStack Query** for all server state (no Redux / Zustand)
 - React Query cache is invalidated optimistically on mutations
+- File storage uses an abstraction (`FileStorageService`) so that switching from local filesystem to S3 only requires a new implementation bean
 
 ---
 
-## Completed Modules
+## Completed Modules & Roadmap
+
+### ✅ Completed
 
 | Phase | Module | Status |
 |---|---|---|
@@ -161,6 +201,19 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 | Phase 3G | Attendance Module | ✅ Complete |
 | Phase 3H | Performance Reviews Module | ✅ Complete |
 | Phase 3I | Profile & Settings Module | ✅ Complete |
+| Phase 4 | AI HR Assistant — Frontend Integration | ✅ Complete |
+| Phase 5 | AI/Security/RAG Audit | ✅ Complete |
+| Phase 6A | Core Task Management | ✅ Complete |
+| Phase 6A.1 | Notifications, Activity Tracking & Attendance-Aware Task Workflow | ✅ Complete |
+| Phase 6B | Task Submission & Review | ✅ Complete |
+| Phase 6B.1 | Submission File Attachments | ✅ Complete |
+| Phase 6C–6E | Advanced Task Management Expansion (Dashboard, Filters, Workload) | ✅ Complete |
+
+### 🔜 Next
+
+| Phase | Module | Status |
+|---|---|---|
+| Phase 7 | AI Task Analysis & Review | **Not implemented yet** |
 
 ---
 
@@ -169,277 +222,836 @@ The system enforces **role-based access control (RBAC)** with four roles: `ADMIN
 ```
 employee-management-portal/
 ├── backend/
-│   ├── Dockerfile
 │   ├── pom.xml
 │   └── src/
 │       ├── main/
 │       │   ├── java/com/company/employeemanagement/
 │       │   │   ├── EmployeeManagementApplication.java
-│       │   │   ├── config/          # Security, Auditing, JWT, OpenAPI
-│       │   │   ├── controller/      # Auth, Employee, Department, Leave, Dashboard,
-│       │   │   │                    #   Attendance, Review, Settings, Profile
+│       │   │   ├── ai/                      # AI Assistant + RAG infrastructure
+│       │   │   │   ├── client/              # GroqClient, GroqApiTypes
+│       │   │   │   ├── config/              # GroqConfig, GroqProperties
+│       │   │   │   ├── controller/          # AiChatController
+│       │   │   │   ├── dto/                 # AiChatRequest, AiChatResponse
+│       │   │   │   ├── rag/                 # RAG pipeline
+│       │   │   │   │   ├── config/          # RagConfig, RagProperties
+│       │   │   │   │   ├── controller/      # KnowledgeController
+│       │   │   │   │   ├── embedding/       # HuggingFaceEmbeddingService, VectorSimilarity
+│       │   │   │   │   ├── entity/          # KnowledgeDocument, KnowledgeChunk
+│       │   │   │   │   ├── repository/      # KnowledgeChunkRepository, KnowledgeDocumentRepository
+│       │   │   │   │   └── service/         # DocumentChunkingService, KnowledgeIngestionService,
+│       │   │   │   │                        #   VectorKnowledgeRetrievalService, RagPromptContextBuilder
+│       │   │   │   └── service/             # AiChatService, AiSystemPrompt
+│       │   │   ├── config/                  # SecurityConfig, AuditingConfig, FileStorageProperties, OpenApiConfig
+│       │   │   ├── controller/              # Auth, Employee, Department, Leave, Attendance,
+│       │   │   │                            #   Task, TaskSubmission, TaskAttachment, TaskComment,
+│       │   │   │                            #   Notification, Dashboard, Review, Settings, Profile
 │       │   │   ├── dto/
-│       │   │   │   ├── request/     # RegisterRequest, LoginRequest, Create/Update*,
-│       │   │   │   │                #   ChangePasswordRequest, CreateReviewRequest, UpdateReviewRequest
-│       │   │   │   └── response/    # AuthResponse, EmployeeResponse, DepartmentResponse,
-│       │   │   │                    #   LeaveRequestResponse, ReviewResponse, PageResponse
-│       │   │   ├── entity/          # JPA entities + enums
-│       │   │   ├── exception/       # GlobalExceptionHandler, custom exceptions
-│       │   │   ├── mapper/          # MapStruct mappers
-│       │   │   ├── repository/      # Spring Data JPA repositories
-│       │   │   ├── security/        # JWT service, filter, UserDetailsService, SecurityUtils
-│       │   │   └── service/         # Business logic interfaces + implementations
+│       │   │   │   ├── request/             # Create/Update*Request, ReassignTaskRequest, etc.
+│       │   │   │   └── response/            # *Response, PageResponse, TaskDashboardStatsResponse
+│       │   │   ├── entity/                  # JPA entities + enums
+│       │   │   │   ├── Task, TaskActivity, TaskAttachment, TaskComment, TaskSubmission
+│       │   │   │   ├── Notification, Employee, Department, LeaveRequest, Attendance, PerformanceReview
+│       │   │   │   └── enums/               # TaskStatus, TaskPriority, TaskCategory, SubmissionStatus,
+│       │   │   │                            #   NotificationType, AttendanceStatus, LeaveStatus, ...
+│       │   │   ├── exception/               # GlobalExceptionHandler, custom exceptions
+│       │   │   ├── mapper/                  # MapStruct mappers
+│       │   │   ├── repository/              # Spring Data JPA repositories
+│       │   │   ├── security/                # JwtService, JwtAuthenticationFilter, SecurityUtils
+│       │   │   └── service/                 # Business logic interfaces + implementations
+│       │   │       └── impl/                # LocalFileStorageService, TaskDeadlineReminderService, ...
 │       │   └── resources/
 │       │       ├── application.properties
 │       │       ├── application-prod.properties
-│       │       └── db/migration/    # Flyway V1–V6 migration scripts
-│       └── test/                    # JUnit 5 + Mockito + Testcontainers tests
+│       │       └── db/migration/            # Flyway V1–V26 migration scripts
+│       └── test/                            # JUnit 5 + Mockito + Testcontainers tests
 │
 ├── frontend/
-│   ├── Dockerfile
 │   ├── package.json
 │   ├── vite.config.js
-│   ├── index.html
 │   └── src/
-│       ├── api/                     # axiosInstance, queryClient
+│       ├── api/                             # axiosInstance, queryClient
 │       ├── components/
-│       │   ├── auth/                # AuthLayout, LoginForm, RegisterForm, etc.
-│       │   ├── common/              # LoadingScreen, PageLoader, ErrorBoundary
-│       │   ├── dashboard/           # 15 dashboard widget components
-│       │   ├── departments/         # 17 department management components
-│       │   ├── employees/           # 17 employee management components
-│       │   ├── layouts/             # AppLayout, Sidebar (role-aware), Topbar
-│       │   └── leaves/              # 21 leave management components
-│       ├── constants/               # api, roles, routes, dashboard, employee, department, leave
-│       ├── contexts/                # AuthContext (JWT, role helpers, auto-logout)
-│       ├── hooks/                   # useEmployees, useDepartmentHooks, useLeaveHooks, etc.
+│       │   ├── auth/                        # Login/Register forms
+│       │   ├── common/                      # LoadingScreen, ErrorBoundary
+│       │   ├── dashboard/                   # Dashboard widgets
+│       │   ├── departments/, employees/     # Module components
+│       │   ├── layouts/                     # AppLayout, Sidebar (role-aware), Topbar
+│       │   ├── leaves/                      # Leave components
+│       │   ├── notifications/               # NotificationBell, NotificationDropdown
+│       │   └── tasks/                       # Task list, form, detail, submission, comments, attachments
+│       ├── constants/                       # API paths, routes, roles
+│       ├── contexts/                        # AuthContext (JWT, role helpers, auto-logout)
+│       ├── hooks/                           # useEmployees, useLeaveHooks, useNotificationSound, ...
 │       ├── pages/
-│       │   ├── auth/                # LoginPage, RegisterPage
-│       │   ├── admin/               # AdminDashboardPage (ADMIN/CEO view)
-│       │   ├── hr/                  # HRDashboardPage (HR/Manager view)
-│       │   ├── employee/            # EmployeeDashboardPage (Employee self-service view)
-│       │   ├── departments/         # DepartmentsPage, DepartmentDetailsPage
-│       │   ├── employees/           # EmployeesPage, EmployeeDetailsPage
-│       │   ├── leaves/              # LeavesPage, LeaveDetailsPage, MyLeavesPage
-│       │   ├── attendance/          # AttendancePage (full implementation)
-│       │   ├── reviews/             # ReviewsPage (full CRUD, role-aware)
-│       │   ├── profile/             # ProfilePage (employee self-service)
-│       │   └── settings/            # SettingsPage (change password)
-│       ├── routes/                  # AppRoutes, RoleProtectedRoute, PublicRoute
-│       ├── services/                # API service wrappers (per entity)
-│       ├── tests/                   # Vitest unit + component tests (326 cases)
-│       ├── theme/                   # MUI theme: palette, typography, components
-│       └── utils/                   # Date, validation, formatters, columns, calculations
+│       │   ├── auth/                        # LoginPage, RegisterPage, ForgotPasswordPage
+│       │   ├── admin/                       # AdminDashboardPage, AdminUsersPage, CompanyPoliciesPage
+│       │   ├── ai/                          # AiAssistantPage
+│       │   ├── attendance/                  # AttendancePage
+│       │   ├── dashboard/                   # DashboardPage
+│       │   ├── departments/, employees/     # Department and Employee pages
+│       │   ├── employee/                    # EmployeeDashboardPage
+│       │   ├── hr/                          # HRDashboardPage
+│       │   ├── leaves/                      # LeavesPage, MyLeavesPage, LeaveDetailsPage
+│       │   ├── profile/, reviews/           # ProfilePage, ReviewsPage
+│       │   ├── settings/                    # SettingsPage
+│       │   └── tasks/                       # ManagerTasksPage, ManagerTaskDetailPage,
+│       │                                    #   EmployeeTasksPage, EmployeeTaskDetailPage
+│       ├── routes/                          # AppRoutes, RoleProtectedRoute, PublicRoute
+│       ├── services/                        # API service wrappers (per entity)
+│       ├── tests/                           # Vitest unit + component tests
+│       ├── theme/                           # MUI theme: palette, typography, components
+│       └── utils/                           # Date, validation, formatters, calculations
 │
-├── docker/                          # Nginx config
+├── docker/                                  # Nginx configuration
 ├── docker-compose.yml
+├── docker-compose.prod.yml
 ├── .env.example
 ├── .github/workflows/ci.yml
 ├── jenkins/Jenkinsfile
-└── postman/                         # Postman collection
+├── aws/                                     # IAM, ECR, EC2 bootstrap scripts
+├── scripts/                                 # deploy.sh, health-check.sh, rollback.sh
+└── postman/                                 # Postman collection
 ```
 
 ---
 
-## Frontend Features
+## Authentication & Authorization
 
-### ✅ Authentication
-- JWT login with remember-me
-- Registration with password strength meter
-- Auto-logout on token expiry
-- Post-login redirect to original destination
-
-### ✅ Dashboard
-- Role-based layout (Admin / HR / Manager / Employee views)
-- KPI summary cards with trend indicators
-- Department distribution PieChart (Recharts)
-- Employee status BarChart (Recharts)
-- Recent activity feed
-- Upcoming leaves widget
-- Attendance summary widget
-- Auto-refresh every 5 minutes
-
-### ✅ Employee Management
-- Server-side paginated, sortable table
-- Search, department filter, status filter
-- Create / Edit (modal dialog, RHF + Zod)
-- Delete with confirmation dialog
-- Full employee detail page
-- Optimistic updates on edit/delete
-- CSV export (current page)
-- Responsive: table on desktop, cards on mobile
-
-### ✅ Department Management
-- Paginated sortable table
-- Search + sort by name/code/created
-- Create / Edit / Delete with CRUD dialogs
-- Department details page with statistics card
-- Embedded employee list per department
-- Optimistic updates + dual cache invalidation
-- CSV export
-
-### ✅ Leave Management
-- Full request lifecycle (PENDING → APPROVED / REJECTED / CANCELLED)
-- Approval and rejection workflows (HR / Manager)
-- Calendar view of leave requests
-- Timeline view per employee
-- Leave balance card
-- Leave statistics (by type/status)
-- My Leaves page (employee self-service via `/leaves/my` endpoint)
-- CSV export + snackbar notifications
-
-### ✅ Attendance
-- Daily check-in/out tracking
-- Attendance status indicators (PRESENT / ABSENT / LATE / HALF_DAY / REMOTE / ON_LEAVE)
-- Attendance history table with pagination
-- Role-based view (own records for EMPLOYEE, all records for ADMIN/HR)
-
-### ✅ Performance Reviews
-- Full CRUD for review records (Admin/HR/Manager create; all roles view)
-- Rating scale 1–5 with labels (Poor → Outstanding)
-- Review periods, dates, reviewer attribution
-- EMPLOYEE role sees own reviews only (backend-enforced ownership)
-- Role-aware action buttons (edit/delete hidden from EMPLOYEE)
-
-### ✅ Profile
-- Employee profile view with personal info, job title, department
-- Avatar initials, employment date, salary (redacted for non-admin)
-
-### ✅ Settings
-- Authenticated password change (current → new → confirm)
-- Client-side + server-side validation
-- Backend BCrypt verification; rejects same-as-current password
-
----
-
-## Backend Features
-
-- **Spring Boot 3.5.3 / Java 21**
-- **8 database tables**: `roles`, `users`, `departments`, `employees`, `leave_requests`, `attendance`, `performance_reviews`, `employee_role`
-- **UUID primary keys** throughout
-- **Flyway** migrations V1–V6 (schema init, audit columns, performance review fixes, missing columns, reviewer id fix)
-- **JWT authentication** (HS256, configurable expiry)
-- **Spring Security** method-level + URL-level protection
-- **RFC 7807 ProblemDetail** error responses (`application/problem+json`)
-- **MapStruct** DTO mapping with null-safety guards
-- **Spring Data Auditing** (`createdAt` / `updatedAt` / `createdBy` / `updatedBy` auto-populated)
-- **Testcontainers** integration tests (MySQL 8)
-- **OpenAPI 3 / Swagger UI** at `/api/swagger-ui.html`
-- **Settings**: `POST /settings/change-password` — authenticated password change
-- **Reviews**: `GET/POST /reviews`, `GET/PUT/DELETE /reviews/{id}` — full CRUD with RBAC
-
----
-
-## Database Overview
-
-```
-roles ──────────────────────────────────── (id, name)
-        │
-users ──┤ (id, email, password, firstName, lastName, role_id,
-        │   createdAt, updatedAt, createdBy, updatedBy)
-        │
-departments ─────────────────────────────── (id, name, code,
-        │                                     createdAt, updatedAt, createdBy, updatedBy)
-        │
-employees ──┤ (id, employeeCode, departmentId, userId,
-        │      jobTitle, phone, address,
-        │      dateOfJoining, salary, status,
-        │      createdAt, updatedAt, createdBy, updatedBy)
-        │
-leave_requests (id, employeeId, leaveType, startDate, endDate,
-                reason, status, reviewedBy, reviewedAt,
-                createdAt, updatedAt, createdBy, updatedBy)
-        │
-attendance (id, employeeId, date, checkIn, checkOut,
-            status, notes, createdAt, updatedAt, createdBy, updatedBy)
-        │
-performance_reviews (id, employeeId, reviewerId, reviewPeriod,
-                     rating, comments, goals, reviewDate,
-                     createdAt, updatedAt, createdBy, updatedBy)
-```
-
----
-
-## Authentication
+### JWT Authentication Flow
 
 1. **Register** → `POST /api/auth/register` → returns JWT + user info
 2. **Login** → `POST /api/auth/login` → returns JWT + user info
 3. JWT stored in `localStorage` (key: `emp_portal_token`)
 4. Axios interceptor attaches `Authorization: Bearer <token>` to every request
-5. 401 response → auto-clear storage + redirect to `/login?redirect=<original-path>`
-6. Token expiry checked on every `AuthContext` render cycle
+5. `401` response → auto-clear storage + redirect to `/login?redirect=<original-path>`
+6. Token expiry is checked on every `AuthContext` render cycle
 
----
+The backend validates the Bearer token on every request via `JwtAuthenticationFilter`, using HS256 signing with a configurable secret (`app.jwt.secret`). Default token expiry is 24 hours; configurable via `app.jwt.expiration-ms`.
 
-## API Overview
+### Role Model
 
-All endpoints are prefixed with `/api`. JWT Bearer token required except public auth endpoints.
+| Role | Description |
+|---|---|
+| `ADMIN` | Full access to all resources and administration functions |
+| `HR` | Employee/department management, leave approval, task creation/management |
+| `MANAGER` | Leave approval, task creation/assignment/review, attendance visibility |
+| `EMPLOYEE` | Self-service: own profile, own leaves, own tasks, own attendance check-in/out |
 
 ### Role Permission Matrix
 
-| Role | Employees | Departments | Leaves | Attendance | Reviews | Settings |
-|---|---|---|---|---|---|---|
-| **ADMIN** | Full CRUD | Full CRUD | All + approve/reject | All | Full CRUD | Change own password |
-| **HR** | Create/Read/Update | Create/Read/Update | All + approve/reject | All | Create/Read/Update | Change own password |
-| **MANAGER** | Read | Read | All + approve/reject | All | Create/Read/Update | Change own password |
-| **EMPLOYEE** | Read own record | Read | Own requests only | Own records | Own reviews (read) | Change own password |
+| Resource | ADMIN | HR | MANAGER | EMPLOYEE |
+|---|---|---|---|---|
+| Employees | Full CRUD | Create / Read / Update | Read | Read own record |
+| Departments | Full CRUD | Create / Read / Update | Read | Read |
+| Leave Requests | All + approve/reject | All + approve/reject | All + approve/reject | Own requests |
+| Attendance | All records | All records | All records (read) | Own check-in/out |
+| Performance Reviews | Full CRUD | Create / Read / Update | Create / Read / Update | Own reviews (read) |
+| Tasks (create/update/delete) | ✅ | ✅ | ✅ | ❌ |
+| Tasks (view) | All tasks | All tasks | All tasks | Own assigned tasks |
+| Task status update | ✅ | ✅ | ✅ | Own tasks (limited transitions) |
+| Task reassign | ✅ | ✅ | ✅ | ❌ |
+| Task submission (submit/resubmit) | ✅ | ✅ | ✅ | Own tasks |
+| Task submission (approve/request-changes) | ✅ | ✅ | ✅ | ❌ |
+| Task attachments (upload/delete) | ✅ | ✅ | ✅ | ❌ |
+| Task attachments (download/list) | ✅ | ✅ | ✅ | Own tasks |
+| Task dashboard stats / workload | ✅ | ✅ | ✅ | ❌ |
+| Notifications | Own only | Own only | Own only | Own only |
+| AI Chat | ✅ | ✅ | ✅ | ✅ |
+| RAG document ingestion | ✅ | ✅ | ❌ | ❌ |
+| Admin endpoints (`/admin/**`) | ✅ | ❌ | ❌ | ❌ |
+| Settings (password change) | ✅ | ✅ | ✅ | ✅ |
 
-### Authentication
+### Security Implementation
 
-| Method | Endpoint | Description | Auth |
-|---|---|---|---|
-| POST | `/auth/register` | Register new user, returns JWT | Public |
-| POST | `/auth/login` | Authenticate, obtain JWT | Public |
+- **`@EnableMethodSecurity`** with `@PreAuthorize` at controller/service level for fine-grained control
+- **IDOR protection** — Employees can only access their own tasks, notifications, leave requests, and submissions; enforced in the service layer
+- **Stateless sessions** — `SessionCreationPolicy.STATELESS`; no CSRF risk from cookie sessions
+- JSON `401 Unauthorized` and `403 Forbidden` responses (not HTML redirects)
+- BCrypt password hashing (cost factor 12)
+- CORS configured for explicit origin patterns
 
-### Employees
+---
+
+## Core Modules
+
+### Employee Management
+
+- Server-side paginated, sortable employee table
+- Search by name, department filter, status filter
+- Create / Edit employee (modal dialog, React Hook Form + Zod validation)
+- Delete with confirmation dialog (ADMIN only)
+- Full employee detail page
+- CSV export (current page)
+- Responsive: table on desktop, cards on mobile
+- EMPLOYEE role can only read their own record (backend-enforced)
+
+### Department Management
+
+- Paginated sortable table with search + sort by name/code/created
+- Create / Edit / Delete with dialogs
+- Department detail page with employee count statistics
+- Embedded employee list per department
+- Optimistic updates with dual cache invalidation
+
+### Attendance Management
+
+Attendance statuses: `PRESENT`, `ABSENT`, `HALF_DAY`, `WORK_FROM_HOME`, `ON_LEAVE`
+
+- **Employee self-service**: check-in and check-out via `POST /api/attendance/checkin` and `POST /api/attendance/checkout`
+- **Employee history**: own attendance records via `GET /api/attendance/my`
+- **Manager/HR visibility**: all employee attendance records
+- Attendance history table with pagination
+- **Task integration**: an employee's current check-in status is used by the task assignment rules (see below)
+
+### Leave Management
+
+Leave types: `ANNUAL`, `SICK`, `UNPAID`, `MATERNITY`, `PATERNITY`, `BEREAVEMENT`, `EMERGENCY`
+
+**Full leave lifecycle:**
+
+```
+PENDING → APPROVED  (by MANAGER, HR, or ADMIN)
+        → REJECTED  (by MANAGER, HR, or ADMIN)
+        → CANCELLED (by the employee, PENDING only)
+```
+
+- Employee self-service leave submission and cancellation
+- Approval / rejection workflow with reason
+- Calendar view and timeline view per employee
+- Leave balance card and leave statistics by type/status
+- My Leaves page at `/leaves/my` endpoint
+- CSV export
+
+---
+
+## Task Management — Phase 6A
+
+Managers and HR users create and assign tasks to employees. Employees work on their assigned tasks and update status. The backend enforces which fields employees can and cannot modify.
+
+### Task Fields
+
+| Field | Controlled by |
+|---|---|
+| Title | Manager/HR (create/update) |
+| Description | Manager/HR |
+| Guidelines | Manager/HR |
+| Acceptance Criteria | Manager/HR |
+| Priority | Manager/HR |
+| Category | Manager/HR |
+| Due Date | Manager/HR |
+| Estimated Hours | Manager/HR |
+| Assigned Employee | Manager/HR (with attendance check) |
+| Status | Manager/HR (full control) + Employee (limited transitions) |
+
+**Employees cannot modify manager-controlled fields** (title, description, guidelines, priority, category, due date). They may only update the task status through permitted transitions.
+
+### Task API Endpoints
 
 | Method | Endpoint | Description | Min. Role |
 |---|---|---|---|
-| GET | `/employees` | Paginated employee list | EMPLOYEE |
-| POST | `/employees` | Create employee | HR |
-| GET | `/employees/{id}` | Employee detail (own only for EMPLOYEE) | EMPLOYEE |
-| PUT | `/employees/{id}` | Update employee | HR |
-| DELETE | `/employees/{id}` | Delete employee | **ADMIN** |
+| GET | `/tasks` | Paginated task list (employees auto-scoped to own) | EMPLOYEE |
+| GET | `/tasks/my` | My assigned tasks | EMPLOYEE |
+| GET | `/tasks/created` | Tasks created by me | EMPLOYEE |
+| GET | `/tasks/{id}` | Task detail (employees: own tasks only) | EMPLOYEE |
+| GET | `/tasks/{id}/activities` | Task activity timeline | EMPLOYEE |
+| GET | `/tasks/dashboard-stats` | Aggregate task statistics | MANAGER |
+| GET | `/tasks/workload-summary` | Per-employee workload summary | MANAGER |
+| GET | `/tasks/workload/{employeeId}` | Workload for a specific employee | MANAGER |
+| GET | `/tasks/employee-availability` | Checked-in employees + task counts | MANAGER |
+| POST | `/tasks` | Create task | MANAGER |
+| PUT | `/tasks/{id}` | Update task | MANAGER |
+| PATCH | `/tasks/{id}/status` | Update task status | EMPLOYEE |
+| POST | `/tasks/{id}/reassign` | Reassign task (new employee must be checked in) | MANAGER |
+| DELETE | `/tasks/{id}` | Delete task | MANAGER |
 
-### Departments
+### Attendance-Aware Task Assignment
+
+A manager/HR can **only assign or reassign a task to an employee who is currently checked in**. This rule is enforced server-side — it is not merely a UI restriction.
+
+- The backend returns `409 Conflict` if the target employee is not checked in at the moment of assignment or reassignment.
+- Existing tasks are **not** deleted or invalidated when an employee checks out; only new assignments are blocked.
+- Employees who are checked out **cannot start a task** (status transition to `IN_PROGRESS` is blocked by the backend).
+- The frontend reflects this restriction in the employee selector (showing check-in status) and disables the "Start" button when the employee is not checked in.
+
+### Task Status & Activity Timeline
+
+**Task lifecycle statuses:**
+
+| Status | Description |
+|---|---|
+| `DRAFT` | Task created but not yet assigned |
+| `ASSIGNED` | Task has been assigned to an employee |
+| `IN_PROGRESS` | Employee has started working |
+| `SUBMITTED` | Employee has submitted work for review |
+| `COMPLETED` | Manager has approved the submission |
+| `CHANGES_REQUESTED` | Manager has requested changes; employee must resubmit |
+| `REJECTED` | Manager has rejected the task |
+
+**Task Activity (`TaskActivity`)** records are automatically created for important events:
+
+| Event Type | Trigger |
+|---|---|
+| `TASK_ASSIGNED` | Task is assigned to an employee |
+| `TASK_STARTED` | Employee transitions task to `IN_PROGRESS` |
+| `TASK_STATUS_CHANGED` | Any status transition |
+| `TASK_REASSIGNED` | Task is reassigned to a different employee |
+
+Activity records are immutable — users cannot create, modify, or delete them via the API. The full timeline is retrievable at `GET /tasks/{id}/activities`.
+
+### Task Comments
+
+- Any authenticated user can post a comment on a task they have access to.
+- Employees may only comment on tasks assigned to them (IDOR enforced in the service layer).
+- Managers/HR/Admin may comment on any task they can access.
+- When a comment is posted, the **other party is notified** via a `TASK_COMMENT` notification: if the author is the assignee, the task creator is notified, and vice versa.
+- The comment history is retrievable at `GET /tasks/{taskId}/comments`.
+
+### Task Categories & Priority
+
+**Categories:**
+
+| Category | Description |
+|---|---|
+| `DEVELOPMENT` | Software development and feature work |
+| `TESTING` | QA, unit testing, integration testing |
+| `DOCUMENTATION` | Technical or user-facing docs |
+| `DEVOPS` | Infrastructure, CI/CD, deployment |
+| `HR` | Human resources and people-management |
+| `SUPPORT` | Customer/internal support, bug fixes |
+| `RESEARCH` | Research, investigation, PoC work |
+| `OTHER` | Catch-all |
+
+**Priority levels (lowest to highest):** `LOW` → `MEDIUM` → `HIGH` → `URGENT`
+
+> **Migration note:** The `CRITICAL` priority value was renamed to `URGENT` in migration V23. Existing `CRITICAL` rows were back-filled to `URGENT`; the old value was then removed from the ENUM.
+
+### Task Attachments
+
+Managers, HR, and Admins can upload reference files to a task. Employees can download those files but cannot upload or delete them.
 
 | Method | Endpoint | Description | Min. Role |
 |---|---|---|---|
-| GET | `/departments` | Paginated department list | EMPLOYEE |
-| GET | `/departments/all` | All departments flat list (dropdowns) | EMPLOYEE |
-| GET | `/departments/{id}` | Department detail | EMPLOYEE |
-| POST | `/departments` | Create department | HR |
-| PUT | `/departments/{id}` | Update department | HR |
-| DELETE | `/departments/{id}` | Delete department | **ADMIN** |
+| GET | `/tasks/{taskId}/attachments` | List attachment metadata | EMPLOYEE |
+| POST | `/tasks/{taskId}/attachments` | Upload attachment | MANAGER |
+| GET | `/tasks/{taskId}/attachments/{id}/download` | Download file | EMPLOYEE |
+| DELETE | `/tasks/{taskId}/attachments/{id}` | Delete attachment | MANAGER |
 
-### Leave Requests
+Files are stored via `FileStorageService` using the key format `tasks/{taskId}/{uuid}.{ext}`. The current implementation stores files on the local filesystem. See [File Storage Architecture](#file-storage-architecture).
+
+---
+
+## Task Submission System — Phase 6B / 6B.1
+
+Employees submit their completed work for manager review. Multiple submission rounds are supported (submit → changes requested → resubmit → approve).
+
+### Submission Lifecycle
+
+```
+Employee (IN_PROGRESS task)
+    ↓  POST /tasks/{taskId}/submissions
+PENDING_REVIEW
+    ↓  Manager reviews
+    ├─ POST /task-submissions/{id}/approve      → APPROVED  (task → COMPLETED)
+    └─ POST /task-submissions/{id}/request-changes → CHANGES_REQUESTED (task → IN_PROGRESS)
+                                                          ↓
+                                              PUT /task-submissions/{id}/resubmit
+                                                          ↓
+                                                   PENDING_REVIEW (new round)
+```
+
+### Submission Statuses
+
+| Status | Description |
+|---|---|
+| `PENDING_REVIEW` | Submitted, awaiting manager review |
+| `APPROVED` | Manager approved; task transitions to `COMPLETED` |
+| `CHANGES_REQUESTED` | Manager requires changes; task reverts to `IN_PROGRESS` |
+
+### Submission API Endpoints
 
 | Method | Endpoint | Description | Min. Role |
 |---|---|---|---|
-| GET | `/leaves` | Paginated leave list (own only for EMPLOYEE) | EMPLOYEE |
-| GET | `/leaves/my` | Current user's own leave requests | EMPLOYEE |
-| POST | `/leaves` | Submit leave request | EMPLOYEE |
-| GET | `/leaves/{id}` | Leave detail (own only for EMPLOYEE) | EMPLOYEE |
-| PUT | `/leaves/{id}` | Update PENDING leave | EMPLOYEE |
-| DELETE | `/leaves/{id}` | Cancel PENDING leave | EMPLOYEE |
-| POST | `/leaves/{id}/approve` | Approve PENDING leave | MANAGER |
-| POST | `/leaves/{id}/reject` | Reject PENDING leave | MANAGER |
+| POST | `/tasks/{taskId}/submissions` | Submit work for review (multipart/form-data) | EMPLOYEE |
+| GET | `/tasks/{taskId}/submissions` | List all submissions for a task | EMPLOYEE |
+| GET | `/tasks/{taskId}/submissions/latest` | Get most recent submission | EMPLOYEE |
+| PUT | `/task-submissions/{id}/resubmit` | Resubmit after changes requested (multipart/form-data) | EMPLOYEE |
+| POST | `/task-submissions/{id}/approve` | Approve submission | MANAGER |
+| POST | `/task-submissions/{id}/request-changes` | Request changes (comment required) | MANAGER |
+| GET | `/task-submissions/{id}/attachment` | Download submission attachment | EMPLOYEE |
 
-### Performance Reviews
+### Submission File Attachments (Phase 6B.1)
+
+Employees can optionally attach a single file to their submission.
+
+**Accepted file types:** `PDF`, `CSV`, `DOCX`, `TXT`
+
+**Maximum file size:** 10 MB (default; configurable via `STORAGE_MAX_FILE_SIZE_BYTES`)
+
+- Both extension and MIME type are validated server-side — the client-supplied `Content-Type` is never trusted exclusively.
+- Employees can only download their own submission attachments; managers/HR/admin can download any.
+- On resubmit, the employee may replace the attachment; omitting the file part preserves the existing attachment.
+- Files are stored via the `FileStorageService` abstraction (see [File Storage Architecture](#file-storage-architecture)).
+
+---
+
+## Notifications — Phase 6A.1
+
+### Backend
+
+In-app notifications are created automatically by the system. Notifications are scoped to the recipient — no user can view another user's notifications.
+
+**Notification types implemented:**
+
+| Type | Trigger |
+|---|---|
+| `TASK_ASSIGNED` | Task assigned to an employee |
+| `TASK_STARTED` | Employee starts a task (sent to task creator/manager) |
+| `TASK_SUBMITTED` | Employee submits work (sent to manager) |
+| `TASK_APPROVED` | Manager approves submission (sent to employee) |
+| `TASK_CHANGES_REQUESTED` | Manager requests changes (sent to employee) |
+| `TASK_STATUS_CHANGED` | General status change |
+| `TASK_DUE_SOON` | Task approaching due date (24h and 2h reminders) |
+| `TASK_OVERDUE` | Task is past its due date |
+| `TASK_REASSIGNED` | Task reassigned (sent to original and new assignee) |
+| `TASK_COMMENT` | New comment posted on a task (sent to the other party) |
+
+**Notification API endpoints:**
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/notifications` | Paginated notification list (own only) |
+| GET | `/notifications/unread-count` | Count of unread notifications |
+| PATCH | `/notifications/{id}/read` | Mark a single notification as read |
+| PATCH | `/notifications/read-all` | Mark all notifications as read |
+
+### Frontend
+
+- **Notification bell** in the top bar with unread count badge
+- **Notification dropdown** showing recent notifications with type icons
+- **Mark as read** (single or all)
+- **Role-aware navigation** — clicking a notification navigates to the correct task detail page based on the authenticated user's role
+- **Notification sound** — uses the browser Web Audio API; respects browser autoplay restrictions; persists muted preference to `localStorage`
+- **Mute toggle** accessible from the notification bell
+
+---
+
+## Deadline Reminders
+
+A scheduled service (`TaskDeadlineReminderService`) runs **hourly** (`cron = "0 0 * * * *"`) and processes all non-completed tasks that have a due date set.
+
+**Reminder intervals:**
+
+| Reminder | When | Notification Type |
+|---|---|---|
+| 24-hour reminder | Due date is tomorrow and `reminder24hSent = false` | `TASK_DUE_SOON` |
+| 2-hour reminder | Due date is today and ≤ 120 minutes remain (before 17:00) and `reminder2hSent = false` | `TASK_DUE_SOON` |
+| Overdue | Due date is in the past and `overdueNotificationSent = false` | `TASK_OVERDUE` |
+
+**Deduplication:** Each reminder is sent at most once per task. Boolean flags (`reminder_24h_sent`, `reminder_2h_sent`, `overdue_notification_sent`) on the `tasks` table prevent duplicate notifications from being generated across repeated hourly runs.
+
+Completed (`COMPLETED`) and rejected (`REJECTED`) tasks are excluded from reminder processing.
+
+---
+
+## Employee Workload Protection
+
+When a manager assigns or reassigns a task, the system provides workload visibility to help prevent overloading an employee.
+
+**Workload information available to MANAGER/HR/ADMIN:**
+
+- **Active task count** — number of `ASSIGNED` or `IN_PROGRESS` tasks per employee
+- **Overdue task count** — non-completed tasks past their due date
+- **Workload summary** — list of all employees with active and overdue task counts (`GET /tasks/workload-summary`)
+- **Per-employee workload** — detail view for a specific employee (`GET /tasks/workload/{employeeId}`)
+- **Employee availability** — all active employees with check-in status and active task count (`GET /tasks/employee-availability`)
+
+> Assignment is **warning-only** — the backend does not block assignment at a specific task count threshold. The attendance check-in rule is the only hard enforcement applied at assignment time. Managers are expected to review the workload information before assigning tasks.
+
+---
+
+## Task Dashboard — Phase 6C–6E
+
+A dedicated task analytics dashboard is available to ADMIN, HR, and MANAGER roles.
+
+**Dashboard statistics endpoint:** `GET /tasks/dashboard-stats`
+
+| Metric | Description |
+|---|---|
+| `totalTasks` | Total number of tasks in the system |
+| `countsByStatus` | Task counts grouped by status (e.g., `{ ASSIGNED: 5, IN_PROGRESS: 3, COMPLETED: 12, ... }`) |
+| `overdueCount` | Number of non-completed tasks whose due date has passed |
+| `urgentCount` | Number of `URGENT`-priority tasks that are not yet completed |
+| `completionPercentage` | Percentage of all tasks that are `COMPLETED` (0–100) |
+
+**Frontend task dashboard features:**
+
+- Role-aware task pages: `ManagerTasksPage` (full management view) and `EmployeeTasksPage` (own tasks only)
+- Task detail pages: `ManagerTaskDetailPage` and `EmployeeTaskDetailPage`
+- Priority and category filter chips
+- Status filter
+- Employee assignment selector with check-in status and workload indicator
+- Activity timeline panel on task detail
+- Submission review panel on manager task detail
+- Comment thread on task detail
+
+---
+
+## Manager & HR Module
+
+Managers and HR users have privileged access across the task management system:
+
+- **Task creation** — title, description, guidelines, acceptance criteria, priority, category, due date, estimated hours
+- **Task assignment** — employee selector shows check-in status and active task count (workload protection)
+- **Task monitoring** — view all tasks with filters by status, priority, category, and assigned employee
+- **Task update** — edit all task fields
+- **Task reassignment** — reassign to another checked-in employee; both parties notified
+- **Task deletion** — remove a task
+- **Submission review** — approve or request changes on employee submissions
+- **Submission attachment download** — download files submitted by employees
+- **Task attachment upload/delete** — attach reference files to tasks
+- **Activity timeline** — view full audit log of task events
+- **Comments** — participate in task discussion threads
+- **Workload visibility** — workload summary across all employees
+- **Attendance visibility** — view all employee attendance records
+
+HR and MANAGER roles have the same task management permissions. The key distinction is in employee and department management: HR can create/update employees and departments; MANAGER has read-only access to those resources.
+
+---
+
+## AI Assistant / RAG Infrastructure
+
+> **This is existing, implemented infrastructure.** It is not the planned Phase 7 AI Task Analysis module (see [Phase 7](#phase-7--upcoming-ai-task-analysis) below).
+
+The portal includes an **AI HR Assistant** powered by:
+
+- **Groq API** for chat completions (Llama model — `llama-3.1-8b-instant` by default)
+- **Hugging Face Inference API** for text embeddings (`nomic-ai/nomic-embed-text-v1.5`, 768-dimensional vectors)
+- **Vector/RAG retrieval** — HR knowledge documents are chunked, embedded, and stored in MySQL; relevant chunks are retrieved by cosine similarity search and injected into the assistant's context
+
+**RAG pipeline:**
+
+```
+HR document
+    ↓
+DocumentChunkingService (chunk-size=1000, overlap=150)
+    ↓
+HuggingFaceEmbeddingService (nomic-ai/nomic-embed-text-v1.5)
+    ↓
+KnowledgeChunk (stored in MySQL with embedding vector)
+    ↓
+VectorKnowledgeRetrievalService (cosine similarity, threshold=0.70, top-k=5)
+    ↓
+RagPromptContextBuilder → system prompt context
+    ↓
+GroqClient (Llama chat completion)
+    ↓
+AiChatResponse
+```
+
+**RAG API endpoints:**
 
 | Method | Endpoint | Description | Min. Role |
 |---|---|---|---|
-| GET | `/reviews` | Paginated review list (own only for EMPLOYEE) | EMPLOYEE |
-| POST | `/reviews` | Create review | MANAGER |
-| GET | `/reviews/{id}` | Review detail (own only for EMPLOYEE) | EMPLOYEE |
-| PUT | `/reviews/{id}` | Update review | MANAGER |
-| DELETE | `/reviews/{id}` | Delete review | **ADMIN** |
+| POST | `/ai/chat` | Send a chat message to the AI assistant | EMPLOYEE |
+| POST | `/ai/rag/documents` | Ingest a knowledge document | HR |
+| GET | `/ai/rag/documents` | List knowledge documents | HR |
+| DELETE | `/ai/rag/documents/{id}` | Delete a document | ADMIN |
+| POST | `/ai/rag/search` | Semantic search over knowledge base | EMPLOYEE |
 
-### Settings
+**Frontend:** `AiAssistantPage` — full chat UI at `/ai/assistant`
 
-| Method | Endpoint | Description | Min. Role |
+**Important security note:** The Groq API key and Hugging Face token are **never exposed to the frontend**. All AI API calls are made server-side.
+
+---
+
+## File Storage Architecture
+
+All file uploads (task submission attachments and task manager attachments) go through the `FileStorageService` abstraction:
+
+```
+Application (TaskSubmissionService / TaskAttachmentService)
+    ↓
+FileStorageService (interface)
+    ↓
+LocalFileStorageService (current implementation)
+    ↓
+Local filesystem: {STORAGE_LOCAL_BASE_DIR}/submissions/{submissionId}/{uuid}.{ext}
+```
+
+**Path traversal protection** is built into `LocalFileStorageService` — the resolved path is always validated to remain within the base directory before any file operation.
+
+**S3 migration path:** The storage key format (`submissions/{submissionId}/{uuid}.{ext}`) is intentionally compatible with S3 object keys. Switching to cloud storage only requires:
+
+1. Creating an `S3FileStorageService` implementing the `FileStorageService` interface
+2. Annotating both implementations with `@ConditionalOnProperty(name="app.storage.provider", havingValue="local"/"s3")`
+3. Setting `STORAGE_PROVIDER=s3` in the environment
+
+No task submission business logic needs to change.
+
+---
+
+## Database & Flyway Migrations
+
+### Migration History (V1–V26)
+
+| Version | Description |
+|---|---|
+| V1 | Initial schema: `roles`, `users`, `departments`, `employees`, `leave_requests`, `attendance`, `performance_reviews`, `employee_role` |
+| V2 | Audit columns + indexes on `roles` table |
+| V3 | Fix `performance_reviews.rating` column type |
+| V4 | Fix `performance_reviews.reviewer_id` column type |
+| V5 | Add missing columns and indexes (audit columns, review fields, attendance indexes) |
+| V6 | Fix `reviewer_id` type for Hibernate compatibility + review indexes |
+| V7 | Seed default users (admin, HR, manager, employee accounts) |
+| V8 | Fix seed user role assignments |
+| V9 | Seed additional employee account |
+| V10 | Backfill employee records |
+| V11 | Ensure default department and fix employee records |
+| V13 | Add `password_reset_tokens` table |
+| V14 | Create `knowledge_documents` and `knowledge_chunks` tables (RAG) |
+| V15 | Add `embedding_vector` column to `knowledge_chunks` (MEDIUMBLOB) |
+| V16 | Create `tasks` table |
+| V17 | Create `notifications` and `task_activities` tables |
+| V18 | Fix `notifications.related_task_id` column type |
+| V19 | Create `task_submissions` table |
+| V20 | Add task submission attachment columns to `task_submissions` |
+| V21 | Create `task_comments` table |
+| V22 | Add `category` enum column to `tasks` |
+| V23 | Rename `CRITICAL` priority to `URGENT` (3-step safe migration) |
+| V24 | Add deadline reminder deduplication flag columns to `tasks` |
+| V25 | Create `task_attachments` table |
+| V26 | Add index on `tasks.category` for filter performance |
+
+> **Latest migration: V26**
+
+Flyway is configured with `repair-on-migrate=true` (removes failed migration entries automatically) and `baseline-on-migrate=true`.
+
+### Local Development
+
+On first startup, Flyway runs all migrations automatically. MySQL must be running and the configured database/user must exist before starting the application.
+
+---
+
+## API Documentation
+
+- **Backend base path:** `/api`
+- **Swagger UI:** `http://localhost:8080/api/swagger-ui.html`
+- **OpenAPI JSON spec:** `http://localhost:8080/api/v3/api-docs`
+
+### Authorising in Swagger UI
+
+1. Open Swagger UI at `/api/swagger-ui.html`
+2. Call `POST /api/auth/login` to obtain a JWT token
+3. Click the **Authorize** button (lock icon)
+4. Enter `Bearer <your-token>` in the `BearerAuth` field
+5. Click **Authorize** — all subsequent Swagger requests will include the token
+
+All protected endpoints are annotated with `@SecurityRequirement(name = "BearerAuth")` and grouped into tagged sections by resource (Tasks, Task Submissions, Task Attachments, Task Comments, Notifications, Dashboard, etc.).
+
+---
+
+## Security
+
+| Protection | Implementation |
+|---|---|
+| JWT authentication | HS256, validated on every request via `JwtAuthenticationFilter` |
+| Spring Security | `SecurityFilterChain` + `@EnableMethodSecurity` |
+| Role-based authorization | URL-level rules + `@PreAuthorize` at controller/service level |
+| IDOR protection | Employee-scoped service queries; ownership checked before resource access |
+| Attendance enforcement | Server-side check at task assignment/start — not a UI-only restriction |
+| Path traversal protection | `LocalFileStorageService.resolveAndValidate()` ensures path stays within base dir |
+| Filename sanitization | Only the basename is stored; path separators in filenames are rejected |
+| MIME type validation | Extension and MIME type both validated; client `Content-Type` is not trusted alone |
+| File size limit | Configurable maximum enforced server-side (default 10 MB) |
+| API key protection | Groq API key and HF token are server-side only; never exposed to frontend |
+| Swagger BearerAuth | All protected endpoints require `Authorization: Bearer <token>` |
+| BCrypt | Password hashing with cost factor 12 |
+| Stateless sessions | No server-side session; CSRF not applicable |
+| JSON error responses | All 401/403 responses return structured JSON, not HTML redirects |
+
+---
+
+## Testing
+
+### Backend Tests
+
+```bash
+cd backend
+.\mvnw.cmd test               # Windows
+./mvnw test                   # macOS/Linux
+mvn clean verify              # Full build + test (CI command)
+```
+
+The backend test suite spans **multiple test classes** using JUnit 5 + Mockito for unit/slice tests and Testcontainers (MySQL 8) for integration tests. Test classes include:
+
+- `JwtServiceTest` — JWT token lifecycle
+- `AuthServiceTest` — login/register service logic
+- `EmployeeServiceTest` — CRUD + ownership checks
+- `EmployeeControllerTest` — HTTP layer
+- `DashboardControllerTest` — dashboard HTTP layer
+- `GlobalExceptionHandlerTest` — error response format
+- `RbacSecurityTest` — RBAC enforcement (38 cases)
+- `EmployeeRbacTest` — employee-specific RBAC
+- `ApiDocumentationTest` — OpenAPI + error responses
+- `SettingsServiceTest` / `SettingsControllerTest` — password change
+- `ReviewServiceTest` / `ReviewControllerTest` — performance reviews
+- `TaskControllerTest` — task management HTTP layer
+- `TaskSubmissionControllerTest` — submission HTTP layer
+- `NotificationControllerTest` — notification HTTP layer
+- `AttendanceControllerTest` — attendance HTTP layer
+- `AuthControllerTest` — auth HTTP layer
+- `ProfileControllerTest` — profile HTTP layer
+- `PasswordResetControllerTest` — password reset HTTP layer
+- `NotificationServiceTest` — notification service logic
+- `TaskServiceTest` — task service logic
+- `TaskSubmissionServiceTest` — submission service logic
+- `TaskAttachmentServiceTest` — attachment service logic
+- `TaskCommentServiceTest` — comment service logic
+- `TaskDeadlineReminderServiceTest` — reminder scheduler logic
+- `FileValidationServiceTest` — file validation logic
+- `PasswordResetServiceTest` — password reset service logic
+- `AiChatControllerTest` / `AiChatServiceTest` — AI controller + service
+- `GroqClientTest` — Groq API client
+- `AiChatSecurityTest` — AI endpoint security
+- `KnowledgeControllerTest` — RAG knowledge controller
+- `HuggingFaceEmbeddingServiceTest` — embedding service
+- `VectorSimilarityTest` — cosine similarity calculation
+- `DatabaseKnowledgeRetrievalServiceTest` — keyword retrieval
+- `DocumentChunkingServiceTest` — document chunking
+- `KnowledgeIngestionServiceTest` — ingestion pipeline
+- `RagPromptContextBuilderTest` — prompt builder
+- `VectorKnowledgeRetrievalServiceTest` — vector retrieval
+- `AuditingIntegrationTest` — JPA audit field population (`@DataJpaTest` + H2)
+- `PersistenceRepositoryTest` — JPA repository layer (`@DataJpaTest` + H2)
+- `EmployeeManagementIntegrationTest` — full-stack Testcontainers
+
+> **Note:** Tests marked `@DataJpaTest` and Testcontainers integration tests require a running Docker daemon with MySQL 8 access. All non-environment tests pass without Docker.
+
+Phase 6C–6E was successfully tested. The full test suite was verified to pass in the CI pipeline.
+
+### Frontend Tests
+
+```bash
+cd frontend
+npm test                  # Single run (vitest run)
+npm run test:watch        # Watch mode
+npm run test:coverage     # Generate v8 coverage report
+```
+
+**Vitest** + **React Testing Library** + **jsdom**. Test files in `src/tests/`:
+
+| Test File | Coverage Area |
+|---|---|
+| `AuthContext.test.jsx` | Auth context state and token management |
+| `AuthFlow.test.jsx` | Authentication flow integration |
+| `LoginPage.test.jsx` / `RegisterPage.test.jsx` | Form validation and submission |
+| `useDashboard.test.jsx` / `DashboardPage.test.jsx` | Dashboard hooks and page states |
+| `dashboardFormatters.test.js` | Dashboard formatting utilities |
+| `useEmployees.test.jsx` / `EmployeesPage.test.jsx` / `EmployeeTable.test.jsx` / `EmployeeForm.test.jsx` | Employee module |
+| `employeeFormatters.test.js` | Employee formatting utilities |
+| `useDepartmentHooks.test.jsx` / `DepartmentsPage.test.jsx` / `DepartmentTable.test.jsx` / `DepartmentForm.test.jsx` | Department module |
+| `departmentFormatters.test.js` | Department formatting utilities |
+| `useLeaveHooks.test.jsx` / `LeavesPage.test.jsx` / `LeaveTable.test.jsx` / `LeaveForm.test.jsx` | Leave module |
+| `leaveCalculations.test.js` | Leave day calculation logic |
+| `leaveFormatters.test.js` | Leave formatting utilities |
+| `ProfilePage.test.jsx` | Profile page |
+| `AiAssistantChat.test.jsx` | AI chat component |
+| `CompanyPolicyForm.test.jsx` / `CompanyPolicyList.test.jsx` | Company policy management |
+| `ForgotPasswordPage.test.jsx` | Password reset page |
+| `NotificationSound.test.jsx` | Notification sound hook |
+| `notificationApi.test.js` | Notification API service |
+| `knowledgeApi.test.js` | RAG knowledge API service |
+| `taskApi.test.js` | Task API service |
+| `SubmissionForm.test.jsx` / `SubmissionReview.test.jsx` | Task submission components |
+| `TaskActivityTimeline.test.jsx` | Activity timeline component |
+| `TaskAttachments.test.jsx` | Task attachments component |
+| `TaskChips.test.jsx` / `TaskPriorityChip.test.jsx` | Task chip components |
+| `TaskComments.test.jsx` | Task comments component |
+| `TaskForm.test.jsx` | Task creation/edit form |
+| `EmployeeAvailabilitySelector.test.jsx` | Employee availability selector |
+| `axiosInstance.test.js` | HTTP client interceptors |
+
+Phase 6C–6E frontend features are covered by the task-related test files above.
+
+---
+
+## Build & Run Instructions
+
+### Backend (without Docker)
+
+Requires a running MySQL 8 instance on `localhost:3306` with the configured database and user.
+
+```bash
+cd backend
+
+# Windows
+.\mvnw.cmd spring-boot:run
+
+# macOS/Linux
+./mvnw spring-boot:run
+```
+
+- API: `http://localhost:8080/api`
+- Swagger UI: `http://localhost:8080/api/swagger-ui.html`
+
+### Frontend (without Docker)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+- App: `http://localhost:5173`
+- Vite proxies `/api/*` → `http://localhost:8080` (configured in `vite.config.js`)
+
+### Running Tests
+
+```bash
+# Backend
+cd backend
+.\mvnw.cmd test        # Windows
+./mvnw test            # macOS/Linux
+
+# Frontend
+cd frontend
+npm test
+```
+
+---
+
+## Environment Variables
+
+Copy `.env.example` to `.env` (gitignored — never commit it).
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Required | Default | Description |
 |---|---|---|---|
-| POST | `/settings/change-password` | Change authenticated user's password | EMPLOYEE |
+| `MYSQL_ROOT_PASSWORD` | Yes (Docker) | — | MySQL root password (container init only) |
+| `DB_NAME` | No | `emp_portal` | Database name |
+| `DB_USER` | No | `emp_user` | App database username |
+| `DB_PASSWORD` | Yes | — | App database password |
+| `JWT_SECRET` | Yes | — | HS256 signing key (≥ 32 chars). Generate: `openssl rand -base64 48` |
+| `CORS_ORIGINS` | No | `http://localhost:5173` | Allowed CORS origins (comma-separated) |
+| `GROQ_API_KEY` | Yes (AI) | — | Groq API key for chat completions. **Never commit.** |
+| `GROQ_MODEL` | No | `llama-3.1-8b-instant` | Groq model ID |
+| `HF_TOKEN` | Yes (RAG) | — | Hugging Face access token for embeddings. **Never commit.** |
+| `RAG_EMBEDDING_MODEL` | No | `nomic-ai/nomic-embed-text-v1.5` | HF embedding model ID |
+| `RAG_ENABLED` | No | `true` | Enable/disable the RAG knowledge base |
+| `RAG_TOP_K` | No | `5` | Max knowledge chunks retrieved per AI request |
+| `RAG_RETRIEVAL_STRATEGY` | No | `vector` | `vector` (semantic) or `database` (keyword) |
+| `RAG_SIMILARITY_THRESHOLD` | No | `0.70` | Minimum cosine similarity for chunk inclusion |
+| `STORAGE_PROVIDER` | No | `local` | File storage provider (`local`; `s3` when implemented) |
+| `STORAGE_LOCAL_BASE_DIR` | No | `~/emp-portal/uploads/submissions` | Absolute path for local file storage |
+| `STORAGE_MAX_FILE_SIZE_BYTES` | No | `10485760` (10 MB) | Maximum upload file size in bytes |
+| `MAIL_HOST` | No | `sandbox.smtp.mailtrap.io` | SMTP host for email (password reset) |
+| `MAIL_PORT` | No | `2525` | SMTP port |
+| `MAIL_USERNAME` | No | — | SMTP username |
+| `MAIL_PASSWORD` | No | — | SMTP password |
+| `MAIL_FROM` | No | `noreply@company.local` | From address for system emails |
 
 ---
 
@@ -450,31 +1062,14 @@ All endpoints are prefixed with `/api`. JWT Bearer token required except public 
 | Tool | Minimum version |
 |---|---|
 | Docker Desktop | 24+ |
-| Docker Compose v2 | built into Docker Desktop |
+| Docker Compose v2 | Built into Docker Desktop |
 
-### Architecture
-
-```
-Browser
-  │
-  ▼  :80
-Nginx  (frontend container)
-  ├── /          →  React SPA (static files)
-  └── /api/*     →  backend:8080  (Spring Boot)
-                            │
-                            ▼
-                      mysql:3306  (MySQL 8)
-```
-
-All services run on an isolated bridge network (`emp_network`).
-MySQL data is stored in the named volume `mysql_data` and survives `docker compose down`.
-
-### Quick start
+### Quick Start
 
 ```bash
 # 1. Copy the environment template and fill in secrets
 cp .env.example .env
-#    Edit .env — change DB_PASSWORD, MYSQL_ROOT_PASSWORD, and JWT_SECRET
+#    Edit .env — set DB_PASSWORD, MYSQL_ROOT_PASSWORD, JWT_SECRET, GROQ_API_KEY, HF_TOKEN
 
 # 2. Build images and start all services
 docker compose up -d --build
@@ -486,7 +1081,7 @@ docker compose logs -f backend
 docker compose ps
 ```
 
-### Application URLs
+### Application URLs (Docker)
 
 | URL | Description |
 |---|---|
@@ -495,251 +1090,30 @@ docker compose ps
 | `http://localhost/api/swagger-ui.html` | Swagger UI |
 | `http://localhost/api/v3/api-docs` | OpenAPI JSON |
 | `http://localhost/api/actuator/health` | Backend health |
-| `http://localhost:8080/api` | Backend direct (127.0.0.1 only) |
 
-### Startup health chain
-
-```
-mysql starts → healthcheck passes
-  └── backend starts → Flyway V1–V6 migrations → Spring Boot UP
-        └── frontend starts (nginx)
-```
-
-### Managing the stack
+### Managing the Stack
 
 ```bash
-# Stop containers (data is preserved)
-docker compose down
-
-# Stop AND delete ALL data
-docker compose down -v          # ⚠ DELETES mysql_data volume
-
-# Rebuild after code changes
-docker compose up -d --build
-
-# Stream logs
-docker compose logs -f backend
-docker compose logs -f mysql
-
-# Check status and health
-docker compose ps
-
-# Open a shell in the backend container
-docker compose exec backend sh
+docker compose down              # Stop (data preserved)
+docker compose down -v           # ⚠ Stop AND delete all data (removes mysql_data volume)
+docker compose up -d --build     # Rebuild after code changes
+docker compose logs -f backend   # Stream backend logs
+docker compose ps                # Check status
 ```
-
-### Data persistence
-
-```bash
-docker compose down           # containers stop, mysql_data volume intact
-docker compose up -d          # data still there ✅
-docker compose down -v        # ⚠ DELETES all MySQL data
-```
-
----
-
-## AWS Deployment (Production)
-
-### Architecture overview
-
-```
-GitHub Actions → OIDC → IAM Role → ECR push
-                                   ↓
-                              ECR repositories
-                                   ↓
-                         EC2 (IAM instance role → ECR pull)
-                                   ↓
-                          docker compose pull
-                          docker compose up -d
-                                   ↓
-                              Health check
-```
-
-### Required AWS resources
-
-| Resource | Name | Type | Bootstrap |
-|---|---|---|---|
-| ECR repository | `employee-management-backend` | Private, IMMUTABLE | Manual |
-| ECR repository | `employee-management-frontend` | Private, IMMUTABLE | Manual |
-| IAM OIDC provider | `token.actions.githubusercontent.com` | OIDC IdP | Manual |
-| IAM role | `GitHubActions-ECRPush-Role` | GitHub Actions push | Manual |
-| IAM policy | `GitHubActions-ECRPush-Policy` | ECR push (least-priv) | Manual |
-| IAM role | `EC2-EmpPortal-InstanceRole` | EC2 ECR pull | Manual |
-| IAM policy | `EC2-EmpPortal-ECRPull-Policy` | ECR pull (least-priv) | Manual |
-| IAM instance profile | `EC2-EmpPortal-InstanceProfile` | Attach to EC2 | Manual |
-| EC2 instance | `emp-portal-prod` | Amazon Linux 2023 | Manual |
-| RDS instance | `emp-portal-db` | MySQL 8.0 | Manual |
-| Security group | `emp-portal-app-sg` | EC2 — ports 22, 80 | Manual |
-| Security group | `emp-portal-db-sg` | RDS — port 3306 from app SG | Manual |
-
-All of the above are **manual bootstrap** resources.
-See `aws/` directory for setup commands and IAM policy JSON files.
-Future: migrate to Terraform.
-
-### Bootstrap sequence
-
-```bash
-# 1. Create ECR repositories (once per account)
-export AWS_REGION=us-east-1
-export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-bash aws/ecr/bootstrap-ecr.sh
-
-# 2. Create OIDC provider + IAM roles (see aws/iam/iam-setup.md)
-
-# 3. Launch EC2 (Amazon Linux 2023, t3.small or larger)
-#    Attach: IAM instance profile EC2-EmpPortal-InstanceProfile
-#    User data: aws/ec2/bootstrap-ec2.sh
-
-# 4. Create RDS MySQL 8 (private subnet, not publicly accessible)
-#    Create database user and grant privileges
-
-# 5. Configure GitHub repository
-#    Variables:  AWS_ROLE_ARN, AWS_REGION, ECR_REGISTRY, EC2_USER
-#    Secrets:    EC2_HOST, EC2_SSH_KEY
-#    Environment: production (with required reviewers if desired)
-
-# 6. On EC2 — create /opt/emp-portal/.env.production
-cp .env.production.example /opt/emp-portal/.env.production
-# Fill in real RDS endpoint, credentials, JWT_SECRET
-chmod 600 /opt/emp-portal/.env.production
-
-# 7. Push to main — CI/CD pipeline runs automatically
-```
-
-### GitHub Actions secrets and variables
-
-Set in: **Repository → Settings → Secrets and variables → Actions**
-
-| Type | Name | Value |
-|---|---|---|
-| Variable | `AWS_ROLE_ARN` | `arn:aws:iam::ACCOUNT:role/GitHubActions-ECRPush-Role` |
-| Variable | `AWS_REGION` | e.g. `us-east-1` |
-| Variable | `ECR_REGISTRY` | `ACCOUNT.dkr.ecr.REGION.amazonaws.com` |
-| Variable | `EC2_USER` | `ec2-user` |
-| Secret | `EC2_HOST` | EC2 public IP or DNS |
-| Secret | `EC2_SSH_KEY` | Private SSH key (PEM format) |
-
-> No `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` are used anywhere.
-
-### Deployment flow (main branch push)
-
-```
-1. backend-ci    — mvn clean verify (196 tests: 155 pass, 41 env-only)
-2. frontend-ci   — npm test (326 tests) + lint + build
-3. docker-build  — validate Dockerfiles build cleanly
-4. compose-validate — validate docker-compose.yml syntax
-5. publish       — OIDC → ECR push, tags: <sha> + main-<sha>
-6. deploy        — SCP compose+scripts → EC2 SSH
-                   → ECR login (instance role)
-                   → docker compose pull
-                   → docker compose up -d
-                   → health-check.sh (actuator + nginx)
-```
-
-### Rollback
-
-```bash
-# On EC2 — rollback to any previous SHA
-export ECR_REGISTRY=<account>.dkr.ecr.<region>.amazonaws.com
-export AWS_REGION=us-east-1
-bash /opt/emp-portal/scripts/rollback.sh <previous-sha>
-
-# Find available SHAs
-aws ecr describe-images \
-  --repository-name employee-management-backend \
-  --query 'sort_by(imageDetails, &imagePushedAt)[-10:].imageTags' \
-  --output table
-```
-
-### Production environment variables
-
-Copy `.env.production.example` → `/opt/emp-portal/.env.production` on EC2.
-Never commit `.env.production` — it is gitignored.
-
-| Variable | Required | Description |
-|---|---|---|
-| `DB_HOST` | Yes | RDS endpoint |
-| `DB_PORT` | No | Default `3306` |
-| `DB_NAME` | Yes | Database name |
-| `DB_USER` | Yes | Database application user |
-| `DB_PASSWORD` | Yes | Database password |
-| `JWT_SECRET` | Yes | HS256 key (≥ 32 chars, `openssl rand -base64 48`) |
-| `CORS_ORIGINS` | Yes | Production frontend URL |
-| `ECR_REGISTRY` | Yes | Injected by deploy step |
-| `IMAGE_TAG` | Yes | Git SHA, injected by deploy step |
-
----
-
-## Development Setup (without Docker)
-
-### Backend
-
-```bash
-cd backend
-
-# Requires a running MySQL instance on localhost:3306
-mvn clean install -DskipTests
-mvn spring-boot:run
-
-# API:      http://localhost:8080/api
-# Swagger:  http://localhost:8080/api/swagger-ui.html
-```
-
-### Frontend
-
-```bash
-cd frontend
-
-npm install
-npm run dev
-
-# App:  http://localhost:5173
-# Vite proxies /api/* → http://localhost:8080 (vite.config.js)
-```
-
----
-
-## Environment Variables
-
-Copy `.env.example` to `.env` (gitignored — never commit it).
-
-```dotenv
-# MySQL
-MYSQL_ROOT_PASSWORD=RootChangeMe123!
-DB_NAME=emp_portal
-DB_USER=emp_user
-DB_PASSWORD=AppChangeMe456!
-
-# JWT signing key (minimum 32 characters)
-# Generate: openssl rand -base64 48
-JWT_SECRET=ReplaceWithAtLeast32CharRandomString!!
-
-# CORS allowed origins
-CORS_ORIGINS=http://localhost
-```
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `MYSQL_ROOT_PASSWORD` | Yes | — | MySQL root password (init only) |
-| `DB_NAME` | No | `emp_portal` | Database name |
-| `DB_USER` | No | `emp_user` | App database user |
-| `DB_PASSWORD` | Yes | — | App database password |
-| `JWT_SECRET` | Yes | — | HS256 signing key (≥ 32 chars) |
-| `CORS_ORIGINS` | No | `http://localhost` | Allowed CORS origins |
 
 ---
 
 ## NPM Scripts
 
 ```bash
-npm run dev          # Start Vite dev server (http://localhost:5173)
-npm run build        # Production build → dist/
-npm run preview      # Preview production build locally
-npm run lint         # ESLint (0 warnings policy)
-npm run lint:fix     # ESLint with auto-fix
-npm run format       # Prettier format all src files
-npm run test         # Run all tests once (Vitest)
-npm run test:watch   # Run tests in watch mode
+npm run dev           # Start Vite dev server (http://localhost:5173)
+npm run build         # Production build → dist/
+npm run preview       # Preview production build locally
+npm run lint          # ESLint (0 warnings policy)
+npm run lint:fix      # ESLint with auto-fix
+npm run format        # Prettier format all src files
+npm run test          # Run all tests once (Vitest)
+npm run test:watch    # Run tests in watch mode
 npm run test:coverage # Generate coverage report (v8)
 ```
 
@@ -765,75 +1139,39 @@ mvn spring-boot:run -Dspring-boot.run.profiles=prod
 
 # Generate test coverage report (JaCoCo)
 mvn test jacoco:report
+
+# Windows Maven wrapper
+.\mvnw.cmd spring-boot:run
+.\mvnw.cmd test
+.\mvnw.cmd clean package
 ```
 
 ---
 
-## Testing
+## Phase 7 — Upcoming: AI Task Analysis
 
-### Backend Tests
+> ⚠️ **Phase 7 is NOT yet implemented.** The following describes planned, future capability only.
 
-```bash
-cd backend
-.\mvnw.cmd test               # unit + integration tests (Windows)
-./mvnw test                   # unit + integration tests (macOS/Linux)
-mvn clean verify              # full build + test (CI command)
+Phase 7 will extend the existing AI/RAG infrastructure to provide automated analysis of employee task submissions for manager-facing insights.
 
-# Run a specific test class
-.\mvnw.cmd test -Dtest=ApiDocumentationTest
-```
+**Planned capabilities:**
 
-- **JUnit 5** + **Mockito** for unit tests
-- **Testcontainers** (MySQL 8) for integration/repository tests
-- **196 test cases** across 14 test classes:
-  - `JwtServiceTest` — JWT token lifecycle (12 cases)
-  - `AuthServiceTest` — login/register service logic (4 cases)
-  - `EmployeeServiceTest` — CRUD + ownership checks (11 cases)
-  - `EmployeeControllerTest` — HTTP layer (8 cases)
-  - `DashboardControllerTest` — dashboard HTTP layer (12 cases)
-  - `GlobalExceptionHandlerTest` — error response format (12 cases)
-  - `RbacSecurityTest` — RBAC enforcement (38 cases)
-  - `ApiDocumentationTest` — OpenAPI + 401/403/404/400 responses (21 cases)
-  - `SettingsServiceTest` — password change service logic (5 cases)
-  - `SettingsControllerTest` — settings HTTP layer (7 cases)
-  - `ReviewServiceTest` — performance review service logic (14 cases)
-  - `ReviewControllerTest` — reviews HTTP layer (20 cases)
-  - `AuditingIntegrationTest` — JPA auditing (`@DataJpaTest` + H2, 19 cases — requires Docker/MySQL for full run)
-  - `PersistenceRepositoryTest` — JPA repository layer (`@DataJpaTest` + H2, 21 cases — requires Docker/MySQL for full run)
-  - `EmployeeManagementIntegrationTest` — full-stack Testcontainers (1 case — requires Docker/MySQL)
+- AI-powered analysis of employee task submissions
+- Completion-quality assessment against task guidelines and acceptance criteria
+- Comparison of submitted work against task description, guidelines, and acceptance criteria
+- Suggested modifications and improvement recommendations
+- Manager-facing AI review report displayed alongside the submission
+- Submission quality scoring
+- Grounded analysis using task description, guidelines, submission content, comments, and activity history
+- Document content extraction from PDF, DOCX, TXT, and CSV attachments where appropriate
 
-> **Note**: The 41 Testcontainers/`@DataJpaTest` cases require a running Docker daemon with MySQL 8 access.
-> All 155 non-environment tests pass without Docker.
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm test                  # Single run (vitest run)
-npm run test:watch        # Watch mode
-npm run test:coverage     # Generate v8 coverage report
-```
-
-- **Vitest** + **React Testing Library** + **jsdom**
-- Test files live in `src/tests/`
-- **326 test cases** across 22 test files — **all pass**:
-  - `AuthContext` — auth context state and token management (9 cases)
-  - `LoginPage` / `RegisterPage` — form validation and submission (35 cases)
-  - `useDashboard` / `DashboardPage` — hooks and page states (20 cases)
-  - `dashboardFormatters` — dashboard formatting utilities (27 cases)
-  - `useEmployees` / `EmployeesPage` / `EmployeeTable` / `EmployeeForm` — employee module (32 cases)
-  - `employeeFormatters` — employee formatting utilities (23 cases)
-  - `useDepartmentHooks` / `DepartmentsPage` / `DepartmentTable` / `DepartmentForm` — department module (30 cases)
-  - `departmentFormatters` — department formatting utilities (18 cases)
-  - `useLeaveHooks` / `LeavesPage` / `LeaveTable` / `LeaveForm` — leave module (57 cases)
-  - `leaveCalculations` — leave day calculation logic (40 cases)
-  - `leaveFormatters` — leave formatting utilities (36 cases)
+This module will build on the existing `FileStorageService` (for submission file access), `VectorKnowledgeRetrievalService` (for context retrieval), `GroqClient` (for LLM analysis), and the `TaskSubmission` domain model — none of which need to be modified.
 
 ---
 
 ## Screenshots
 
-> *Screenshots will be added after UI stabilisation.*
+> *Screenshots will be updated after UI stabilisation.*
 
 | Screen | Description |
 |---|---|
@@ -843,174 +1181,11 @@ npm run test:coverage     # Generate v8 coverage report
 | Employee Details | `docs/screenshots/employee-detail.png` |
 | Departments | `docs/screenshots/departments.png` |
 | Leave Management | `docs/screenshots/leaves.png` |
-| My Leaves | `docs/screenshots/my-leaves.png` |
-| Leave Calendar | `docs/screenshots/leave-calendar.png` |
-
----
-
-## Roadmap
-
-| Phase | Module | Status |
-|---|---|---|
-| DevOps 1 | Docker & Docker Compose | ✅ Done |
-| DevOps 2 | GitHub Actions CI | ✅ Done |
-| DevOps 3 | Registry push + deployment pipeline | ✅ Done |
-| 3G | Attendance Management | ✅ Done |
-| 3H | Performance Reviews | ✅ Done |
-| 3I | Profile + Settings Pages | ✅ Done |
-| 4A | Backend Dashboard API | ✅ Done |
-| 4B | Notifications (WebSocket) | Future |
-| 4C | Reports & Analytics | Future |
-| 4D | Bulk Import (CSV/Excel) | Future |
-| 4E | Employee Onboarding Workflow | Future |
-| 5A | Mobile App (React Native) | Future |
-
----
-
-## Changelog
-
-### Phase 3G–3I + Settings + Reviews *(current)*
-- Implemented **Performance Reviews** module: `ReviewController`, `ReviewService`, `ReviewServiceImpl`, `ReviewResponse`, `CreateReviewRequest`, `UpdateReviewRequest`
-- Implemented **Settings** module: `SettingsController`, `SettingsService`, `SettingsServiceImpl`, `ChangePasswordRequest`
-- Reviews RBAC: EMPLOYEE sees own reviews only (backend-enforced); ADMIN/HR/MANAGER create/update; ADMIN-only delete
-- Added **V5 migration** (`V5__add_missing_columns_and_indexes.sql`): audit columns, review fields, attendance indexes
-- Added **V6 migration** (`V6__fix_reviewer_id_type_and_add_review_index.sql`): reverts `reviewer_id` to `CHAR(36)` (Hibernate compatibility), adds review indexes
-- Frontend **ReviewsPage**: paginated table, create/edit/delete dialogs, rating chips (1–5 with colour), role-aware action buttons
-- Frontend **SettingsPage**: change-password form with show/hide toggle, client-side Zod validation, server error feedback
-- Frontend **Sidebar**: role-aware Reviews nav item (Admin → `/admin/reviews`, HR/Manager → `/hr/reviews`, Employee → `/employee/reviews` as "My Reviews")
-- Added 41 new backend test cases: `SettingsServiceTest` (5), `SettingsControllerTest` (7), `ReviewServiceTest` (14), `ReviewControllerTest` (20) — all pass
-- Fixed 3 pre-existing frontend test failures: `AuthContext.register()` navigation expectation updated to role-resolved path; `useMyLeaves` tests updated to mock `getMyLeaveRequests` (dedicated endpoint) instead of `getLeaveRequests`
-- **326/326 frontend tests pass; 155/155 non-environment backend tests pass**
-
-### DevOps Phase 4 — Real AWS Deployment Verification
-- Fixed `health-check.sh`: replaced `(( N++ ))` with `N=$((N+1))` (bash strict-mode arithmetic trap at 0)
-- Fixed `health-check.sh`: replaced `compose ps --format` with `docker inspect` (stable across Compose v2 versions)
-- Fixed `health-check.sh`: fallback DB check when `show-details` omits components
-- Fixed `deploy.sh`: health-wait loop rewritten using `docker inspect` — eliminates false-healthy-on-empty-output bug
-- Fixed `deploy.sh`: added `AWS_REGION` validation guard; increased timeout to 180s for cold RDS starts
-- Fixed `application-prod.properties`: `show-details=never` → `show-details=always` (port 8080 is not published)
-- Fixed `ci.yml`: `compose-validate` job now also validates `docker-compose.prod.yml` with CI placeholder vars
-- Fixed `ci.yml`: removed invalid `strip_components` from `appleboy/scp-action` step
-- Added `scripts/smoke-test.sh`: 11 real API checks (auth, CRUD, RBAC, leave workflow, cleanup)
-- Added smoke-test step to `deploy` job in `ci.yml`
-- Added `aws/ec2/verify-ec2.sh`: on-host verification (Docker, Compose, IAM role, ECR auth, files, permissions)
-- Added `aws/ec2/ec2-rds-setup.md`: step-by-step security group, EC2, RDS, deploy-user SSH key setup
-- Updated `.env.production.example`: clearer variable split (on-EC2 vs CI-injected), stronger placeholder names
-
-### DevOps Phase 3 — AWS ECR + OIDC + EC2 Deployment
-- Added `publish` job: OIDC → `aws-actions/configure-aws-credentials@v4` → ECR push with immutable SHA tags
-- Added `deploy` job: SCP compose + scripts to EC2, SSH deploy via `appleboy/ssh-action`, health verification
-- No static AWS credentials — GitHub Actions uses `id-token: write` OIDC; EC2 uses IAM instance role
-- Created `docker-compose.prod.yml`: ECR images, RDS MySQL (no local MySQL container)
-- Created `.env.production.example`: production template (never committed)
-- Created `scripts/deploy.sh`: ECR login → pull → up -d → health wait loop
-- Created `scripts/health-check.sh`: Nginx /healthz + Spring Boot /api/actuator/health + DB check
-- Created `scripts/rollback.sh`: one-line rollback to any previous SHA
-- Created `aws/ecr/bootstrap-ecr.sh`: one-time ECR repository creation + lifecycle policies
-- Created `aws/ec2/bootstrap-ec2.sh`: Amazon Linux 2023 user-data (Docker, Compose v2, deploy user)
-- Created `aws/iam/` — IAM trust policy JSON, ECR push policy JSON, ECR pull policy JSON, setup guide
-- Existing 4 CI jobs (backend-ci, frontend-ci, docker-build, compose-validate) preserved unchanged
-
-### DevOps Phase 2 — CI/CD (GitHub Actions)
-- Rewrote `.github/workflows/ci.yml`: 4-job pipeline (backend-ci, frontend-ci, docker-build, compose-validate)
-- Java 17 → **Java 21** throughout CI (matches `pom.xml` `<java.version>21</java.version>`)
-- Added `npm test` (Vitest) step — frontend tests now run in CI (previously only lint + build)
-- `docker-build` job: BuildKit GHA cache, `push: false` validation only, runs after both CI jobs pass
-- `compose-validate` job: generates minimal `.env`, runs `docker compose config --quiet` on every push/PR
-- Added `permissions: contents: read` (minimum required), `concurrency` cancel-in-progress
-- PR trigger now covers both `main` and `develop` branches
-- Removed stale registry env vars (`REGISTRY`, `IMAGE_NAME`) — no push in this loop
-
-### DevOps Phase 1 — Docker & Docker Compose
-- `backend/Dockerfile`: Java 17 → 21, added tini, non-root `appuser`, 3-stage build
-- `frontend/Dockerfile`: 3-stage build with dedicated npm dep-cache layer
-- `frontend/nginx.conf`: security headers (CSP, HSTS, X-Frame-Options), gzip, proxy timeouts, `/healthz` endpoint
-- `docker-compose.yml`: complete rewrite — health checks, `127.0.0.1` port bindings, `service_healthy` dependency chain, correct env vars, SSL override
-- `.env.example`: corrected variable names, added `MYSQL_ROOT_PASSWORD`
-- Added `backend/.dockerignore`, `frontend/.dockerignore`, `.dockerignore` (root)
-
-### Database & Persistence Phase
-- Created `V2__add_roles_audit_columns_and_indexes.sql`: adds `created_at`/`updated_at`/`created_by`/`updated_by` to `roles` table + 7 performance indexes
-- Fixed N+1 in `DepartmentMapper`: new `countEmployeesByDepartmentId()` COUNT query
-- Fixed N+1 in employee list: two-step `findAllIds` + `findAllWithAssociationsByIds` JOIN FETCH strategy
-- Fixed N+1 in leave request list: same two-step ID + JOIN FETCH pattern
-- Added `PersistenceRepositoryTest.java` — 21 `@DataJpaTest` cases covering all repository operations
-
-### Development Loop 4 — API Documentation & Consistency
-- Expanded `OpenApiConfig.java` description: role table, auth instructions, error format reference
-- Added `springdoc.swagger-ui.try-it-out-enabled=true` and `tags-sorter=alpha` to `application.properties`
-- Fixed README API table: `DELETE /employees/{id}` and `DELETE /departments/{id}` now correctly list **ADMIN only**
-- Added missing `GET /departments/all` entry to API table
-- Corrected Swagger UI URL from `/swagger-ui.html` to `/api/swagger-ui.html` (context-path aware)
-- Added Swagger UI auth flow instructions to README
-- Created `ApiDocumentationTest.java` — 15 WebMvcTest cases covering OpenAPI descriptor availability, structured 401/403/400/404 responses
-
-### Development Loop 3 — JPA Auditing
-- Confirmed `BaseEntity` `createdAt`/`updatedAt` auditing already existed
-- Added `createdBy`/`updatedBy` fields to `EmployeeResponse`, `LeaveRequestResponse`, `DepartmentResponse`
-- Added H2 test dependency to `pom.xml`
-- Created `AuditingIntegrationTest.java` — 20 `@DataJpaTest` cases verifying audit field population
-
-### Development Loop 2 — Role-Based Access Control (RBAC)
-- Created `SecurityUtils` component (`security/SecurityUtils.java`)
-- Added `EmployeeRepository.findByUserId(UUID)` for employee-ownership lookups
-- Updated `SecurityConfig`: JSON `AuthenticationEntryPoint` for 401, MANAGER added to leave approve/reject
-- `LeaveRequestServiceImpl`: full ownership enforcement (findAll scoped, findById/create/update/cancel check ownership)
-- `EmployeeServiceImpl`: ownership check on `findById` for EMPLOYEE role
-- `LeaveController`: `@PreAuthorize` updated to include MANAGER on approve/reject
-- Created `RbacSecurityTest.java` — 31 `@WebMvcTest` cases covering all 4 roles, unauthenticated access, resource-ownership violations
-- Frontend `axiosInstance.js`: 403 interceptor redirecting to `/403`
-
-### Phase 3F — Leave Management Module
-- Added `LeavesPage`, `LeaveDetailsPage`, `MyLeavesPage` with full CRUD
-- Full approval/rejection workflow (HR + Manager roles)
-- Calendar view (monthly grid) and timeline view per employee
-- Leave balance card and leave statistics component
-- 21 reusable leave components
-- 7 React Query hooks with optimistic updates
-- Leave day calculation utilities (excluding weekends + holidays)
-- 6 test files (~70 test cases)
-- Added `README.md` (this file)
-- Added `.gitignore`
-
-### Phase 3E — Department Management Module
-- `DepartmentsPage` + `DepartmentDetailsPage`
-- 17 reusable department components
-- 5 department React Query hooks with optimistic updates + dual cache invalidation
-- Department employee list embedded in detail page
-
-### Phase 3D — Employee Management Module
-- `EmployeesPage` + `EmployeeDetailsPage`
-- 17 reusable employee components
-- 5 employee React Query hooks with optimistic updates
-- Server-side sort, search, filter, pagination
-- CSV export
-
-### Phase 3C — Dashboard Module
-- Role-based dashboard (Admin/HR/Manager/Employee layouts)
-- Recharts PieChart + BarChart integration
-- 15 dashboard components, 4 React Query hooks
-
-### Phase 3B — Authentication Module
-- Login + Register pages with RHF + Zod validation
-- Password strength meter, remember-me, post-login redirect
-
-### Phase 3A — Frontend Foundation
-- Vite + React 19 + MUI v7 scaffold
-- TanStack Query, React Router v7, Axios interceptors
-- Theme (light/dark), routing, layouts, error boundary
-
-### Phase 2V — Backend Tests + Postman
-- 53 unit + integration test cases
-- Postman collection with 14 automated requests
-
-### Phase 2 — Backend
-- Spring Boot 3.5.3 / Java 21 full backend
-- 47 Java source files
-- JWT auth, RBAC, Flyway migrations, MapStruct, Testcontainers
-
-### Phase 1 — Project Scaffold
-- Folder structure, pom.xml, package.json, Docker Compose, CI/CD
+| Task List (Manager) | `docs/screenshots/manager-tasks.png` |
+| Task Detail (Employee) | `docs/screenshots/employee-task-detail.png` |
+| Task Submission | `docs/screenshots/task-submission.png` |
+| Notification Bell | `docs/screenshots/notifications.png` |
+| AI Assistant | `docs/screenshots/ai-assistant.png` |
 
 ---
 
