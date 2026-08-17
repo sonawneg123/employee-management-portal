@@ -4,6 +4,7 @@
  * Phase 6A: View + edit tasks.
  * Phase 6B: Submission review (approve / request changes).
  * Phase 6C-6E: Activity timeline, comments, attachments, reassign dialog.
+ * Phase 7B: AI Evaluation section.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -50,6 +51,7 @@ import TaskActivityTimeline from '@/components/tasks/TaskActivityTimeline';
 import TaskComments from '@/components/tasks/TaskComments';
 import TaskAttachments from '@/components/tasks/TaskAttachments';
 import EmployeeAvailabilitySelector from '@/components/tasks/EmployeeAvailabilitySelector';
+import TaskAiEvaluationSection from '@/components/tasks/TaskAiEvaluationSection';
 
 /**
  * Manager task detail page.
@@ -88,6 +90,14 @@ export default function ManagerTaskDetailPage() {
   const { data: latestSubmission, isLoading: isLoadingSubmission } = useLatestSubmission(id, {
     enabled: Boolean(id) && needsSubmission,
   });
+
+  // AI evaluation is available whenever a submission exists (any status that has a submission)
+  const hasAnySubmission = task && ['SUBMITTED', 'COMPLETED', 'IN_PROGRESS'].includes(task.status);
+  const { data: latestSubmissionForAi } = useLatestSubmission(id, {
+    enabled: Boolean(id) && hasAnySubmission && !needsSubmission,
+  });
+  // Use whichever submission data is available
+  const submissionForAi = latestSubmission ?? latestSubmissionForAi ?? null;
 
   // Availability for the reassign + edit dialogs
   const { data: availabilityEmployees = [] } = useEmployeeAvailability();
@@ -289,6 +299,22 @@ export default function ManagerTaskDetailPage() {
             </Alert>
           </Box>
         )}
+
+        {/* ── AI Evaluation section (Phase 7B) ──────────────────────── */}
+        <Box sx={{ mt: 3 }}>
+          <TaskAiEvaluationSection
+            taskId={id}
+            submission={submissionForAi}
+            onRunComplete={(review) => {
+              showSnackbar(
+                review.status === 'COMPLETED' ? 'success' : 'info',
+                review.status === 'COMPLETED'
+                  ? 'AI evaluation completed successfully.'
+                  : 'AI evaluation has been queued.',
+              );
+            }}
+          />
+        </Box>
 
         {/* ── Attachments, Comments, Timeline ──────────────────────────── */}
         <Grid container spacing={3} sx={{ mt: 1 }}>

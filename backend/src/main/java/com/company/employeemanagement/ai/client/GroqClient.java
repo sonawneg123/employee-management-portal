@@ -75,7 +75,9 @@ public class GroqClient {
      * @throws GroqClientException if any communication or API error occurs
      */
     public String chat(final String systemPrompt, final String userMessage) {
+        String model = groqProperties.getModel();
         GroqApiTypes.ChatRequest requestBody = buildRequest(systemPrompt, userMessage);
+        log.debug("Sending request to Groq — model: {}", model);
 
         try {
             GroqApiTypes.ChatResponse response = restClient.post()
@@ -86,12 +88,36 @@ public class GroqClient {
                         // Read the body for diagnostics — never log the API key.
                         String errorBody = readBodySafely(res);
                         if (status == 401) {
-                            log.error("Groq API authentication failed (401). Check GROQ_API_KEY configuration.");
+                            log.error("Groq API authentication failed (HTTP 401). "
+                                    + "Check that GROQ_API_KEY is set and valid in .env. "
+                                    + "response body: {}", errorBody);
                             throw new GroqClientException(
                                     "AI service authentication failed. Please contact the system administrator.",
                                     GroqClientException.ErrorType.AUTH_FAILURE);
                         }
-                        log.warn("Groq API returned client error: HTTP {} — response body: {}", status, errorBody);
+                        if (status == 429) {
+                            log.warn("Groq API rate limit exceeded (HTTP 429). "
+                                    + "Reduce request frequency or upgrade the Groq plan. "
+                                    + "response body: {}", errorBody);
+                            throw new GroqClientException(
+                                    "The AI service is currently rate-limited. Please try again in a moment.",
+                                    GroqClientException.ErrorType.API_FAILURE);
+                        }
+                        // Detect model_not_found (404) — most common misconfiguration error
+                        if (status == 404 || (errorBody != null && errorBody.contains("model_not_found"))) {
+                            log.error("Groq model not found or not accessible (HTTP {}). "
+                                    + "Configured model: '{}'. "
+                                    + "Update GROQ_MODEL in .env to a currently available model "
+                                    + "(e.g. groq/compound-mini). "
+                                    + "See https://console.groq.com/docs/models. "
+                                    + "response body: {}", status, model, errorBody);
+                            throw new GroqClientException(
+                                    "The configured AI model is not available. "
+                                    + "Please contact the system administrator to update GROQ_MODEL.",
+                                    GroqClientException.ErrorType.INVALID_REQUEST);
+                        }
+                        log.warn("Groq API returned client error: HTTP {} — model: {} — response body: {}",
+                                status, model, errorBody);
                         throw new GroqClientException(
                                 "The AI service rejected the request.",
                                 GroqClientException.ErrorType.INVALID_REQUEST);
@@ -99,24 +125,28 @@ public class GroqClient {
                     .onStatus(HttpStatusCode::is5xxServerError, (req, res) -> {
                         int status = res.getStatusCode().value();
                         String errorBody = readBodySafely(res);
-                        log.warn("Groq API returned server error: HTTP {} — response body: {}", status, errorBody);
+                        log.warn("Groq API returned server error: HTTP {} — model: {} — response body: {}",
+                                status, model, errorBody);
                         throw new GroqClientException(
                                 "The AI service is temporarily unavailable. Please try again later.",
                                 GroqClientException.ErrorType.API_FAILURE);
                     })
                     .body(GroqApiTypes.ChatResponse.class);
 
+            log.debug("Groq request successful — model: {}", model);
             return extractAnswer(response);
 
         } catch (GroqClientException e) {
             throw e;
         } catch (ResourceAccessException e) {
-            log.warn("Groq API request timed out or connection refused: {}", e.getMessage());
+            log.warn("Groq API request timed out or connection refused — model: {} — cause: {}",
+                    model, e.getMessage());
             throw new GroqClientException(
                     "The AI assistant is temporarily unavailable. Please try again later.",
                     GroqClientException.ErrorType.TIMEOUT);
         } catch (RestClientException e) {
-            log.error("Unexpected error communicating with Groq API: {}", e.getMessage());
+            log.error("Unexpected error communicating with Groq API — model: {} — cause: {}",
+                    model, e.getMessage());
             throw new GroqClientException(
                     "The AI assistant is temporarily unavailable. Please try again later.",
                     GroqClientException.ErrorType.API_FAILURE);

@@ -147,7 +147,7 @@ class AiChatServiceTest {
         }
 
         @Test
-        @DisplayName("throws IllegalArgumentException for INVALID_REQUEST")
+        @DisplayName("throws IllegalArgumentException for INVALID_REQUEST (includes model config hint)")
         void invalidRequestThrowsIllegalArgument() {
             when(retrievalService.search(any())).thenReturn(Collections.emptyList());
             when(groqClient.chat(anyString(), anyString()))
@@ -156,7 +156,22 @@ class AiChatServiceTest {
 
             assertThatThrownBy(() -> aiChatService.chat(new AiChatRequest(USER_MESSAGE)))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("rephrasing");
+                    .hasMessageContaining("process your request");
+        }
+
+        @Test
+        @DisplayName("throws IllegalArgumentException for INVALID_REQUEST (model_not_found scenario)")
+        void modelNotFoundThrowsIllegalArgument() {
+            when(retrievalService.search(any())).thenReturn(Collections.emptyList());
+            when(groqClient.chat(anyString(), anyString()))
+                    .thenThrow(new GroqClientException(
+                            "The configured AI model is not available. "
+                            + "Please contact the system administrator to update GROQ_MODEL.",
+                            GroqClientException.ErrorType.INVALID_REQUEST));
+
+            assertThatThrownBy(() -> aiChatService.chat(new AiChatRequest(USER_MESSAGE)))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("process your request");
         }
     }
 

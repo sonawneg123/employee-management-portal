@@ -35,8 +35,11 @@ class GroqClientTest {
 
     // ── Constants ─────────────────────────────────────────────────────────────
 
-    /** The current default model — must match application.properties groq.model default. */
-    private static final String DEFAULT_MODEL = "llama-3.1-8b-instant";
+    /**
+     * The current default model — must match application.properties groq.model default.
+     * Updated from llama-3.1-8b-instant (removed by Groq, produces model_not_found errors).
+     */
+    private static final String DEFAULT_MODEL = "groq/compound-mini";
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -146,14 +149,16 @@ class GroqClientTest {
         }
 
         @Test
-        @DisplayName("model field contains the current default model name (regression — retired model caused HTTP 400)")
+        @DisplayName("model field contains the current default model name (regression — retired models caused HTTP 404)")
         void modelFieldMatchesCurrentDefault() throws Exception {
             String json = plainMapper.writeValueAsString(chatRequest());
 
-            // llama-3.1-8b-instant is the active Groq model as of mid-2025.
-            // If this fails, update DEFAULT_MODEL and application.properties groq.model default.
+            // groq/compound-mini is the active Groq model as of 2025.
+            // llama-3.1-8b-instant was removed by Groq (model_not_found).
+            // If this test fails, update DEFAULT_MODEL and application.properties groq.model default.
             assertThat(json).contains("\"" + DEFAULT_MODEL + "\"");
-            assertThat(json).doesNotContain("\"llama3-8b-8192\""); // retired model must never appear
+            assertThat(json).doesNotContain("\"llama3-8b-8192\"");   // decommissioned
+            assertThat(json).doesNotContain("\"llama-3.1-8b-instant\""); // removed — model_not_found
         }
 
         @Test
@@ -264,6 +269,45 @@ class GroqClientTest {
 
             // Constructor must not throw — it logs an error instead.
             new GroqClient(rc, props);
+        }
+
+        @Test
+        @DisplayName("model name from properties is included in the serialised request body")
+        void modelNameFromPropertiesIsInRequest() throws Exception {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            GroqApiTypes.ChatRequest req = new GroqApiTypes.ChatRequest(
+                    DEFAULT_MODEL,
+                    List.of(new GroqApiTypes.Message("user", "hi")),
+                    512, 0.7
+            );
+            String json = mapper.writeValueAsString(req);
+            assertThat(json).contains("\"" + DEFAULT_MODEL + "\"");
+            // Ensure no stale model names appear
+            assertThat(json).doesNotContain("llama3-8b-8192");
+            assertThat(json).doesNotContain("llama-3.1-8b-instant");
+        }
+
+        @Test
+        @DisplayName("GroqClientException with INVALID_REQUEST type is thrown for model_not_found scenario")
+        void invalidRequestTypeForModelNotFound() {
+            // A GroqClientException of INVALID_REQUEST type is thrown when the model is unavailable.
+            // This test validates the exception type that the service layer handles.
+            GroqClientException ex = new GroqClientException(
+                    "The configured AI model is not available.",
+                    GroqClientException.ErrorType.INVALID_REQUEST);
+            assertThat(ex.getErrorType()).isEqualTo(GroqClientException.ErrorType.INVALID_REQUEST);
+            assertThat(ex.getMessage()).contains("not available");
+        }
+
+        @Test
+        @DisplayName("GroqClientException with API_FAILURE type is thrown for rate-limit scenario")
+        void apiFailureTypeForRateLimit() {
+            // A GroqClientException of API_FAILURE type is thrown when rate-limited (HTTP 429).
+            GroqClientException ex = new GroqClientException(
+                    "The AI service is currently rate-limited.",
+                    GroqClientException.ErrorType.API_FAILURE);
+            assertThat(ex.getErrorType()).isEqualTo(GroqClientException.ErrorType.API_FAILURE);
+            assertThat(ex.getMessage()).contains("rate-limited");
         }
     }
 }

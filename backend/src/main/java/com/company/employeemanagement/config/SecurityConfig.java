@@ -245,6 +245,14 @@ public class SecurityConfig {
                         // Attachment download — all authenticated roles (ownership enforced in service)
                         .requestMatchers(HttpMethod.GET, "/task-submissions/*/attachment")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── AI Task Review — Phase 7A — privileged roles only ──────────────
+                        .requestMatchers(HttpMethod.POST, "/task-submissions/*/ai-review")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/task-submissions/*/ai-review",
+                                "/task-submissions/*/ai-reviews")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/task-ai-reviews/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
                         // ── Notification endpoints — all authenticated roles (self-scoped) ──
                         .requestMatchers(HttpMethod.GET, "/notifications/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")

@@ -92,26 +92,28 @@ public class AiChatService {
 
         // ── 2. Forward to Groq ───────────────────────────────────────────────
         try {
-            log.debug("Sending grounded request to Groq");
+            log.info("Sending grounded request to Groq");
             String answer = groqClient.chat(systemPrompt, request.message());
-            log.debug("AI chat response obtained — answer length: {} chars", answer.length());
+            log.info("Groq request successful — answer length: {} chars", answer.length());
             return new AiChatResponse(answer);
 
         } catch (GroqClientException e) {
             switch (e.getErrorType()) {
                 case AUTH_FAILURE -> {
-                    log.error("Groq authentication failure — verify GROQ_API_KEY configuration.");
+                    log.error("Groq authentication failure — verify GROQ_API_KEY is set correctly in .env.");
                     throw new IllegalStateException(
                             "The AI assistant is currently unavailable due to a configuration issue. "
                             + "Please contact the system administrator.");
                 }
                 case INVALID_REQUEST -> {
-                    log.warn("Groq rejected the request: {}", e.getMessage());
+                    // model_not_found errors are already logged with full detail by GroqClient
+                    log.warn("Groq rejected the AI chat request: {}", e.getMessage());
                     throw new IllegalArgumentException(
-                            "The AI assistant could not process your request. Please try rephrasing.");
+                            "The AI assistant could not process your request. "
+                            + "If this persists, the AI model configuration may need updating.");
                 }
                 default -> {
-                    log.warn("Groq API error ({}): {}", e.getErrorType(), e.getMessage());
+                    log.warn("Groq API error ({}) for AI chat: {}", e.getErrorType(), e.getMessage());
                     throw new IllegalStateException(
                             "The AI assistant is temporarily unavailable. Please try again later.");
                 }
@@ -132,13 +134,13 @@ public class AiChatService {
      */
     private String buildGroundedPrompt(final String userMessage) {
         if (!ragProperties.isEnabled()) {
-            log.debug("RAG is disabled — using Phase 1 system prompt");
+            log.info("RAG is disabled — using Phase 1 system prompt");
             return AiSystemPrompt.DEFAULT;
         }
 
         final List<KnowledgeSearchResult> chunks = retrieveChunksSafely(userMessage);
 
-        log.debug("Building grounded AI prompt with {} chunk(s)", chunks.size());
+        log.info("Building grounded AI prompt with {} chunk(s)", chunks.size());
         final String contextSection = contextBuilder.buildContextSection(chunks);
         return AiSystemPrompt.buildGroundedSystemPrompt(contextSection);
     }
@@ -153,7 +155,7 @@ public class AiChatService {
      */
     private List<KnowledgeSearchResult> retrieveChunksSafely(final String userMessage) {
         try {
-            log.debug("RAG retrieval started for AI chat request");
+            log.info("RAG retrieval started for AI chat request");
             final KnowledgeSearchRequest searchRequest =
                     new KnowledgeSearchRequest(userMessage, ragProperties.getTopK());
             final List<KnowledgeSearchResult> chunks = retrievalService.search(searchRequest);

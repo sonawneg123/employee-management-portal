@@ -103,6 +103,11 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   TASK_SUBMISSION_REQUEST_CHANGES: (submissionId) => `/task-submissions/${submissionId}/request-changes`,
   TASK_SUBMISSION_ATTACHMENT: (submissionId) => `/task-submissions/${submissionId}/attachment`,
 
+  // AI Task Reviews (Phase 7A/7B)
+  TASK_SUBMISSION_AI_REVIEW: (submissionId) => `/task-submissions/${submissionId}/ai-review`,
+  TASK_SUBMISSION_AI_REVIEWS: (submissionId) => `/task-submissions/${submissionId}/ai-reviews`,
+  TASK_AI_REVIEW_BY_ID: (reviewId) => `/task-ai-reviews/${reviewId}`,
+
   // Notifications
   NOTIFICATIONS: '/notifications',
   NOTIFICATIONS_UNREAD_COUNT: '/notifications/unread-count',

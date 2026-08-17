@@ -57,5 +57,17 @@ public enum NotificationType {
      * Only generated when the role actually changes.
      * This is a positive/success event; the frontend plays a happy sound.
      */
-    ROLE_UPDATED
+    ROLE_UPDATED,
+
+    /**
+     * Sent to the requesting manager/HR/admin when an AI task evaluation completes
+     * successfully. Clicking the notification navigates to the task detail page.
+     */
+    AI_REVIEW_COMPLETED,
+
+    /**
+     * Sent to the requesting manager/HR/admin when an AI task evaluation fails.
+     * Clicking the notification navigates to the task detail page.
+     */
+    AI_REVIEW_FAILED
 }

@@ -83,6 +83,8 @@ function notifColor(type) {
   if (type === 'LEAVE_APPROVED')         return '#059669';
   if (type === 'LEAVE_REJECTED')         return '#DC2626';
   if (type === 'ROLE_UPDATED')           return '#7C3AED';
+  if (type === 'AI_REVIEW_COMPLETED')    return '#0EA5E9';
+  if (type === 'AI_REVIEW_FAILED')       return '#EF4444';
   return '#6B7280';
 }
 
