@@ -12,21 +12,22 @@ import java.util.UUID;
  *
  * <p>Combines user account fields with the linked employee record (if present).
  *
- * @param userId         UUID of the user account
- * @param email          login email address
- * @param firstName      first name
- * @param lastName       last name
- * @param roles          comma-separated list of the user's roles
- * @param employeeId     UUID of the linked employee record, or {@code null}
- * @param employeeCode   HR-assigned employee code, or {@code null}
- * @param departmentId   UUID of the department, or {@code null}
- * @param departmentName name of the department, or {@code null}
- * @param jobTitle       current job title, or {@code null}
- * @param phone          contact phone number, or {@code null}
- * @param address        mailing address, or {@code null}
- * @param dateOfJoining  date the employee joined the company, or {@code null}
- * @param salary         gross salary, or {@code null}
- * @param status         current employment status, or {@code null}
+ * @param userId          UUID of the user account
+ * @param email           login email address
+ * @param firstName       first name
+ * @param lastName        last name
+ * @param roles           comma-separated list of the user's roles
+ * @param employeeId      UUID of the linked employee record, or {@code null}
+ * @param employeeCode    HR-assigned employee code, or {@code null}
+ * @param departmentId    UUID of the department, or {@code null}
+ * @param departmentName  name of the department, or {@code null}
+ * @param jobTitle        current job title, or {@code null}
+ * @param phone           contact phone number, or {@code null}
+ * @param address         mailing address, or {@code null}
+ * @param dateOfJoining   date the employee joined the company, or {@code null}
+ * @param salary          gross salary, or {@code null}
+ * @param status          current employment status, or {@code null}
+ * @param profilePhotoUrl relative URL to retrieve the profile photo, or {@code null}
  *
  * @author Employee Management Portal Team
  */
@@ -77,6 +78,10 @@ public record ProfileResponse(
         BigDecimal salary,
 
         @Schema(description = "Employment status", example = "ACTIVE")
-        EmployeeStatus status
+        EmployeeStatus status,
+
+        @Schema(description = "URL to retrieve the profile photo, or null if no photo uploaded",
+                example = "/api/profile/photo")
+        String profilePhotoUrl
 ) {
 }

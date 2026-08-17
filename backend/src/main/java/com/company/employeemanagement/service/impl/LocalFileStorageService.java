@@ -112,6 +112,24 @@ public class LocalFileStorageService implements FileStorageService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Generates a storage key in the format {@code profiles/{employeeId}/{uuid}.{ext}}.
+     */
+    @Override
+    public String storeProfilePhoto(final MultipartFile file, final UUID employeeId) throws IOException {
+        String storedName = UUID.randomUUID().toString() + extractExtension(file.getOriginalFilename());
+        String storageKey = "profiles/" + employeeId + "/" + storedName;
+
+        Path target = resolveAndValidate(storageKey);
+        Files.createDirectories(target.getParent());
+        Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+
+        log.info("FileStorage.storeProfilePhoto: key={} size={}", storageKey, file.getSize());
+        return storageKey;
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     /**

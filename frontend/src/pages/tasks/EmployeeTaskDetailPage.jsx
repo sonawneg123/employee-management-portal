@@ -52,7 +52,12 @@ export default function EmployeeTaskDetailPage() {
 
   const { data: task, isLoading, isError } = useTask(id);
   const updateStatusMutation = useUpdateTaskStatus();
-  const { isCheckedOut } = useTodayAttendance();
+  const { todayAttendance, isCheckedOut } = useTodayAttendance();
+  // Task actions are blocked when the employee hasn't checked in today OR has checked out today.
+  // This is derived from today's date only — a previous day's checkout does NOT carry over
+  // because `todayAttendance` is queried with today's date as part of the query key.
+  const isNotCheckedIn = !todayAttendance;
+  const isTaskActionsBlocked = isCheckedOut || isNotCheckedIn;
 
   // Submission hooks
   const createSubmissionMutation = useCreateSubmission();
@@ -76,8 +81,10 @@ export default function EmployeeTaskDetailPage() {
 
   // ── Start task ──────────────────────────────────────────────────────────────
   const handleStartTask = async () => {
-    if (isCheckedOut) {
-      showSnackbar('warning', 'You have checked out. Check in again to start working on tasks.');
+    if (isTaskActionsBlocked) {
+      showSnackbar('warning', isCheckedOut
+        ? 'You have checked out. Check in again to start working on tasks.'
+        : 'You must check in before starting tasks.');
       return;
     }
     try {
@@ -165,19 +172,32 @@ export default function EmployeeTaskDetailPage() {
           <Typography variant="h6" noWrap sx={{ maxWidth: 400 }}>{task.title}</Typography>
         </Box>
 
-        {/* Checkout restriction banner */}
-        {isCheckedOut && (
+        {/* Attendance restriction banner — shown when employee is checked out OR hasn't checked in yet */}
+        {isTaskActionsBlocked && (
           <Alert
             severity="warning"
             icon={<LockClockRoundedIcon />}
             sx={{ mb: 3 }}
           >
-            <Typography variant="body2" fontWeight={600}>
-              You have checked out for today.
-            </Typography>
-            <Typography variant="body2">
-              Task actions are unavailable until your next working session.
-            </Typography>
+            {isCheckedOut ? (
+              <>
+                <Typography variant="body2" fontWeight={600}>
+                  You have checked out for today.
+                </Typography>
+                <Typography variant="body2">
+                  Task actions are unavailable until your next working session.
+                </Typography>
+              </>
+            ) : (
+              <>
+                <Typography variant="body2" fontWeight={600}>
+                  You have not checked in yet today.
+                </Typography>
+                <Typography variant="body2">
+                  Please check in to enable task actions.
+                </Typography>
+              </>
+            )}
           </Alert>
         )}
 
@@ -187,8 +207,10 @@ export default function EmployeeTaskDetailPage() {
           onStartTask={handleStartTask}
           isUpdatingStatus={updateStatusMutation.isPending}
           showStartButton={task.status === 'ASSIGNED'}
-          startDisabled={isCheckedOut}
-          startDisabledReason="You have checked out. Check in again to start working."
+          startDisabled={isTaskActionsBlocked}
+          startDisabledReason={isCheckedOut
+            ? 'You have checked out. Check in again to start working.'
+            : 'You have not checked in today. Check in to start working.'}
         />
 
         {/* ── Submission section ─────────────────────────────────────────── */}

@@ -71,6 +71,9 @@ export const ROUTES = /** @type {const} */ ({
   ADMIN_POLICIES: '/admin/policies',
   HR_POLICIES: '/hr/policies',
 
+  // ── Manager Leave Management ─────────────────────────────────────
+  MANAGER_LEAVES: '/hr/leave-approvals',
+
   // ── Task Management ──────────────────────────────────────────────
   MANAGER_TASKS: '/hr/tasks',
   MANAGER_TASK_DETAIL: (id) => `/hr/tasks/${id}`,

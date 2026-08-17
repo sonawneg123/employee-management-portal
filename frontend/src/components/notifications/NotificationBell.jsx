@@ -70,8 +70,19 @@ function relativeTime(isoDate) {
  * @returns {string} colour for the left border
  */
 function notifColor(type) {
-  if (type === 'TASK_ASSIGNED') return '#4F46E5';
-  if (type === 'TASK_STARTED')  return '#10B981';
+  if (type === 'TASK_ASSIGNED')          return '#4F46E5';
+  if (type === 'TASK_STARTED')           return '#10B981';
+  if (type === 'TASK_UPDATED')           return '#F59E0B';
+  if (type === 'TASK_REASSIGNED')        return '#8B5CF6';
+  if (type === 'TASK_DUE_SOON')          return '#EF4444';
+  if (type === 'TASK_OVERDUE')           return '#DC2626';
+  if (type === 'TASK_SUBMITTED')         return '#0EA5E9';
+  if (type === 'TASK_APPROVED')          return '#10B981';
+  if (type === 'TASK_CHANGES_REQUESTED') return '#F97316';
+  if (type === 'TASK_COMMENT')           return '#6366F1';
+  if (type === 'LEAVE_APPROVED')         return '#059669';
+  if (type === 'LEAVE_REJECTED')         return '#DC2626';
+  if (type === 'ROLE_UPDATED')           return '#7C3AED';
   return '#6B7280';
 }
 
@@ -107,21 +118,25 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
   const markAll = useMarkAllNotificationsRead();
 
   // Sound management
-  const { muted, toggleMute, playSound } = useNotificationSound();
+  const { muted, toggleMute, playSoundForType } = useNotificationSound();
 
   // Track the previous unread count to detect genuinely new notifications.
   // We skip the very first load (prevCount === null) to avoid playing on page load.
+  // When there are new notifications, play the appropriate sound based on the newest type.
   const prevCountRef = useRef(null);
+  const prevNotifIdsRef = useRef(null);
   useEffect(() => {
     if (prevCountRef.current === null) {
       prevCountRef.current = unreadCount;
       return;
     }
     if (unreadCount > prevCountRef.current) {
-      playSound();
+      // Find the newest notification type to play the right sound
+      const latestType = notifications[0]?.type ?? null;
+      playSoundForType(latestType);
     }
     prevCountRef.current = unreadCount;
-  }, [unreadCount, playSound]);
+  }, [unreadCount, playSoundForType, notifications]);
 
   const handleOpen = useCallback((event) => {
     setAnchorEl((prev) => (prev ? null : event.currentTarget));
@@ -149,20 +164,44 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
     [hasAnyRole],
   );
 
+  /**
+   * Determine navigation target for a notification.
+   * Task notifications → task detail.
+   * Leave/role notifications → leaves page.
+   *
+   * @param {Object} notif
+   * @returns {string|null}
+   */
+  const notifRoute = useCallback(
+    (notif) => {
+      if (notif.relatedTaskId) return taskRoute(notif.relatedTaskId);
+      if (notif.type === 'LEAVE_APPROVED' || notif.type === 'LEAVE_REJECTED') {
+        const isEmployee = hasAnyRole([ROLES.EMPLOYEE])
+            && !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
+        return isEmployee ? ROUTES.MY_LEAVES : ROUTES.LEAVES;
+      }
+      if (notif.type === 'ROLE_UPDATED') {
+        return ROUTES.PROFILE;
+      }
+      return null;
+    },
+    [taskRoute, hasAnyRole],
+  );
+
   const handleNotificationClick = useCallback(
     async (notif) => {
       // Mark as read (fire-and-forget; errors are swallowed)
       if (!notif.read) {
         markRead.mutate(notif.id);
       }
-      // Navigate if there is a related task
-      const route = notif.relatedTaskId ? taskRoute(notif.relatedTaskId) : null;
+      // Navigate if there is a relevant destination
+      const route = notifRoute(notif);
       if (route) {
         handleClose();
         navigate(route);
       }
     },
-    [markRead, taskRoute, handleClose, navigate],
+    [markRead, notifRoute, handleClose, navigate],
   );
 
   const handleMarkAll = useCallback(() => {

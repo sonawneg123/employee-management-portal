@@ -41,6 +41,7 @@ import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import TaskRoundedIcon from '@mui/icons-material/TaskRounded';
 import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import HowToRegRoundedIcon from '@mui/icons-material/HowToRegRounded';
 
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
@@ -152,6 +153,12 @@ const NAV_ITEMS = [
     path: ROUTES.HR_REVIEWS,
     icon: <AssessmentRoundedIcon />,
     allowedRoles: [ROLES.HR, ROLES.MANAGER],
+  },
+  {
+    label: 'Leave Approvals',
+    path: ROUTES.MANAGER_LEAVES,
+    icon: <HowToRegRoundedIcon />,
+    allowedRoles: [ROLES.MANAGER],
   },
   {
     label: 'Task Management',

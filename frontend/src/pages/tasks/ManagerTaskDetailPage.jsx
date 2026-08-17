@@ -334,6 +334,7 @@ export default function ManagerTaskDetailPage() {
             value={reassignEmployeeId}
             onChange={setReassignEmployeeId}
             label="Reassign To"
+            currentAssigneeId={task.assignedEmployeeId ?? undefined}
           />
           <TextField
             label="Reason (optional)"

@@ -95,6 +95,10 @@ public record EmployeeResponse(
 
         @Schema(description = "Email of the principal who last modified this record, or SYSTEM",
                 example = "hr@example.com")
-        String updatedBy
+        String updatedBy,
+
+        @Schema(description = "URL to retrieve the employee's profile photo, or null if no photo uploaded",
+                example = "/api/employees/3fa85f64-5717-4562-b3fc-2c963f66afa6/profile-photo")
+        String profilePhotoUrl
 ) {
 }

@@ -111,7 +111,8 @@ class ProfileControllerTest {
                 "123 Main St",
                 LocalDate.of(2024, 1, 15),
                 BigDecimal.valueOf(75000),
-                EmployeeStatus.ACTIVE);
+                EmployeeStatus.ACTIVE,
+                null);
     }
 
     /**

@@ -63,4 +63,16 @@ public interface FileStorageService {
      * @return {@code true} if the file exists
      */
     boolean exists(String storageKey);
+
+    /**
+     * Stores a profile photo and returns the storage key.
+     *
+     * <p>Storage key format: {@code profiles/{employeeId}/{uuid}.{ext}}
+     *
+     * @param file       the uploaded image file
+     * @param employeeId the UUID of the employee this photo belongs to
+     * @return the storage key that uniquely identifies the stored photo
+     * @throws java.io.IOException if the file cannot be written
+     */
+    String storeProfilePhoto(MultipartFile file, UUID employeeId) throws java.io.IOException;
 }

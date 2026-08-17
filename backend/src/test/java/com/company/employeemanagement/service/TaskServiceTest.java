@@ -20,6 +20,7 @@ import com.company.employeemanagement.exception.ResourceNotFoundException;
 import com.company.employeemanagement.mapper.TaskMapper;
 import com.company.employeemanagement.repository.AttendanceRepository;
 import com.company.employeemanagement.repository.EmployeeRepository;
+import com.company.employeemanagement.repository.LeaveRequestRepository;
 import com.company.employeemanagement.repository.TaskActivityRepository;
 import com.company.employeemanagement.repository.TaskRepository;
 import com.company.employeemanagement.security.SecurityUtils;
@@ -68,6 +69,7 @@ class TaskServiceTest {
     @Mock private TaskRepository         taskRepository;
     @Mock private EmployeeRepository     employeeRepository;
     @Mock private AttendanceRepository   attendanceRepository;
+    @Mock private LeaveRequestRepository leaveRequestRepository;
     @Mock private TaskActivityRepository taskActivityRepository;
     @Mock private TaskMapper             taskMapper;
     @Mock private SecurityUtils          securityUtils;
@@ -79,7 +81,8 @@ class TaskServiceTest {
     void setUp() {
         taskService = new TaskServiceImpl(
                 taskRepository, employeeRepository, attendanceRepository,
-                taskActivityRepository, taskMapper, securityUtils, notificationService);
+                leaveRequestRepository, taskActivityRepository,
+                taskMapper, securityUtils, notificationService);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -388,7 +391,7 @@ class TaskServiceTest {
 
             assertThatThrownBy(() -> taskService.updateStatus(taskId, request))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("checked in");
+                    .hasMessageContaining("checked out today");
         }
 
         @Test
@@ -732,7 +735,7 @@ class TaskServiceTest {
 
             assertThatThrownBy(() -> taskService.create(request))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("checked in");
+                    .hasMessageContaining("checked out today");
         }
     }
 

@@ -23,6 +23,7 @@ import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 import TaskStatusChip from './TaskStatusChip';
 import TaskPriorityChip from './TaskPriorityChip';
+import EmployeeAvatar from '@/components/employees/EmployeeAvatar';
 
 /**
  * @param {{
@@ -144,7 +145,16 @@ export default function TaskDetailView({
 
                 {/* Assigned to */}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <PersonRoundedIcon fontSize="small" color="action" />
+                  {task.assignedEmployeeId ? (
+                    <EmployeeAvatar
+                      firstName={task.assignedEmployeeName?.split(' ')[0]}
+                      lastName={task.assignedEmployeeName?.split(' ').slice(1).join(' ')}
+                      profilePhotoUrl={`/api/employees/${task.assignedEmployeeId}/profile-photo`}
+                      size={28}
+                    />
+                  ) : (
+                    <PersonRoundedIcon fontSize="small" color="action" />
+                  )}
                   <Box>
                     <Typography variant="caption" color="text.secondary" display="block">
                       Assigned To

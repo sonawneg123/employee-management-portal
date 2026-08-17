@@ -35,5 +35,27 @@ public enum NotificationType {
     TASK_REASSIGNED,
 
     /** Sent when a new comment is posted on a task (to the other party). */
-    TASK_COMMENT
+    TASK_COMMENT,
+
+    /** Sent to the assigned employee when meaningful task fields are updated by a manager. */
+    TASK_UPDATED,
+
+    /**
+     * Sent to the employee when a manager/HR/admin approves their leave request.
+     * This is a positive/success event; the frontend plays a happy sound.
+     */
+    LEAVE_APPROVED,
+
+    /**
+     * Sent to the employee when a manager/HR/admin rejects their leave request.
+     * Includes the rejection reason in the notification message when provided.
+     */
+    LEAVE_REJECTED,
+
+    /**
+     * Sent to the employee when an administrator changes their role.
+     * Only generated when the role actually changes.
+     * This is a positive/success event; the frontend plays a happy sound.
+     */
+    ROLE_UPDATED
 }

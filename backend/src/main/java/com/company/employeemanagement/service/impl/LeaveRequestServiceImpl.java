@@ -9,6 +9,7 @@ import com.company.employeemanagement.entity.Employee;
 import com.company.employeemanagement.entity.LeaveRequest;
 import com.company.employeemanagement.entity.enums.LeaveStatus;
 import com.company.employeemanagement.entity.enums.LeaveType;
+import com.company.employeemanagement.entity.enums.NotificationType;
 import com.company.employeemanagement.exception.AccessDeniedException;
 import com.company.employeemanagement.exception.ResourceNotFoundException;
 import com.company.employeemanagement.mapper.LeaveRequestMapper;
@@ -16,6 +17,7 @@ import com.company.employeemanagement.repository.EmployeeRepository;
 import com.company.employeemanagement.repository.LeaveRequestRepository;
 import com.company.employeemanagement.security.SecurityUtils;
 import com.company.employeemanagement.service.LeaveRequestService;
+import com.company.employeemanagement.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -49,10 +51,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     private static final Logger log = LoggerFactory.getLogger(LeaveRequestServiceImpl.class);
 
+    private static final java.time.format.DateTimeFormatter DATE_FMT =
+            java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy");
+
     private final LeaveRequestRepository leaveRequestRepository;
     private final EmployeeRepository employeeRepository;
     private final LeaveRequestMapper leaveRequestMapper;
     private final SecurityUtils securityUtils;
+    private final NotificationService notificationService;
 
     /**
      * Constructs the service with all required dependencies.
@@ -61,15 +67,18 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
      * @param employeeRepository     repository for employee lookups
      * @param leaveRequestMapper     MapStruct mapper for entity-to-DTO conversion
      * @param securityUtils          helper for current-principal inspection
+     * @param notificationService    service for sending in-app notifications
      */
     public LeaveRequestServiceImpl(final LeaveRequestRepository leaveRequestRepository,
                                     final EmployeeRepository employeeRepository,
                                     final LeaveRequestMapper leaveRequestMapper,
-                                    final SecurityUtils securityUtils) {
+                                    final SecurityUtils securityUtils,
+                                    final NotificationService notificationService) {
         this.leaveRequestRepository = leaveRequestRepository;
         this.employeeRepository = employeeRepository;
         this.leaveRequestMapper = leaveRequestMapper;
         this.securityUtils = securityUtils;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -289,6 +298,28 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         leaveRequest.setReviewedBy(currentUserId());
 
         LeaveRequest updated = leaveRequestRepository.save(leaveRequest);
+        log.info("LeaveRequest.approve: id={} for employeeId={}", id, updated.getEmployee().getId());
+
+        // Send LEAVE_APPROVED notification to the employee
+        Employee recipient = updated.getEmployee();
+        if (recipient != null && recipient.getUser() != null) {
+            String startStr = updated.getStartDate() != null
+                    ? updated.getStartDate().format(DATE_FMT) : "—";
+            String endStr = updated.getEndDate() != null
+                    ? updated.getEndDate().format(DATE_FMT) : "—";
+            try {
+                notificationService.createNotification(
+                        recipient,
+                        NotificationType.LEAVE_APPROVED,
+                        "Leave Request Approved",
+                        "Your leave request from " + startStr + " to " + endStr + " has been approved.",
+                        null
+                );
+            } catch (Exception e) {
+                log.warn("LeaveRequest.approve: failed to send LEAVE_APPROVED notification: {}", e.getMessage());
+            }
+        }
+
         return leaveRequestMapper.toResponse(updated);
     }
 
@@ -304,11 +335,39 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         leaveRequest.setStatus(LeaveStatus.REJECTED);
         leaveRequest.setReviewedAt(LocalDateTime.now());
         leaveRequest.setReviewedBy(currentUserId());
-        if (request != null && request.rejectionReason() != null) {
-            leaveRequest.setRejectionReason(request.rejectionReason());
+        final String rejectionReason = (request != null) ? request.rejectionReason() : null;
+        if (rejectionReason != null) {
+            leaveRequest.setRejectionReason(rejectionReason);
         }
 
         LeaveRequest updated = leaveRequestRepository.save(leaveRequest);
+        log.info("LeaveRequest.reject: id={} for employeeId={}", id, updated.getEmployee().getId());
+
+        // Send LEAVE_REJECTED notification to the employee
+        Employee recipient = updated.getEmployee();
+        if (recipient != null && recipient.getUser() != null) {
+            String startStr = updated.getStartDate() != null
+                    ? updated.getStartDate().format(DATE_FMT) : "—";
+            String endStr = updated.getEndDate() != null
+                    ? updated.getEndDate().format(DATE_FMT) : "—";
+            String msg = "Your leave request from " + startStr + " to " + endStr + " has been rejected.";
+            if (rejectionReason != null && !rejectionReason.isBlank()) {
+                msg += " Reason: " + rejectionReason;
+            }
+            final String finalMsg = msg;
+            try {
+                notificationService.createNotification(
+                        recipient,
+                        NotificationType.LEAVE_REJECTED,
+                        "Leave Request Rejected",
+                        finalMsg,
+                        null
+                );
+            } catch (Exception e) {
+                log.warn("LeaveRequest.reject: failed to send LEAVE_REJECTED notification: {}", e.getMessage());
+            }
+        }
+
         return leaveRequestMapper.toResponse(updated);
     }
 

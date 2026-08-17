@@ -1,19 +1,23 @@
 /**
  * @fileoverview EmployeeAvatar — circular avatar for an employee.
  *
- * Shows the employee's profile photo when available, otherwise falls back
- * to a deterministically coloured avatar with the employee's initials.
+ * Shows the employee's profile photo when available (fetched via authenticated
+ * API), otherwise falls back to a deterministically coloured avatar with the
+ * employee's initials.
+ *
+ * Phase 6G: Uses useEmployeePhoto hook for authenticated image loading.
  */
 
 import React from 'react';
 import { Avatar, Tooltip } from '@mui/material';
 import { formatInitials, avatarColorFromName } from '@/utils/employeeFormatters';
+import { useEmployeePhoto } from '@/hooks/useEmployeePhoto';
 
 /**
  * @typedef {Object} EmployeeAvatarProps
  * @property {string | null | undefined} firstName
  * @property {string | null | undefined} lastName
- * @property {string | null | undefined} [profilePhotoUrl]
+ * @property {string | null | undefined} [profilePhotoUrl]  - Relative API URL like /api/employees/{id}/profile-photo
  * @property {number}                    [size=40]     - Avatar diameter in pixels.
  * @property {boolean}                   [tooltip]     - Wrap in a tooltip showing the full name.
  * @property {string}                    [tooltipText] - Override tooltip text.
@@ -21,6 +25,7 @@ import { formatInitials, avatarColorFromName } from '@/utils/employeeFormatters'
 
 /**
  * Circular employee avatar with initials fallback.
+ * Handles authenticated photo loading internally.
  *
  * @param {EmployeeAvatarProps} props
  * @returns {JSX.Element}
@@ -37,9 +42,12 @@ export default function EmployeeAvatar({
   const bgColor = avatarColorFromName(firstName);
   const fullName = [firstName, lastName].filter(Boolean).join(' ') || 'Employee';
 
+  // Fetch the photo via authenticated API if a URL is provided
+  const { objectUrl } = useEmployeePhoto(profilePhotoUrl ?? null);
+
   const avatar = (
     <Avatar
-      src={profilePhotoUrl ?? undefined}
+      src={objectUrl ?? undefined}
       alt={fullName}
       sx={{
         width: size,
@@ -51,7 +59,7 @@ export default function EmployeeAvatar({
       }}
       aria-label={`Avatar for ${fullName}`}
     >
-      {!profilePhotoUrl && initials}
+      {!objectUrl && initials}
     </Avatar>
   );
 

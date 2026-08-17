@@ -16,6 +16,7 @@ import com.company.employeemanagement.entity.Task;
 import com.company.employeemanagement.entity.TaskActivity;
 import com.company.employeemanagement.entity.User;
 import com.company.employeemanagement.entity.enums.EmployeeStatus;
+import com.company.employeemanagement.entity.enums.LeaveStatus;
 import com.company.employeemanagement.entity.enums.NotificationType;
 import com.company.employeemanagement.entity.enums.TaskCategory;
 import com.company.employeemanagement.entity.enums.TaskPriority;
@@ -25,6 +26,7 @@ import com.company.employeemanagement.exception.ResourceNotFoundException;
 import com.company.employeemanagement.mapper.TaskMapper;
 import com.company.employeemanagement.repository.AttendanceRepository;
 import com.company.employeemanagement.repository.EmployeeRepository;
+import com.company.employeemanagement.repository.LeaveRequestRepository;
 import com.company.employeemanagement.repository.TaskActivityRepository;
 import com.company.employeemanagement.repository.TaskRepository;
 import com.company.employeemanagement.security.SecurityUtils;
@@ -89,6 +91,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final EmployeeRepository employeeRepository;
     private final AttendanceRepository attendanceRepository;
+    private final LeaveRequestRepository leaveRequestRepository;
     private final TaskActivityRepository taskActivityRepository;
     private final TaskMapper taskMapper;
     private final SecurityUtils securityUtils;
@@ -97,6 +100,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskServiceImpl(final TaskRepository taskRepository,
                            final EmployeeRepository employeeRepository,
                            final AttendanceRepository attendanceRepository,
+                           final LeaveRequestRepository leaveRequestRepository,
                            final TaskActivityRepository taskActivityRepository,
                            final TaskMapper taskMapper,
                            final SecurityUtils securityUtils,
@@ -104,6 +108,7 @@ public class TaskServiceImpl implements TaskService {
         this.taskRepository = taskRepository;
         this.employeeRepository = employeeRepository;
         this.attendanceRepository = attendanceRepository;
+        this.leaveRequestRepository = leaveRequestRepository;
         this.taskActivityRepository = taskActivityRepository;
         this.taskMapper = taskMapper;
         this.securityUtils = securityUtils;
@@ -245,6 +250,16 @@ public class TaskServiceImpl implements TaskService {
 
         Employee prevAssigned = task.getAssignedEmployee();
 
+        // Snapshot meaningful fields BEFORE applying updates for change detection
+        final String oldTitle              = task.getTitle();
+        final String oldDescription        = task.getDescription();
+        final String oldGuidelines         = task.getGuidelines();
+        final String oldAcceptanceCriteria = task.getAcceptanceCriteria();
+        final TaskPriority oldPriority     = task.getPriority();
+        final TaskStatus   oldStatusSnap   = task.getStatus();
+        final LocalDate    oldDueDate      = task.getDueDate();
+        final TaskCategory oldCategory     = task.getCategory();
+
         Employee assignedEmployee = null;
         if (request.assignedEmployeeId() != null) {
             assignedEmployee = employeeRepository.findById(request.assignedEmployeeId())
@@ -280,8 +295,11 @@ public class TaskServiceImpl implements TaskService {
                     prevStatus.name(), newStatus.name());
         }
 
-        if (assignedEmployee != null
-                && (prevAssigned == null || !prevAssigned.getId().equals(assignedEmployee.getId()))) {
+        // Determine whether the assignee changed
+        final boolean assigneeChanged = assignedEmployee != null
+                && (prevAssigned == null || !prevAssigned.getId().equals(assignedEmployee.getId()));
+
+        if (assigneeChanged) {
             String dueDateStr = updated.getDueDate() != null
                     ? updated.getDueDate().format(DATE_FMT) : "N/A";
             notificationService.createNotification(
@@ -293,6 +311,34 @@ public class TaskServiceImpl implements TaskService {
                             + "Priority: " + updated.getPriority().name(),
                     updated.getId()
             );
+        }
+
+        // Send TASK_UPDATED only when: assignee did NOT change, there IS an assignee,
+        // and at least one meaningful field actually changed.
+        final Employee currentAssignee = updated.getAssignedEmployee();
+        if (!assigneeChanged && currentAssignee != null) {
+            String changesSummary = buildChangesSummary(
+                    oldTitle, request.title(),
+                    oldDescription, request.description(),
+                    oldGuidelines, request.guidelines(),
+                    oldAcceptanceCriteria, request.acceptanceCriteria(),
+                    oldPriority, updated.getPriority(),
+                    oldStatusSnap, newStatus,
+                    oldDueDate, request.dueDate(),
+                    oldCategory, request.category());
+
+            if (!changesSummary.isEmpty()) {
+                Employee actor = securityUtils.getCurrentEmployee().orElse(null);
+                String actorName = actor != null ? employeeName(actor) : securityUtils.getCurrentUsername();
+                notificationService.createNotification(
+                        currentAssignee,
+                        NotificationType.TASK_UPDATED,
+                        "Task Updated",
+                        "\"" + updated.getTitle() + "\" was updated by " + actorName + ".\n\n"
+                                + "Changed:\n" + changesSummary,
+                        updated.getId()
+                );
+            }
         }
 
         return taskMapper.toResponse(taskRepository.findByIdWithAssociations(updated.getId())
@@ -354,9 +400,15 @@ public class TaskServiceImpl implements TaskService {
         Employee newEmployee = employeeRepository.findById(request.newEmployeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee", request.newEmployeeId()));
 
+        Employee previousEmployee = task.getAssignedEmployee();
+
+        if (previousEmployee != null && previousEmployee.getId().equals(newEmployee.getId())) {
+            throw new IllegalStateException(
+                    "Cannot reassign task to the same employee who is currently assigned.");
+        }
+
         requireEmployeeCheckedIn(newEmployee);
 
-        Employee previousEmployee = task.getAssignedEmployee();
         Employee actor = securityUtils.getCurrentEmployee().orElse(null);
 
         task.setAssignedEmployee(newEmployee);
@@ -518,26 +570,60 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional(readOnly = true)
     public List<EmployeeAvailabilityResponse> getEmployeeAvailability() {
-        List<Employee> activeEmployees = employeeRepository.findByStatus(
-                EmployeeStatus.ACTIVE,
-                org.springframework.data.domain.Pageable.unpaged()
-        ).getContent();
+        // Include both ACTIVE and DISABLED employees so the UI can show disabled state
+        List<Employee> employees = employeeRepository.findAll().stream()
+                .filter(e -> e.getStatus() == EmployeeStatus.ACTIVE
+                        || e.getStatus() == EmployeeStatus.DISABLED)
+                .collect(Collectors.toList());
 
         LocalDate today = LocalDate.now();
 
-        return activeEmployees.stream()
+        return employees.stream()
                 .map(e -> {
-                    boolean checkedIn = attendanceRepository
+                    boolean isDisabled = e.getStatus() == EmployeeStatus.DISABLED;
+                    boolean checkedIn = !isDisabled && attendanceRepository
                             .findByEmployeeIdAndAttendanceDate(e.getId(), today)
                             .map(a -> a.getCheckOutTime() == null)
                             .orElse(false);
+                    boolean checkedOut = !isDisabled && attendanceRepository
+                            .findByEmployeeIdAndAttendanceDate(e.getId(), today)
+                            .map(a -> a.getCheckOutTime() != null)
+                            .orElse(false);
+                    boolean onApprovedLeave = !isDisabled && leaveRequestRepository
+                            .existsApprovedLeaveForEmployeeOnDate(e.getId(), LeaveStatus.APPROVED, today);
                     long active = taskRepository.countActiveTasksByEmployeeId(e.getId());
+                    boolean available = !isDisabled && checkedIn && !onApprovedLeave;
+
+                    // Determine primary unavailability reason (priority: DISABLED > APPROVED_LEAVE > CHECKED_OUT > NOT_CHECKED_IN)
+                    String unavailabilityReason = null;
+                    if (!available) {
+                        if (isDisabled) {
+                            unavailabilityReason = "DISABLED";
+                        } else if (onApprovedLeave) {
+                            unavailabilityReason = "APPROVED_LEAVE";
+                        } else if (checkedOut) {
+                            unavailabilityReason = "CHECKED_OUT";
+                        } else {
+                            unavailabilityReason = "NOT_CHECKED_IN";
+                        }
+                    }
+
+                    // Build profile photo URL if a photo is stored
+                    String profilePhotoUrl = e.getProfilePhotoStorageKey() != null
+                            ? "/api/employees/" + e.getId() + "/profile-photo"
+                            : null;
+
                     return new EmployeeAvailabilityResponse(
                             e.getId(),
                             employeeName(e),
                             e.getEmployeeCode(),
                             checkedIn,
-                            active
+                            active,
+                            onApprovedLeave,
+                            available,
+                            isDisabled,
+                            profilePhotoUrl,
+                            unavailabilityReason
                     );
                 })
                 .collect(Collectors.toList());
@@ -608,14 +694,41 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * Enforces that the given employee has an active check-in record today.
+     * Enforces that the given employee is available for new task assignment today.
+     *
+     * <p>An employee is available when ALL of the following are true for today's date:
+     * <ol>
+     *   <li>They have an attendance record (checked in today).</li>
+     *   <li>Their check-out time is null (not yet checked out).</li>
+     *   <li>They do NOT have an APPROVED leave request covering today.</li>
+     * </ol>
+     *
+     * <p>Previous days' check-out records are irrelevant — availability is always
+     * derived from the <em>current calendar date</em>.
      *
      * @param employee the employee to check
-     * @throws IllegalStateException if the employee has not checked in or has already checked out
+     * @throws IllegalStateException if the employee is not available for assignment today
      */
     private void requireEmployeeCheckedIn(final Employee employee) {
+        // Rule 0: block if the employee is disabled — 409 Conflict
+        if (employee.getStatus() == EmployeeStatus.DISABLED) {
+            throw new IllegalStateException(
+                    "Employee is disabled and cannot be assigned a new task.");
+        }
+
+        LocalDate today = LocalDate.now();
+
+        // Rule 3: block if the employee has an approved leave covering today
+        boolean onApprovedLeave = leaveRequestRepository
+                .existsApprovedLeaveForEmployeeOnDate(employee.getId(), LeaveStatus.APPROVED, today);
+        if (onApprovedLeave) {
+            throw new IllegalStateException(
+                    "Employee has an approved leave for today and cannot be assigned a new task.");
+        }
+
+        // Rules 1 & 2: block if not checked in (or already checked out) TODAY
         Optional<Attendance> todayAttendance = attendanceRepository
-                .findByEmployeeIdAndAttendanceDate(employee.getId(), LocalDate.now());
+                .findByEmployeeIdAndAttendanceDate(employee.getId(), today);
 
         if (todayAttendance.isEmpty()) {
             throw new IllegalStateException(
@@ -623,7 +736,7 @@ public class TaskServiceImpl implements TaskService {
         }
         if (todayAttendance.get().getCheckOutTime() != null) {
             throw new IllegalStateException(
-                    "Employee must be checked in before a new task can be assigned.");
+                    "Employee has already checked out today and cannot be assigned a new task.");
         }
     }
 
@@ -664,6 +777,50 @@ public class TaskServiceImpl implements TaskService {
                     + " " + (employee.getLastName() != null ? employee.getLastName() : "")).trim();
         }
         return employee.getEmployeeCode();
+    }
+
+    /**
+     * Builds a human-readable bullet-point summary of the fields that changed.
+     * Returns an empty string when nothing meaningful changed.
+     */
+    private String buildChangesSummary(final String oldTitle,        final String newTitle,
+                                        final String oldDesc,         final String newDesc,
+                                        final String oldGuidelines,   final String newGuidelines,
+                                        final String oldCriteria,     final String newCriteria,
+                                        final TaskPriority oldPriority, final TaskPriority newPriority,
+                                        final TaskStatus   oldStatus,   final TaskStatus   newStatus,
+                                        final LocalDate    oldDueDate,  final LocalDate    newDueDate,
+                                        final TaskCategory oldCategory, final TaskCategory newCategory) {
+        StringBuilder sb = new StringBuilder();
+
+        if (!java.util.Objects.equals(oldTitle, newTitle)) {
+            sb.append("• Title: ").append(oldTitle).append(" → ").append(newTitle).append('\n');
+        }
+        if (!java.util.Objects.equals(oldDesc, newDesc)) {
+            sb.append("• Description updated\n");
+        }
+        if (!java.util.Objects.equals(oldGuidelines, newGuidelines)) {
+            sb.append("• Guidelines updated\n");
+        }
+        if (!java.util.Objects.equals(oldCriteria, newCriteria)) {
+            sb.append("• Acceptance criteria updated\n");
+        }
+        if (!java.util.Objects.equals(oldPriority, newPriority)) {
+            sb.append("• Priority: ").append(oldPriority).append(" → ").append(newPriority).append('\n');
+        }
+        if (!java.util.Objects.equals(oldStatus, newStatus)) {
+            sb.append("• Status: ").append(oldStatus).append(" → ").append(newStatus).append('\n');
+        }
+        if (!java.util.Objects.equals(oldDueDate, newDueDate)) {
+            String oldStr = oldDueDate != null ? oldDueDate.format(DATE_FMT) : "none";
+            String newStr = newDueDate != null ? newDueDate.format(DATE_FMT) : "none";
+            sb.append("• Due date: ").append(oldStr).append(" → ").append(newStr).append('\n');
+        }
+        if (!java.util.Objects.equals(oldCategory, newCategory)) {
+            sb.append("• Category: ").append(oldCategory).append(" → ").append(newCategory).append('\n');
+        }
+
+        return sb.toString().stripTrailing();
     }
 
     /**

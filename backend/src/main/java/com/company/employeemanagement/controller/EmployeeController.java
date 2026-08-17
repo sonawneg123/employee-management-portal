@@ -4,8 +4,12 @@ import com.company.employeemanagement.dto.request.CreateEmployeeRequest;
 import com.company.employeemanagement.dto.request.UpdateEmployeeRequest;
 import com.company.employeemanagement.dto.response.EmployeeResponse;
 import com.company.employeemanagement.dto.response.PageResponse;
+import com.company.employeemanagement.entity.Employee;
 import com.company.employeemanagement.entity.enums.EmployeeStatus;
+import com.company.employeemanagement.exception.ResourceNotFoundException;
+import com.company.employeemanagement.repository.EmployeeRepository;
 import com.company.employeemanagement.service.EmployeeService;
+import com.company.employeemanagement.service.FileStorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,9 +19,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
@@ -33,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -57,14 +64,22 @@ import java.util.UUID;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final EmployeeRepository employeeRepository;
+    private final FileStorageService fileStorageService;
 
     /**
-     * Constructs the controller with its required service dependency.
+     * Constructs the controller with its required dependencies.
      *
-     * @param employeeService the employee management service
+     * @param employeeService    the employee management service
+     * @param employeeRepository repository for direct employee lookups
+     * @param fileStorageService service for reading profile photo files
      */
-    public EmployeeController(final EmployeeService employeeService) {
+    public EmployeeController(final EmployeeService employeeService,
+                               final EmployeeRepository employeeRepository,
+                               final FileStorageService fileStorageService) {
         this.employeeService = employeeService;
+        this.employeeRepository = employeeRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     /**
@@ -238,5 +253,56 @@ public class EmployeeController {
             @PathVariable final UUID id) {
         employeeService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Streams the profile photo for any employee by UUID.
+     *
+     * <p>This endpoint allows any authenticated user to retrieve a colleague's
+     * profile photo for display in employee tables and avatars.
+     *
+     * @param id UUID of the employee whose photo to retrieve
+     * @return the image bytes with the correct {@code Content-Type} header
+     * @throws IOException if the underlying file cannot be read
+     */
+    @GetMapping("/{id}/profile-photo")
+    @PreAuthorize("hasAnyRole('ADMIN','HR','MANAGER','EMPLOYEE')")
+    @Operation(summary = "Get employee profile photo",
+               description = "Returns the profile photo for the given employee. "
+                       + "Any authenticated role may call this endpoint.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Photo returned"),
+            @ApiResponse(responseCode = "404", description = "Employee or photo not found",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    })
+    public ResponseEntity<InputStreamResource> getProfilePhoto(
+            @Parameter(description = "UUID of the employee",
+                       example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+            @PathVariable final UUID id) throws IOException {
+
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee", id));
+
+        if (employee.getProfilePhotoStorageKey() == null) {
+            throw new ResourceNotFoundException("Profile photo", "employeeId", id);
+        }
+
+        String mimeType = employee.getProfilePhotoMimeType();
+        MediaType mediaType = (mimeType != null && !mimeType.isBlank())
+                ? MediaType.parseMediaType(mimeType)
+                : MediaType.APPLICATION_OCTET_STREAM;
+
+        InputStreamResource resource = new InputStreamResource(
+                fileStorageService.openForRead(employee.getProfilePhotoStorageKey()));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + employee.getProfilePhotoStoredName() + "\"")
+                .contentType(mediaType)
+                .body(resource);
     }
 }

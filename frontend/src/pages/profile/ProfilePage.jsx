@@ -1,14 +1,23 @@
 /**
- * @fileoverview ProfilePage — authenticated user's employee profile (redesigned).
+ * @fileoverview ProfilePage — authenticated user's employee profile.
+ *
+ * Phase 6F additions:
+ *  - Profile photo upload (JPG/JPEG/PNG/WEBP, max 5 MB)
+ *  - Replace existing photo
+ *  - Delete photo (with confirmation)
+ *  - Avatar uses uploaded photo when available
+ *
+ * Phase 6G additions:
+ *  - Photo crop / position / zoom dialog before upload
+ *  - Topbar avatar sync — updates immediately via AuthContext.updateUser
+ *  - Cancel crop does NOT modify the existing photo
  *
  * Fetches via GET /profile and displays:
  * - Name, role badge, status, employee meta
  * - Editable personal info (phone, address) via PUT /profile/personal
- *
- * Layout: premium profile header card + information sections.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -20,11 +29,20 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Grid,
+  LinearProgress,
   Skeleton,
+  Slider,
   Snackbar,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
@@ -38,12 +56,26 @@ import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
 import PhoneRoundedIcon from '@mui/icons-material/PhoneRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import CameraAltRoundedIcon from '@mui/icons-material/CameraAltRounded';
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
+import ZoomInRoundedIcon from '@mui/icons-material/ZoomInRounded';
+import ZoomOutRoundedIcon from '@mui/icons-material/ZoomOutRounded';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 
-import { getProfile, updatePersonalInfo } from '@/services/profileApi';
+import {
+  getProfile,
+  updatePersonalInfo,
+  uploadProfilePhoto,
+  deleteProfilePhoto,
+} from '@/services/profileApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/constants/roles';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5 MB
+const CROP_CANVAS_SIZE = 300; // px — output square
 
 /**
  * @param {string[]} roles
@@ -96,10 +128,229 @@ function InfoRow({ Icon, label, value, loading }) {
   );
 }
 
+/**
+ * Renders the cropped image from the given canvas + parameters as a circular preview.
+ *
+ * @param {HTMLImageElement} img
+ * @param {number} zoom - Scale factor (1 = fit)
+ * @param {{ x: number, y: number }} offset - Offset in pixels (relative to centre)
+ * @param {HTMLCanvasElement} canvas
+ */
+function drawCrop(img, zoom, offset, canvas) {
+  const ctx = canvas.getContext('2d');
+  const size = CROP_CANVAS_SIZE;
+  canvas.width = size;
+  canvas.height = size;
+  ctx.clearRect(0, 0, size, size);
+
+  // Draw circular clip
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+  ctx.clip();
+
+  // Scale and draw image centred at offset
+  const scale = zoom * (size / Math.max(img.naturalWidth, img.naturalHeight));
+  const scaledW = img.naturalWidth * scale;
+  const scaledH = img.naturalHeight * scale;
+  const drawX = (size - scaledW) / 2 + offset.x;
+  const drawY = (size - scaledH) / 2 + offset.y;
+  ctx.drawImage(img, drawX, drawY, scaledW, scaledH);
+  ctx.restore();
+}
+
+/**
+ * Converts a canvas to a Blob.
+ *
+ * @param {HTMLCanvasElement} canvas
+ * @param {string} [mimeType='image/jpeg']
+ * @returns {Promise<Blob>}
+ */
+function canvasToBlob(canvas, mimeType = 'image/jpeg') {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('Canvas toBlob failed'))),
+      mimeType,
+      0.92,
+    );
+  });
+}
+
+// ── Crop Dialog ───────────────────────────────────────────────────────────────
+
+/**
+ * Photo crop/position/zoom dialog.
+ *
+ * @param {{
+ *   open: boolean,
+ *   imageSrc: string,
+ *   mimeType: string,
+ *   onConfirm: (blob: Blob) => void,
+ *   onCancel: () => void,
+ * }} props
+ */
+function CropDialog({ open, imageSrc, mimeType, onConfirm, onCancel }) {
+  const canvasRef = useRef(null);
+  const imgRef = useRef(null);
+  const isDragging = useRef(false);
+  const lastPos = useRef({ x: 0, y: 0 });
+
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  // Reset on open
+  useEffect(() => {
+    if (open) {
+      setZoom(1);
+      setOffset({ x: 0, y: 0 });
+      setImgLoaded(false);
+    }
+  }, [open, imageSrc]);
+
+  // Redraw on param change
+  useEffect(() => {
+    if (!imgLoaded || !canvasRef.current || !imgRef.current) return;
+    drawCrop(imgRef.current, zoom, offset, canvasRef.current);
+  }, [zoom, offset, imgLoaded]);
+
+  const handleImgLoad = useCallback(() => {
+    setImgLoaded(true);
+    if (canvasRef.current && imgRef.current) {
+      drawCrop(imgRef.current, 1, { x: 0, y: 0 }, canvasRef.current);
+    }
+  }, []);
+
+  // Drag to position
+  const handleMouseDown = useCallback((e) => {
+    isDragging.current = true;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+  }, []);
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging.current) return;
+    const dx = e.clientX - lastPos.current.x;
+    const dy = e.clientY - lastPos.current.y;
+    lastPos.current = { x: e.clientX, y: e.clientY };
+    setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  // Touch drag support
+  const handleTouchStart = useCallback((e) => {
+    const t = e.touches[0];
+    isDragging.current = true;
+    lastPos.current = { x: t.clientX, y: t.clientY };
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!isDragging.current) return;
+    const t = e.touches[0];
+    const dx = t.clientX - lastPos.current.x;
+    const dy = t.clientY - lastPos.current.y;
+    lastPos.current = { x: t.clientX, y: t.clientY };
+    setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  const handleConfirm = useCallback(async () => {
+    if (!canvasRef.current) return;
+    const blob = await canvasToBlob(canvasRef.current, mimeType === 'image/png' ? 'image/png' : 'image/jpeg');
+    onConfirm(blob);
+  }, [mimeType, onConfirm]);
+
+  return (
+    <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
+      <DialogTitle>Crop &amp; Position Photo</DialogTitle>
+      <DialogContent>
+        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+          Drag to reposition • Use the slider to zoom in/out • Preview below
+        </Typography>
+        {/* Hidden source image */}
+        {imageSrc && (
+          <img
+            ref={imgRef}
+            src={imageSrc}
+            alt="Crop source"
+            style={{ display: 'none' }}
+            onLoad={handleImgLoad}
+          />
+        )}
+        {/* Circular preview canvas */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+          <Box
+            sx={{
+              width: CROP_CANVAS_SIZE,
+              height: CROP_CANVAS_SIZE,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '3px solid',
+              borderColor: 'primary.main',
+              cursor: 'grab',
+              userSelect: 'none',
+              '&:active': { cursor: 'grabbing' },
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <canvas
+              ref={canvasRef}
+              width={CROP_CANVAS_SIZE}
+              height={CROP_CANVAS_SIZE}
+              style={{ display: 'block' }}
+            />
+          </Box>
+        </Box>
+        {/* Zoom slider */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2 }}>
+          <ZoomOutRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+          <Slider
+            value={zoom}
+            min={0.5}
+            max={3}
+            step={0.01}
+            onChange={(_, v) => setZoom(v)}
+            aria-label="Zoom"
+            sx={{ flex: 1 }}
+          />
+          <ZoomInRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+        </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 0.5 }}>
+          Zoom: {Math.round(zoom * 100)}%
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onCancel} variant="outlined">
+          Cancel
+        </Button>
+        <Button
+          onClick={handleConfirm}
+          variant="contained"
+          startIcon={<CheckRoundedIcon />}
+          disabled={!imgLoaded}
+        >
+          Use This Photo
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 /**
- * Profile page — view and edit own employee details.
+ * Profile page — view and edit own employee details, including profile photo.
  *
  * @returns {JSX.Element}
  */
@@ -108,6 +359,17 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const [editMode, setEditMode] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, severity: 'success', message: '' });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null); // null | 0-100
+  const [photoError, setPhotoError] = useState('');
+  // Cache-bust counter so the <img> re-fetches after upload/delete
+  const [photoCacheBust, setPhotoCacheBust] = useState(Date.now());
+  const fileInputRef = useRef(null);
+
+  // Crop dialog state
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
+  const [cropMimeType, setCropMimeType] = useState('image/jpeg');
 
   const showSnack = (severity, message) => setSnackbar({ open: true, severity, message });
 
@@ -145,25 +407,16 @@ export default function ProfilePage() {
     }
   }, [profile, reset]);
 
-  // ── Save mutation ──────────────────────────────────────────────────────────
+  // ── Save personal info mutation ────────────────────────────────────────────
   const saveMutation = useMutation({
     mutationFn: updatePersonalInfo,
     onSuccess: (updatedProfile) => {
-      // 1. Immediately write the fresh data into the React Query cache so the
-      //    profile card re-renders without waiting for a background refetch.
       queryClient.setQueryData(['profile', user?.userId], updatedProfile);
-
-      // 2. Sync firstName/lastName back into AuthContext so topbar/sidebar
-      //    reflect the new name immediately without a re-login.
       updateUser({
         firstName: updatedProfile.firstName,
         lastName: updatedProfile.lastName,
       });
-
-      // 3. Schedule a background refetch so any other observers (e.g. LeavesPage
-      //    profile query) also see the fresh data.
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-
       setEditMode(false);
       showSnack('success', 'Profile updated successfully 🎉');
     },
@@ -182,6 +435,97 @@ export default function ProfilePage() {
     setEditMode(false);
   };
 
+  // ── Profile photo upload ───────────────────────────────────────────────────
+  const uploadMutation = useMutation({
+    mutationFn: ({ file, onProgress }) => uploadProfilePhoto(file, onProgress),
+    onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(['profile', user?.userId], updatedProfile);
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      setUploadProgress(null);
+      const newCacheBust = Date.now();
+      setPhotoCacheBust(newCacheBust);
+      // Sync profile photo URL to AuthContext so Topbar updates immediately
+      updateUser({ profilePhotoUrl: updatedProfile.profilePhotoUrl ?? '/api/profile/photo' });
+      showSnack('success', 'Profile photo updated.');
+    },
+    onError: (err) => {
+      setUploadProgress(null);
+      const msg = err?.response?.data?.detail ?? err?.message ?? 'Failed to upload photo.';
+      setPhotoError(msg);
+      showSnack('error', msg);
+    },
+  });
+
+  // ── Profile photo delete ───────────────────────────────────────────────────
+  const deleteMutation = useMutation({
+    mutationFn: deleteProfilePhoto,
+    onSuccess: () => {
+      const cleared = { ...(profile ?? {}), profilePhotoUrl: null };
+      queryClient.setQueryData(['profile', user?.userId], cleared);
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+      setPhotoCacheBust(Date.now());
+      setDeleteConfirmOpen(false);
+      // Clear profile photo URL in AuthContext so Topbar updates immediately
+      updateUser({ profilePhotoUrl: null });
+      showSnack('success', 'Profile photo removed.');
+    },
+    onError: (err) => {
+      setDeleteConfirmOpen(false);
+      showSnack('error', err?.response?.data?.detail ?? 'Failed to remove photo.');
+    },
+  });
+
+  // ── File selection — opens crop dialog ────────────────────────────────────
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!fileInputRef.current) return;
+    // Reset input so same file can be re-selected after an error
+    fileInputRef.current.value = '';
+    if (!file) return;
+
+    setPhotoError('');
+
+    // Client-side validation (mirrors server)
+    if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+      const msg = 'Unsupported file type. Please upload a JPG, PNG, or WEBP image.';
+      setPhotoError(msg);
+      showSnack('error', msg);
+      return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      const msg = 'Image is too large. Maximum allowed size is 5 MB.';
+      setPhotoError(msg);
+      showSnack('error', msg);
+      return;
+    }
+
+    // Open crop dialog with the selected file as a data URL
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setCropImageSrc(ev.target.result);
+      setCropMimeType(file.type);
+      setCropOpen(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── Crop dialog handlers ────────────────────────────────────────────────────
+  const handleCropConfirm = useCallback((blob) => {
+    setCropOpen(false);
+    setCropImageSrc(null);
+    setUploadProgress(0);
+    // Create a File from the blob for upload
+    const filename = `profile_photo.${blob.type === 'image/png' ? 'png' : 'jpg'}`;
+    const croppedFile = new File([blob], filename, { type: blob.type });
+    uploadMutation.mutate({ file: croppedFile, onProgress: setUploadProgress });
+  }, [uploadMutation]);
+
+  const handleCropCancel = useCallback(() => {
+    setCropOpen(false);
+    setCropImageSrc(null);
+    // Do NOT modify the existing photo — cancel does nothing
+  }, []);
+
   const initials = profile
     ? `${profile.firstName?.[0] ?? ''}${profile.lastName?.[0] ?? ''}`.toUpperCase()
     : user
@@ -189,6 +533,53 @@ export default function ProfilePage() {
       : '?';
 
   const roleLabel = getRoleLabel(user?.roles);
+  const hasPhoto = Boolean(profile?.profilePhotoUrl);
+  // Build authenticated photo URL (the JWT is sent by axiosInstance; for <img> tags
+  // we use the absolute path — authentication handled by the cookie/session-free JWT
+  // in the Authorization header is not applicable for plain <img> tags.
+  // Instead we use the relative /api/profile/photo path — the browser will forward
+  // the Authorization header only if set via fetch/XHR, not <img>. For simplicity
+  // we display the photo using a blob-URL approach via a hidden fetch, OR
+  // fall back to the avatar initials approach — which is the safest pattern for JWT-only apps.
+  // We render the photo via an authenticated fetch → object URL.
+  const [photoObjectUrl, setPhotoObjectUrl] = useState(null);
+
+  useEffect(() => {
+    // When the profile has a photo, fetch it with the current auth token and
+    // create a blob object URL for the <img> tag.
+    if (!hasPhoto) {
+      if (photoObjectUrl) {
+        URL.revokeObjectURL(photoObjectUrl);
+        setPhotoObjectUrl(null);
+      }
+      return;
+    }
+
+    let cancelled = false;
+
+    // Use axiosInstance which already has the Authorization header
+    import('@/api/axiosInstance').then(({ default: axiosInstance }) => {
+      axiosInstance
+        .get('/profile/photo', { responseType: 'blob', params: { v: photoCacheBust } })
+        .then((res) => {
+          if (!cancelled) {
+            const url = URL.createObjectURL(res.data);
+            setPhotoObjectUrl((prev) => {
+              if (prev) URL.revokeObjectURL(prev);
+              return url;
+            });
+          }
+        })
+        .catch(() => {
+          if (!cancelled) setPhotoObjectUrl(null);
+        });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasPhoto, photoCacheBust]);
 
   return (
     <>
@@ -236,24 +627,87 @@ export default function ProfilePage() {
         <Grid size={{ xs: 12, md: 4 }}>
           <Card>
             <CardContent sx={{ p: 3 }}>
-              {/* Avatar + name block */}
+              {/* Avatar + photo controls */}
               <Box sx={{ textAlign: 'center', mb: 3 }}>
                 {isLoading ? (
                   <Skeleton variant="circular" width={88} height={88} sx={{ mx: 'auto', mb: 2 }} />
                 ) : (
-                  <Avatar
-                    sx={{
-                      width: 88,
-                      height: 88,
-                      background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
-                      fontSize: '2rem',
-                      fontWeight: 800,
-                      mx: 'auto',
-                      mb: 2,
-                    }}
-                  >
-                    {initials}
-                  </Avatar>
+                  <Box sx={{ position: 'relative', display: 'inline-block', mb: 2 }}>
+                    <Avatar
+                      src={photoObjectUrl ?? undefined}
+                      sx={{
+                        width: 88,
+                        height: 88,
+                        background: photoObjectUrl
+                          ? 'transparent'
+                          : 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                        fontSize: '2rem',
+                        fontWeight: 800,
+                      }}
+                      aria-label="Profile photo"
+                    >
+                      {!photoObjectUrl && initials}
+                    </Avatar>
+                    {/* Upload overlay button */}
+                    {!uploadMutation.isPending && (
+                      <Tooltip title={hasPhoto ? 'Replace photo' : 'Upload photo'}>
+                        <Box
+                          component="label"
+                          htmlFor="profile-photo-input"
+                          sx={{
+                            position: 'absolute',
+                            bottom: 0,
+                            right: 0,
+                            width: 26,
+                            height: 26,
+                            borderRadius: '50%',
+                            bgcolor: 'primary.main',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            border: '2px solid',
+                            borderColor: 'background.paper',
+                            '&:hover': { bgcolor: 'primary.dark' },
+                          }}
+                          aria-label={hasPhoto ? 'Replace profile photo' : 'Upload profile photo'}
+                        >
+                          <CameraAltRoundedIcon sx={{ fontSize: 14, color: '#fff' }} />
+                        </Box>
+                      </Tooltip>
+                    )}
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      id="profile-photo-input"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      style={{ display: 'none' }}
+                      onChange={handleFileChange}
+                      aria-label="Select profile photo file"
+                    />
+                  </Box>
+                )}
+
+                {/* Upload progress bar */}
+                {uploadProgress !== null && (
+                  <Box sx={{ width: '100%', mb: 1 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={uploadProgress}
+                      sx={{ borderRadius: 2, height: 6 }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      Uploading… {uploadProgress}%
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Photo error */}
+                {photoError && (
+                  <Alert severity="error" sx={{ mb: 1, textAlign: 'left', fontSize: '0.75rem' }}>
+                    {photoError}
+                  </Alert>
                 )}
 
                 {isLoading ? (
@@ -312,6 +766,36 @@ export default function ProfilePage() {
                     </>
                   )}
                 </Box>
+
+                {/* Photo action buttons */}
+                {!isLoading && (
+                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', mt: 1.5 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      component="label"
+                      htmlFor="profile-photo-input"
+                      startIcon={<CameraAltRoundedIcon fontSize="small" />}
+                      disabled={uploadMutation.isPending}
+                      sx={{ fontSize: '0.72rem', py: 0.4, px: 1.2 }}
+                    >
+                      {hasPhoto ? 'Change Photo' : 'Upload Photo'}
+                    </Button>
+                    {hasPhoto && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        startIcon={<DeleteOutlineRoundedIcon fontSize="small" />}
+                        onClick={() => setDeleteConfirmOpen(true)}
+                        disabled={deleteMutation.isPending}
+                        sx={{ fontSize: '0.72rem', py: 0.4, px: 1.2 }}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </Box>
+                )}
               </Box>
 
               <Divider sx={{ mb: 2 }} />
@@ -511,6 +995,47 @@ export default function ProfilePage() {
           </Card>
         </Grid>
       </Grid>
+
+      {/* ── Crop dialog ─────────────────────────────────────────────────────── */}
+      <CropDialog
+        open={cropOpen}
+        imageSrc={cropImageSrc}
+        mimeType={cropMimeType}
+        onConfirm={handleCropConfirm}
+        onCancel={handleCropCancel}
+      />
+
+      {/* ── Delete photo confirmation dialog ─────────────────────────────── */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Remove Profile Photo?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Your profile photo will be permanently removed. The default initials avatar will be
+            shown instead.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeleteConfirmOpen(false)} variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => deleteMutation.mutate()}
+            variant="contained"
+            color="error"
+            disabled={deleteMutation.isPending}
+            startIcon={
+              deleteMutation.isPending ? <CircularProgress size={14} color="inherit" /> : null
+            }
+          >
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}

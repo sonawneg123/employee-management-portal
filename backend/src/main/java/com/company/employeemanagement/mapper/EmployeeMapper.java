@@ -41,12 +41,13 @@ public interface EmployeeMapper {
      * @return a fully populated {@link EmployeeResponse} (null user fields
      *         will be {@code null} in the response)
      */
-    @Mapping(target = "departmentId",   source = "department.id")
-    @Mapping(target = "departmentName", source = "department.name")
-    @Mapping(target = "userId",         source = "user", qualifiedByName = "userToId")
-    @Mapping(target = "firstName",      source = "employee", qualifiedByName = "employeeToFirstName")
-    @Mapping(target = "lastName",       source = "employee", qualifiedByName = "employeeToLastName")
-    @Mapping(target = "email",          source = "employee", qualifiedByName = "employeeToEmail")
+    @Mapping(target = "departmentId",    source = "department.id")
+    @Mapping(target = "departmentName",  source = "department.name")
+    @Mapping(target = "userId",          source = "user", qualifiedByName = "userToId")
+    @Mapping(target = "firstName",       source = "employee", qualifiedByName = "employeeToFirstName")
+    @Mapping(target = "lastName",        source = "employee", qualifiedByName = "employeeToLastName")
+    @Mapping(target = "email",           source = "employee", qualifiedByName = "employeeToEmail")
+    @Mapping(target = "profilePhotoUrl", source = "employee", qualifiedByName = "employeeToProfilePhotoUrl")
     EmployeeResponse toResponse(Employee employee);
 
     /**
@@ -141,5 +142,18 @@ public interface EmployeeMapper {
         if (employee == null) return null;
         if (employee.getUser() != null) return employee.getUser().getEmail();
         return null;
+    }
+
+    /**
+     * Returns the profile photo URL if a photo storage key is present.
+     * Format: {@code /api/employees/{id}/profile-photo}
+     *
+     * @param employee the employee entity
+     * @return relative URL string, or {@code null} if no photo
+     */
+    @Named("employeeToProfilePhotoUrl")
+    default String employeeToProfilePhotoUrl(final Employee employee) {
+        if (employee == null || employee.getProfilePhotoStorageKey() == null) return null;
+        return "/api/employees/" + employee.getId() + "/profile-photo";
     }
 }

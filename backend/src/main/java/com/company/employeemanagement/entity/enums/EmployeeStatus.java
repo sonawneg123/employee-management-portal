@@ -10,6 +10,9 @@ public enum EmployeeStatus {
     /** Employee is actively working. */
     ACTIVE,
 
+    /** Employee account has been administratively disabled; cannot be assigned tasks. */
+    DISABLED,
+
     /** Employee is no longer active but not yet formally terminated. */
     INACTIVE,
 

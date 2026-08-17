@@ -29,6 +29,31 @@ import java.util.UUID;
 @Repository
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID> {
 
+    /**
+     * Returns whether the given employee has an APPROVED leave request
+     * that covers the specified date (startDate <= date <= endDate).
+     *
+     * <p>Used by the task assignment service to block assignment when the
+     * employee is on approved leave today.
+     *
+     * @param employeeId the UUID of the employee to check
+     * @param status     the leave status to match (use {@link LeaveStatus#APPROVED})
+     * @param date       the date to check coverage for (typically today)
+     * @return {@code true} if an approved leave record spans the given date
+     */
+    @Query("""
+            SELECT COUNT(lr) > 0 FROM LeaveRequest lr
+            WHERE lr.employee.id = :employeeId
+              AND lr.status      = :status
+              AND lr.startDate  <= :date
+              AND lr.endDate    >= :date
+            """)
+    boolean existsApprovedLeaveForEmployeeOnDate(
+            @Param("employeeId") UUID employeeId,
+            @Param("status")     LeaveStatus status,
+            @Param("date")       LocalDate date);
+
+
     // ── Scalar ID queries (pagination happens at the database) ────────────────
 
     /**

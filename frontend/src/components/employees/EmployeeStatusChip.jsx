@@ -20,6 +20,13 @@ const STATUS_STYLES = {
     border: 'rgba(16,185,129,0.25)',
     dot: '#10B981',
   },
+  DISABLED: {
+    label: 'Disabled',
+    color: '#64748B',
+    bg: 'rgba(100,116,139,0.1)',
+    border: 'rgba(100,116,139,0.25)',
+    dot: '#94A3B8',
+  },
   INACTIVE: {
     label: 'Inactive',
     color: '#D97706',

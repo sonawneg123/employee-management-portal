@@ -19,6 +19,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,4 +153,33 @@ public class Employee extends BaseEntity {
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY,
                cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<PerformanceReview> performanceReviews = new ArrayList<>();
+
+    // ── Profile photo fields ───────────────────────────────────────────────────
+
+    /** Original filename as supplied by the client during upload. */
+    @Column(name = "profile_photo_original_name", length = 255)
+    private String profilePhotoOriginalName;
+
+    /** UUID-based stored filename on disk (prevents collisions and path guessing). */
+    @Column(name = "profile_photo_stored_name", length = 255)
+    private String profilePhotoStoredName;
+
+    /** MIME type of the uploaded photo (e.g., {@code image/jpeg}). */
+    @Column(name = "profile_photo_mime_type", length = 100)
+    private String profilePhotoMimeType;
+
+    /** File size in bytes at the time of upload. */
+    @Column(name = "profile_photo_size_bytes")
+    private Long profilePhotoSizeBytes;
+
+    /**
+     * Storage key used to retrieve or delete the file via {@link com.company.employeemanagement.service.FileStorageService}.
+     * Format: {@code profiles/{employeeId}/{uuid}.{ext}}.
+     */
+    @Column(name = "profile_photo_storage_key", length = 500)
+    private String profilePhotoStorageKey;
+
+    /** Timestamp of the most recent successful photo upload. */
+    @Column(name = "profile_photo_uploaded_at")
+    private LocalDateTime profilePhotoUploadedAt;
 }

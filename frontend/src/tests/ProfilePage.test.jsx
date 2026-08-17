@@ -26,6 +26,21 @@ import { AuthContext } from '@/contexts/AuthContext';
 vi.mock('@/services/profileApi', () => ({
   getProfile: vi.fn(),
   updatePersonalInfo: vi.fn(),
+  uploadProfilePhoto: vi.fn(),
+  deleteProfilePhoto: vi.fn(),
+  getProfilePhotoUrl: vi.fn(() => '/api/profile/photo'),
+  getEmployeePhotoUrl: vi.fn((id) => `/api/employees/${id}/profile-photo`),
+}));
+
+// ── Mock axiosInstance to handle dynamic imports in ProfilePage ────────────────
+vi.mock('@/api/axiosInstance', () => ({
+  default: {
+    defaults: { baseURL: '' },
+    get: vi.fn().mockRejectedValue(new Error('no photo')),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  },
 }));
 
 import * as profileApi from '@/services/profileApi';

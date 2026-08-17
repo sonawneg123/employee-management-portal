@@ -38,6 +38,8 @@ const SAMPLE_EMPLOYEES = [
     activeTasks: 4,
     overdueCount: 1,
     workloadLevel: 'MEDIUM',
+    availableToday: false,
+    unavailabilityReason: 'CHECKED_OUT',
   },
   {
     employeeId: 'emp-3',
@@ -91,21 +93,22 @@ describe('EmployeeAvailabilitySelector', () => {
     });
   });
 
-  it('shows checked-in "In" badge for checked-in employees', async () => {
+  it('shows checked-in "🟢 Checked In" badge for checked-in employees', async () => {
     render(<ControlledSelector />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
-      // Alice is checked in → should show "In" chip
-      const inChips = screen.getAllByText('In');
+      // Alice and Carol are checked in → should show "🟢 Checked In" chip
+      const inChips = screen.getAllByText('🟢 Checked In');
       expect(inChips.length).toBeGreaterThan(0);
     });
   });
 
-  it('shows "Out" badge for employees not checked in', async () => {
+  it('shows "🔴 Checked Out" badge for employees not checked in', async () => {
     render(<ControlledSelector />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
-      expect(screen.getByText('Out')).toBeInTheDocument();
+      // Bob Jones is not checked in and not on leave → shows checkout chip
+      expect(screen.getByText('🔴 Checked Out')).toBeInTheDocument();
     });
   });
 
@@ -119,7 +122,19 @@ describe('EmployeeAvailabilitySelector', () => {
   });
 
   it('shows overdue count chip when overdueCount > 0', async () => {
-    render(<ControlledSelector />);
+    // Use a checked-in employee with overdue tasks so the chip renders
+    const employees = [
+      {
+        employeeId: 'emp-x',
+        employeeName: 'Overdue Worker',
+        employeeCode: 'EMP099',
+        checkedIn: true,
+        activeTasks: 3,
+        overdueCount: 1,
+        availableToday: true,
+      },
+    ];
+    render(<ControlledSelector employees={employees} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       expect(screen.getByText('1 overdue')).toBeInTheDocument();

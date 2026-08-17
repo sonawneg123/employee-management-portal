@@ -67,6 +67,9 @@ const ManagerTaskReviewsPage = lazy(() => import('@/pages/tasks/ManagerTasksPage
 const EmployeeTasksPage      = lazy(() => import('@/pages/tasks/EmployeeTasksPage'));
 const EmployeeTaskDetailPage = lazy(() => import('@/pages/tasks/EmployeeTaskDetailPage'));
 
+// ── Manager Leave Approvals page ──────────────────────────────────────────────
+const ManagerLeavePage = lazy(() => import('@/pages/leaves/ManagerLeavePage'));
+
 // ── Suspense wrapper ─────────────────────────────────────────────────────────
 
 /**
@@ -161,6 +164,7 @@ export default function AppRoutes() {
             <Route path={ROUTES.HR_ATTENDANCE} element={withSuspense(<AttendancePage />)} />
             <Route path={ROUTES.HR_REVIEWS} element={withSuspense(<ReviewsPage />)} />
             <Route path={ROUTES.HR_POLICIES} element={withSuspense(<CompanyPoliciesPage />)} />
+            <Route path={ROUTES.MANAGER_LEAVES} element={withSuspense(<ManagerLeavePage />)} />
             <Route path={ROUTES.MANAGER_TASKS} element={withSuspense(<ManagerTasksPage />)} />
             <Route path={`${ROUTES.MANAGER_TASKS}/:id`} element={withSuspense(<ManagerTaskDetailPage />)} />
             <Route path={ROUTES.MANAGER_TASK_REVIEWS} element={withSuspense(<ManagerTasksPage />)} />

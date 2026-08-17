@@ -32,11 +32,12 @@ function resolveDashboard(roles = []) {
 
 /**
  * @typedef {Object} AuthUser
- * @property {string}   userId
- * @property {string}   email
- * @property {string}   firstName
- * @property {string}   lastName
- * @property {string[]} roles
+ * @property {string}      userId
+ * @property {string}      email
+ * @property {string}      firstName
+ * @property {string}      lastName
+ * @property {string[]}    roles
+ * @property {string|null} [profilePhotoUrl] - Relative URL to the user's profile photo, or null.
  */
 
 /**

@@ -1,7 +1,9 @@
 /**
- * @fileoverview useNotificationSound — Web Audio API–based notification tone.
+ * @fileoverview useNotificationSound — Web Audio API–based notification tones.
  *
  * Plays a subtle two-tone chime when new notifications arrive.
+ * Plays a pleasant "happy" two-tone chime for positive events
+ * (LEAVE_APPROVED, ROLE_UPDATED).
  * Respects browser autoplay restrictions: if the AudioContext cannot be
  * created or playback is blocked, the hook fails silently.
  *
@@ -12,10 +14,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const STORAGE_KEY = 'notif_sound_muted';
 
+/** Notification types that should play the "happy" chime instead of the standard one. */
+const HAPPY_TYPES = new Set(['LEAVE_APPROVED', 'ROLE_UPDATED']);
+
 /**
  * Returns controls for the notification sound.
  *
- * @returns {{ muted: boolean, toggleMute: () => void, playSound: () => void }}
+ * @returns {{ muted: boolean, toggleMute: () => void, playSound: () => void, playHappySound: () => void, playSoundForType: (type: string) => void }}
  */
 export function useNotificationSound() {
   const [muted, setMuted] = useState(() => {
@@ -43,7 +48,7 @@ export function useNotificationSound() {
   }, []);
 
   /**
-   * Plays a short two-tone notification chime.
+   * Plays a short two-tone notification chime (standard).
    * Does nothing when muted or when the browser blocks autoplay.
    */
   const playSound = useCallback(() => {
@@ -92,6 +97,71 @@ export function useNotificationSound() {
     }
   }, [muted, getAudioCtx]);
 
+  /**
+   * Plays a pleasant "happy" two-tone chime for positive events
+   * (leave approval, role update, etc.).
+   * Uses higher frequencies and a brighter ascending melody.
+   * Does nothing when muted or when the browser blocks autoplay.
+   */
+  const playHappySound = useCallback(() => {
+    if (muted) return;
+
+    try {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+
+      const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
+
+      resume.then(() => {
+        const now = ctx.currentTime;
+
+        // Tone 1: 1047 Hz (C6) — bright, pleasant
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1047, now);
+        gain1.gain.setValueAtTime(0, now);
+        gain1.gain.linearRampToValueAtTime(0.15, now + 0.02);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.28);
+
+        // Tone 2: 1319 Hz (E6) — ascending, cheerful
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1319, now + 0.16);
+        gain2.gain.setValueAtTime(0, now + 0.16);
+        gain2.gain.linearRampToValueAtTime(0.15, now + 0.18);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.50);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.16);
+        osc2.stop(now + 0.50);
+      }).catch(() => {
+        // Autoplay blocked — silent failure
+      });
+    } catch {
+      // AudioContext not supported — silent failure
+    }
+  }, [muted, getAudioCtx]);
+
+  /**
+   * Plays the appropriate sound based on the notification type.
+   * Happy types get the ascending chime; all others get the standard chime.
+   *
+   * @param {string} [type] - NotificationType string, e.g. "LEAVE_APPROVED"
+   */
+  const playSoundForType = useCallback((type) => {
+    if (HAPPY_TYPES.has(type)) {
+      playHappySound();
+    } else {
+      playSound();
+    }
+  }, [playSound, playHappySound]);
+
   const toggleMute = useCallback(() => {
     setMuted((prev) => {
       const next = !prev;
@@ -111,5 +181,5 @@ export function useNotificationSound() {
     };
   }, []);
 
-  return { muted, toggleMute, playSound };
+  return { muted, toggleMute, playSound, playHappySound, playSoundForType };
 }

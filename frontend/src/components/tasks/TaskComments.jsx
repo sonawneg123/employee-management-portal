@@ -8,7 +8,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   Card,
@@ -24,6 +23,7 @@ import CommentRoundedIcon from '@mui/icons-material/CommentRounded';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 
 import { useTaskComments, useCreateTaskComment } from '@/hooks/useTaskHooks';
+import EmployeeAvatar from '@/components/employees/EmployeeAvatar';
 
 /**
  * Returns up to 2 initials from a display name.
@@ -148,9 +148,12 @@ export default function TaskComments({ taskId }) {
             <Stack spacing={2}>
               {comments.map((comment, idx) => (
                 <Box key={comment.id ?? idx} sx={{ display: 'flex', gap: 1.5 }}>
-                  <Avatar sx={{ width: 34, height: 34, fontSize: '0.75rem', bgcolor: 'primary.main', flexShrink: 0 }}>
-                    {initials(comment.authorName)}
-                  </Avatar>
+                  <EmployeeAvatar
+                    firstName={comment.authorName?.split(' ')[0]}
+                    lastName={comment.authorName?.split(' ').slice(1).join(' ')}
+                    profilePhotoUrl={comment.authorId ? `/api/employees/${comment.authorId}/profile-photo` : null}
+                    size={34}
+                  />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mb: 0.5 }}>
                       <Typography variant="body2" fontWeight={600}>

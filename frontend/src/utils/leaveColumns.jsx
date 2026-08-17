@@ -9,6 +9,7 @@ import { Box, Typography } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LeaveStatusChip from '@/components/leaves/LeaveStatusChip';
 import LeaveTypeChip from '@/components/leaves/LeaveTypeChip';
+import EmployeeAvatar from '@/components/employees/EmployeeAvatar';
 import { formatLeaveDateRange, formatLeaveWorkingDays } from '@/utils/leaveFormatters';
 import { formatDate } from '@/utils/dateUtils';
 import { LEAVE_COLUMNS } from '@/constants/leaveConstants';
@@ -34,24 +35,33 @@ export function getLeaveColumns() {
       id: LEAVE_COLUMNS.EMPLOYEE,
       label: 'Employee',
       sortable: false,
-      width: '200px',
+      width: '220px',
       render: (row) => (
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            <Typography variant="body2" fontWeight={600} noWrap>
-              {row.employeeName ?? '—'}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <EmployeeAvatar
+            firstName={(row.employeeName ?? '').split(' ')[0]}
+            lastName={(row.employeeName ?? '').split(' ').slice(1).join(' ')}
+            profilePhotoUrl={row.employeeId ? `/api/employees/${row.employeeId}/profile-photo` : null}
+            size={32}
+            tooltip={false}
+          />
+          <Box sx={{ minWidth: 0 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Typography variant="body2" fontWeight={600} noWrap>
+                {row.employeeName ?? '—'}
+              </Typography>
+              {row.isEmergency && (
+                <WarningAmberIcon
+                  fontSize="small"
+                  sx={{ color: 'error.main' }}
+                  titleAccess="Emergency leave"
+                />
+              )}
+            </Box>
+            <Typography variant="caption" color="text.secondary" noWrap>
+              {row.employeeCode ?? ''} {row.departmentName ? `· ${row.departmentName}` : ''}
             </Typography>
-            {row.isEmergency && (
-              <WarningAmberIcon
-                fontSize="small"
-                sx={{ color: 'error.main' }}
-                titleAccess="Emergency leave"
-              />
-            )}
           </Box>
-          <Typography variant="caption" color="text.secondary" noWrap>
-            {row.employeeCode ?? ''} {row.departmentName ? `· ${row.departmentName}` : ''}
-          </Typography>
         </Box>
       ),
     },

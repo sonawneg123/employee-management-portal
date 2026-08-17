@@ -184,10 +184,14 @@ export default function EmployeeTable({
                   onClick={() => onView(emp)}
                   sx={{
                     cursor: 'pointer',
+                    opacity: emp.status === 'DISABLED' ? 0.55 : 1,
                     '&:hover': { bgcolor: (t) => `${t.palette.primary.main}08` },
-                    transition: 'background-color 150ms ease',
+                    transition: 'background-color 150ms ease, opacity 150ms ease',
+                    ...(emp.status === 'DISABLED' && {
+                      bgcolor: 'action.hover',
+                    }),
                   }}
-                  aria-label={`Row for ${emp.firstName} ${emp.lastName}`}
+                  aria-label={`Row for ${emp.firstName} ${emp.lastName}${emp.status === 'DISABLED' ? ' (disabled)' : ''}`}
                 >
                   {columns.map((col) => (
                     <TableCell key={col.id} align={col.align ?? 'left'}>

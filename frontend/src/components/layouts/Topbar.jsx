@@ -5,8 +5,11 @@
  * - Mobile hamburger toggle
  * - Page-level breadcrumb/title area
  * - Dark/light mode toggle
- * - User avatar with name + role chip
+ * - User avatar with name + role chip (uses profile photo when available)
  * - Dropdown menu (profile, logout)
+ *
+ * Phase 6G: Avatar now shows profile photo (if uploaded) and auto-updates
+ * on photo upload/replace/delete without requiring re-login.
  */
 
 import React, { useState } from 'react';
@@ -67,6 +70,8 @@ function getRoleChipLabel(roles) {
 export default function Topbar({ onMenuClick, sidebarWidth }) {
   const { user, logout } = useAuth();
   const { mode, toggleMode } = useThemeMode();
+  // profilePhotoUrl is stored in the user context when available (set by ProfilePage after upload)
+  const profilePhotoUrl = user?.profilePhotoUrl ?? null;
   const navigate = useNavigate();
   // location hook kept for potential future breadcrumb feature
   useLocation();
@@ -178,6 +183,7 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
           aria-expanded={menuOpen}
         >
           <Avatar
+            src={profilePhotoUrl || undefined}
             sx={{
               width: 28,
               height: 28,
@@ -186,7 +192,7 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
               fontWeight: 700,
             }}
           >
-            {initials}
+            {!profilePhotoUrl && initials}
           </Avatar>
           {!isMobileScreen && (
             <Box sx={{ minWidth: 0 }}>
@@ -235,6 +241,7 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
             <Box sx={{ px: 2, py: 1.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
                 <Avatar
+                  src={profilePhotoUrl || undefined}
                   sx={{
                     width: 38,
                     height: 38,
@@ -243,7 +250,7 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
                     fontWeight: 700,
                   }}
                 >
-                  {initials}
+                  {!profilePhotoUrl && initials}
                 </Avatar>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography variant="body2" fontWeight={700} noWrap>

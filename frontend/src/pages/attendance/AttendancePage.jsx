@@ -427,19 +427,29 @@ export default function AttendancePage() {
   const checkInMutation = useMutation({
     mutationFn: checkIn,
     onSuccess: () => {
+      // Invalidate attendance queries so useTodayAttendance picks up the new record
       queryClient.invalidateQueries({ queryKey: ['attendance', 'my'] });
+      // Also invalidate task availability so the manager selector refreshes
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'availability'] });
+      // Invalidate employee's own task list so actions are immediately unblocked
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       showSnack('success', 'Checked in successfully.');
     },
-    onError: (err) => showSnack('error', err?.message ?? 'Check-in failed.'),
+    onError: (err) => showSnack('error', err?.response?.data?.detail ?? err?.message ?? 'Check-in failed.'),
   });
 
   const checkOutMutation = useMutation({
     mutationFn: checkOut,
     onSuccess: () => {
+      // Invalidate attendance queries so useTodayAttendance picks up the checkout
       queryClient.invalidateQueries({ queryKey: ['attendance', 'my'] });
+      // Also invalidate task availability so the manager selector refreshes
+      queryClient.invalidateQueries({ queryKey: ['tasks', 'availability'] });
+      // Invalidate employee's own task list so actions are immediately blocked
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       showSnack('success', 'Checked out successfully.');
     },
-    onError: (err) => showSnack('error', err?.message ?? 'Check-out failed.'),
+    onError: (err) => showSnack('error', err?.response?.data?.detail ?? err?.message ?? 'Check-out failed.'),
   });
 
   const isMutating = createMutation.isPending || updateMutation.isPending;

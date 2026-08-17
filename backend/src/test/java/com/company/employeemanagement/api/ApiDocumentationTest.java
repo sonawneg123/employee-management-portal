@@ -155,6 +155,12 @@ class ApiDocumentationTest {
     @MockBean
     private SecurityUtils securityUtils;
 
+    @MockBean
+    private com.company.employeemanagement.repository.EmployeeRepository employeeRepository;
+
+    @MockBean
+    private com.company.employeemanagement.service.FileStorageService fileStorageService;
+
     private static final UUID ANY_UUID = UUID.randomUUID();
 
     // ========================================================================

@@ -123,12 +123,15 @@ class RbacSecurityTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean private EmployeeService       employeeService;
-    @MockBean private DepartmentService     departmentService;
-    @MockBean private LeaveRequestService   leaveRequestService;
-    @MockBean private JwtService            jwtService;
-    @MockBean private UserDetailsService    userDetailsService;
-    @MockBean private SecurityUtils         securityUtils;
+    @MockBean private EmployeeService                                                           employeeService;
+    @MockBean private DepartmentService                                                         departmentService;
+    @MockBean private LeaveRequestService                                                       leaveRequestService;
+    @MockBean private JwtService                                                                jwtService;
+    @MockBean private UserDetailsService                                                        userDetailsService;
+    @MockBean private SecurityUtils                                                             securityUtils;
+    // Phase 6F: EmployeeController now requires these for the profile-photo endpoint
+    @MockBean private com.company.employeemanagement.repository.EmployeeRepository             employeeRepository;
+    @MockBean private com.company.employeemanagement.service.FileStorageService                fileStorageService;
 
     private ObjectMapper objectMapper;
 
@@ -154,7 +157,7 @@ class RbacSecurityTest {
                 LocalDate.of(2024, 1, 15),
                 new BigDecimal("75000.00"), EmployeeStatus.ACTIVE,
                 LocalDateTime.now(), LocalDateTime.now(),
-                null, null
+                null, null, null
         );
     }
 
