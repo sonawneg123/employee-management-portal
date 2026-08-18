@@ -29,10 +29,10 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 
 # Copy only the packaged JAR — no source code in the runtime image
-COPY --from=builder /build/target/*.jar app.jar
-
+# COPY --from=builder /build/target/*.jar app.jar
+COPY --from=builder --chown=appuser:appgroup /build/target/*.jar app.jar
 # Set ownership to the non-root user
-RUN chown appuser:appgroup app.jar
+# RUN chown appuser:appgroup app.jar
 
 # Switch to non-root user
 USER appuser
