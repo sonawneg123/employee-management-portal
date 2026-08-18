@@ -63,6 +63,8 @@ export const API_ENDPOINTS = /** @type {const} */ ({
 
   // AI Assistant
   AI_CHAT: '/ai/chat',
+  // AI Copilot (Phase 7E)
+  AI_AGENT_CHAT: '/ai/agent/chat',
 
   // RAG Knowledge Base (Company Policies)
   KNOWLEDGE_DOCUMENTS: '/ai/rag/documents',
@@ -107,6 +109,13 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   TASK_SUBMISSION_AI_REVIEW: (submissionId) => `/task-submissions/${submissionId}/ai-review`,
   TASK_SUBMISSION_AI_REVIEWS: (submissionId) => `/task-submissions/${submissionId}/ai-reviews`,
   TASK_AI_REVIEW_BY_ID: (reviewId) => `/task-ai-reviews/${reviewId}`,
+
+  // AI Feedback & Insights (Phase 7D)
+  TASK_SUBMISSION_AI_FEEDBACK: (submissionId) => `/task-submissions/${submissionId}/ai-feedback`,
+  TASK_SUBMISSION_AI_HISTORY: (submissionId) => `/task-submissions/${submissionId}/ai-history`,
+  TASK_AI_TREND: (taskId) => `/tasks/${taskId}/ai-trend`,
+  TASK_AI_INSIGHTS: (taskId) => `/tasks/${taskId}/ai-insights`,
+  AI_DASHBOARD_SUMMARY: '/ai/dashboard-summary',
 
   // Notifications
   NOTIFICATIONS: '/notifications',

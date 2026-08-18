@@ -1,5 +1,6 @@
 package com.company.employeemanagement.service.impl;
 
+import com.company.employeemanagement.ai.event.TaskSubmissionAiEvent;
 import com.company.employeemanagement.dto.request.CreateTaskSubmissionRequest;
 import com.company.employeemanagement.dto.request.RequestChangesRequest;
 import com.company.employeemanagement.dto.request.UpdateTaskSubmissionRequest;
@@ -24,6 +25,7 @@ import com.company.employeemanagement.service.NotificationService;
 import com.company.employeemanagement.service.TaskSubmissionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,6 +67,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
     private final NotificationService notificationService;
     private final FileStorageService fileStorageService;
     private final FileValidationService fileValidationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * Constructs the service with required dependencies.
@@ -76,7 +79,8 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
             final SecurityUtils securityUtils,
             final NotificationService notificationService,
             final FileStorageService fileStorageService,
-            final FileValidationService fileValidationService) {
+            final FileValidationService fileValidationService,
+            final ApplicationEventPublisher eventPublisher) {
         this.submissionRepository = submissionRepository;
         this.taskRepository = taskRepository;
         this.taskActivityRepository = taskActivityRepository;
@@ -84,6 +88,7 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
         this.notificationService = notificationService;
         this.fileStorageService = fileStorageService;
         this.fileValidationService = fileValidationService;
+        this.eventPublisher = eventPublisher;
     }
 
     /** {@inheritDoc} */
@@ -152,6 +157,14 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
                     task.getId()
             );
         }
+
+        // Publish domain event — AI evaluation starts after this transaction commits
+        // (TransactionalEventListener fires on AFTER_COMMIT, so Groq is never called
+        //  if this transaction rolls back)
+        UUID savedSubmissionId = saved.getId();
+        UUID savedTaskId = task.getId();
+        eventPublisher.publishEvent(new TaskSubmissionAiEvent(savedSubmissionId, savedTaskId));
+        log.info("AI REVIEW EVENT — published for submissionId={} taskId={}", savedSubmissionId, savedTaskId);
 
         // Re-fetch with full associations for the response
         return toResponse(submissionRepository.findByIdWithAssociations(saved.getId())
@@ -271,6 +284,13 @@ public class TaskSubmissionServiceImpl implements TaskSubmissionService {
                     task.getId()
             );
         }
+
+        // Publish domain event — AI evaluation starts after this transaction commits
+        UUID updatedSubmissionId = updated.getId();
+        UUID updatedTaskId = task.getId();
+        eventPublisher.publishEvent(new TaskSubmissionAiEvent(updatedSubmissionId, updatedTaskId));
+        log.info("AI REVIEW EVENT — published (resubmit) for submissionId={} taskId={}",
+                updatedSubmissionId, updatedTaskId);
 
         return toResponse(submissionRepository.findByIdWithAssociations(updated.getId())
                 .orElse(updated));

@@ -180,6 +180,9 @@ public class SecurityConfig {
                         // ── AI chat — any authenticated user ─────────────────
                         .requestMatchers(HttpMethod.POST, "/ai/chat")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // ── AI Copilot (Phase 7E) — any authenticated user ────
+                        .requestMatchers(HttpMethod.POST, "/ai/agent/chat")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         // ── RAG document management — ADMIN or HR only ────────
                         .requestMatchers(HttpMethod.POST, "/ai/rag/documents")
                                 .hasAnyRole("ADMIN", "HR")
@@ -252,6 +255,17 @@ public class SecurityConfig {
                                 "/task-submissions/*/ai-reviews")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/task-ai-reviews/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // ── AI Feedback & Insights — Phase 7D ─────────────────────────────
+                        // Employee-safe feedback and history — all authenticated roles (IDOR in service)
+                        .requestMatchers(HttpMethod.GET, "/task-submissions/*/ai-feedback",
+                                "/task-submissions/*/ai-history")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
+                        // Manager-only AI analytics
+                        .requestMatchers(HttpMethod.GET, "/tasks/*/ai-trend",
+                                "/tasks/*/ai-insights")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/ai/dashboard-summary")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER")
                         // ── Notification endpoints — all authenticated roles (self-scoped) ──
                         .requestMatchers(HttpMethod.GET, "/notifications/**")

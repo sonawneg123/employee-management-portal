@@ -80,10 +80,78 @@ public interface TaskAiReviewRepository extends JpaRepository<TaskAiReview, UUID
     boolean existsBySubmissionIdAndStatus(UUID submissionId, AiReviewStatus status);
 
     /**
-     * Returns all AI reviews for the given task.
+     * Returns all AI reviews for the given task, with submission's submittedBy loaded.
      *
      * @param taskId the task UUID
      * @return list of AI reviews
      */
-    List<TaskAiReview> findAllByTaskId(UUID taskId);
+    @Query("""
+            SELECT r FROM TaskAiReview r
+            LEFT JOIN FETCH r.submission s
+            LEFT JOIN FETCH s.submittedBy sb
+            LEFT JOIN FETCH sb.user
+            LEFT JOIN FETCH r.task t
+            LEFT JOIN FETCH r.requestedBy rb
+            LEFT JOIN FETCH rb.user
+            WHERE r.task.id = :taskId
+            ORDER BY r.createdAt DESC
+            """)
+    List<TaskAiReview> findAllByTaskId(@Param("taskId") UUID taskId);
+
+    /**
+     * Returns all AI reviews for the given task with only COMPLETED status,
+     * ordered by completedAt ascending for trend computation.
+     *
+     * @param taskId the task UUID
+     * @return list of completed AI reviews, oldest first
+     */
+    @Query("""
+            SELECT r FROM TaskAiReview r
+            LEFT JOIN FETCH r.submission s
+            LEFT JOIN FETCH s.submittedBy sb
+            LEFT JOIN FETCH r.task t
+            WHERE r.task.id = :taskId
+              AND r.status = 'COMPLETED'
+            ORDER BY r.completedAt ASC
+            """)
+    List<TaskAiReview> findCompletedByTaskIdOrderByCompletedAtAsc(@Param("taskId") UUID taskId);
+
+    /**
+     * Returns the latest completed AI review for the given submission.
+     * Used for employee AI history queries (includes submittedBy for authorization).
+     *
+     * @param submissionId the submission UUID
+     * @return reviews with submission associations
+     */
+    @Query("""
+            SELECT r FROM TaskAiReview r
+            LEFT JOIN FETCH r.submission s
+            LEFT JOIN FETCH s.submittedBy sb
+            LEFT JOIN FETCH sb.user
+            LEFT JOIN FETCH r.task t
+            WHERE r.submission.id = :submissionId
+            ORDER BY r.createdAt DESC
+            """)
+    List<TaskAiReview> findAllBySubmissionIdWithSubmitter(
+            @Param("submissionId") UUID submissionId);
+
+    /**
+     * Returns all reviews stuck in PENDING or PROCESSING state.
+     *
+     * <p>Used by the startup recovery mechanism to detect reviews that were
+     * interrupted by an application restart before they could complete.
+     *
+     * @param statuses the statuses to search for
+     * @return list of stale reviews
+     */
+    @Query("""
+            SELECT r FROM TaskAiReview r
+            LEFT JOIN FETCH r.task
+            LEFT JOIN FETCH r.submission s
+            LEFT JOIN FETCH s.task
+            LEFT JOIN FETCH r.requestedBy rb
+            LEFT JOIN FETCH rb.user
+            WHERE r.status IN :statuses
+            """)
+    List<TaskAiReview> findAllByStatusIn(@Param("statuses") List<AiReviewStatus> statuses);
 }

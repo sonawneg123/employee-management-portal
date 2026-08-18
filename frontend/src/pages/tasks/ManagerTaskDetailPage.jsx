@@ -5,6 +5,7 @@
  * Phase 6B: Submission review (approve / request changes).
  * Phase 6C-6E: Activity timeline, comments, attachments, reassign dialog.
  * Phase 7B: AI Evaluation section.
+ * Phase 7D: AI score trend and task insights.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -52,6 +53,7 @@ import TaskComments from '@/components/tasks/TaskComments';
 import TaskAttachments from '@/components/tasks/TaskAttachments';
 import EmployeeAvailabilitySelector from '@/components/tasks/EmployeeAvailabilitySelector';
 import TaskAiEvaluationSection from '@/components/tasks/TaskAiEvaluationSection';
+import ManagerAiTrendSection from '@/components/tasks/ManagerAiTrendSection';
 
 /**
  * Manager task detail page.
@@ -315,6 +317,9 @@ export default function ManagerTaskDetailPage() {
             }}
           />
         </Box>
+
+        {/* ── AI Score Trend & Insights (Phase 7D) — manager-only ───── */}
+        <ManagerAiTrendSection taskId={id} />
 
         {/* ── Attachments, Comments, Timeline ──────────────────────────── */}
         <Grid container spacing={3} sx={{ mt: 1 }}>

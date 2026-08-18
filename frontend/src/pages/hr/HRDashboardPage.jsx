@@ -29,6 +29,7 @@ import DepartmentDistributionChart from '@/components/dashboard/DepartmentDistri
 import UpcomingLeavesWidget from '@/components/dashboard/UpcomingLeavesWidget';
 import RecentActivity from '@/components/dashboard/RecentActivity';
 import AttendanceSummaryWidget from '@/components/dashboard/AttendanceSummaryWidget';
+import AiDashboardSummaryWidget from '@/components/dashboard/AiDashboardSummaryWidget';
 
 /**
  * HR/Manager dashboard page — people-management view.
@@ -155,6 +156,15 @@ export default function HRDashboardPage() {
             <AttendanceSummaryWidget />
           </Grid>
         </Grid>
+
+        {/* AI Task Insights — compact dashboard widget (Phase 7D) */}
+        <Box sx={{ mt: 3 }}>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <AiDashboardSummaryWidget />
+            </Grid>
+          </Grid>
+        </Box>
       </Box>
     </>
   );

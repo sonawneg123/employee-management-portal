@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -97,6 +98,74 @@ public class TaskAiReviewService {
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
+
+    /**
+     * Triggers an AI evaluation asynchronously for the given submission after
+     * the transaction has committed.
+     *
+     * <p>This is the entry point for the automatic pipeline (Phase 7C). It differs
+     * from {@link #requestReview(UUID)} in two ways:
+     * <ol>
+     *   <li>No security check — the caller (event listener) runs in a background
+     *       thread after the submission transaction has committed; there is no
+     *       HTTP security context at that point.</li>
+     *   <li>The review is attributed to the task creator rather than the current
+     *       HTTP user, since there is no HTTP user in the background thread.</li>
+     * </ol>
+     *
+     * <p>Duplicate protection: if a PENDING or PROCESSING review already exists
+     * for this submission, the method returns silently without creating a new one.
+     *
+     * @param submissionId UUID of the submission to evaluate
+     */
+    @Transactional
+    public void triggerAutomaticReview(final UUID submissionId) {
+        log.info("AI REVIEW QUEUED — automatic trigger: submissionId={}", submissionId);
+
+        // Load the submission
+        Optional<TaskSubmission> optionalSubmission =
+                submissionRepository.findByIdWithAssociations(submissionId);
+        if (optionalSubmission.isEmpty()) {
+            log.warn("AI REVIEW QUEUED — submission not found (may have been deleted): submissionId={}",
+                    submissionId);
+            return;
+        }
+        TaskSubmission submission = optionalSubmission.get();
+
+        // Duplicate protection: skip if already in-flight
+        if (aiReviewRepository.existsBySubmissionIdAndStatus(submissionId, AiReviewStatus.PENDING)
+                || aiReviewRepository.existsBySubmissionIdAndStatus(submissionId, AiReviewStatus.PROCESSING)) {
+            log.info("AI REVIEW QUEUED — skipped, review already in-flight: submissionId={}", submissionId);
+            return;
+        }
+
+        // Attribute the review to the task creator (manager who created the task)
+        Employee requestedBy = resolveReviewRequester(submission);
+        if (requestedBy == null) {
+            log.error("AI REVIEW QUEUED — cannot create review: no requestedBy employee resolved for submissionId={}",
+                    submissionId);
+            return;
+        }
+
+        // Create PENDING review record
+        TaskAiReview review = TaskAiReview.builder()
+                .task(submission.getTask())
+                .submission(submission)
+                .requestedBy(requestedBy)
+                .status(AiReviewStatus.PENDING)
+                .aiProvider("groq")
+                .aiModel(groqProperties.getModel())
+                .promptVersion("v1")
+                .build();
+        review = aiReviewRepository.save(review);
+        log.info("AI REVIEW QUEUED — created: reviewId={} submissionId={} taskId={}",
+                review.getId(), submissionId,
+                submission.getTask() != null ? submission.getTask().getId() : null);
+
+        // Perform the analysis (updates status to PROCESSING → COMPLETED/FAILED)
+        performAnalysis(review, submission);
+    }
+
 
     /**
      * Requests an AI analysis for the given submission.
@@ -349,6 +418,30 @@ public class TaskAiReviewService {
     }
 
     /**
+     * Resolves the employee to attribute an automatic review to.
+     *
+     * <p>Prefers the task creator (manager who created the task). Falls back to
+     * the submission's submitter in case the creator is not set. If neither is
+     * available, returns {@code null} and logs a warning.
+     *
+     * @param submission the submission being reviewed
+     * @return the employee to record as {@code requestedBy}, or {@code null}
+     */
+    private Employee resolveReviewRequester(final TaskSubmission submission) {
+        if (submission.getTask() != null && submission.getTask().getCreatedByEmployee() != null) {
+            return submission.getTask().getCreatedByEmployee();
+        }
+        if (submission.getSubmittedBy() != null) {
+            log.warn("AI review requester fallback: task has no creator — using submitter for submissionId={}",
+                    submission.getId());
+            return submission.getSubmittedBy();
+        }
+        log.warn("AI review requester: neither task creator nor submitter is available — submissionId={}",
+                submission.getId());
+        return null;
+    }
+
+    /**
      * Produces a safe, single-line error description for persistence.
      */
     private String sanitiseError(final Exception e) {
@@ -362,20 +455,55 @@ public class TaskAiReviewService {
     }
 
     /**
-     * Sends an AI_REVIEW_COMPLETED notification to the requester.
-     * Failures here are logged but swallowed so they don't affect the main flow.
+     * Sends AI_REVIEW_COMPLETED notifications.
+     *
+     * <p>Phase 7D: Sends to BOTH:
+     * <ol>
+     *   <li>The requester (manager/HR/admin) — existing behaviour from Phase 7A/7C.</li>
+     *   <li>The employee who submitted the task — new in Phase 7D, using employee-safe message.</li>
+     * </ol>
+     *
+     * <p>Duplicate notifications are prevented: each recipient receives at most one notification
+     * per review. The employee message is intentionally different from the manager message and
+     * does NOT expose the recommended action or any manager-only details.
+     *
+     * <p>Failures here are logged but swallowed so they don't affect the main flow.
      */
     private void sendCompletionNotification(final TaskAiReview review) {
         try {
-            if (review.getRequestedBy() == null || review.getTask() == null) return;
+            if (review.getTask() == null) return;
+            UUID taskId = review.getTask().getId();
             String taskTitle = review.getTask().getTitle();
-            String msg = "AI evaluation for \"" + taskTitle + "\" is ready for review.";
-            notificationService.createNotification(
-                    review.getRequestedBy(),
-                    NotificationType.AI_REVIEW_COMPLETED,
-                    "AI Evaluation Completed",
-                    msg,
-                    review.getTask().getId());
+
+            // Notify the requester (manager/HR/admin)
+            if (review.getRequestedBy() != null) {
+                String managerMsg = "AI evaluation for \"" + taskTitle + "\" is ready for review.";
+                notificationService.createNotification(
+                        review.getRequestedBy(),
+                        NotificationType.AI_REVIEW_COMPLETED,
+                        "AI Evaluation Completed",
+                        managerMsg,
+                        taskId);
+            }
+
+            // Notify the employee who submitted the task (Phase 7D)
+            // Only notify if the submitter is different from the requester (avoid duplicate)
+            Employee submitter = review.getSubmission() != null
+                    ? review.getSubmission().getSubmittedBy() : null;
+            if (submitter != null) {
+                boolean sameAsRequester = review.getRequestedBy() != null
+                        && submitter.getId().equals(review.getRequestedBy().getId());
+                if (!sameAsRequester) {
+                    String employeeMsg = "Your task submission has been evaluated by the AI assistant. "
+                            + "View the feedback to see your strengths and areas for improvement.";
+                    notificationService.createNotification(
+                            submitter,
+                            NotificationType.AI_REVIEW_COMPLETED,
+                            "AI Feedback Available",
+                            employeeMsg,
+                            taskId);
+                }
+            }
         } catch (Exception ex) {
             log.warn("Failed to send AI review completion notification for reviewId={}: {}",
                     review.getId(), ex.getMessage());
@@ -383,20 +511,48 @@ public class TaskAiReviewService {
     }
 
     /**
-     * Sends an AI_REVIEW_FAILED notification to the requester.
-     * Failures here are logged but swallowed so they don't affect the main flow.
+     * Sends AI_REVIEW_FAILED notifications.
+     *
+     * <p>Phase 7D: Notifies the requester. Also notifies the employee with a friendly,
+     * non-technical message (does NOT expose stack traces or API errors).
+     *
+     * <p>Failures here are logged but swallowed so they don't affect the main flow.
      */
     private void sendFailureNotification(final TaskAiReview review) {
         try {
-            if (review.getRequestedBy() == null || review.getTask() == null) return;
+            if (review.getTask() == null) return;
+            UUID taskId = review.getTask().getId();
             String taskTitle = review.getTask().getTitle();
-            String msg = "AI evaluation for \"" + taskTitle + "\" failed. You can retry from the task.";
-            notificationService.createNotification(
-                    review.getRequestedBy(),
-                    NotificationType.AI_REVIEW_FAILED,
-                    "AI Evaluation Failed",
-                    msg,
-                    review.getTask().getId());
+
+            // Notify the requester (manager/HR/admin)
+            if (review.getRequestedBy() != null) {
+                String managerMsg = "AI evaluation for \"" + taskTitle + "\" failed. You can retry from the task.";
+                notificationService.createNotification(
+                        review.getRequestedBy(),
+                        NotificationType.AI_REVIEW_FAILED,
+                        "AI Evaluation Failed",
+                        managerMsg,
+                        taskId);
+            }
+
+            // Notify the employee with a friendly, non-technical message (Phase 7D)
+            // Does NOT expose: error details, stack traces, API provider messages
+            Employee submitter = review.getSubmission() != null
+                    ? review.getSubmission().getSubmittedBy() : null;
+            if (submitter != null) {
+                boolean sameAsRequester = review.getRequestedBy() != null
+                        && submitter.getId().equals(review.getRequestedBy().getId());
+                if (!sameAsRequester) {
+                    String employeeMsg = "The AI evaluation of your submission could not be completed at this time. "
+                            + "Your manager has been notified.";
+                    notificationService.createNotification(
+                            submitter,
+                            NotificationType.AI_REVIEW_FAILED,
+                            "AI Evaluation Unavailable",
+                            employeeMsg,
+                            taskId);
+                }
+            }
         } catch (Exception ex) {
             log.warn("Failed to send AI review failure notification for reviewId={}: {}",
                     review.getId(), ex.getMessage());

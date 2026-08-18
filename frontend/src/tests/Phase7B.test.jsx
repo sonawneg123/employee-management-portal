@@ -269,7 +269,8 @@ describe('TaskAiEvaluationSection — loading / in-flight state', () => {
     setupHooks({ latestReview: PENDING_REVIEW });
 
     renderSection({ taskId: 'task-1', submission: MOCK_SUBMISSION });
-    expect(screen.getByText(/queued/i)).toBeInTheDocument();
+    // Multiple "queued" elements may appear (chip label + alert text) — check at least one exists
+    expect(screen.getAllByText(/queued/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows skeleton when isLoadingLatest is true', () => {
@@ -436,7 +437,8 @@ describe('TaskAiEvaluationSection — failed evaluation', () => {
     // Error text is split across DOM nodes by MUI Alert — use container query
     const alert = document.querySelector('[role="alert"]');
     expect(alert).toBeTruthy();
-    expect(alert.textContent).toMatch(/GroqClientException/i);
+    // Phase 7C: raw exception traces are hidden; human-readable message shown instead
+    expect(alert.textContent).toMatch(/AI evaluation failed/i);
   });
 
   it('shows Retry button', () => {

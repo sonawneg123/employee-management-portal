@@ -89,3 +89,114 @@ export async function getAiReviewById(reviewId) {
   );
   return data;
 }
+
+// ── Phase 7D: Employee AI feedback & manager analytics ─────────────────────────
+
+/**
+ * @typedef {Object} AiFeedbackResponse
+ * @property {string} id
+ * @property {string} submissionId
+ * @property {'PENDING'|'PROCESSING'|'COMPLETED'|'FAILED'} status
+ * @property {number|null} overallScore
+ * @property {number|null} workQualityScore
+ * @property {number|null} completenessScore
+ * @property {number|null} relevanceScore
+ * @property {string|null} summary
+ * @property {string[]} strengths
+ * @property {string[]} areasToImprove
+ * @property {string[]} suggestionsForNextSubmission
+ * @property {string|null} evaluatedAt
+ * @property {string|null} requestedAt
+ * @property {string} evaluationExplanation
+ */
+
+/**
+ * @typedef {Object} AiScoreTrendResponse
+ * @property {string} taskId
+ * @property {Array<{reviewId: string, submissionNumber: number, overallScore: number, qualityScore: number|null, evaluatedAt: string}>} scoreHistory
+ * @property {'IMPROVING'|'STABLE'|'DECLINING'|'INSUFFICIENT_DATA'} trendDirection
+ * @property {number|null} totalScoreChange
+ * @property {number|null} latestScore
+ * @property {number|null} previousScore
+ * @property {number|null} latestScoreChange
+ * @property {boolean} hasTrendData
+ */
+
+/**
+ * @typedef {Object} AiDashboardSummaryResponse
+ * @property {number} totalEvaluated
+ * @property {number|null} averageScore
+ * @property {number} employeesImproving
+ * @property {number} employeesNeedingAttention
+ * @property {number} submissionsAwaitingEvaluation
+ * @property {number} failedEvaluations
+ */
+
+/**
+ * Returns the employee-safe AI feedback for a submission.
+ * Employees may only view their own submission's feedback.
+ * Does NOT expose managerSummary, recommendedAction, or AI internals.
+ *
+ * @param {string} submissionId UUID of the submission
+ * @returns {Promise<AiFeedbackResponse>}
+ */
+export async function getEmployeeAiFeedback(submissionId) {
+  const { data } = await axiosInstance.get(
+    API_ENDPOINTS.TASK_SUBMISSION_AI_FEEDBACK(submissionId),
+  );
+  return data;
+}
+
+/**
+ * Returns the AI evaluation history for a submission (employee-safe view).
+ *
+ * @param {string} submissionId UUID of the submission
+ * @returns {Promise<AiFeedbackResponse[]>}
+ */
+export async function getEmployeeAiHistory(submissionId) {
+  const { data } = await axiosInstance.get(
+    API_ENDPOINTS.TASK_SUBMISSION_AI_HISTORY(submissionId),
+  );
+  return data;
+}
+
+/**
+ * Returns the AI score trend for a task (manager view).
+ * Requires ADMIN, HR, or MANAGER role.
+ *
+ * @param {string} taskId UUID of the task
+ * @returns {Promise<AiScoreTrendResponse>}
+ */
+export async function getAiScoreTrend(taskId) {
+  const { data } = await axiosInstance.get(
+    API_ENDPOINTS.TASK_AI_TREND(taskId),
+  );
+  return data;
+}
+
+/**
+ * Returns AI task insights for the given task (manager view).
+ * No new AI API calls — aggregates stored evaluation data.
+ *
+ * @param {string} taskId UUID of the task
+ * @returns {Promise<import('../constants/api').AiTaskInsightsResponse>}
+ */
+export async function getAiTaskInsights(taskId) {
+  const { data } = await axiosInstance.get(
+    API_ENDPOINTS.TASK_AI_INSIGHTS(taskId),
+  );
+  return data;
+}
+
+/**
+ * Returns the AI summary for the manager dashboard.
+ * Requires ADMIN, HR, or MANAGER role.
+ *
+ * @returns {Promise<AiDashboardSummaryResponse>}
+ */
+export async function getAiDashboardSummary() {
+  const { data } = await axiosInstance.get(
+    API_ENDPOINTS.AI_DASHBOARD_SUMMARY,
+  );
+  return data;
+}

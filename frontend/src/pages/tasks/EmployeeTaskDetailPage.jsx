@@ -6,6 +6,7 @@
  *             shows submission status card (PENDING_REVIEW / CHANGES_REQUESTED / APPROVED),
  *             and allows resubmission after manager requests changes.
  * Phase 6C-6E: Activity timeline, comments panel, attachments (download only).
+ * Phase 7D:   Employee-safe AI feedback section (advisory only).
  */
 
 import React, { useCallback, useState } from 'react';
@@ -39,6 +40,7 @@ import SubmissionStatusCard from '@/components/tasks/SubmissionStatusCard';
 import TaskActivityTimeline from '@/components/tasks/TaskActivityTimeline';
 import TaskComments from '@/components/tasks/TaskComments';
 import TaskAttachments from '@/components/tasks/TaskAttachments';
+import EmployeeAiFeedbackSection from '@/components/tasks/EmployeeAiFeedbackSection';
 
 /**
  * Employee task detail page with full Phase 6B submission lifecycle
@@ -216,7 +218,14 @@ export default function EmployeeTaskDetailPage() {
         {/* ── Submission section ─────────────────────────────────────────── */}
 
         {showChangesRequestedCard && latestSubmission && (
-          <SubmissionStatusCard submission={latestSubmission} />
+          <Box>
+            <SubmissionStatusCard submission={latestSubmission} />
+            {/* Phase 7D: Show AI feedback below manager's changes request, clearly distinguished */}
+            <EmployeeAiFeedbackSection
+              submissionId={latestSubmission?.id}
+              taskId={id}
+            />
+          </Box>
         )}
 
         {showSubmitForm && (
@@ -236,6 +245,11 @@ export default function EmployeeTaskDetailPage() {
         {showStatusCard && (
           <Box sx={{ mt: 3 }}>
             <SubmissionStatusCard submission={latestSubmission} />
+            {/* Phase 7D: Employee-safe AI feedback (advisory, never shows manager decisions) */}
+            <EmployeeAiFeedbackSection
+              submissionId={latestSubmission?.id}
+              taskId={id}
+            />
           </Box>
         )}
 

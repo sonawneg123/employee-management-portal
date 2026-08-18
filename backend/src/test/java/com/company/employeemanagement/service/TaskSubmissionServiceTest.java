@@ -1,5 +1,6 @@
 package com.company.employeemanagement.service;
 
+import com.company.employeemanagement.ai.event.TaskSubmissionAiEvent;
 import com.company.employeemanagement.dto.request.CreateTaskSubmissionRequest;
 import com.company.employeemanagement.dto.request.RequestChangesRequest;
 import com.company.employeemanagement.dto.request.UpdateTaskSubmissionRequest;
@@ -28,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.IOException;
@@ -56,13 +58,14 @@ import static org.mockito.Mockito.when;
 @DisplayName("TaskSubmissionServiceImpl")
 class TaskSubmissionServiceTest {
 
-    @Mock private TaskSubmissionRepository submissionRepository;
-    @Mock private TaskRepository           taskRepository;
-    @Mock private TaskActivityRepository   taskActivityRepository;
-    @Mock private SecurityUtils            securityUtils;
-    @Mock private NotificationService      notificationService;
-    @Mock private FileStorageService       fileStorageService;
-    @Mock private FileValidationService    fileValidationService;
+    @Mock private TaskSubmissionRepository  submissionRepository;
+    @Mock private TaskRepository            taskRepository;
+    @Mock private TaskActivityRepository    taskActivityRepository;
+    @Mock private SecurityUtils             securityUtils;
+    @Mock private NotificationService       notificationService;
+    @Mock private FileStorageService        fileStorageService;
+    @Mock private FileValidationService     fileValidationService;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     private TaskSubmissionServiceImpl submissionService;
 
@@ -71,7 +74,7 @@ class TaskSubmissionServiceTest {
         submissionService = new TaskSubmissionServiceImpl(
                 submissionRepository, taskRepository, taskActivityRepository,
                 securityUtils, notificationService,
-                fileStorageService, fileValidationService);
+                fileStorageService, fileValidationService, eventPublisher);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -712,6 +715,105 @@ class TaskSubmissionServiceTest {
             assertThatThrownBy(() -> submissionService.downloadAttachment(subId))
                     .isInstanceOf(ResourceNotFoundException.class)
                     .hasMessageContaining("no file attachment");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Phase 7C — AI event publishing
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Nested
+    @DisplayName("Phase 7C — AI event publishing")
+    class AiEventPublishing {
+
+        @Test
+        @DisplayName("createSubmission publishes TaskSubmissionAiEvent after save")
+        void createSubmissionPublishesAiEvent() {
+            UUID empId  = UUID.randomUUID();
+            UUID taskId = UUID.randomUUID();
+            UUID subId  = UUID.randomUUID();
+            Employee employee = buildEmployee(empId, "Jane", "Doe");
+            Employee manager  = buildEmployee(UUID.randomUUID(), "John", "Manager");
+            Task task = buildTask(taskId, employee, manager, TaskStatus.IN_PROGRESS);
+            TaskSubmission saved = buildSubmission(subId, task, employee, SubmissionStatus.PENDING_REVIEW);
+
+            CreateTaskSubmissionRequest request = new CreateTaskSubmissionRequest(
+                    "Done the work", "Implemented feature", null
+            );
+
+            when(taskRepository.findByIdWithAssociations(taskId)).thenReturn(Optional.of(task));
+            when(securityUtils.getCurrentEmployee()).thenReturn(Optional.of(employee));
+            when(securityUtils.hasRole("ROLE_EMPLOYEE")).thenReturn(true);
+            when(securityUtils.isPrivileged()).thenReturn(false);
+            when(taskRepository.save(task)).thenReturn(task);
+            when(submissionRepository.save(any(TaskSubmission.class))).thenReturn(saved);
+            when(submissionRepository.findByIdWithAssociations(subId)).thenReturn(Optional.of(saved));
+
+            submissionService.createSubmission(taskId, request, null);
+
+            org.mockito.ArgumentCaptor<Object> captor =
+                    org.mockito.ArgumentCaptor.forClass(Object.class);
+            verify(eventPublisher).publishEvent(captor.capture());
+            assertThat(captor.getValue()).isInstanceOf(TaskSubmissionAiEvent.class);
+            TaskSubmissionAiEvent event = (TaskSubmissionAiEvent) captor.getValue();
+            assertThat(event.submissionId()).isEqualTo(subId);
+            assertThat(event.taskId()).isEqualTo(taskId);
+        }
+
+        @Test
+        @DisplayName("resubmit publishes TaskSubmissionAiEvent after save")
+        void resubmitPublishesAiEvent() {
+            UUID empId  = UUID.randomUUID();
+            UUID mgId   = UUID.randomUUID();
+            UUID taskId = UUID.randomUUID();
+            UUID subId  = UUID.randomUUID();
+            Employee employee = buildEmployee(empId, "Jane", "Doe");
+            Employee manager  = buildEmployee(mgId, "John", "Manager");
+            Task task = buildTask(taskId, employee, manager, TaskStatus.IN_PROGRESS);
+            TaskSubmission sub = buildSubmission(subId, task, employee, SubmissionStatus.CHANGES_REQUESTED);
+            sub.setReviewComment("Please add tests");
+
+            UpdateTaskSubmissionRequest request = new UpdateTaskSubmissionRequest(
+                    "Added tests as requested", "Wrote unit tests", null
+            );
+
+            when(submissionRepository.findByIdWithAssociations(subId)).thenReturn(Optional.of(sub));
+            when(securityUtils.getCurrentEmployee()).thenReturn(Optional.of(employee));
+            when(taskRepository.save(task)).thenReturn(task);
+            when(submissionRepository.save(sub)).thenReturn(sub);
+
+            submissionService.resubmit(subId, request, null);
+
+            org.mockito.ArgumentCaptor<Object> captor =
+                    org.mockito.ArgumentCaptor.forClass(Object.class);
+            verify(eventPublisher).publishEvent(captor.capture());
+            assertThat(captor.getValue()).isInstanceOf(TaskSubmissionAiEvent.class);
+            TaskSubmissionAiEvent event = (TaskSubmissionAiEvent) captor.getValue();
+            assertThat(event.submissionId()).isEqualTo(subId);
+            assertThat(event.taskId()).isEqualTo(taskId);
+        }
+
+        @Test
+        @DisplayName("approve() does NOT publish AI event (only submission/resubmit trigger AI)")
+        void approveDoesNotPublishAiEvent() {
+            UUID empId  = UUID.randomUUID();
+            UUID mgId   = UUID.randomUUID();
+            UUID taskId = UUID.randomUUID();
+            UUID subId  = UUID.randomUUID();
+            Employee employee = buildEmployee(empId, "Jane", "Doe");
+            Employee manager  = buildEmployee(mgId, "John", "Manager");
+            Task task = buildTask(taskId, employee, manager, TaskStatus.SUBMITTED);
+            TaskSubmission sub = buildSubmission(subId, task, employee, SubmissionStatus.PENDING_REVIEW);
+
+            when(securityUtils.isPrivileged()).thenReturn(true);
+            when(securityUtils.getCurrentEmployee()).thenReturn(Optional.of(manager));
+            when(submissionRepository.findByIdWithAssociations(subId)).thenReturn(Optional.of(sub));
+            when(taskRepository.save(task)).thenReturn(task);
+            when(submissionRepository.save(sub)).thenReturn(sub);
+
+            submissionService.approve(subId);
+
+            verify(eventPublisher, never()).publishEvent(any(TaskSubmissionAiEvent.class));
         }
     }
 }

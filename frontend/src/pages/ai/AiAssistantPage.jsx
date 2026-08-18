@@ -1,51 +1,71 @@
 /**
- * @fileoverview AI Assistant page.
+ * @fileoverview AI Copilot page — Phase 7E.
  *
- * A thin page wrapper around {@link AiAssistantChat} that provides the page
- * title, header, and the disclaimer about Phase 1 limitations.
+ * Replaces the Phase 1 general HR assistant with the full Agentic AI Copilot.
+ * The original simple RAG assistant is preserved and accessible via the Legacy tab.
  */
 
-import React from 'react';
-import { Box, Typography, Alert } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Alert, Tabs, Tab } from '@mui/material';
 import { Helmet } from 'react-helmet-async';
 import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
+import AiCopilotChat from '@/components/ai/AiCopilotChat';
 import AiAssistantChat from '@/components/ai/AiAssistantChat';
 
 /**
- * AI Assistant page component.
+ * AI Copilot page.
  *
  * @returns {JSX.Element}
  */
 export default function AiAssistantPage() {
+  const [tab, setTab] = useState(0);
+
   return (
     <>
       <Helmet>
-        <title>AI Assistant — Employee Management Portal</title>
+        <title>AI Copilot — Employee Management Portal</title>
       </Helmet>
 
-      <Box sx={{ maxWidth: 800, mx: 'auto', px: { xs: 1, sm: 2 }, py: 3 }}>
-        {/* ── Page header ──────────────────────────────────────────────── */}
+      <Box sx={{ maxWidth: 880, mx: 'auto', px: { xs: 1, sm: 2 }, py: 3 }}>
+        {/* Page header */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
           <SmartToyRoundedIcon sx={{ fontSize: 32, color: 'primary.main' }} />
           <Box>
             <Typography variant="h5" fontWeight={700}>
-              HR AI Assistant
+              AI Copilot
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Powered by Groq · Phase 1
+              Powered by Groq · Phase 7E — Agentic
             </Typography>
           </Box>
         </Box>
 
-        {/* ── Phase 1 disclaimer ────────────────────────────────────────── */}
-        <Alert severity="info" sx={{ mb: 2 }}>
-          <strong>Phase 1 — General HR Guidance Only.</strong> The AI assistant provides general HR
-          information and guidance. It does not have access to your personal records, leave balances,
-          or any private company data in this phase.
-        </Alert>
+        {/* Tabs */}
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Tab label="AI Copilot (Agentic)" />
+          <Tab label="General HR Assistant (Legacy)" />
+        </Tabs>
 
-        {/* ── Chat UI ──────────────────────────────────────────────────── */}
-        <AiAssistantChat />
+        {tab === 0 && (
+          <>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <strong>Phase 7E — Agentic AI Copilot.</strong> I have access to live application data
+              and can perform controlled actions with your confirmation. My tool access is scoped to
+              your role — I cannot access data outside your permissions.
+            </Alert>
+            <AiCopilotChat />
+          </>
+        )}
+
+        {tab === 1 && (
+          <>
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <strong>General HR Guidance Only.</strong> This assistant provides general HR information
+              and company policy guidance. It does not have access to live application data.
+            </Alert>
+            <AiAssistantChat />
+          </>
+        )}
       </Box>
     </>
   );

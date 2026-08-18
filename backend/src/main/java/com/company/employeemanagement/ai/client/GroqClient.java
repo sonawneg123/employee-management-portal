@@ -66,6 +66,61 @@ public class GroqClient {
     }
 
     /**
+     * Sends a multi-turn conversation with available tool schemas to the Groq API.
+     *
+     * <p>Tool schemas are injected into the system prompt as JSON so the model
+     * knows which tools to call. The model outputs either a plain text answer
+     * or a JSON tool-call block.
+     *
+     * @param systemPrompt the agent system prompt
+     * @param messages     the conversation history (user + tool_result turns)
+     * @param toolSchemas  available tool schemas for this turn
+     * @return the model's reply text (may contain a tool_call JSON block)
+     * @throws GroqClientException if any communication or API error occurs
+     */
+    public String chatWithToolSchema(final String systemPrompt,
+                                      final List<com.company.employeemanagement.ai.agent.service.AiAgentService.GroqMessage> messages,
+                                      final List<com.company.employeemanagement.ai.agent.service.AiAgentService.ToolSchema> toolSchemas) {
+        // Build enhanced system prompt with tool instruction
+        StringBuilder enhancedSystem = new StringBuilder(systemPrompt);
+
+        if (!toolSchemas.isEmpty()) {
+            enhancedSystem.append("\n\nAVAILABLE TOOLS:\n");
+            enhancedSystem.append("If you need real data to answer, output ONLY a JSON tool call in this exact format:\n");
+            enhancedSystem.append("{\"tool_call\": {\"name\": \"<tool_name>\", \"arguments\": {<args>}}}\n");
+            enhancedSystem.append("Output ONLY the JSON with no other text when calling a tool.\n");
+            enhancedSystem.append("When you have all the data you need, respond normally in plain text.\n\n");
+            enhancedSystem.append("Tools you may call:\n");
+            for (com.company.employeemanagement.ai.agent.service.AiAgentService.ToolSchema tool : toolSchemas) {
+                enhancedSystem.append("- ").append(tool.name()).append(": ").append(tool.description()).append("\n");
+                enhancedSystem.append("  Parameters schema: ").append(tool.parameterSchema()).append("\n");
+            }
+        } else {
+            enhancedSystem.append("\n\nNo tools are available for this request. Answer using only your existing knowledge.\n");
+        }
+
+        // Build the last user message from the conversation
+        String lastUserMessage = messages.isEmpty() ? ""
+                : messages.get(messages.size() - 1).content();
+
+        // Build a combined user message with conversation context
+        StringBuilder combinedUser = new StringBuilder();
+        if (messages.size() > 1) {
+            combinedUser.append("[CONVERSATION CONTEXT]\n");
+            for (int i = 0; i < messages.size() - 1; i++) {
+                com.company.employeemanagement.ai.agent.service.AiAgentService.GroqMessage m = messages.get(i);
+                combinedUser.append(m.role().toUpperCase()).append(": ").append(m.content()).append("\n");
+            }
+            combinedUser.append("[END CONTEXT]\n\n");
+            combinedUser.append("[CURRENT MESSAGE]\n").append(lastUserMessage);
+        } else {
+            combinedUser.append(lastUserMessage);
+        }
+
+        return chat(enhancedSystem.toString(), combinedUser.toString());
+    }
+
+    /**
      * Sends a single user message (with a system prompt) to the Groq API and
      * returns the model's reply as a plain string.
      *

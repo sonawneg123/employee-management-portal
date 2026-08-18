@@ -623,15 +623,22 @@ export default function TaskAiEvaluationSection({ taskId, submission, onRunCompl
           </Typography>
         )}
 
-        {/* ── Loading skeleton ─────────────────────────────────────────── */}
+        {/* ── Loading skeleton / In-flight ─────────────────────────────── */}
         {(isLoadingLatest || isInFlight) && (
           <Box sx={{ mb: 2 }}>
-            {isInFlight && !runMutation.isPending && (
+            {/* PENDING = automatically queued, not yet processing */}
+            {latestReview?.status === 'PENDING' && !runMutation.isPending && (
               <Alert severity="info" icon={<HourglassTopRoundedIcon />} sx={{ mb: 2 }}>
-                AI is evaluating this submission… This may take 10–30 seconds.
+                AI evaluation queued — processing will start shortly…
               </Alert>
             )}
-            {(isLoadingLatest || (isInFlight && runMutation.isPending)) && (
+            {/* PROCESSING = Groq is actively evaluating */}
+            {latestReview?.status === 'PROCESSING' && !runMutation.isPending && (
+              <Alert severity="info" icon={<HourglassTopRoundedIcon />} sx={{ mb: 2 }}>
+                AI evaluation in progress… This may take 10–30 seconds.
+              </Alert>
+            )}
+            {(isLoadingLatest || runMutation.isPending) && (
               <Box>
                 <Skeleton variant="text" width="60%" height={32} />
                 <Skeleton variant="text" width="80%" />
@@ -659,13 +666,16 @@ export default function TaskAiEvaluationSection({ taskId, submission, onRunCompl
                 size="small"
                 onClick={handleRun}
                 disabled={runMutation.isPending}
+                data-testid="retry-evaluation-btn"
               >
-                Retry
+                Retry Evaluation
               </Button>
             }
           >
             AI evaluation failed.
-            {displayedReview.errorMessage ? ` Details: ${displayedReview.errorMessage}` : ''}
+            {displayedReview.errorMessage
+              ? ` The AI provider reported an issue. You can retry using the button.`
+              : ' You can retry using the button.'}
           </Alert>
         )}
 
