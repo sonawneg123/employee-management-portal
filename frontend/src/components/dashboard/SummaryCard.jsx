@@ -2,6 +2,7 @@
  * @fileoverview SummaryCard — premium KPI metric card with trend indicator.
  *
  * Displays a single numeric metric with icon, trend delta, and subtle hover animation.
+ * Uses a colored icon container and clean typography hierarchy.
  */
 
 import React from 'react';
@@ -13,9 +14,9 @@ import { formatCompactNumber, formatTrend, trendColor } from '@/utils/dashboardF
 
 /** @param {{ change: number }} props */
 function TrendIcon({ change }) {
-  if (change > 0) return <TrendingUpIcon sx={{ fontSize: 13 }} />;
-  if (change < 0) return <TrendingDownIcon sx={{ fontSize: 13 }} />;
-  return <TrendingFlatIcon sx={{ fontSize: 13 }} />;
+  if (change > 0) return <TrendingUpIcon sx={{ fontSize: 12 }} />;
+  if (change < 0) return <TrendingDownIcon sx={{ fontSize: 12 }} />;
+  return <TrendingFlatIcon sx={{ fontSize: 12 }} />;
 }
 
 /**
@@ -50,12 +51,19 @@ export default function SummaryCard({
     return (
       <Card sx={{ height: '100%' }}>
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2.5 }}>
-            <Skeleton variant="rounded" width={48} height={48} sx={{ borderRadius: '12px' }} />
-            <Skeleton variant="text" width={50} height={22} />
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              mb: 2.5,
+            }}
+          >
+            <Skeleton variant="rounded" width={52} height={52} sx={{ borderRadius: '14px' }} />
+            <Skeleton variant="rounded" width={54} height={22} sx={{ borderRadius: '6px' }} />
           </Box>
-          <Skeleton variant="text" width="45%" height={40} />
-          <Skeleton variant="text" width="65%" height={20} />
+          <Skeleton variant="text" width="50%" height={44} sx={{ mb: 0.5 }} />
+          <Skeleton variant="text" width="70%" height={20} />
         </CardContent>
       </Card>
     );
@@ -71,9 +79,9 @@ export default function SummaryCard({
         '&:hover': {
           boxShadow: (theme) =>
             theme.palette.mode === 'dark'
-              ? '0 8px 32px rgba(0,0,0,0.5)'
-              : '0 8px 32px rgba(0,0,0,0.1)',
-          transform: 'translateY(-2px)',
+              ? '0 12px 40px rgba(0,0,0,0.5)'
+              : '0 12px 40px rgba(0,0,0,0.1)',
+          transform: 'translateY(-3px)',
         },
       }}
     >
@@ -89,9 +97,9 @@ export default function SummaryCard({
         >
           <Box
             sx={{
-              width: 48,
-              height: 48,
-              borderRadius: '12px',
+              width: 52,
+              height: 52,
+              borderRadius: '14px',
               bgcolor: iconBg,
               display: 'flex',
               alignItems: 'center',
@@ -100,7 +108,7 @@ export default function SummaryCard({
             }}
             aria-hidden="true"
           >
-            <Icon sx={{ color: iconColor, fontSize: 22 }} />
+            <Icon sx={{ color: iconColor, fontSize: 24 }} />
           </Box>
 
           {trend != null && (
@@ -108,12 +116,12 @@ export default function SummaryCard({
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 0.3,
+                gap: 0.4,
                 color: trendClr,
                 bgcolor: `${trendClr}18`,
                 borderRadius: '6px',
-                px: 0.75,
-                py: 0.35,
+                px: 0.85,
+                py: 0.4,
               }}
               aria-label={`Trend: ${formatTrend(trend)} ${trendLabel}`}
             >
@@ -125,11 +133,16 @@ export default function SummaryCard({
           )}
         </Box>
 
-        {/* Metric */}
+        {/* Metric value */}
         <Typography
           variant="h3"
           fontWeight={800}
-          sx={{ lineHeight: 1.1, mb: 0.5, letterSpacing: '-0.02em' }}
+          sx={{
+            lineHeight: 1.1,
+            mb: 0.5,
+            letterSpacing: '-0.03em',
+            fontSize: { xs: '1.75rem', sm: '2rem' },
+          }}
           aria-label={`${label}: ${value}`}
         >
           {formatCompactNumber(value)}
@@ -140,7 +153,7 @@ export default function SummaryCard({
         </Typography>
 
         {trend != null && (
-          <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.5 }}>
+          <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.75 }}>
             {trend >= 0 ? '+' : ''}
             {trend} {trendLabel}
           </Typography>

@@ -38,7 +38,7 @@ export function useTaskSubmissions(taskId, opts = {}) {
   return useQuery({
     queryKey: submissionKeys.forTask(taskId),
     queryFn: () => getSubmissionsForTask(taskId),
-    enabled: Boolean(taskId) && (opts.enabled !== false),
+    enabled: Boolean(taskId) && opts.enabled !== false,
     staleTime: 15_000,
     refetchInterval: 20_000,
     refetchIntervalInBackground: false,
@@ -55,7 +55,7 @@ export function useLatestSubmission(taskId, opts = {}) {
   return useQuery({
     queryKey: submissionKeys.latestForTask(taskId),
     queryFn: () => getLatestSubmission(taskId),
-    enabled: Boolean(taskId) && (opts.enabled !== false),
+    enabled: Boolean(taskId) && opts.enabled !== false,
     staleTime: 15_000,
     refetchInterval: 20_000,
     refetchIntervalInBackground: false,

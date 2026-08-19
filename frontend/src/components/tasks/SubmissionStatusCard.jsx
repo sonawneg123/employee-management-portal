@@ -93,12 +93,7 @@ export default function SubmissionStatusCard({ submission }) {
           <Typography variant="subtitle1" fontWeight={700}>
             Submission Status
           </Typography>
-          <Chip
-            icon={config.icon}
-            label={config.label}
-            color={config.color}
-            size="small"
-          />
+          <Chip icon={config.icon} label={config.label} color={config.color} size="small" />
         </Stack>
 
         <Divider sx={{ mb: 2 }} />

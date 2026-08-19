@@ -127,19 +127,13 @@ const NOT_CHECKED_IN_EMPLOYEE = {
 describe('EmployeeAvailabilitySelector — Phase 6G', () => {
   it('renders without errors with mixed availability employees', () => {
     render(
-      <ControlledSelector
-        employees={[AVAILABLE_EMPLOYEE, DISABLED_EMPLOYEE, ON_LEAVE_EMPLOYEE]}
-      />
+      <ControlledSelector employees={[AVAILABLE_EMPLOYEE, DISABLED_EMPLOYEE, ON_LEAVE_EMPLOYEE]} />,
     );
     expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 
   it('shows disabled chip for a disabled employee when dropdown is open', async () => {
-    render(
-      <ControlledSelector
-        employees={[AVAILABLE_EMPLOYEE, DISABLED_EMPLOYEE]}
-      />
-    );
+    render(<ControlledSelector employees={[AVAILABLE_EMPLOYEE, DISABLED_EMPLOYEE]} />);
     const combo = screen.getByRole('combobox');
     fireEvent.mouseDown(combo);
     // The disabled employee name should be visible in options
@@ -150,18 +144,14 @@ describe('EmployeeAvailabilitySelector — Phase 6G', () => {
   });
 
   it('shows approved leave chip for an employee on approved leave', async () => {
-    render(
-      <ControlledSelector employees={[AVAILABLE_EMPLOYEE, ON_LEAVE_EMPLOYEE]} />
-    );
+    render(<ControlledSelector employees={[AVAILABLE_EMPLOYEE, ON_LEAVE_EMPLOYEE]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     expect(await screen.findByText('Carol Leave')).toBeInTheDocument();
     expect(await screen.findByText(/Approved Leave/i)).toBeInTheDocument();
   });
 
   it('shows checked out chip for a checked out employee', async () => {
-    render(
-      <ControlledSelector employees={[AVAILABLE_EMPLOYEE, CHECKED_OUT_EMPLOYEE]} />
-    );
+    render(<ControlledSelector employees={[AVAILABLE_EMPLOYEE, CHECKED_OUT_EMPLOYEE]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     expect(await screen.findByText('Dave CheckedOut')).toBeInTheDocument();
     expect(await screen.findByText(/Checked Out/i)).toBeInTheDocument();
@@ -175,9 +165,7 @@ describe('EmployeeAvailabilitySelector — Phase 6G', () => {
   });
 
   it('disabled employee option has Mui-disabled class', async () => {
-    render(
-      <ControlledSelector employees={[AVAILABLE_EMPLOYEE, DISABLED_EMPLOYEE]} />
-    );
+    render(<ControlledSelector employees={[AVAILABLE_EMPLOYEE, DISABLED_EMPLOYEE]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     // Wait for the options to render
     await screen.findByText('Bob Disabled');
@@ -199,7 +187,7 @@ describe('EmployeeAvailabilitySelector — Phase 6G', () => {
       <ControlledSelector
         employees={[AVAILABLE_EMPLOYEE, DISABLED_EMPLOYEE]}
         currentAssigneeId="emp-1"
-      />
+      />,
     );
     fireEvent.mouseDown(screen.getByRole('combobox'));
     expect(await screen.findByText(/Currently Assigned/i)).toBeInTheDocument();

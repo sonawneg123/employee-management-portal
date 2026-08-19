@@ -2,7 +2,7 @@
  * @fileoverview SectionCard — premium titled section container.
  *
  * Wraps dashboard widgets with a consistent card header, optional refresh,
- * and children content area.
+ * and children content area. Used throughout dashboard and management pages.
  */
 
 import React from 'react';
@@ -44,7 +44,7 @@ export default function SectionCard({
       {/* Header */}
       <Box
         sx={{
-          px: 2.5,
+          px: 3,
           pt: 2.5,
           pb: 1.5,
           display: 'flex',
@@ -53,8 +53,12 @@ export default function SectionCard({
           gap: 1,
         }}
       >
-        <Box>
-          <Typography variant="h5" fontWeight={700} sx={{ letterSpacing: '-0.005em' }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            sx={{ letterSpacing: '-0.01em', lineHeight: 1.3 }}
+          >
             {title}
           </Typography>
           {subtitle && (
@@ -86,6 +90,7 @@ export default function SectionCard({
                     '0%': { transform: 'rotate(0deg)' },
                     '100%': { transform: 'rotate(360deg)' },
                   },
+                  '&:hover': { bgcolor: 'rgba(79,70,229,0.08)', color: 'primary.main' },
                 }}
               >
                 <RefreshRoundedIcon sx={{ fontSize: 15 }} />
@@ -100,8 +105,8 @@ export default function SectionCard({
       <CardContent
         sx={{
           flexGrow: 1,
-          p: 2.5,
-          '&:last-child': { pb: 2.5 },
+          p: 3,
+          '&:last-child': { pb: 3 },
           ...contentSx,
         }}
       >

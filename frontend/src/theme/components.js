@@ -1,9 +1,11 @@
 /**
- * @fileoverview Material UI component overrides — premium SaaS design system.
+ * @fileoverview Material UI component overrides — PeopleCore HR SaaS design system.
  *
- * Applies global defaults that eliminate repetitive prop drilling.
- * Design tokens: border-radius 12px cards, 10px inputs, 8px buttons.
- * Animations: 150–250ms ease, respects prefers-reduced-motion.
+ * Design tokens:
+ * - Cards: 16px radius, white background, soft shadow
+ * - Inputs: 10px radius, soft focus ring
+ * - Buttons: 10px radius, no elevation on contained
+ * - Sidebar: light variant, indigo active state
  *
  * @param {import('@mui/material').PaletteMode} mode
  * @returns {import('@mui/material').ThemeOptions['components']}
@@ -20,9 +22,8 @@ export function getComponentOverrides(mode) {
           scrollbarWidth: 'thin',
           scrollbarColor: isDark
             ? 'rgba(255,255,255,0.15) transparent'
-            : 'rgba(0,0,0,0.12) transparent',
+            : 'rgba(79,70,229,0.18) transparent',
         },
-        /* Page entrance animation — respects prefers-reduced-motion */
         '@keyframes fadeUp': {
           from: { opacity: 0, transform: 'translateY(12px)' },
           to: { opacity: 1, transform: 'translateY(0)' },
@@ -57,14 +58,20 @@ export function getComponentOverrides(mode) {
           transition: 'all 0.15s ease',
           '&:active': { transform: 'scale(0.98)' },
         },
-        sizeSmall: { padding: '5px 14px', fontSize: '0.8125rem' },
+        sizeSmall: { padding: '6px 14px', fontSize: '0.8125rem' },
         sizeLarge: { padding: '12px 28px', fontSize: '0.9375rem' },
         contained: {
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: isDark
-              ? '0 4px 16px rgba(79,70,229,0.35)'
-              : '0 4px 16px rgba(79,70,229,0.25)',
+            boxShadow: isDark ? '0 4px 16px rgba(79,70,229,0.4)' : '0 4px 16px rgba(79,70,229,0.3)',
+          },
+        },
+        containedWarning: {
+          color: '#fff',
+          background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #D97706, #B45309)',
+            boxShadow: '0 4px 16px rgba(245,158,11,0.35)',
           },
         },
         outlined: {
@@ -79,9 +86,12 @@ export function getComponentOverrides(mode) {
       styleOverrides: {
         root: {
           borderRadius: 16,
-          border: `1px solid ${isDark ? 'rgba(241,245,249,0.07)' : '#E2E8F0'}`,
+          border: `1px solid ${isDark ? 'rgba(241,245,249,0.07)' : '#E5E7EB'}`,
           transition: 'box-shadow 0.2s ease, transform 0.2s ease',
           backgroundImage: 'none',
+          boxShadow: isDark
+            ? '0 1px 4px rgba(0,0,0,0.3)'
+            : '0 1px 4px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.02)',
         },
       },
     },
@@ -97,7 +107,7 @@ export function getComponentOverrides(mode) {
             : '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
         },
         elevation2: {
-          boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.5)' : '0 4px 12px rgba(0,0,0,0.08)',
+          boxShadow: isDark ? '0 4px 12px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.08)',
         },
         elevation4: {
           boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.6)' : '0 8px 32px rgba(0,0,0,0.1)',
@@ -117,13 +127,14 @@ export function getComponentOverrides(mode) {
       styleOverrides: {
         root: {
           borderRadius: 10,
+          backgroundColor: isDark ? 'transparent' : '#FFFFFF',
           transition: 'box-shadow 0.15s ease',
           '&.Mui-focused': {
-            boxShadow: `0 0 0 3px ${isDark ? 'rgba(79,70,229,0.25)' : 'rgba(79,70,229,0.15)'}`,
+            boxShadow: `0 0 0 3px ${isDark ? 'rgba(79,70,229,0.25)' : 'rgba(79,70,229,0.12)'}`,
           },
         },
         notchedOutline: {
-          borderColor: isDark ? 'rgba(241,245,249,0.15)' : '#E2E8F0',
+          borderColor: isDark ? 'rgba(241,245,249,0.15)' : '#E5E7EB',
           borderWidth: '1.5px',
         },
         input: {
@@ -137,8 +148,9 @@ export function getComponentOverrides(mode) {
       defaultProps: { shrink: true },
       styleOverrides: {
         root: {
-          fontWeight: 500,
-          fontSize: '0.875rem',
+          fontWeight: 600,
+          fontSize: '0.8125rem',
+          color: isDark ? 'rgba(241,245,249,0.65)' : '#374151',
         },
       },
     },
@@ -167,13 +179,13 @@ export function getComponentOverrides(mode) {
       styleOverrides: {
         root: {
           '& .MuiTableCell-head': {
-            fontWeight: 600,
-            fontSize: '0.75rem',
-            letterSpacing: '0.05em',
+            fontWeight: 700,
+            fontSize: '0.7rem',
+            letterSpacing: '0.07em',
             textTransform: 'uppercase',
-            color: isDark ? 'rgba(241,245,249,0.55)' : '#64748B',
-            backgroundColor: isDark ? 'rgba(255,255,255,0.025)' : '#F8FAFC',
-            borderBottom: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E2E8F0'}`,
+            color: isDark ? 'rgba(241,245,249,0.55)' : '#6B7280',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.025)' : '#F9FAFB',
+            borderBottom: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E5E7EB'}`,
           },
         },
       },
@@ -183,7 +195,7 @@ export function getComponentOverrides(mode) {
       styleOverrides: {
         root: {
           fontSize: '0.875rem',
-          borderColor: isDark ? 'rgba(241,245,249,0.07)' : '#F1F5F9',
+          borderColor: isDark ? 'rgba(241,245,249,0.07)' : '#F3F4F6',
           padding: '12px 16px',
         },
       },
@@ -193,9 +205,18 @@ export function getComponentOverrides(mode) {
       styleOverrides: {
         root: {
           '&:hover': {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(79,70,229,0.025)',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(79,70,229,0.03)',
           },
           transition: 'background-color 0.15s ease',
+        },
+      },
+    },
+
+    MuiTableContainer: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          border: `1px solid ${isDark ? 'rgba(241,245,249,0.07)' : '#E5E7EB'}`,
         },
       },
     },
@@ -220,6 +241,10 @@ export function getComponentOverrides(mode) {
           fontWeight: 500,
           borderRadius: 8,
           padding: '6px 10px',
+          backgroundColor: isDark ? '#374151' : '#111827',
+        },
+        arrow: {
+          color: isDark ? '#374151' : '#111827',
         },
       },
     },
@@ -228,7 +253,8 @@ export function getComponentOverrides(mode) {
       styleOverrides: {
         paper: {
           borderRadius: 20,
-          border: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E2E8F0'}`,
+          border: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E5E7EB'}`,
+          boxShadow: isDark ? '0 25px 50px rgba(0,0,0,0.7)' : '0 25px 50px rgba(0,0,0,0.12)',
         },
       },
     },
@@ -258,7 +284,7 @@ export function getComponentOverrides(mode) {
     MuiAlert: {
       styleOverrides: {
         root: {
-          borderRadius: 10,
+          borderRadius: 12,
           fontSize: '0.875rem',
           fontWeight: 500,
         },
@@ -305,7 +331,7 @@ export function getComponentOverrides(mode) {
     MuiDivider: {
       styleOverrides: {
         root: {
-          borderColor: isDark ? 'rgba(241,245,249,0.08)' : '#E2E8F0',
+          borderColor: isDark ? 'rgba(241,245,249,0.08)' : '#E5E7EB',
         },
       },
     },
@@ -316,14 +342,17 @@ export function getComponentOverrides(mode) {
           fontWeight: 600,
           fontSize: '0.875rem',
           textTransform: 'none',
-          minHeight: 40,
-          padding: '8px 16px',
+          minHeight: 44,
+          padding: '8px 20px',
         },
       },
     },
 
     MuiTabs: {
       styleOverrides: {
+        root: {
+          minHeight: 44,
+        },
         indicator: {
           height: 2,
           borderRadius: 2,
@@ -342,8 +371,8 @@ export function getComponentOverrides(mode) {
     MuiMenu: {
       styleOverrides: {
         paper: {
-          borderRadius: 12,
-          border: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E2E8F0'}`,
+          borderRadius: 14,
+          border: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E5E7EB'}`,
           boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.6)' : '0 8px 32px rgba(0,0,0,0.1)',
           backgroundImage: 'none',
         },
@@ -355,11 +384,17 @@ export function getComponentOverrides(mode) {
         root: {
           fontSize: '0.875rem',
           fontWeight: 500,
-          borderRadius: 6,
+          borderRadius: 8,
           margin: '2px 4px',
           padding: '7px 10px',
           '&:hover': {
             backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(79,70,229,0.06)',
+          },
+          '&.Mui-selected': {
+            backgroundColor: isDark ? 'rgba(79,70,229,0.2)' : 'rgba(79,70,229,0.08)',
+            '&:hover': {
+              backgroundColor: isDark ? 'rgba(79,70,229,0.3)' : 'rgba(79,70,229,0.12)',
+            },
           },
         },
       },
@@ -368,8 +403,8 @@ export function getComponentOverrides(mode) {
     MuiPopover: {
       styleOverrides: {
         paper: {
-          borderRadius: 12,
-          border: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E2E8F0'}`,
+          borderRadius: 14,
+          border: `1px solid ${isDark ? 'rgba(241,245,249,0.08)' : '#E5E7EB'}`,
         },
       },
     },
@@ -394,8 +429,17 @@ export function getComponentOverrides(mode) {
           '&::after': {
             background: isDark
               ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)'
-              : 'linear-gradient(90deg, transparent, rgba(0,0,0,0.03), transparent)',
+              : 'linear-gradient(90deg, transparent, rgba(79,70,229,0.04), transparent)',
           },
+        },
+      },
+    },
+
+    MuiBadge: {
+      styleOverrides: {
+        badge: {
+          fontWeight: 700,
+          fontSize: '0.65rem',
         },
       },
     },

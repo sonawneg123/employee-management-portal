@@ -67,10 +67,7 @@ export default function EmployeeTaskDetailPage() {
 
   // Fetch the latest submission when the task has been submitted or is completed
   const hasSubmission = task && ['SUBMITTED', 'COMPLETED', 'IN_PROGRESS'].includes(task.status);
-  const {
-    data: latestSubmission,
-    isLoading: isLoadingSubmission,
-  } = useLatestSubmission(id, {
+  const { data: latestSubmission, isLoading: isLoadingSubmission } = useLatestSubmission(id, {
     enabled: Boolean(id) && hasSubmission,
   });
 
@@ -84,9 +81,12 @@ export default function EmployeeTaskDetailPage() {
   // ── Start task ──────────────────────────────────────────────────────────────
   const handleStartTask = async () => {
     if (isTaskActionsBlocked) {
-      showSnackbar('warning', isCheckedOut
-        ? 'You have checked out. Check in again to start working on tasks.'
-        : 'You must check in before starting tasks.');
+      showSnackbar(
+        'warning',
+        isCheckedOut
+          ? 'You have checked out. Check in again to start working on tasks.'
+          : 'You must check in before starting tasks.',
+      );
       return;
     }
     try {
@@ -127,14 +127,14 @@ export default function EmployeeTaskDetailPage() {
 
   // ── Render helpers ──────────────────────────────────────────────────────────
 
-  const showSubmitForm = task?.status === 'IN_PROGRESS'
-    && (!latestSubmission || latestSubmission.reviewStatus === 'CHANGES_REQUESTED');
+  const showSubmitForm =
+    task?.status === 'IN_PROGRESS' &&
+    (!latestSubmission || latestSubmission.reviewStatus === 'CHANGES_REQUESTED');
 
-  const showStatusCard = latestSubmission
-    && ['SUBMITTED', 'COMPLETED'].includes(task?.status);
+  const showStatusCard = latestSubmission && ['SUBMITTED', 'COMPLETED'].includes(task?.status);
 
-  const showChangesRequestedCard = task?.status === 'IN_PROGRESS'
-    && latestSubmission?.reviewStatus === 'CHANGES_REQUESTED';
+  const showChangesRequestedCard =
+    task?.status === 'IN_PROGRESS' && latestSubmission?.reviewStatus === 'CHANGES_REQUESTED';
 
   if (isLoading) {
     return (
@@ -161,7 +161,9 @@ export default function EmployeeTaskDetailPage() {
 
   return (
     <>
-      <Helmet><title>{task.title} | My Tasks</title></Helmet>
+      <Helmet>
+        <title>{task.title} | My Tasks</title>
+      </Helmet>
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Breadcrumb navigation */}
@@ -169,18 +171,20 @@ export default function EmployeeTaskDetailPage() {
           <IconButton onClick={() => navigate(ROUTES.EMPLOYEE_TASKS)}>
             <ArrowBackRoundedIcon />
           </IconButton>
-          <Typography variant="h6" color="text.secondary">My Tasks</Typography>
-          <Typography variant="h6" color="text.secondary">›</Typography>
-          <Typography variant="h6" noWrap sx={{ maxWidth: 400 }}>{task.title}</Typography>
+          <Typography variant="h6" color="text.secondary">
+            My Tasks
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            ›
+          </Typography>
+          <Typography variant="h6" noWrap sx={{ maxWidth: 400 }}>
+            {task.title}
+          </Typography>
         </Box>
 
         {/* Attendance restriction banner — shown when employee is checked out OR hasn't checked in yet */}
         {isTaskActionsBlocked && (
-          <Alert
-            severity="warning"
-            icon={<LockClockRoundedIcon />}
-            sx={{ mb: 3 }}
-          >
+          <Alert severity="warning" icon={<LockClockRoundedIcon />} sx={{ mb: 3 }}>
             {isCheckedOut ? (
               <>
                 <Typography variant="body2" fontWeight={600}>
@@ -195,9 +199,7 @@ export default function EmployeeTaskDetailPage() {
                 <Typography variant="body2" fontWeight={600}>
                   You have not checked in yet today.
                 </Typography>
-                <Typography variant="body2">
-                  Please check in to enable task actions.
-                </Typography>
+                <Typography variant="body2">Please check in to enable task actions.</Typography>
               </>
             )}
           </Alert>
@@ -210,9 +212,11 @@ export default function EmployeeTaskDetailPage() {
           isUpdatingStatus={updateStatusMutation.isPending}
           showStartButton={task.status === 'ASSIGNED'}
           startDisabled={isTaskActionsBlocked}
-          startDisabledReason={isCheckedOut
-            ? 'You have checked out. Check in again to start working.'
-            : 'You have not checked in today. Check in to start working.'}
+          startDisabledReason={
+            isCheckedOut
+              ? 'You have checked out. Check in again to start working.'
+              : 'You have not checked in today. Check in to start working.'
+          }
         />
 
         {/* ── Submission section ─────────────────────────────────────────── */}
@@ -221,10 +225,7 @@ export default function EmployeeTaskDetailPage() {
           <Box>
             <SubmissionStatusCard submission={latestSubmission} />
             {/* Phase 7D: Show AI feedback below manager's changes request, clearly distinguished */}
-            <EmployeeAiFeedbackSection
-              submissionId={latestSubmission?.id}
-              taskId={id}
-            />
+            <EmployeeAiFeedbackSection submissionId={latestSubmission?.id} taskId={id} />
           </Box>
         )}
 
@@ -235,9 +236,7 @@ export default function EmployeeTaskDetailPage() {
               existingSubmission={showChangesRequestedCard ? latestSubmission : null}
               isResubmit={showChangesRequestedCard}
               onSubmit={showChangesRequestedCard ? handleResubmit : handleSubmitTask}
-              isSubmitting={
-                createSubmissionMutation.isPending || resubmitMutation.isPending
-              }
+              isSubmitting={createSubmissionMutation.isPending || resubmitMutation.isPending}
             />
           </Box>
         )}
@@ -246,10 +245,7 @@ export default function EmployeeTaskDetailPage() {
           <Box sx={{ mt: 3 }}>
             <SubmissionStatusCard submission={latestSubmission} />
             {/* Phase 7D: Employee-safe AI feedback (advisory, never shows manager decisions) */}
-            <EmployeeAiFeedbackSection
-              submissionId={latestSubmission?.id}
-              taskId={id}
-            />
+            <EmployeeAiFeedbackSection submissionId={latestSubmission?.id} taskId={id} />
           </Box>
         )}
 

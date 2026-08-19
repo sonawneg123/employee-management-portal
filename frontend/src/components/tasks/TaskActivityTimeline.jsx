@@ -6,32 +6,24 @@
  */
 
 import React from 'react';
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  CircularProgress,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Card, CardContent, CircularProgress, Stack, Typography } from '@mui/material';
 import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 
 import { useTaskActivities } from '@/hooks/useTaskHooks';
 
 /** Map backend eventType to a human-friendly icon label colour */
 const EVENT_COLOR = {
-  CREATED:           '#6366f1',
-  ASSIGNED:          '#3b82f6',
-  REASSIGNED:        '#8b5cf6',
-  STATUS_CHANGED:    '#10b981',
-  SUBMITTED:         '#f59e0b',
-  APPROVED:          '#22c55e',
+  CREATED: '#6366f1',
+  ASSIGNED: '#3b82f6',
+  REASSIGNED: '#8b5cf6',
+  STATUS_CHANGED: '#10b981',
+  SUBMITTED: '#f59e0b',
+  APPROVED: '#22c55e',
   CHANGES_REQUESTED: '#ef4444',
-  REJECTED:          '#ef4444',
-  COMMENTED:         '#64748b',
-  ATTACHMENT_ADDED:  '#0ea5e9',
-  ATTACHMENT_DELETED:'#94a3b8',
+  REJECTED: '#ef4444',
+  COMMENTED: '#64748b',
+  ATTACHMENT_ADDED: '#0ea5e9',
+  ATTACHMENT_DELETED: '#94a3b8',
 };
 
 /**
@@ -79,7 +71,9 @@ export default function TaskActivityTimeline({ taskId }) {
         )}
 
         {isError && (
-          <Alert severity="error" sx={{ mt: 1 }}>Failed to load activity timeline.</Alert>
+          <Alert severity="error" sx={{ mt: 1 }}>
+            Failed to load activity timeline.
+          </Alert>
         )}
 
         {!isLoading && !isError && sorted.length === 0 && (
@@ -99,7 +93,15 @@ export default function TaskActivityTimeline({ taskId }) {
                   sx={{ display: 'flex', gap: 1.5, position: 'relative' }}
                 >
                   {/* Vertical line */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 20, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      width: 20,
+                      flexShrink: 0,
+                    }}
+                  >
                     <Box
                       sx={{
                         width: 10,
@@ -110,24 +112,29 @@ export default function TaskActivityTimeline({ taskId }) {
                         flexShrink: 0,
                       }}
                     />
-                    {!isLast && (
-                      <Box sx={{ width: 2, flex: 1, bgcolor: 'divider', my: 0.5 }} />
-                    )}
+                    {!isLast && <Box sx={{ width: 2, flex: 1, bgcolor: 'divider', my: 0.5 }} />}
                   </Box>
 
                   {/* Content */}
                   <Box sx={{ pb: isLast ? 0 : 1.5 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 0.25 }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ fontSize: '0.75rem', mb: 0.25 }}
+                    >
                       {formatTs(activity.createdAt)}
                     </Typography>
                     <Typography variant="body2">
-                      <Box component="span" fontWeight={600}>{activity.actorName ?? 'System'}</Box>
-                      {' '}
-                      {activity.description ?? activity.eventType?.toLowerCase()?.replace(/_/g, ' ')}
+                      <Box component="span" fontWeight={600}>
+                        {activity.actorName ?? 'System'}
+                      </Box>{' '}
+                      {activity.description ??
+                        activity.eventType?.toLowerCase()?.replace(/_/g, ' ')}
                     </Typography>
                     {activity.fromStatus && activity.toStatus && (
                       <Typography variant="caption" color="text.secondary">
-                        {activity.fromStatus.replace(/_/g, ' ')} → {activity.toStatus.replace(/_/g, ' ')}
+                        {activity.fromStatus.replace(/_/g, ' ')} →{' '}
+                        {activity.toStatus.replace(/_/g, ' ')}
                       </Typography>
                     )}
                   </Box>

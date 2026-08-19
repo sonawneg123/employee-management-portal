@@ -12,8 +12,6 @@ import { getComponentOverrides } from './components';
 
 /**
  * Custom breakpoint values (pixels).
- * These extend MUI's default breakpoints with an extra {@code xs2} step
- * to fine-tune mobile layouts.
  *
  * @type {import('@mui/material').BreakpointsOptions}
  */
@@ -40,7 +38,7 @@ export function createAppTheme(mode) {
     palette,
     typography,
     breakpoints,
-    shape: { borderRadius: 10 },
+    shape: { borderRadius: 12 },
     spacing: 8,
     components: getComponentOverrides(mode),
   });

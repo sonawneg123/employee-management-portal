@@ -203,10 +203,7 @@ describe('AiAssistantChat', () => {
       sendAiMessage.mockResolvedValue({ answer: 'OK' });
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Hello',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Hello');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
@@ -226,19 +223,17 @@ describe('AiAssistantChat', () => {
 
     it('send button is disabled when input is only whitespace', async () => {
       renderChat();
-      fireEvent.change(
-        screen.getByRole('textbox', { name: /message input/i }),
-        { target: { value: '   ' } },
-      );
+      fireEvent.change(screen.getByRole('textbox', { name: /message input/i }), {
+        target: { value: '   ' },
+      });
       expect(screen.getByRole('button', { name: /send message/i })).toBeDisabled();
     });
 
     it('send button is enabled when input has content', async () => {
       renderChat();
-      fireEvent.change(
-        screen.getByRole('textbox', { name: /message input/i }),
-        { target: { value: 'What is the leave policy?' } },
-      );
+      fireEvent.change(screen.getByRole('textbox', { name: /message input/i }), {
+        target: { value: 'What is the leave policy?' },
+      });
       expect(screen.getByRole('button', { name: /send message/i })).not.toBeDisabled();
     });
   });
@@ -246,63 +241,77 @@ describe('AiAssistantChat', () => {
   // ── Sending a message ──────────────────────────────────────────────────────
 
   describe('Sending a message', () => {
-    it('calls sendAiMessage with the typed message when send is clicked', async () => {
-      sendAiMessage.mockResolvedValue({ answer: 'You have 20 days.' });
-      const { user } = renderChat();
+    it(
+      'calls sendAiMessage with the typed message when send is clicked',
+      async () => {
+        sendAiMessage.mockResolvedValue({ answer: 'You have 20 days.' });
+        const { user } = renderChat();
 
-      fireEvent.change(
-        screen.getByRole('textbox', { name: /message input/i }),
-        { target: { value: 'How many leave days?' } },
-      );
-      await user.click(screen.getByRole('button', { name: /send message/i }));
+        fireEvent.change(screen.getByRole('textbox', { name: /message input/i }), {
+          target: { value: 'How many leave days?' },
+        });
+        await user.click(screen.getByRole('button', { name: /send message/i }));
 
-      await waitFor(() => {
-        expect(sendAiMessage).toHaveBeenCalledWith('How many leave days?');
-      });
-    }, TEST_TIMEOUT);
+        await waitFor(() => {
+          expect(sendAiMessage).toHaveBeenCalledWith('How many leave days?');
+        });
+      },
+      TEST_TIMEOUT,
+    );
 
-    it('displays the user message in the chat after sending', async () => {
-      sendAiMessage.mockResolvedValue({ answer: 'Annual leave is 20 days.' });
-      const { user } = renderChat();
+    it(
+      'displays the user message in the chat after sending',
+      async () => {
+        sendAiMessage.mockResolvedValue({ answer: 'Annual leave is 20 days.' });
+        const { user } = renderChat();
 
-      fireEvent.change(
-        screen.getByRole('textbox', { name: /message input/i }),
-        { target: { value: 'What is annual leave?' } },
-      );
-      await user.click(screen.getByRole('button', { name: /send message/i }));
+        fireEvent.change(screen.getByRole('textbox', { name: /message input/i }), {
+          target: { value: 'What is annual leave?' },
+        });
+        await user.click(screen.getByRole('button', { name: /send message/i }));
 
-      await waitFor(() => {
-        expect(screen.getByText('What is annual leave?')).toBeInTheDocument();
-      });
-    }, TEST_TIMEOUT);
+        await waitFor(() => {
+          expect(screen.getByText('What is annual leave?')).toBeInTheDocument();
+        });
+      },
+      TEST_TIMEOUT,
+    );
 
-    it('sends message when Enter key is pressed (without shift)', async () => {
-      sendAiMessage.mockResolvedValue({ answer: 'OK' });
-      renderChat();
+    it(
+      'sends message when Enter key is pressed (without shift)',
+      async () => {
+        sendAiMessage.mockResolvedValue({ answer: 'OK' });
+        renderChat();
 
-      const input = screen.getByRole('textbox', { name: /message input/i });
-      // Set input value then fire keyDown directly on the element so the
-      // component's onKeyDown handler is triggered reliably in jsdom.
-      fireEvent.change(input, { target: { value: 'Hello' } });
-      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', shiftKey: false });
+        const input = screen.getByRole('textbox', { name: /message input/i });
+        // Set input value then fire keyDown directly on the element so the
+        // component's onKeyDown handler is triggered reliably in jsdom.
+        fireEvent.change(input, { target: { value: 'Hello' } });
+        fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', shiftKey: false });
 
-      await waitFor(() => {
-        expect(sendAiMessage).toHaveBeenCalledWith('Hello');
-      });
-    }, TEST_TIMEOUT);
+        await waitFor(() => {
+          expect(sendAiMessage).toHaveBeenCalledWith('Hello');
+        });
+      },
+      TEST_TIMEOUT,
+    );
 
-    it('clears the input field after sending', async () => {
-      sendAiMessage.mockResolvedValue({ answer: 'OK' });
-      const { user } = renderChat();
+    it(
+      'clears the input field after sending',
+      async () => {
+        sendAiMessage.mockResolvedValue({ answer: 'OK' });
+        const { user } = renderChat();
 
-      const input = screen.getByRole('textbox', { name: /message input/i });
-      fireEvent.change(input, { target: { value: 'Test message' } });
-      await user.click(screen.getByRole('button', { name: /send message/i }));
+        const input = screen.getByRole('textbox', { name: /message input/i });
+        fireEvent.change(input, { target: { value: 'Test message' } });
+        await user.click(screen.getByRole('button', { name: /send message/i }));
 
-      await waitFor(() => {
-        expect(input).toHaveValue('');
-      });
-    }, TEST_TIMEOUT);
+        await waitFor(() => {
+          expect(input).toHaveValue('');
+        });
+      },
+      TEST_TIMEOUT,
+    );
   });
 
   // ── Loading state ──────────────────────────────────────────────────────────
@@ -313,10 +322,7 @@ describe('AiAssistantChat', () => {
       sendAiMessage.mockImplementation(() => new Promise(() => {}));
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Test',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Test');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
@@ -328,10 +334,7 @@ describe('AiAssistantChat', () => {
       sendAiMessage.mockImplementation(() => new Promise(() => {}));
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Test',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Test');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
@@ -366,10 +369,7 @@ describe('AiAssistantChat', () => {
       sendAiMessage.mockResolvedValue({ answer: 'Hello!' });
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Hi',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Hi');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
@@ -389,16 +389,11 @@ describe('AiAssistantChat', () => {
       });
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Question',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Question');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
-        expect(screen.getByRole('alert')).toHaveTextContent(
-          /your session has expired/i,
-        );
+        expect(screen.getByRole('alert')).toHaveTextContent(/your session has expired/i);
       });
     });
 
@@ -410,10 +405,7 @@ describe('AiAssistantChat', () => {
       });
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Question',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Question');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
@@ -429,10 +421,7 @@ describe('AiAssistantChat', () => {
       });
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Question',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Question');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {
@@ -477,10 +466,7 @@ describe('AiAssistantChat', () => {
       sendAiMessage.mockResolvedValue({ answer: 'Test answer' });
       const { user } = renderChat();
 
-      await user.type(
-        screen.getByRole('textbox', { name: /message input/i }),
-        'Single message',
-      );
+      await user.type(screen.getByRole('textbox', { name: /message input/i }), 'Single message');
       await user.click(screen.getByRole('button', { name: /send message/i }));
 
       await waitFor(() => {

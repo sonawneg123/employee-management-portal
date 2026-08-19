@@ -144,8 +144,12 @@ function ScoreBar({ label, value }) {
   return (
     <Box sx={{ mb: 1 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.25 }}>
-        <Typography variant="caption" color="text.secondary">{label}</Typography>
-        <Typography variant="caption" fontWeight={700}>{pct}</Typography>
+        <Typography variant="caption" color="text.secondary">
+          {label}
+        </Typography>
+        <Typography variant="caption" fontWeight={700}>
+          {pct}
+        </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"
@@ -161,33 +165,14 @@ function ScoreBar({ label, value }) {
 
 function RecommendationBadge({ action }) {
   if (action === 'APPROVE') {
-    return (
-      <Chip
-        icon={<CheckCircleRoundedIcon />}
-        label="Approve"
-        color="success"
-        size="small"
-      />
-    );
+    return <Chip icon={<CheckCircleRoundedIcon />} label="Approve" color="success" size="small" />;
   }
   if (action === 'REQUEST_CHANGES') {
-    return (
-      <Chip
-        icon={<EditIcon />}
-        label="Request Changes"
-        color="warning"
-        size="small"
-      />
-    );
+    return <Chip icon={<EditIcon />} label="Request Changes" color="warning" size="small" />;
   }
   // MANUAL_REVIEW or unknown
   return (
-    <Chip
-      icon={<WarningAmberRoundedIcon />}
-      label="Review Manually"
-      color="default"
-      size="small"
-    />
+    <Chip icon={<WarningAmberRoundedIcon />} label="Review Manually" color="default" size="small" />
   );
 }
 
@@ -195,7 +180,7 @@ function RecommendationBadge({ action }) {
 function EditIcon() {
   return (
     <svg style={{ width: 16, height: 16, fill: 'currentColor' }} viewBox="0 0 24 24">
-      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm18-12.38a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+      <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm18-12.38a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
     </svg>
   );
 }
@@ -203,7 +188,10 @@ function EditIcon() {
 // ── Full evaluation result ────────────────────────────────────────────────────
 
 function EvaluationResult({ review }) {
-  const analysis = useMemo(() => parseAnalysis(review.structuredAnalysisJson), [review.structuredAnalysisJson]);
+  const analysis = useMemo(
+    () => parseAnalysis(review.structuredAnalysisJson),
+    [review.structuredAnalysisJson],
+  );
   const [showRequirements, setShowRequirements] = useState(false);
 
   const completionScore = review.completionScore ?? null;
@@ -231,7 +219,9 @@ function EvaluationResult({ review }) {
               <Typography variant="h3" fontWeight={800} color="primary.main" lineHeight={1}>
                 {completionScore}
               </Typography>
-              <Typography variant="caption" color="text.secondary">/ 100</Typography>
+              <Typography variant="caption" color="text.secondary">
+                / 100
+              </Typography>
               <Typography variant="caption" display="block" color="text.secondary">
                 Completion
               </Typography>
@@ -242,7 +232,9 @@ function EvaluationResult({ review }) {
               <Typography variant="h3" fontWeight={800} color="secondary.main" lineHeight={1}>
                 {qualityScore}
               </Typography>
-              <Typography variant="caption" color="text.secondary">/ 100</Typography>
+              <Typography variant="caption" color="text.secondary">
+                / 100
+              </Typography>
               <Typography variant="caption" display="block" color="text.secondary">
                 Quality
               </Typography>
@@ -264,9 +256,10 @@ function EvaluationResult({ review }) {
         <Box sx={{ maxWidth: 360 }}>
           {completionScore !== null && <ScoreBar label="Task Completion" value={completionScore} />}
           {qualityScore !== null && <ScoreBar label="Quality" value={qualityScore} />}
-          {analysis?.qualityAssessment?.score != null && completionScore !== analysis.qualityAssessment.score && (
-            <ScoreBar label="Quality Assessment" value={analysis.qualityAssessment.score} />
-          )}
+          {analysis?.qualityAssessment?.score != null &&
+            completionScore !== analysis.qualityAssessment.score && (
+              <ScoreBar label="Quality Assessment" value={analysis.qualityAssessment.score} />
+            )}
         </Box>
       </Box>
 
@@ -283,8 +276,8 @@ function EvaluationResult({ review }) {
           </Stack>
           <Alert severity="info" icon={<SmartToyRoundedIcon />} sx={{ mt: 1 }}>
             <Typography variant="caption">
-              <strong>Advisory only.</strong> This AI recommendation does not automatically
-              approve or reject the submission. You make the final decision.
+              <strong>Advisory only.</strong> This AI recommendation does not automatically approve
+              or reject the submission. You make the final decision.
             </Typography>
           </Alert>
         </Box>
@@ -325,11 +318,7 @@ function EvaluationResult({ review }) {
                 <ListItemIcon sx={{ minWidth: 28 }}>
                   <CheckRoundedIcon fontSize="small" color="success" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography variant="body2">{item}</Typography>
-                  }
-                />
+                <ListItemText primary={<Typography variant="body2">{item}</Typography>} />
               </ListItem>
             ))}
           </List>
@@ -348,11 +337,7 @@ function EvaluationResult({ review }) {
                 <ListItemIcon sx={{ minWidth: 28 }}>
                   <PriorityHighRoundedIcon fontSize="small" color="warning" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography variant="body2">{item}</Typography>
-                  }
-                />
+                <ListItemText primary={<Typography variant="body2">{item}</Typography>} />
               </ListItem>
             ))}
           </List>
@@ -399,9 +384,13 @@ function EvaluationResult({ review }) {
             <List dense disablePadding>
               {requirements.map((req, i) => {
                 const statusColor =
-                  req.status === 'COMPLETED' ? 'success' :
-                  req.status === 'PARTIALLY_COMPLETED' ? 'warning' :
-                  req.status === 'MISSING' ? 'error' : 'default';
+                  req.status === 'COMPLETED'
+                    ? 'success'
+                    : req.status === 'PARTIALLY_COMPLETED'
+                      ? 'warning'
+                      : req.status === 'MISSING'
+                        ? 'error'
+                        : 'default';
                 return (
                   <ListItem
                     key={i}
@@ -421,10 +410,16 @@ function EvaluationResult({ review }) {
                         size="small"
                         sx={{ fontSize: '0.65rem', height: 18 }}
                       />
-                      <Typography variant="body2" fontWeight={500}>{req.requirement}</Typography>
+                      <Typography variant="body2" fontWeight={500}>
+                        {req.requirement}
+                      </Typography>
                     </Stack>
                     {req.evidence && (
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, ml: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ mt: 0.25, ml: 0.5 }}
+                      >
                         Evidence: {req.evidence}
                       </Typography>
                     )}
@@ -478,7 +473,9 @@ function EvaluationHistoryTable({ reviews, onSelectReview, selectedReviewId }) {
                 sx={{ cursor: onSelectReview ? 'pointer' : 'default' }}
               >
                 <TableCell>
-                  <Typography variant="caption">{formatDate(r.completedAt || r.createdAt)}</Typography>
+                  <Typography variant="caption">
+                    {formatDate(r.completedAt || r.createdAt)}
+                  </Typography>
                 </TableCell>
                 <TableCell align="center">
                   <Typography variant="caption" fontWeight={600}>
@@ -494,7 +491,9 @@ function EvaluationHistoryTable({ reviews, onSelectReview, selectedReviewId }) {
                   {r.recommendedAction ? (
                     <RecommendationBadge action={r.recommendedAction} />
                   ) : (
-                    <Typography variant="caption" color="text.secondary">—</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      —
+                    </Typography>
                   )}
                 </TableCell>
                 <TableCell>
@@ -531,10 +530,9 @@ export default function TaskAiEvaluationSection({ taskId, submission, onRunCompl
   } = useLatestAiReview(submissionId, { enabled: Boolean(submissionId) });
 
   // ── History ────────────────────────────────────────────────────────────────
-  const {
-    data: allReviews,
-    isLoading: isLoadingHistory,
-  } = useAllAiReviews(submissionId, { enabled: Boolean(submissionId) });
+  const { data: allReviews, isLoading: isLoadingHistory } = useAllAiReviews(submissionId, {
+    enabled: Boolean(submissionId),
+  });
 
   // ── Selected review for history detail ────────────────────────────────────
   const [selectedHistoryReview, setSelectedHistoryReview] = useState(null);
@@ -579,28 +577,33 @@ export default function TaskAiEvaluationSection({ taskId, submission, onRunCompl
   }
 
   // ── Determine if evaluation is in-flight ───────────────────────────────────
-  const isInFlight = runMutation.isPending
-    || latestReview?.status === 'PENDING'
-    || latestReview?.status === 'PROCESSING';
+  const isInFlight =
+    runMutation.isPending ||
+    latestReview?.status === 'PENDING' ||
+    latestReview?.status === 'PROCESSING';
 
   const hasCompleted = latestReview?.status === 'COMPLETED';
   const hasFailed = latestReview?.status === 'FAILED';
   const hasExisting = Boolean(latestReview);
 
   // No review yet (404 → latestError?.response?.status === 404 OR latestError is not 404)
-  const noReviewYet = !latestReview && !isLoadingLatest
-    && (!latestError || latestError?.response?.status === 404);
+  const noReviewYet =
+    !latestReview && !isLoadingLatest && (!latestError || latestError?.response?.status === 404);
 
   // ── Run button label ───────────────────────────────────────────────────────
   const runButtonLabel = hasExisting
-    ? isInFlight ? 'Evaluating…' : 'Re-run Evaluation'
+    ? isInFlight
+      ? 'Evaluating…'
+      : 'Re-run Evaluation'
     : 'Run AI Evaluation';
 
-  const runButtonIcon = isInFlight
-    ? <CircularProgress size={16} color="inherit" />
-    : hasExisting
-      ? <RefreshRoundedIcon />
-      : <PlayArrowRoundedIcon />;
+  const runButtonIcon = isInFlight ? (
+    <CircularProgress size={16} color="inherit" />
+  ) : hasExisting ? (
+    <RefreshRoundedIcon />
+  ) : (
+    <PlayArrowRoundedIcon />
+  );
 
   return (
     <Card variant="outlined" sx={{ mb: 3, borderColor: 'primary.light', borderWidth: 1 }}>
@@ -705,7 +708,13 @@ export default function TaskAiEvaluationSection({ taskId, submission, onRunCompl
 
         {/* ── Run button ──────────────────────────────────────────────── */}
         <Tooltip
-          title={isInFlight ? 'Evaluation in progress…' : hasExisting ? 'Request a fresh AI evaluation' : 'Run the first AI evaluation for this submission'}
+          title={
+            isInFlight
+              ? 'Evaluation in progress…'
+              : hasExisting
+                ? 'Request a fresh AI evaluation'
+                : 'Run the first AI evaluation for this submission'
+          }
         >
           <span>
             <Button

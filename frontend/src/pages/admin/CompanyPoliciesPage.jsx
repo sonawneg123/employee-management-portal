@@ -26,10 +26,10 @@ import { listDocuments } from '@/services/knowledgeApi';
  * @returns {JSX.Element}
  */
 export default function CompanyPoliciesPage() {
-  const [documents, setDocuments]   = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [listLoading, setListLoading] = useState(false);
-  const [listError, setListError]   = useState('');
-  const [fetched, setFetched]       = useState(false);
+  const [listError, setListError] = useState('');
+  const [fetched, setFetched] = useState(false);
 
   // Fetch the document list on first render and on explicit refresh
   const fetchDocuments = useCallback(async () => {
@@ -78,9 +78,9 @@ export default function CompanyPoliciesPage() {
 
         {/* ── Info banner ───────────────────────────────────────────────── */}
         <Alert severity="info" sx={{ mb: 3 }}>
-          Documents added here are processed by the RAG pipeline and become available to
-          the <strong>AI Assistant</strong>. The assistant will use them to answer
-          employee questions about company policies.
+          Documents added here are processed by the RAG pipeline and become available to the{' '}
+          <strong>AI Assistant</strong>. The assistant will use them to answer employee questions
+          about company policies.
         </Alert>
 
         {/* ── Add form ──────────────────────────────────────────────────── */}

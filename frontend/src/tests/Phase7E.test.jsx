@@ -27,7 +27,8 @@ const mockInfoResponse = {
 };
 
 const mockActionProposalResponse = {
-  answer: "I'm ready to perform this action:\n\n**Reassign task \"Fix bug\" to Rahul**\n\nDo you want me to proceed?",
+  answer:
+    'I\'m ready to perform this action:\n\n**Reassign task "Fix bug" to Rahul**\n\nDo you want me to proceed?',
   responseType: 'ACTION_PROPOSAL',
   toolsExecuted: ['get_task', 'get_employee_availability'],
   confirmationToken: 'test-token-123',

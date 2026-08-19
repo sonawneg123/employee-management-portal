@@ -39,11 +39,7 @@ vi.mock('@/hooks/useTaskAiReviewHooks', async (importOriginal) => {
   };
 });
 
-import {
-  useLatestAiReview,
-  useAllAiReviews,
-  useRunAiReview,
-} from '@/hooks/useTaskAiReviewHooks';
+import { useLatestAiReview, useAllAiReviews, useRunAiReview } from '@/hooks/useTaskAiReviewHooks';
 
 // ── Test helpers ──────────────────────────────────────────────────────────────
 
@@ -62,7 +58,7 @@ function renderSection(props = {}) {
   return render(
     <Wrapper>
       <TaskAiEvaluationSection {...props} />
-    </Wrapper>
+    </Wrapper>,
   );
 }
 
@@ -76,7 +72,14 @@ const MOCK_SUBMISSION = {
 const STRUCTURED_JSON = JSON.stringify({
   completionScore: 85,
   overallAssessment: 'Good overall.',
-  requirements: [{ requirement: 'Write tests', status: 'COMPLETED', evidence: 'Tests written', suggestion: null }],
+  requirements: [
+    {
+      requirement: 'Write tests',
+      status: 'COMPLETED',
+      evidence: 'Tests written',
+      suggestion: null,
+    },
+  ],
   completedItems: ['Write tests'],
   missingItems: [],
   partialItems: [],
@@ -288,9 +291,7 @@ describe('Phase 7C — TaskAiEvaluationSection', () => {
 
     // The run button should be disabled during in-flight
     const buttons = screen.getAllByRole('button');
-    const runButtons = buttons.filter(b =>
-      b.textContent?.includes('Evaluating') || b.disabled
-    );
+    const runButtons = buttons.filter((b) => b.textContent?.includes('Evaluating') || b.disabled);
     expect(runButtons.length).toBeGreaterThan(0);
   });
 

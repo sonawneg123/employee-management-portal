@@ -39,7 +39,7 @@ import { useAuth } from '@/contexts/AuthContext';
 // ── Mock knowledgeApi ─────────────────────────────────────────────────────────
 vi.mock('@/services/knowledgeApi', () => ({
   ingestDocument: vi.fn(),
-  listDocuments:  vi.fn(),
+  listDocuments: vi.fn(),
   deleteDocument: vi.fn(),
 }));
 import { deleteDocument } from '@/services/knowledgeApi';
@@ -55,8 +55,8 @@ function renderList(props = {}, { isAdmin = false } = {}) {
 
   const defaults = {
     documents: [],
-    loading:   false,
-    error:     '',
+    loading: false,
+    error: '',
     onRefresh: vi.fn(),
   };
   return render(
@@ -67,14 +67,14 @@ function renderList(props = {}, { isAdmin = false } = {}) {
 }
 
 const MOCK_DOC = {
-  id:         'uuid-1',
-  title:      'Employee Leave Policy',
+  id: 'uuid-1',
+  title: 'Employee Leave Policy',
   sourceType: 'POLICY',
-  status:     'ACTIVE',
+  status: 'ACTIVE',
   description: null,
-  createdAt:  '2025-06-01T10:00:00',
-  updatedAt:  '2025-06-01T10:00:00',
-  createdBy:  'admin@company.com',
+  createdAt: '2025-06-01T10:00:00',
+  updatedAt: '2025-06-01T10:00:00',
+  createdBy: 'admin@company.com',
 };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

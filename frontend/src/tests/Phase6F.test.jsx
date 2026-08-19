@@ -15,14 +15,7 @@
 
 import React, { useState } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  within,
-  act,
-} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -116,9 +109,7 @@ function Wrapper({ children, user = BASE_USER, updateUser = vi.fn() }) {
       <QueryClientProvider client={qc}>
         <ThemeProvider theme={testTheme}>
           <MemoryRouter>
-            <AuthContext.Provider value={authValue}>
-              {children}
-            </AuthContext.Provider>
+            <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -322,9 +313,7 @@ describe('ProfilePage — Profile Photo (Phase 6F)', () => {
     await ue.upload(fileInput, bigFile);
 
     await waitFor(() => {
-      expect(
-        screen.getAllByText(/too large/i).length,
-      ).toBeGreaterThan(0);
+      expect(screen.getAllByText(/too large/i).length).toBeGreaterThan(0);
     });
   });
 
@@ -335,7 +324,15 @@ describe('ProfilePage — Profile Photo (Phase 6F)', () => {
 
     // Phase 6G: crop dialog — mock canvas API (jsdom has no canvas support)
     const mockBlob = new Blob(['img'], { type: 'image/jpeg' });
-    const mockCtx = { clearRect: vi.fn(), save: vi.fn(), beginPath: vi.fn(), arc: vi.fn(), clip: vi.fn(), drawImage: vi.fn(), restore: vi.fn() };
+    const mockCtx = {
+      clearRect: vi.fn(),
+      save: vi.fn(),
+      beginPath: vi.fn(),
+      arc: vi.fn(),
+      clip: vi.fn(),
+      drawImage: vi.fn(),
+      restore: vi.fn(),
+    };
     const origGetContext = HTMLCanvasElement.prototype.getContext;
     const origToBlob = HTMLCanvasElement.prototype.toBlob;
     HTMLCanvasElement.prototype.getContext = () => mockCtx;
@@ -356,8 +353,14 @@ describe('ProfilePage — Profile Photo (Phase 6F)', () => {
     // Crop dialog opens — fire img onLoad (jsdom won't do it automatically) then confirm
     const confirmBtn = await screen.findByRole('button', { name: /use this photo/i });
     const hiddenImg = document.querySelector('img[alt="Crop source"]');
-    if (hiddenImg) { await act(async () => { fireEvent.load(hiddenImg); }); }
-    await act(async () => { fireEvent.click(confirmBtn); });
+    if (hiddenImg) {
+      await act(async () => {
+        fireEvent.load(hiddenImg);
+      });
+    }
+    await act(async () => {
+      fireEvent.click(confirmBtn);
+    });
 
     await waitFor(() => {
       expect(profileApi.uploadProfilePhoto).toHaveBeenCalled();
@@ -377,7 +380,15 @@ describe('ProfilePage — Profile Photo (Phase 6F)', () => {
 
     // Phase 6G: crop dialog — mock canvas API (jsdom has no canvas support)
     const mockBlob = new Blob(['img'], { type: 'image/jpeg' });
-    const mockCtx = { clearRect: vi.fn(), save: vi.fn(), beginPath: vi.fn(), arc: vi.fn(), clip: vi.fn(), drawImage: vi.fn(), restore: vi.fn() };
+    const mockCtx = {
+      clearRect: vi.fn(),
+      save: vi.fn(),
+      beginPath: vi.fn(),
+      arc: vi.fn(),
+      clip: vi.fn(),
+      drawImage: vi.fn(),
+      restore: vi.fn(),
+    };
     const origGetContext = HTMLCanvasElement.prototype.getContext;
     const origToBlob = HTMLCanvasElement.prototype.toBlob;
     HTMLCanvasElement.prototype.getContext = () => mockCtx;
@@ -398,8 +409,14 @@ describe('ProfilePage — Profile Photo (Phase 6F)', () => {
     // Crop dialog opens — fire img onLoad then confirm
     const confirmBtn = await screen.findByRole('button', { name: /use this photo/i });
     const hiddenImg = document.querySelector('img[alt="Crop source"]');
-    if (hiddenImg) { await act(async () => { fireEvent.load(hiddenImg); }); }
-    await act(async () => { fireEvent.click(confirmBtn); });
+    if (hiddenImg) {
+      await act(async () => {
+        fireEvent.load(hiddenImg);
+      });
+    }
+    await act(async () => {
+      fireEvent.click(confirmBtn);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/profile photo updated/i)).toBeInTheDocument();

@@ -158,10 +158,9 @@ export async function requestChanges(submissionId, payload) {
  * @returns {Promise<void>}
  */
 export async function downloadAttachment(submissionId, filename) {
-  const response = await axiosInstance.get(
-    API_ENDPOINTS.TASK_SUBMISSION_ATTACHMENT(submissionId),
-    { responseType: 'blob' },
-  );
+  const response = await axiosInstance.get(API_ENDPOINTS.TASK_SUBMISSION_ATTACHMENT(submissionId), {
+    responseType: 'blob',
+  });
   const url = window.URL.createObjectURL(response.data);
   const link = document.createElement('a');
   link.href = url;

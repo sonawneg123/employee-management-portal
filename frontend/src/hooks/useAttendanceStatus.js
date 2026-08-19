@@ -22,9 +22,10 @@ import { ROLES } from '@/constants/roles';
 export function useTodayAttendance() {
   const { user, hasAnyRole } = useAuth();
 
-  const isEmployee = Boolean(user)
-    && hasAnyRole([ROLES.EMPLOYEE])
-    && !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
+  const isEmployee =
+    Boolean(user) &&
+    hasAnyRole([ROLES.EMPLOYEE]) &&
+    !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -43,7 +44,9 @@ export function useTodayAttendance() {
   //  - they have a record for today AND
   //  - checkOutTime is non-null
   const isCheckedOut = Boolean(
-    todayAttendance && todayAttendance.checkOutTime !== null && todayAttendance.checkOutTime !== undefined,
+    todayAttendance &&
+    todayAttendance.checkOutTime !== null &&
+    todayAttendance.checkOutTime !== undefined,
   );
 
   return { todayAttendance, isCheckedOut, isLoading };

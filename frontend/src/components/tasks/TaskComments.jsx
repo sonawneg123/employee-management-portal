@@ -59,18 +59,18 @@ function formatDate(iso) {
 
 /** Role → chip colour */
 const ROLE_COLOR = {
-  ROLE_MANAGER:  'secondary',
-  ROLE_HR:       'info',
-  ROLE_ADMIN:    'warning',
+  ROLE_MANAGER: 'secondary',
+  ROLE_HR: 'info',
+  ROLE_ADMIN: 'warning',
   ROLE_EMPLOYEE: 'default',
 };
 
 function roleLabel(role) {
   if (!role) return null;
   const map = {
-    ROLE_MANAGER:  'Manager',
-    ROLE_HR:       'HR',
-    ROLE_ADMIN:    'Admin',
+    ROLE_MANAGER: 'Manager',
+    ROLE_HR: 'HR',
+    ROLE_ADMIN: 'Admin',
     ROLE_EMPLOYEE: 'Employee',
   };
   return map[role] ?? role;
@@ -122,9 +122,7 @@ export default function TaskComments({ taskId }) {
           <Typography variant="subtitle1" fontWeight={600}>
             Discussion
           </Typography>
-          {comments && (
-            <Chip label={comments.length} size="small" sx={{ ml: 0.5 }} />
-          )}
+          {comments && <Chip label={comments.length} size="small" sx={{ ml: 0.5 }} />}
         </Stack>
 
         {isLoading && (
@@ -134,7 +132,9 @@ export default function TaskComments({ taskId }) {
         )}
 
         {isError && (
-          <Alert severity="error" sx={{ mb: 2 }}>Failed to load comments.</Alert>
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Failed to load comments.
+          </Alert>
         )}
 
         {!isLoading && !isError && (!comments || comments.length === 0) && (
@@ -151,11 +151,19 @@ export default function TaskComments({ taskId }) {
                   <EmployeeAvatar
                     firstName={comment.authorName?.split(' ')[0]}
                     lastName={comment.authorName?.split(' ').slice(1).join(' ')}
-                    profilePhotoUrl={comment.authorId ? `/api/employees/${comment.authorId}/profile-photo` : null}
+                    profilePhotoUrl={
+                      comment.authorId ? `/api/employees/${comment.authorId}/profile-photo` : null
+                    }
                     size={34}
                   />
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mb: 0.5 }}>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      alignItems="center"
+                      flexWrap="wrap"
+                      sx={{ mb: 0.5 }}
+                    >
                       <Typography variant="body2" fontWeight={600}>
                         {comment.authorName ?? 'Unknown'}
                       </Typography>
@@ -170,7 +178,9 @@ export default function TaskComments({ taskId }) {
                       )}
                       {comment.edited && (
                         <Tooltip title="This comment was edited">
-                          <Typography variant="caption" color="text.disabled">(edited)</Typography>
+                          <Typography variant="caption" color="text.disabled">
+                            (edited)
+                          </Typography>
                         </Tooltip>
                       )}
                       <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
@@ -200,7 +210,9 @@ export default function TaskComments({ taskId }) {
 
         {/* Post comment */}
         {submitError && (
-          <Alert severity="error" sx={{ mb: 1 }}>{submitError}</Alert>
+          <Alert severity="error" sx={{ mb: 1 }}>
+            {submitError}
+          </Alert>
         )}
         <Stack direction="row" spacing={1} alignItems="flex-end">
           <TextField
@@ -217,7 +229,13 @@ export default function TaskComments({ taskId }) {
           />
           <Button
             variant="contained"
-            endIcon={createMutation.isPending ? <CircularProgress size={14} color="inherit" /> : <SendRoundedIcon />}
+            endIcon={
+              createMutation.isPending ? (
+                <CircularProgress size={14} color="inherit" />
+              ) : (
+                <SendRoundedIcon />
+              )
+            }
             onClick={handlePost}
             disabled={!content.trim() || createMutation.isPending}
             sx={{ whiteSpace: 'nowrap', alignSelf: 'flex-end', mb: 0.5 }}

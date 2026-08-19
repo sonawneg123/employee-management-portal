@@ -139,7 +139,10 @@ export default function ManagerTaskDetailPage() {
 
   const handleUpdate = async () => {
     const errs = validateForm();
-    if (Object.keys(errs).length > 0) { setFormErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setFormErrors(errs);
+      return;
+    }
 
     const payload = {
       title: formValues.title.trim(),
@@ -223,7 +226,11 @@ export default function ManagerTaskDetailPage() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="error">Task not found or you do not have access.</Alert>
-        <Button startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate(ROUTES.MANAGER_TASKS)} sx={{ mt: 2 }}>
+        <Button
+          startIcon={<ArrowBackRoundedIcon />}
+          onClick={() => navigate(ROUTES.MANAGER_TASKS)}
+          sx={{ mt: 2 }}
+        >
           Back to Tasks
         </Button>
       </Box>
@@ -232,7 +239,9 @@ export default function ManagerTaskDetailPage() {
 
   return (
     <>
-      <Helmet><title>{task.title} | Task Management</title></Helmet>
+      <Helmet>
+        <title>{task.title} | Task Management</title>
+      </Helmet>
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Header navigation */}
@@ -240,9 +249,15 @@ export default function ManagerTaskDetailPage() {
           <IconButton onClick={() => navigate(ROUTES.MANAGER_TASKS)}>
             <ArrowBackRoundedIcon />
           </IconButton>
-          <Typography variant="h6" color="text.secondary">Task Management</Typography>
-          <Typography variant="h6" color="text.secondary">›</Typography>
-          <Typography variant="h6" noWrap sx={{ maxWidth: 400 }}>{task.title}</Typography>
+          <Typography variant="h6" color="text.secondary">
+            Task Management
+          </Typography>
+          <Typography variant="h6" color="text.secondary">
+            ›
+          </Typography>
+          <Typography variant="h6" noWrap sx={{ maxWidth: 400 }}>
+            {task.title}
+          </Typography>
           <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
             <Tooltip title="Reassign task to another employee">
               <Button
@@ -291,12 +306,15 @@ export default function ManagerTaskDetailPage() {
         {task.status === 'COMPLETED' && latestSubmission && (
           <Box sx={{ mt: 3 }}>
             <Alert severity="success">
-              <Typography variant="body2" fontWeight={600}>Task Completed</Typography>
+              <Typography variant="body2" fontWeight={600}>
+                Task Completed
+              </Typography>
               <Typography variant="body2">
                 Approved by {latestSubmission.reviewedByName ?? 'Manager'}
                 {latestSubmission.reviewedAt
                   ? ` on ${new Date(latestSubmission.reviewedAt).toLocaleString()}`
-                  : ''}.
+                  : ''}
+                .
               </Typography>
             </Alert>
           </Box>
@@ -379,7 +397,9 @@ export default function ManagerTaskDetailPage() {
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setReassignOpen(false)} variant="outlined">Cancel</Button>
+          <Button onClick={() => setReassignOpen(false)} variant="outlined">
+            Cancel
+          </Button>
           <Button
             onClick={handleReassign}
             variant="contained"

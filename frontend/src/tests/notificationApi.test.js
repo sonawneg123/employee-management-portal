@@ -31,7 +31,9 @@ describe('notificationApi', () => {
   it('getNotifications calls GET /notifications with params', async () => {
     axiosInstance.get = vi.fn().mockResolvedValue({ data: { content: [mockNotification] } });
     const result = await getNotifications({ page: 0, size: 20 });
-    expect(axiosInstance.get).toHaveBeenCalledWith('/notifications', { params: { page: 0, size: 20 } });
+    expect(axiosInstance.get).toHaveBeenCalledWith('/notifications', {
+      params: { page: 0, size: 20 },
+    });
     expect(result.content[0].id).toBe('notif-1');
   });
 

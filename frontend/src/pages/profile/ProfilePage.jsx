@@ -261,7 +261,10 @@ function CropDialog({ open, imageSrc, mimeType, onConfirm, onCancel }) {
 
   const handleConfirm = useCallback(async () => {
     if (!canvasRef.current) return;
-    const blob = await canvasToBlob(canvasRef.current, mimeType === 'image/png' ? 'image/png' : 'image/jpeg');
+    const blob = await canvasToBlob(
+      canvasRef.current,
+      mimeType === 'image/png' ? 'image/png' : 'image/jpeg',
+    );
     onConfirm(blob);
   }, [mimeType, onConfirm]);
 
@@ -326,7 +329,11 @@ function CropDialog({ open, imageSrc, mimeType, onConfirm, onCancel }) {
           />
           <ZoomInRoundedIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
         </Box>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 0.5 }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ display: 'block', textAlign: 'center', mt: 0.5 }}
+        >
           Zoom: {Math.round(zoom * 100)}%
         </Typography>
       </DialogContent>
@@ -510,15 +517,18 @@ export default function ProfilePage() {
   };
 
   // ── Crop dialog handlers ────────────────────────────────────────────────────
-  const handleCropConfirm = useCallback((blob) => {
-    setCropOpen(false);
-    setCropImageSrc(null);
-    setUploadProgress(0);
-    // Create a File from the blob for upload
-    const filename = `profile_photo.${blob.type === 'image/png' ? 'png' : 'jpg'}`;
-    const croppedFile = new File([blob], filename, { type: blob.type });
-    uploadMutation.mutate({ file: croppedFile, onProgress: setUploadProgress });
-  }, [uploadMutation]);
+  const handleCropConfirm = useCallback(
+    (blob) => {
+      setCropOpen(false);
+      setCropImageSrc(null);
+      setUploadProgress(0);
+      // Create a File from the blob for upload
+      const filename = `profile_photo.${blob.type === 'image/png' ? 'png' : 'jpg'}`;
+      const croppedFile = new File([blob], filename, { type: blob.type });
+      uploadMutation.mutate({ file: croppedFile, onProgress: setUploadProgress });
+    },
+    [uploadMutation],
+  );
 
   const handleCropCancel = useCallback(() => {
     setCropOpen(false);

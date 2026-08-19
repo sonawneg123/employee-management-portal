@@ -163,9 +163,7 @@ describe('SubmissionForm', () => {
     const input = document.querySelector('input[type="file"]');
     const pdfFile = new File(['hello'], 'report.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [pdfFile] } });
-    await waitFor(() =>
-      expect(screen.getByText('report.pdf')).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('report.pdf')).toBeInTheDocument());
   });
 
   it('shows validation error for unsupported file type', async () => {
@@ -177,9 +175,7 @@ describe('SubmissionForm', () => {
     const input = document.querySelector('input[type="file"]');
     const zipFile = new File(['data'], 'archive.zip', { type: 'application/zip' });
     fireEvent.change(input, { target: { files: [zipFile] } });
-    await waitFor(() =>
-      expect(screen.getByText(/unsupported file type/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/unsupported file type/i)).toBeInTheDocument());
   });
 
   it('shows remove button after file selection and removes file on click', async () => {

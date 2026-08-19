@@ -106,7 +106,8 @@ function Wrapper({ children }) {
                 logout: vi.fn(),
                 updateUser: vi.fn(),
                 hasRole: (role) => role === 'ROLE_MANAGER',
-                hasAnyRole: (roles) => roles.some((r) => ['ROLE_MANAGER', 'ROLE_HR', 'ROLE_ADMIN'].includes(r)),
+                hasAnyRole: (roles) =>
+                  roles.some((r) => ['ROLE_MANAGER', 'ROLE_HR', 'ROLE_ADMIN'].includes(r)),
               }}
             >
               {children}
@@ -126,24 +127,40 @@ describe('ManagerLeavePage', () => {
   });
 
   it('renders without crashing', () => {
-    render(<Wrapper><ManagerLeavePage /></Wrapper>);
+    render(
+      <Wrapper>
+        <ManagerLeavePage />
+      </Wrapper>,
+    );
     expect(screen.getByRole('heading', { name: /Leave Approvals/i })).toBeInTheDocument();
   });
 
   it('shows "Leave Approvals" as the page heading', () => {
-    render(<Wrapper><ManagerLeavePage /></Wrapper>);
+    render(
+      <Wrapper>
+        <ManagerLeavePage />
+      </Wrapper>,
+    );
     expect(screen.getByRole('heading', { name: /Leave Approvals/i })).toBeInTheDocument();
   });
 
   it('shows employee leave request in the table', async () => {
-    render(<Wrapper><ManagerLeavePage /></Wrapper>);
+    render(
+      <Wrapper>
+        <ManagerLeavePage />
+      </Wrapper>,
+    );
     await waitFor(() => {
       expect(screen.getByText('Alice Smith')).toBeInTheDocument();
     });
   });
 
   it('shows leave type', async () => {
-    render(<Wrapper><ManagerLeavePage /></Wrapper>);
+    render(
+      <Wrapper>
+        <ManagerLeavePage />
+      </Wrapper>,
+    );
     await waitFor(() => {
       // LeaveTypeChip renders "Annual Leave" or similar — may appear in multiple places
       const items = screen.getAllByText(/annual/i);
@@ -152,7 +169,11 @@ describe('ManagerLeavePage', () => {
   });
 
   it('does not show a create button (managers cannot create leaves)', () => {
-    render(<Wrapper><ManagerLeavePage /></Wrapper>);
+    render(
+      <Wrapper>
+        <ManagerLeavePage />
+      </Wrapper>,
+    );
     // canCreate=false — no "New Leave" or "Add" button
     expect(screen.queryByRole('button', { name: /new leave/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /add/i })).not.toBeInTheDocument();

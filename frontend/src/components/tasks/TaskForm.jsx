@@ -70,7 +70,14 @@ export default function TaskForm({
   const handleField = (field) => (e) => onChange(field, e.target.value);
 
   return (
-    <Box component="form" noValidate onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
+    <Box
+      component="form"
+      noValidate
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
       <Grid container spacing={2}>
         {/* Title */}
         <Grid size={{ xs: 12 }}>
@@ -168,7 +175,9 @@ export default function TaskForm({
               onChange={handleField('priority')}
             >
               {PRIORITIES.map((p) => (
-                <MenuItem key={p} value={p}>{p.charAt(0) + p.slice(1).toLowerCase()}</MenuItem>
+                <MenuItem key={p} value={p}>
+                  {p.charAt(0) + p.slice(1).toLowerCase()}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -215,7 +224,9 @@ export default function TaskForm({
                 <em>None</em>
               </MenuItem>
               {TASK_CATEGORIES.map((cat) => (
-                <MenuItem key={cat} value={cat}>{categoryLabel(cat)}</MenuItem>
+                <MenuItem key={cat} value={cat}>
+                  {categoryLabel(cat)}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>

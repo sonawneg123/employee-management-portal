@@ -1,7 +1,8 @@
 /**
  * @fileoverview Material UI palette definitions for light and dark modes.
  *
- * Brand identity: Indigo (#4F46E5) as primary, Violet (#7C3AED) as accent.
+ * Brand identity: Indigo/Navy (#243B7A, #4F46E5) as primary.
+ * Dashboard background: soft lavender (#F1F2FF) in light mode.
  * Status colours follow semantic conventions: emerald = success,
  * amber = warning, red = error.
  */
@@ -16,7 +17,7 @@ export const lightPalette = {
   primary: {
     main: '#4F46E5',
     light: '#818CF8',
-    dark: '#4338CA',
+    dark: '#243B7A',
     contrastText: '#ffffff',
   },
   secondary: {
@@ -46,15 +47,15 @@ export const lightPalette = {
     dark: '#059669',
   },
   background: {
-    default: '#F8FAFC',
+    default: '#F1F2FF',
     paper: '#FFFFFF',
   },
   text: {
-    primary: '#0F172A',
-    secondary: '#64748B',
-    disabled: '#94A3B8',
+    primary: '#111827',
+    secondary: '#6B7280',
+    disabled: '#9CA3AF',
   },
-  divider: '#E2E8F0',
+  divider: '#E5E7EB',
 };
 
 /**

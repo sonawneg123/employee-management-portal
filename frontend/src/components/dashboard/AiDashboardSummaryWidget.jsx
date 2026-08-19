@@ -62,7 +62,13 @@ export default function AiDashboardSummaryWidget({ enabled = true }) {
           <Typography variant="subtitle1" fontWeight={700}>
             AI Task Insights
           </Typography>
-          <Chip label="Advisory" size="small" color="default" variant="outlined" sx={{ ml: 'auto', fontSize: '0.65rem' }} />
+          <Chip
+            label="Advisory"
+            size="small"
+            color="default"
+            variant="outlined"
+            sx={{ ml: 'auto', fontSize: '0.65rem' }}
+          />
         </Stack>
 
         <Divider sx={{ mb: 2 }} />

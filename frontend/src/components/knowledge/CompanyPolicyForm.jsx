@@ -15,14 +15,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Alert, Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 import { ingestDocument } from '@/services/knowledgeApi';
 
@@ -37,20 +30,23 @@ const MAX_TITLE_LENGTH = 500;
  * @returns {JSX.Element}
  */
 export default function CompanyPolicyForm({ onSuccess }) {
-  const [title, setTitle]           = useState('');
-  const [content, setContent]       = useState('');
-  const [titleTouched, setTitleTouched]     = useState(false);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [titleTouched, setTitleTouched] = useState(false);
   const [contentTouched, setContentTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess]       = useState(false);
-  const [apiError, setApiError]     = useState('');
+  const [success, setSuccess] = useState(false);
+  const [apiError, setApiError] = useState('');
 
   // ── Derived validation state ─────────────────────────────────────────────
-  const titleError   = title.trim().length === 0 ? 'Title is required.' :
-                       title.trim().length > MAX_TITLE_LENGTH
-                         ? `Title must not exceed ${MAX_TITLE_LENGTH} characters.` : '';
+  const titleError =
+    title.trim().length === 0
+      ? 'Title is required.'
+      : title.trim().length > MAX_TITLE_LENGTH
+        ? `Title must not exceed ${MAX_TITLE_LENGTH} characters.`
+        : '';
   const contentError = content.trim().length === 0 ? 'Content is required.' : '';
-  const canSubmit    = !submitting && !titleError && !contentError;
+  const canSubmit = !submitting && !titleError && !contentError;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -74,7 +70,7 @@ export default function CompanyPolicyForm({ onSuccess }) {
 
     try {
       const doc = await ingestDocument({
-        title:   title.trim(),
+        title: title.trim(),
         content: content.trim(),
       });
       setSuccess(true);
@@ -107,8 +103,8 @@ export default function CompanyPolicyForm({ onSuccess }) {
           onClose={handleReset}
           aria-label="Document submitted successfully"
         >
-          Document submitted and is now being processed. It will be available to the AI
-          Assistant once its status becomes&nbsp;<strong>ACTIVE</strong>.
+          Document submitted and is now being processed. It will be available to the AI Assistant
+          once its status becomes&nbsp;<strong>ACTIVE</strong>.
         </Alert>
       )}
 
@@ -124,7 +120,10 @@ export default function CompanyPolicyForm({ onSuccess }) {
         label="Document Title"
         placeholder="e.g. Employee Leave Policy"
         value={title}
-        onChange={(e) => { setTitle(e.target.value); setTitleTouched(true); }}
+        onChange={(e) => {
+          setTitle(e.target.value);
+          setTitleTouched(true);
+        }}
         onBlur={() => setTitleTouched(true)}
         required
         fullWidth
@@ -142,7 +141,10 @@ export default function CompanyPolicyForm({ onSuccess }) {
         label="Document Content"
         placeholder="Paste or type the full policy text here…"
         value={content}
-        onChange={(e) => { setContent(e.target.value); setContentTouched(true); }}
+        onChange={(e) => {
+          setContent(e.target.value);
+          setContentTouched(true);
+        }}
         onBlur={() => setContentTouched(true)}
         required
         fullWidth
@@ -166,11 +168,7 @@ export default function CompanyPolicyForm({ onSuccess }) {
           variant="contained"
           disabled={!canSubmit}
           startIcon={
-            submitting ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : (
-              <UploadFileRoundedIcon />
-            )
+            submitting ? <CircularProgress size={16} color="inherit" /> : <UploadFileRoundedIcon />
           }
           aria-label="Submit document"
         >

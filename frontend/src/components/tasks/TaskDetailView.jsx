@@ -46,13 +46,13 @@ export default function TaskDetailView({
 }) {
   const formattedDueDate = task.dueDate
     ? new Date(task.dueDate).toLocaleDateString(undefined, {
-        year: 'numeric', month: 'long', day: 'numeric',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
       })
     : '—';
 
-  const formattedCreated = task.createdAt
-    ? new Date(task.createdAt).toLocaleString()
-    : '—';
+  const formattedCreated = task.createdAt ? new Date(task.createdAt).toLocaleString() : '—';
 
   return (
     <Box>

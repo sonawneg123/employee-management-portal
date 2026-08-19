@@ -435,7 +435,8 @@ export default function AttendancePage() {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       showSnack('success', 'Checked in successfully.');
     },
-    onError: (err) => showSnack('error', err?.response?.data?.detail ?? err?.message ?? 'Check-in failed.'),
+    onError: (err) =>
+      showSnack('error', err?.response?.data?.detail ?? err?.message ?? 'Check-in failed.'),
   });
 
   const checkOutMutation = useMutation({
@@ -449,7 +450,8 @@ export default function AttendancePage() {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       showSnack('success', 'Checked out successfully.');
     },
-    onError: (err) => showSnack('error', err?.response?.data?.detail ?? err?.message ?? 'Check-out failed.'),
+    onError: (err) =>
+      showSnack('error', err?.response?.data?.detail ?? err?.message ?? 'Check-out failed.'),
   });
 
   const isMutating = createMutation.isPending || updateMutation.isPending;

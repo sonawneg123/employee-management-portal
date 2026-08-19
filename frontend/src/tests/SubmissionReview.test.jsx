@@ -92,9 +92,7 @@ describe('SubmissionReview', () => {
       </Wrapper>,
     );
     fireEvent.click(screen.getByRole('button', { name: /approve submission/i }));
-    await waitFor(() =>
-      expect(screen.getByText(/approve submission\?/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/approve submission\?/i)).toBeInTheDocument());
   });
 
   it('calls onApprove when confirmation dialog Approve is clicked', async () => {
@@ -127,9 +125,7 @@ describe('SubmissionReview', () => {
       </Wrapper>,
     );
     fireEvent.click(screen.getByRole('button', { name: /request changes/i }));
-    await waitFor(() =>
-      expect(screen.getByLabelText(/review comment/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByLabelText(/review comment/i)).toBeInTheDocument());
   });
 
   it('requires a comment before calling onRequestChanges', async () => {

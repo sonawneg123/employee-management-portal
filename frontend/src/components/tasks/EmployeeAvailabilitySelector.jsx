@@ -119,212 +119,235 @@ export default function EmployeeAvailabilitySelector({
           </MenuItem>
         )}
 
-        {!loading && employees.map((emp) => {
-          const empId = emp.employeeId ?? emp.id;
-          const empName = emp.employeeName ?? emp.label ?? empId;
-          const checkedIn = emp.checkedIn ?? false;
-          const onApprovedLeaveToday = emp.onApprovedLeaveToday ?? false;
-          const isDisabled = emp.disabled ?? false;
-          const profilePhotoUrl = emp.profilePhotoUrl ?? null;
-          const unavailabilityReason = emp.unavailabilityReason ?? null;
+        {!loading &&
+          employees.map((emp) => {
+            const empId = emp.employeeId ?? emp.id;
+            const empName = emp.employeeName ?? emp.label ?? empId;
+            const checkedIn = emp.checkedIn ?? false;
+            const onApprovedLeaveToday = emp.onApprovedLeaveToday ?? false;
+            const isDisabled = emp.disabled ?? false;
+            const profilePhotoUrl = emp.profilePhotoUrl ?? null;
+            const unavailabilityReason = emp.unavailabilityReason ?? null;
 
-          // availableToday from server, or derive locally as fallback
-          const availableToday = emp.availableToday !== undefined
-            ? emp.availableToday
-            : (!isDisabled && checkedIn && !onApprovedLeaveToday);
-          const activeTasks = emp.activeTasks ?? 0;
-          const overdueCount = emp.overdueCount ?? 0;
-          const isHighWorkload = activeTasks >= 6;
-          const isCurrentAssignee = currentAssigneeId && empId === currentAssigneeId;
-          // Unavailable = disabled, on leave, or not currently checked in
-          const isUnavailable = !isCurrentAssignee && !availableToday;
+            // availableToday from server, or derive locally as fallback
+            const availableToday =
+              emp.availableToday !== undefined
+                ? emp.availableToday
+                : !isDisabled && checkedIn && !onApprovedLeaveToday;
+            const activeTasks = emp.activeTasks ?? 0;
+            const overdueCount = emp.overdueCount ?? 0;
+            const isHighWorkload = activeTasks >= 6;
+            const isCurrentAssignee = currentAssigneeId && empId === currentAssigneeId;
+            // Unavailable = disabled, on leave, or not currently checked in
+            const isUnavailable = !isCurrentAssignee && !availableToday;
 
-          // Profile avatar element
-          const avatarEl = (
-            <Avatar
-              src={profilePhotoUrl || undefined}
-              alt={empName}
-              sx={{
-                width: 24,
-                height: 24,
-                fontSize: '0.6rem',
-                fontWeight: 700,
-                bgcolor: avatarColor(empName),
-                flexShrink: 0,
-                opacity: isUnavailable || isCurrentAssignee ? 0.5 : 1,
-              }}
-            >
-              {!profilePhotoUrl && getInitials(empName)}
-            </Avatar>
-          );
-
-          // Status chip content based on priority
-          const statusChip = (() => {
-            if (isCurrentAssignee) {
-              return (
-                <Chip
-                  label="Currently Assigned"
-                  size="small"
-                  color="default"
-                  variant="outlined"
-                  sx={{ height: 18, fontSize: '0.65rem', fontStyle: 'italic', color: 'text.disabled' }}
-                />
-              );
-            }
-            if (isDisabled || unavailabilityReason === 'DISABLED') {
-              return (
-                <Tooltip title="Employee is disabled — assignment not allowed">
-                  <Chip
-                    icon={<BlockRoundedIcon sx={{ fontSize: '0.75rem !important' }} />}
-                    label="🔴 Disabled"
-                    size="small"
-                    color="error"
-                    variant="filled"
-                    sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
-                  />
-                </Tooltip>
-              );
-            }
-            if (onApprovedLeaveToday || unavailabilityReason === 'APPROVED_LEAVE') {
-              return (
-                <Tooltip title="Employee has an approved leave today — assignment blocked">
-                  <Chip
-                    label="🟠 Approved Leave Today"
-                    size="small"
-                    color="warning"
-                    variant="filled"
-                    sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
-                  />
-                </Tooltip>
-              );
-            }
-            if (unavailabilityReason === 'CHECKED_OUT') {
-              return (
-                <Tooltip title="Employee has already checked out today — assignment blocked">
-                  <Chip
-                    label="🔴 Checked Out"
-                    size="small"
-                    color="error"
-                    variant="filled"
-                    sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
-                  />
-                </Tooltip>
-              );
-            }
-            if (!checkedIn || unavailabilityReason === 'NOT_CHECKED_IN') {
-              return (
-                <Tooltip title="Employee has not checked in today — assignment blocked">
-                  <Chip
-                    label="🔴 Not Checked In"
-                    size="small"
-                    color="error"
-                    variant="outlined"
-                    sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
-                  />
-                </Tooltip>
-              );
-            }
-            return (
-              <Tooltip title="Currently checked in">
-                <Chip
-                  label="🟢 Checked In"
-                  size="small"
-                  color="success"
-                  variant="filled"
-                  sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
-                />
-              </Tooltip>
+            // Profile avatar element
+            const avatarEl = (
+              <Avatar
+                src={profilePhotoUrl || undefined}
+                alt={empName}
+                sx={{
+                  width: 24,
+                  height: 24,
+                  fontSize: '0.6rem',
+                  fontWeight: 700,
+                  bgcolor: avatarColor(empName),
+                  flexShrink: 0,
+                  opacity: isUnavailable || isCurrentAssignee ? 0.5 : 1,
+                }}
+              >
+                {!profilePhotoUrl && getInitials(empName)}
+              </Avatar>
             );
-          })();
 
-          return (
-            <MenuItem
-              key={empId}
-              value={isCurrentAssignee ? '' : empId}
-              disabled={isCurrentAssignee || isUnavailable}
-              sx={
-                (isCurrentAssignee || isUnavailable)
-                  ? {
-                      opacity: 0.6,
-                      cursor: 'not-allowed',
-                      '&.Mui-disabled': { opacity: 0.6 },
-                    }
-                  : undefined
+            // Status chip content based on priority
+            const statusChip = (() => {
+              if (isCurrentAssignee) {
+                return (
+                  <Chip
+                    label="Currently Assigned"
+                    size="small"
+                    color="default"
+                    variant="outlined"
+                    sx={{
+                      height: 18,
+                      fontSize: '0.65rem',
+                      fontStyle: 'italic',
+                      color: 'text.disabled',
+                    }}
+                  />
+                );
               }
-              // Prevent selection via click when current assignee or unavailable
-              onClick={
-                (isCurrentAssignee || isUnavailable)
-                  ? (e) => e.stopPropagation()
-                  : undefined
+              if (isDisabled || unavailabilityReason === 'DISABLED') {
+                return (
+                  <Tooltip title="Employee is disabled — assignment not allowed">
+                    <Chip
+                      icon={<BlockRoundedIcon sx={{ fontSize: '0.75rem !important' }} />}
+                      label="🔴 Disabled"
+                      size="small"
+                      color="error"
+                      variant="filled"
+                      sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                    />
+                  </Tooltip>
+                );
               }
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', flexWrap: 'wrap' }}>
-                {/* Avatar */}
-                {avatarEl}
+              if (onApprovedLeaveToday || unavailabilityReason === 'APPROVED_LEAVE') {
+                return (
+                  <Tooltip title="Employee has an approved leave today — assignment blocked">
+                    <Chip
+                      label="🟠 Approved Leave Today"
+                      size="small"
+                      color="warning"
+                      variant="filled"
+                      sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                    />
+                  </Tooltip>
+                );
+              }
+              if (unavailabilityReason === 'CHECKED_OUT') {
+                return (
+                  <Tooltip title="Employee has already checked out today — assignment blocked">
+                    <Chip
+                      label="🔴 Checked Out"
+                      size="small"
+                      color="error"
+                      variant="filled"
+                      sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                    />
+                  </Tooltip>
+                );
+              }
+              if (!checkedIn || unavailabilityReason === 'NOT_CHECKED_IN') {
+                return (
+                  <Tooltip title="Employee has not checked in today — assignment blocked">
+                    <Chip
+                      label="🔴 Not Checked In"
+                      size="small"
+                      color="error"
+                      variant="outlined"
+                      sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                    />
+                  </Tooltip>
+                );
+              }
+              return (
+                <Tooltip title="Currently checked in">
+                  <Chip
+                    label="🟢 Checked In"
+                    size="small"
+                    color="success"
+                    variant="filled"
+                    sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700 }}
+                  />
+                </Tooltip>
+              );
+            })();
 
-                {/* Lock icon for unavailable */}
-                {!isCurrentAssignee && (isUnavailable) && (
-                  <LockRoundedIcon fontSize="small" sx={{ color: 'text.disabled', flexShrink: 0 }} />
-                )}
-
-                <Typography
-                  variant="body2"
+            return (
+              <MenuItem
+                key={empId}
+                value={isCurrentAssignee ? '' : empId}
+                disabled={isCurrentAssignee || isUnavailable}
+                sx={
+                  isCurrentAssignee || isUnavailable
+                    ? {
+                        opacity: 0.6,
+                        cursor: 'not-allowed',
+                        '&.Mui-disabled': { opacity: 0.6 },
+                      }
+                    : undefined
+                }
+                // Prevent selection via click when current assignee or unavailable
+                onClick={
+                  isCurrentAssignee || isUnavailable ? (e) => e.stopPropagation() : undefined
+                }
+              >
+                <Box
                   sx={{
-                    flexGrow: 1,
-                    minWidth: 100,
-                    color: (isCurrentAssignee || isUnavailable) ? 'text.disabled' : 'inherit',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    width: '100%',
+                    flexWrap: 'wrap',
                   }}
                 >
-                  {empName}
-                  {emp.employeeCode && (
-                    <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                      ({emp.employeeCode})
-                    </Typography>
+                  {/* Avatar */}
+                  {avatarEl}
+
+                  {/* Lock icon for unavailable */}
+                  {!isCurrentAssignee && isUnavailable && (
+                    <LockRoundedIcon
+                      fontSize="small"
+                      sx={{ color: 'text.disabled', flexShrink: 0 }}
+                    />
                   )}
-                </Typography>
 
-                {/* Status chip */}
-                {statusChip}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      flexGrow: 1,
+                      minWidth: 100,
+                      color: isCurrentAssignee || isUnavailable ? 'text.disabled' : 'inherit',
+                    }}
+                  >
+                    {empName}
+                    {emp.employeeCode && (
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ ml: 0.5 }}
+                      >
+                        ({emp.employeeCode})
+                      </Typography>
+                    )}
+                  </Typography>
 
-                {/* Only show workload info for available employees */}
-                {!isCurrentAssignee && !isUnavailable && (
-                  <>
-                    {/* Active tasks count */}
-                    <Tooltip title={`${activeTasks} active task${activeTasks !== 1 ? 's' : ''}`}>
-                      <Chip
-                        label={`${activeTasks} active`}
-                        size="small"
-                        color={isHighWorkload ? 'warning' : 'default'}
-                        variant="outlined"
-                        sx={{ height: 18, fontSize: '0.65rem' }}
-                      />
-                    </Tooltip>
+                  {/* Status chip */}
+                  {statusChip}
 
-                    {/* Overdue count */}
-                    {overdueCount > 0 && (
-                      <Tooltip title={`${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''}`}>
+                  {/* Only show workload info for available employees */}
+                  {!isCurrentAssignee && !isUnavailable && (
+                    <>
+                      {/* Active tasks count */}
+                      <Tooltip title={`${activeTasks} active task${activeTasks !== 1 ? 's' : ''}`}>
                         <Chip
-                          label={`${overdueCount} overdue`}
+                          label={`${activeTasks} active`}
                           size="small"
-                          color="error"
+                          color={isHighWorkload ? 'warning' : 'default'}
                           variant="outlined"
                           sx={{ height: 18, fontSize: '0.65rem' }}
                         />
                       </Tooltip>
-                    )}
 
-                    {/* High workload warning */}
-                    {isHighWorkload && (
-                      <Tooltip title="High workload — this employee already has 6+ active tasks">
-                        <WarningAmberRoundedIcon fontSize="small" color="warning" />
-                      </Tooltip>
-                    )}
-                  </>
-                )}
-              </Box>
-            </MenuItem>
-          );
-        })}
+                      {/* Overdue count */}
+                      {overdueCount > 0 && (
+                        <Tooltip
+                          title={`${overdueCount} overdue task${overdueCount !== 1 ? 's' : ''}`}
+                        >
+                          <Chip
+                            label={`${overdueCount} overdue`}
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            sx={{ height: 18, fontSize: '0.65rem' }}
+                          />
+                        </Tooltip>
+                      )}
+
+                      {/* High workload warning */}
+                      {isHighWorkload && (
+                        <Tooltip title="High workload — this employee already has 6+ active tasks">
+                          <WarningAmberRoundedIcon fontSize="small" color="warning" />
+                        </Tooltip>
+                      )}
+                    </>
+                  )}
+                </Box>
+              </MenuItem>
+            );
+          })}
       </Select>
       {error && <FormHelperText>{error}</FormHelperText>}
     </FormControl>

@@ -76,7 +76,7 @@ describe('EmployeeAvailabilitySelector', () => {
     render(
       <Wrapper>
         <EmployeeAvailabilitySelector employees={[]} value="" onChange={() => {}} loading />
-      </Wrapper>
+      </Wrapper>,
     );
     // When loading, the Select is disabled (aria-disabled)
     const combo = screen.getByRole('combobox');
@@ -150,12 +150,8 @@ describe('EmployeeAvailabilitySelector', () => {
     const onChange = vi.fn();
     render(
       <Wrapper>
-        <EmployeeAvailabilitySelector
-          employees={SAMPLE_EMPLOYEES}
-          value=""
-          onChange={onChange}
-        />
-      </Wrapper>
+        <EmployeeAvailabilitySelector employees={SAMPLE_EMPLOYEES} value="" onChange={onChange} />
+      </Wrapper>,
     );
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => screen.getByText(/alice smith/i));

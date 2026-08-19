@@ -16,12 +16,7 @@
 
 import React, { useState } from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-} from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { MemoryRouter } from 'react-router-dom';
@@ -54,11 +49,7 @@ vi.mock('@/hooks/useTaskSubmissionHooks', () => ({
 vi.mock('@/components/tasks/TaskDetailView', () => ({
   default: ({ startDisabled, startDisabledReason }) => (
     <div>
-      <button
-        data-testid="start-task-btn"
-        disabled={startDisabled}
-        title={startDisabledReason}
-      >
+      <button data-testid="start-task-btn" disabled={startDisabled} title={startDisabledReason}>
         Start Task
       </button>
     </div>
@@ -124,9 +115,7 @@ function Wrapper({ children }) {
       <QueryClientProvider client={qc}>
         <ThemeProvider theme={testTheme}>
           <MemoryRouter initialEntries={['/tasks/task-1']}>
-            <AuthContext.Provider value={authValue}>
-              {children}
-            </AuthContext.Provider>
+            <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
           </MemoryRouter>
         </ThemeProvider>
       </QueryClientProvider>
@@ -199,9 +188,9 @@ const EMPLOYEES = {
     employeeId: 'emp-5',
     employeeName: 'Eve Patel',
     employeeCode: 'EMP005',
-    checkedIn: true,         // Checked IN today
+    checkedIn: true, // Checked IN today
     onApprovedLeaveToday: false,
-    availableToday: true,    // Available today — yesterday is irrelevant
+    availableToday: true, // Available today — yesterday is irrelevant
     activeTasks: 1,
     overdueCount: 0,
   },
@@ -225,9 +214,7 @@ const SAMPLE_TASK = {
 
 describe('EmployeeAvailabilitySelector — Phase 6F.1 (Attendance + Leave)', () => {
   it('1. Checked-out employee appears disabled', async () => {
-    render(
-      <SelectorWrapper employees={[EMPLOYEES.checkedOut]} />,
-    );
+    render(<SelectorWrapper employees={[EMPLOYEES.checkedOut]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       const item = screen.getByRole('option', { hidden: true, name: /Bob Jones/i });
@@ -258,9 +245,7 @@ describe('EmployeeAvailabilitySelector — Phase 6F.1 (Attendance + Leave)', () 
   });
 
   it('3. Employee on approved leave today is disabled and shows leave chip', async () => {
-    render(
-      <SelectorWrapper employees={[EMPLOYEES.onApprovedLeave]} />,
-    );
+    render(<SelectorWrapper employees={[EMPLOYEES.onApprovedLeave]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       // The "🟠 Approved Leave Today" chip must be visible
@@ -270,9 +255,7 @@ describe('EmployeeAvailabilitySelector — Phase 6F.1 (Attendance + Leave)', () 
 
   it('4. Employee with future leave (not today) is available — no leave chip', async () => {
     // Future leave means onApprovedLeaveToday=false → employee is available if checked in
-    render(
-      <SelectorWrapper employees={[EMPLOYEES.checkedIn]} />,
-    );
+    render(<SelectorWrapper employees={[EMPLOYEES.checkedIn]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       expect(screen.queryByText('🟠 Approved Leave Today')).not.toBeInTheDocument();
@@ -300,9 +283,7 @@ describe('EmployeeAvailabilitySelector — Phase 6F.1 (Attendance + Leave)', () 
   });
 
   it('7. Checked-in employee shows "🟢 Checked In" chip', async () => {
-    render(
-      <SelectorWrapper employees={[EMPLOYEES.checkedIn]} />,
-    );
+    render(<SelectorWrapper employees={[EMPLOYEES.checkedIn]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       expect(screen.getByText('🟢 Checked In')).toBeInTheDocument();
@@ -310,9 +291,7 @@ describe('EmployeeAvailabilitySelector — Phase 6F.1 (Attendance + Leave)', () 
   });
 
   it('7b. Checked-out employee shows "🔴 Checked Out" chip', async () => {
-    render(
-      <SelectorWrapper employees={[EMPLOYEES.checkedOut]} />,
-    );
+    render(<SelectorWrapper employees={[EMPLOYEES.checkedOut]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       expect(screen.getByText('🔴 Checked Out')).toBeInTheDocument();
@@ -340,11 +319,7 @@ describe('EmployeeAvailabilitySelector — Phase 6F.1 (Attendance + Leave)', () 
   });
 
   it('9. Approved leave chip is shown only for employee on approved leave', async () => {
-    render(
-      <SelectorWrapper
-        employees={[EMPLOYEES.checkedIn, EMPLOYEES.onApprovedLeave]}
-      />,
-    );
+    render(<SelectorWrapper employees={[EMPLOYEES.checkedIn, EMPLOYEES.onApprovedLeave]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       // Only Carol (emp-3) should show the leave chip
@@ -354,9 +329,7 @@ describe('EmployeeAvailabilitySelector — Phase 6F.1 (Attendance + Leave)', () 
   });
 
   it('10. Employee on approved leave shows lock icon (is unavailable)', async () => {
-    render(
-      <SelectorWrapper employees={[EMPLOYEES.onApprovedLeave]} />,
-    );
+    render(<SelectorWrapper employees={[EMPLOYEES.onApprovedLeave]} />);
     fireEvent.mouseDown(screen.getByRole('combobox'));
     await waitFor(() => {
       const item = screen.getByRole('option', { hidden: true, name: /Carol Wang/i });

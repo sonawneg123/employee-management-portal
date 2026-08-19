@@ -52,7 +52,7 @@ export default function AuthLayout({ children, title, subtitle }) {
           <Grid
             size={5}
             sx={{
-              background: 'linear-gradient(145deg, #3730A3 0%, #4F46E5 40%, #7C3AED 100%)',
+              background: 'linear-gradient(145deg, #243B7A 0%, #4F46E5 50%, #7C3AED 100%)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',

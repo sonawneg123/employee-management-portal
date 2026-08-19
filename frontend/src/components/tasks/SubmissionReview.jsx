@@ -80,10 +80,7 @@ export default function SubmissionReview({
   };
 
   return (
-    <Card
-      variant="outlined"
-      sx={{ mb: 3, borderColor: 'warning.main', borderWidth: 2 }}
-    >
+    <Card variant="outlined" sx={{ mb: 3, borderColor: 'warning.main', borderWidth: 2 }}>
       <CardContent>
         <Typography variant="subtitle1" fontWeight={700} gutterBottom color="warning.dark">
           📋 Submission Awaiting Review
@@ -196,7 +193,9 @@ export default function SubmissionReview({
                       submission.id,
                       submission.attachmentOriginalName || 'attachment',
                     );
-                  } catch { /* browser will show error */ }
+                  } catch {
+                    /* browser will show error */
+                  }
                 }}
               >
                 Download
@@ -213,9 +212,11 @@ export default function SubmissionReview({
             variant="contained"
             color="success"
             startIcon={
-              isProcessing
-                ? <CircularProgress size={16} color="inherit" />
-                : <CheckCircleRoundedIcon />
+              isProcessing ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <CheckCircleRoundedIcon />
+              )
             }
             disabled={isProcessing}
             onClick={() => setApproveDialogOpen(true)}
@@ -239,18 +240,13 @@ export default function SubmissionReview({
         <DialogTitle>Approve Submission?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            This will mark the task as <strong>Completed</strong> and notify the employee.
-            This action cannot be undone.
+            This will mark the task as <strong>Completed</strong> and notify the employee. This
+            action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setApproveDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleApproveConfirm}
-            variant="contained"
-            color="success"
-            autoFocus
-          >
+          <Button onClick={handleApproveConfirm} variant="contained" color="success" autoFocus>
             Approve
           </Button>
         </DialogActions>
@@ -266,8 +262,8 @@ export default function SubmissionReview({
         <DialogTitle>Request Changes</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-            Explain what changes are needed. The employee will be notified and the task
-            will revert to <strong>In Progress</strong>.
+            Explain what changes are needed. The employee will be notified and the task will revert
+            to <strong>In Progress</strong>.
           </DialogContentText>
           <TextField
             label="Review Comment"
@@ -295,11 +291,7 @@ export default function SubmissionReview({
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleRequestChangesSubmit}
-            variant="contained"
-            color="warning"
-          >
+          <Button onClick={handleRequestChangesSubmit} variant="contained" color="warning">
             Request Changes
           </Button>
         </DialogActions>

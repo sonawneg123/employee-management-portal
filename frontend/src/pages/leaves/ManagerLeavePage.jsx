@@ -43,11 +43,7 @@ import {
   LEAVE_DEFAULT_SORT,
   LEAVE_DEFAULT_DIRECTION,
 } from '@/constants/leaveConstants';
-import {
-  useLeaves,
-  useApproveLeave,
-  useRejectLeave,
-} from '@/hooks/useLeaveHooks';
+import { useLeaves, useApproveLeave, useRejectLeave } from '@/hooks/useLeaveHooks';
 
 import LeaveTable from '@/components/leaves/LeaveTable';
 import LeaveToolbar from '@/components/leaves/LeaveToolbar';
@@ -114,11 +110,27 @@ export default function ManagerLeavePage() {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
-  const handleSearchChange = useCallback((v) => { setSearch(v); setPage(0); }, []);
-  const handleStatusChange = useCallback((v) => { setStatus(v); setPage(0); }, []);
-  const handleTypeChange   = useCallback((v) => { setType(v);   setPage(0); }, []);
-  const handleSortChange   = useCallback((f, d) => { setSort(f); setDirection(d); setPage(0); }, []);
-  const handleDirectionChange = useCallback((d) => { setDirection(d); setPage(0); }, []);
+  const handleSearchChange = useCallback((v) => {
+    setSearch(v);
+    setPage(0);
+  }, []);
+  const handleStatusChange = useCallback((v) => {
+    setStatus(v);
+    setPage(0);
+  }, []);
+  const handleTypeChange = useCallback((v) => {
+    setType(v);
+    setPage(0);
+  }, []);
+  const handleSortChange = useCallback((f, d) => {
+    setSort(f);
+    setDirection(d);
+    setPage(0);
+  }, []);
+  const handleDirectionChange = useCallback((d) => {
+    setDirection(d);
+    setPage(0);
+  }, []);
   const handleClearFilters = useCallback(() => {
     setSearch('');
     setStatus('');
@@ -290,7 +302,10 @@ export default function ManagerLeavePage() {
                           color="success"
                           size="small"
                           clickable
-                          onClick={(e) => { e.stopPropagation(); setApproveTarget(l); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setApproveTarget(l);
+                          }}
                           sx={{ fontWeight: 600 }}
                         />
                         <Chip
@@ -298,7 +313,10 @@ export default function ManagerLeavePage() {
                           color="error"
                           size="small"
                           clickable
-                          onClick={(e) => { e.stopPropagation(); setRejectTarget(l); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRejectTarget(l);
+                          }}
                           sx={{ fontWeight: 600 }}
                         />
                       </Box>
@@ -313,7 +331,10 @@ export default function ManagerLeavePage() {
           pageSize={pageSize}
           totalElements={totalElements}
           onPageChange={setPage}
-          onPageSizeChange={(s) => { setPageSize(s); setPage(0); }}
+          onPageSizeChange={(s) => {
+            setPageSize(s);
+            setPage(0);
+          }}
           disabled={isLoading || isFetching}
         />
       </Card>

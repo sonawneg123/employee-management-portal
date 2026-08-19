@@ -44,9 +44,7 @@ import { API_ENDPOINTS } from '@/constants/api';
  * @returns {Promise<TaskAiReviewResponse>}
  */
 export async function requestAiReview(submissionId) {
-  const { data } = await axiosInstance.post(
-    API_ENDPOINTS.TASK_SUBMISSION_AI_REVIEW(submissionId),
-  );
+  const { data } = await axiosInstance.post(API_ENDPOINTS.TASK_SUBMISSION_AI_REVIEW(submissionId));
   return data;
 }
 
@@ -58,9 +56,7 @@ export async function requestAiReview(submissionId) {
  * @returns {Promise<TaskAiReviewResponse>}
  */
 export async function getLatestAiReview(submissionId) {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.TASK_SUBMISSION_AI_REVIEW(submissionId),
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.TASK_SUBMISSION_AI_REVIEW(submissionId));
   return data;
 }
 
@@ -71,9 +67,7 @@ export async function getLatestAiReview(submissionId) {
  * @returns {Promise<TaskAiReviewResponse[]>}
  */
 export async function getAllAiReviews(submissionId) {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.TASK_SUBMISSION_AI_REVIEWS(submissionId),
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.TASK_SUBMISSION_AI_REVIEWS(submissionId));
   return data;
 }
 
@@ -84,9 +78,7 @@ export async function getAllAiReviews(submissionId) {
  * @returns {Promise<TaskAiReviewResponse>}
  */
 export async function getAiReviewById(reviewId) {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.TASK_AI_REVIEW_BY_ID(reviewId),
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.TASK_AI_REVIEW_BY_ID(reviewId));
   return data;
 }
 
@@ -141,9 +133,7 @@ export async function getAiReviewById(reviewId) {
  * @returns {Promise<AiFeedbackResponse>}
  */
 export async function getEmployeeAiFeedback(submissionId) {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.TASK_SUBMISSION_AI_FEEDBACK(submissionId),
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.TASK_SUBMISSION_AI_FEEDBACK(submissionId));
   return data;
 }
 
@@ -154,9 +144,7 @@ export async function getEmployeeAiFeedback(submissionId) {
  * @returns {Promise<AiFeedbackResponse[]>}
  */
 export async function getEmployeeAiHistory(submissionId) {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.TASK_SUBMISSION_AI_HISTORY(submissionId),
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.TASK_SUBMISSION_AI_HISTORY(submissionId));
   return data;
 }
 
@@ -168,9 +156,7 @@ export async function getEmployeeAiHistory(submissionId) {
  * @returns {Promise<AiScoreTrendResponse>}
  */
 export async function getAiScoreTrend(taskId) {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.TASK_AI_TREND(taskId),
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.TASK_AI_TREND(taskId));
   return data;
 }
 
@@ -182,9 +168,7 @@ export async function getAiScoreTrend(taskId) {
  * @returns {Promise<import('../constants/api').AiTaskInsightsResponse>}
  */
 export async function getAiTaskInsights(taskId) {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.TASK_AI_INSIGHTS(taskId),
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.TASK_AI_INSIGHTS(taskId));
   return data;
 }
 
@@ -195,8 +179,6 @@ export async function getAiTaskInsights(taskId) {
  * @returns {Promise<AiDashboardSummaryResponse>}
  */
 export async function getAiDashboardSummary() {
-  const { data } = await axiosInstance.get(
-    API_ENDPOINTS.AI_DASHBOARD_SUMMARY,
-  );
+  const { data } = await axiosInstance.get(API_ENDPOINTS.AI_DASHBOARD_SUMMARY);
   return data;
 }

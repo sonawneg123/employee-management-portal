@@ -61,10 +61,10 @@ const AiAssistantPage = lazy(() => import('@/pages/ai/AiAssistantPage'));
 const CompanyPoliciesPage = lazy(() => import('@/pages/admin/CompanyPoliciesPage'));
 
 // ── Task Management pages ─────────────────────────────────────────────────────
-const ManagerTasksPage       = lazy(() => import('@/pages/tasks/ManagerTasksPage'));
-const ManagerTaskDetailPage  = lazy(() => import('@/pages/tasks/ManagerTaskDetailPage'));
+const ManagerTasksPage = lazy(() => import('@/pages/tasks/ManagerTasksPage'));
+const ManagerTaskDetailPage = lazy(() => import('@/pages/tasks/ManagerTaskDetailPage'));
 const ManagerTaskReviewsPage = lazy(() => import('@/pages/tasks/ManagerTasksPage')); // reuse list page filtered to reviews
-const EmployeeTasksPage      = lazy(() => import('@/pages/tasks/EmployeeTasksPage'));
+const EmployeeTasksPage = lazy(() => import('@/pages/tasks/EmployeeTasksPage'));
 const EmployeeTaskDetailPage = lazy(() => import('@/pages/tasks/EmployeeTaskDetailPage'));
 
 // ── Manager Leave Approvals page ──────────────────────────────────────────────
@@ -166,8 +166,14 @@ export default function AppRoutes() {
             <Route path={ROUTES.HR_POLICIES} element={withSuspense(<CompanyPoliciesPage />)} />
             <Route path={ROUTES.MANAGER_LEAVES} element={withSuspense(<ManagerLeavePage />)} />
             <Route path={ROUTES.MANAGER_TASKS} element={withSuspense(<ManagerTasksPage />)} />
-            <Route path={`${ROUTES.MANAGER_TASKS}/:id`} element={withSuspense(<ManagerTaskDetailPage />)} />
-            <Route path={ROUTES.MANAGER_TASK_REVIEWS} element={withSuspense(<ManagerTasksPage />)} />
+            <Route
+              path={`${ROUTES.MANAGER_TASKS}/:id`}
+              element={withSuspense(<ManagerTaskDetailPage />)}
+            />
+            <Route
+              path={ROUTES.MANAGER_TASK_REVIEWS}
+              element={withSuspense(<ManagerTasksPage />)}
+            />
           </Route>
 
           {/* ── Employee self-service routes (/employee/*) ────────────── */}
@@ -181,7 +187,10 @@ export default function AppRoutes() {
             <Route path={ROUTES.EMPLOYEE_PROFILE} element={withSuspense(<ProfilePage />)} />
             <Route path={ROUTES.EMPLOYEE_REVIEWS} element={withSuspense(<ReviewsPage />)} />
             <Route path={ROUTES.EMPLOYEE_TASKS} element={withSuspense(<EmployeeTasksPage />)} />
-            <Route path={`${ROUTES.EMPLOYEE_TASKS}/:id`} element={withSuspense(<EmployeeTaskDetailPage />)} />
+            <Route
+              path={`${ROUTES.EMPLOYEE_TASKS}/:id`}
+              element={withSuspense(<EmployeeTaskDetailPage />)}
+            />
           </Route>
 
           {/* ── Legacy flat routes (backward compatibility) ───────────── */}

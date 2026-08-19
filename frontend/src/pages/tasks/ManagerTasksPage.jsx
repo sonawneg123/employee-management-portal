@@ -65,7 +65,15 @@ import TaskForm from '@/components/tasks/TaskForm';
 import PageHeader from '@/components/common/PageHeader';
 import { categoryLabel, TASK_CATEGORIES } from '@/components/tasks/TaskForm';
 
-const TASK_STATUSES = ['DRAFT', 'ASSIGNED', 'IN_PROGRESS', 'SUBMITTED', 'COMPLETED', 'CHANGES_REQUESTED', 'REJECTED'];
+const TASK_STATUSES = [
+  'DRAFT',
+  'ASSIGNED',
+  'IN_PROGRESS',
+  'SUBMITTED',
+  'COMPLETED',
+  'CHANGES_REQUESTED',
+  'REJECTED',
+];
 const TASK_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
 function StatCard({ icon, label, value, color, extra }) {
@@ -97,8 +105,12 @@ function StatCard({ icon, label, value, color, extra }) {
         {icon}
       </Box>
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="h5" fontWeight={700}>{value ?? '—'}</Typography>
-        <Typography variant="body2" color="text.secondary">{label}</Typography>
+        <Typography variant="h5" fontWeight={700}>
+          {value ?? '—'}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {label}
+        </Typography>
         {extra}
       </Box>
     </Card>
@@ -142,7 +154,10 @@ export default function ManagerTasksPage() {
 
   // ── Snackbar ───────────────────────────────────────────────────────────────
   const [snackbar, setSnackbar] = useState({ open: false, severity: 'success', message: '' });
-  const showSnackbar = useCallback((severity, message) => setSnackbar({ open: true, severity, message }), []);
+  const showSnackbar = useCallback(
+    (severity, message) => setSnackbar({ open: true, severity, message }),
+    [],
+  );
   const closeSnackbar = useCallback(() => setSnackbar((s) => ({ ...s, open: false })), []);
 
   // ── Tasks query ────────────────────────────────────────────────────────────
@@ -172,10 +187,13 @@ export default function ManagerTasksPage() {
   const totalElements = tasksQuery.data?.totalElements ?? 0;
 
   // ── Form handlers ──────────────────────────────────────────────────────────
-  const handleFormChange = useCallback((field, value) => {
-    setFormValues((prev) => ({ ...prev, [field]: value }));
-    if (formErrors[field]) setFormErrors((e) => ({ ...e, [field]: undefined }));
-  }, [formErrors]);
+  const handleFormChange = useCallback(
+    (field, value) => {
+      setFormValues((prev) => ({ ...prev, [field]: value }));
+      if (formErrors[field]) setFormErrors((e) => ({ ...e, [field]: undefined }));
+    },
+    [formErrors],
+  );
 
   const validateForm = () => {
     const errs = {};
@@ -186,7 +204,10 @@ export default function ManagerTasksPage() {
 
   const handleCreate = async () => {
     const errs = validateForm();
-    if (Object.keys(errs).length > 0) { setFormErrors(errs); return; }
+    if (Object.keys(errs).length > 0) {
+      setFormErrors(errs);
+      return;
+    }
 
     const payload = {
       title: formValues.title.trim(),
@@ -228,7 +249,9 @@ export default function ManagerTasksPage() {
 
   return (
     <>
-      <Helmet><title>Task Management | Employee Portal</title></Helmet>
+      <Helmet>
+        <title>Task Management | Employee Portal</title>
+      </Helmet>
 
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         <PageHeader
@@ -248,57 +271,131 @@ export default function ManagerTasksPage() {
         {/* ── Stat cards ──────────────────────────────────────────────────── */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <StatCard icon={<AssignmentRoundedIcon />} label="Total" value={stats.totalTasks} color={theme.palette.primary.main} />
+            <StatCard
+              icon={<AssignmentRoundedIcon />}
+              label="Total"
+              value={stats.totalTasks}
+              color={theme.palette.primary.main}
+            />
           </Grid>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <StatCard icon={<PendingActionsRoundedIcon />} label="Assigned" value={stats.assigned} color={theme.palette.info.main} />
+            <StatCard
+              icon={<PendingActionsRoundedIcon />}
+              label="Assigned"
+              value={stats.assigned}
+              color={theme.palette.info.main}
+            />
           </Grid>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <StatCard icon={<HourglassEmptyRoundedIcon />} label="In Progress" value={stats.inProgress} color={theme.palette.primary.main} />
+            <StatCard
+              icon={<HourglassEmptyRoundedIcon />}
+              label="In Progress"
+              value={stats.inProgress}
+              color={theme.palette.primary.main}
+            />
           </Grid>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <StatCard icon={<PriorityHighRoundedIcon />} label="Urgent" value={stats.urgent} color={theme.palette.error.main} />
+            <StatCard
+              icon={<PriorityHighRoundedIcon />}
+              label="Urgent"
+              value={stats.urgent}
+              color={theme.palette.error.main}
+            />
           </Grid>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <StatCard icon={<CheckCircleOutlineRoundedIcon />} label="Completed" value={stats.completed} color={theme.palette.success.main}
+            <StatCard
+              icon={<CheckCircleOutlineRoundedIcon />}
+              label="Completed"
+              value={stats.completed}
+              color={theme.palette.success.main}
               extra={
                 completionPct !== null ? (
                   <Box sx={{ mt: 0.5 }}>
-                    <LinearProgress variant="determinate" value={completionPct} color="success" sx={{ borderRadius: 1, height: 4 }} />
-                    <Typography variant="caption" color="text.secondary">{completionPct}%</Typography>
+                    <LinearProgress
+                      variant="determinate"
+                      value={completionPct}
+                      color="success"
+                      sx={{ borderRadius: 1, height: 4 }}
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {completionPct}%
+                    </Typography>
                   </Box>
                 ) : null
               }
             />
           </Grid>
           <Grid size={{ xs: 6, sm: 4, md: 2 }}>
-            <StatCard icon={<ErrorOutlineRoundedIcon />} label="Overdue" value={stats.overdue} color={theme.palette.error.main} />
+            <StatCard
+              icon={<ErrorOutlineRoundedIcon />}
+              label="Overdue"
+              value={stats.overdue}
+              color={theme.palette.error.main}
+            />
           </Grid>
         </Grid>
 
         {/* ── Filters ─────────────────────────────────────────────────────── */}
         <Card variant="outlined" sx={{ mb: 2 }}>
           <Box sx={{ p: 2 }}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="flex-start" flexWrap="wrap">
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              alignItems="flex-start"
+              flexWrap="wrap"
+            >
               <FormControl size="small" sx={{ minWidth: 160 }}>
                 <InputLabel>Status</InputLabel>
-                <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(0); }} label="Status">
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setPage(0);
+                  }}
+                  label="Status"
+                >
                   <MenuItem value="">All</MenuItem>
-                  {TASK_STATUSES.map((s) => <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>)}
+                  {TASK_STATUSES.map((s) => (
+                    <MenuItem key={s} value={s}>
+                      {s.replace(/_/g, ' ')}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 140 }}>
                 <InputLabel>Priority</InputLabel>
-                <Select value={priorityFilter} onChange={(e) => { setPriorityFilter(e.target.value); setPage(0); }} label="Priority">
+                <Select
+                  value={priorityFilter}
+                  onChange={(e) => {
+                    setPriorityFilter(e.target.value);
+                    setPage(0);
+                  }}
+                  label="Priority"
+                >
                   <MenuItem value="">All</MenuItem>
-                  {TASK_PRIORITIES.map((p) => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+                  {TASK_PRIORITIES.map((p) => (
+                    <MenuItem key={p} value={p}>
+                      {p}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Category</InputLabel>
-                <Select value={categoryFilter} onChange={(e) => { setCategoryFilter(e.target.value); setPage(0); }} label="Category">
+                <Select
+                  value={categoryFilter}
+                  onChange={(e) => {
+                    setCategoryFilter(e.target.value);
+                    setPage(0);
+                  }}
+                  label="Category"
+                >
                   <MenuItem value="">All Categories</MenuItem>
-                  {TASK_CATEGORIES.map((c) => <MenuItem key={c} value={c}>{categoryLabel(c)}</MenuItem>)}
+                  {TASK_CATEGORIES.map((c) => (
+                    <MenuItem key={c} value={c}>
+                      {categoryLabel(c)}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -312,7 +409,11 @@ export default function ManagerTasksPage() {
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>Direction</InputLabel>
-                <Select value={direction} onChange={(e) => setDirection(e.target.value)} label="Direction">
+                <Select
+                  value={direction}
+                  onChange={(e) => setDirection(e.target.value)}
+                  label="Direction"
+                >
                   <MenuItem value="desc">Newest First</MenuItem>
                   <MenuItem value="asc">Oldest First</MenuItem>
                 </Select>
@@ -354,22 +455,41 @@ export default function ManagerTasksPage() {
                     tasks.map((task) => (
                       <TableRow key={task.id} hover>
                         <TableCell>
-                          <Typography variant="body2" fontWeight={600} noWrap sx={{ maxWidth: 200 }}>
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            noWrap
+                            sx={{ maxWidth: 200 }}
+                          >
                             {task.title}
                           </Typography>
                           {task.category && (
-                            <Chip label={categoryLabel(task.category)} size="small" variant="outlined" sx={{ mt: 0.25, height: 18, fontSize: '0.65rem' }} />
+                            <Chip
+                              label={categoryLabel(task.category)}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mt: 0.25, height: 18, fontSize: '0.65rem' }}
+                            />
                           )}
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">
-                            {task.assignedEmployeeName ?? <em style={{ color: '#888' }}>Unassigned</em>}
+                            {task.assignedEmployeeName ?? (
+                              <em style={{ color: '#888' }}>Unassigned</em>
+                            )}
                           </Typography>
                         </TableCell>
-                        <TableCell><TaskPriorityChip priority={task.priority} /></TableCell>
-                        <TableCell><TaskStatusChip status={task.status} overdue={task.overdue} /></TableCell>
                         <TableCell>
-                          <Typography variant="body2" color={task.overdue ? 'error.main' : 'text.primary'}>
+                          <TaskPriorityChip priority={task.priority} />
+                        </TableCell>
+                        <TableCell>
+                          <TaskStatusChip status={task.status} overdue={task.overdue} />
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            color={task.overdue ? 'error.main' : 'text.primary'}
+                          >
                             {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
                           </Typography>
                         </TableCell>
@@ -409,7 +529,10 @@ export default function ManagerTasksPage() {
               page={page}
               onPageChange={(_, newPage) => setPage(newPage)}
               rowsPerPage={pageSize}
-              onRowsPerPageChange={(e) => { setPageSize(parseInt(e.target.value)); setPage(0); }}
+              onRowsPerPageChange={(e) => {
+                setPageSize(parseInt(e.target.value));
+                setPage(0);
+              }}
               rowsPerPageOptions={[10, 20, 50]}
             />
           </Paper>
@@ -425,7 +548,11 @@ export default function ManagerTasksPage() {
             errors={formErrors}
             onChange={handleFormChange}
             onSubmit={handleCreate}
-            onCancel={() => { setCreateOpen(false); setFormValues(FORM_INITIAL); setFormErrors({}); }}
+            onCancel={() => {
+              setCreateOpen(false);
+              setFormValues(FORM_INITIAL);
+              setFormErrors({});
+            }}
             employees={availabilityEmployees}
             showAvailability
             isSubmitting={createMutation.isPending}

@@ -47,19 +47,31 @@ describe('TaskComments', () => {
 
   it('shows loading spinner', () => {
     setupMocks({ isLoading: true });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('shows error message when fetch fails', () => {
     setupMocks({ isError: true });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     expect(screen.getByText(/failed to load comments/i)).toBeInTheDocument();
   });
 
   it('shows "No comments yet" when there are no comments', () => {
     setupMocks({ comments: [] });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     expect(screen.getByText(/no comments yet/i)).toBeInTheDocument();
   });
 
@@ -76,7 +88,11 @@ describe('TaskComments', () => {
         },
       ],
     });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     expect(screen.getByText('Jane Manager')).toBeInTheDocument();
     expect(screen.getByText('Please review the requirements.')).toBeInTheDocument();
   });
@@ -93,28 +109,48 @@ describe('TaskComments', () => {
         },
       ],
     });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     expect(screen.getByText(/\(edited\)/i)).toBeInTheDocument();
   });
 
   it('calls createTaskComment mutation when Post is clicked with content', async () => {
     setupMocks({ comments: [] });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     const textarea = screen.getByPlaceholderText(/write a comment/i);
     fireEvent.change(textarea, { target: { value: 'Hello world' } });
     fireEvent.click(screen.getByRole('button', { name: /post/i }));
-    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledWith({ taskId: 'task-1', content: 'Hello world' }));
+    await waitFor(() =>
+      expect(mockMutateAsync).toHaveBeenCalledWith({ taskId: 'task-1', content: 'Hello world' }),
+    );
   });
 
   it('Post button is disabled when content is empty', () => {
     setupMocks({ comments: [] });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     expect(screen.getByRole('button', { name: /post/i })).toBeDisabled();
   });
 
   it('shows comment count chip', () => {
-    setupMocks({ comments: [{ id: 'c1', authorName: 'Bob', content: 'Hi', createdAt: '2025-01-01T00:00:00' }] });
-    render(<Wrapper><TaskComments taskId="task-1" /></Wrapper>);
+    setupMocks({
+      comments: [{ id: 'c1', authorName: 'Bob', content: 'Hi', createdAt: '2025-01-01T00:00:00' }],
+    });
+    render(
+      <Wrapper>
+        <TaskComments taskId="task-1" />
+      </Wrapper>,
+    );
     // chip label = '1'
     expect(screen.getByText('1')).toBeInTheDocument();
   });

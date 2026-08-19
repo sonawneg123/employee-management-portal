@@ -82,7 +82,7 @@ function renderFeedback(props = {}) {
   return render(
     <Wrapper>
       <EmployeeAiFeedbackSection submissionId="sub-001" taskId="task-001" {...props} />
-    </Wrapper>
+    </Wrapper>,
   );
 }
 
@@ -90,7 +90,7 @@ function renderTrend(props = {}) {
   return render(
     <Wrapper>
       <ManagerAiTrendSection taskId="task-001" {...props} />
-    </Wrapper>
+    </Wrapper>,
   );
 }
 
@@ -98,7 +98,7 @@ function renderDashboard(props = {}) {
   return render(
     <Wrapper>
       <AiDashboardSummaryWidget {...props} />
-    </Wrapper>
+    </Wrapper>,
   );
 }
 
@@ -149,8 +149,20 @@ const FAILED_FEEDBACK = {
 const TREND_IMPROVING = {
   taskId: 'task-001',
   scoreHistory: [
-    { reviewId: 'r1', submissionNumber: 1, overallScore: 70, qualityScore: 72, evaluatedAt: '2025-01-01T09:00:00' },
-    { reviewId: 'r2', submissionNumber: 2, overallScore: 85, qualityScore: 88, evaluatedAt: '2025-01-02T09:00:00' },
+    {
+      reviewId: 'r1',
+      submissionNumber: 1,
+      overallScore: 70,
+      qualityScore: 72,
+      evaluatedAt: '2025-01-01T09:00:00',
+    },
+    {
+      reviewId: 'r2',
+      submissionNumber: 2,
+      overallScore: 85,
+      qualityScore: 88,
+      evaluatedAt: '2025-01-02T09:00:00',
+    },
   ],
   trendDirection: 'IMPROVING',
   totalScoreChange: 15,
@@ -437,7 +449,11 @@ describe('Phase 7D — AiDashboardSummaryWidget', () => {
   });
 
   it('26. Renders all dashboard stats', () => {
-    useAiDashboardSummary.mockReturnValue({ data: DASHBOARD_SUMMARY, isLoading: false, isError: false });
+    useAiDashboardSummary.mockReturnValue({
+      data: DASHBOARD_SUMMARY,
+      isLoading: false,
+      isError: false,
+    });
     renderDashboard();
     expect(screen.getByTestId('ai-stat-evaluated')).toBeDefined();
     expect(screen.getByTestId('ai-stat-avg-score')).toBeDefined();
@@ -455,21 +471,33 @@ describe('Phase 7D — AiDashboardSummaryWidget', () => {
   });
 
   it('28. Shows correct total evaluated count', () => {
-    useAiDashboardSummary.mockReturnValue({ data: DASHBOARD_SUMMARY, isLoading: false, isError: false });
+    useAiDashboardSummary.mockReturnValue({
+      data: DASHBOARD_SUMMARY,
+      isLoading: false,
+      isError: false,
+    });
     renderDashboard();
     const statEl = screen.getByTestId('ai-stat-evaluated');
     expect(statEl.textContent).toContain('12');
   });
 
   it('29. Shows correct average score', () => {
-    useAiDashboardSummary.mockReturnValue({ data: DASHBOARD_SUMMARY, isLoading: false, isError: false });
+    useAiDashboardSummary.mockReturnValue({
+      data: DASHBOARD_SUMMARY,
+      isLoading: false,
+      isError: false,
+    });
     renderDashboard();
     const statEl = screen.getByTestId('ai-stat-avg-score');
     expect(statEl.textContent).toContain('84');
   });
 
   it('30. Shows "Advisory" chip', () => {
-    useAiDashboardSummary.mockReturnValue({ data: DASHBOARD_SUMMARY, isLoading: false, isError: false });
+    useAiDashboardSummary.mockReturnValue({
+      data: DASHBOARD_SUMMARY,
+      isLoading: false,
+      isError: false,
+    });
     renderDashboard();
     expect(screen.getByText(/Advisory/i)).toBeDefined();
   });
@@ -530,13 +558,17 @@ describe('Phase 7D — API endpoint constants', () => {
   it('35. TASK_SUBMISSION_AI_FEEDBACK endpoint is defined', async () => {
     const { API_ENDPOINTS } = await import('@/constants/api');
     expect(typeof API_ENDPOINTS.TASK_SUBMISSION_AI_FEEDBACK).toBe('function');
-    expect(API_ENDPOINTS.TASK_SUBMISSION_AI_FEEDBACK('test-id')).toBe('/task-submissions/test-id/ai-feedback');
+    expect(API_ENDPOINTS.TASK_SUBMISSION_AI_FEEDBACK('test-id')).toBe(
+      '/task-submissions/test-id/ai-feedback',
+    );
   });
 
   it('36. TASK_SUBMISSION_AI_HISTORY endpoint is defined', async () => {
     const { API_ENDPOINTS } = await import('@/constants/api');
     expect(typeof API_ENDPOINTS.TASK_SUBMISSION_AI_HISTORY).toBe('function');
-    expect(API_ENDPOINTS.TASK_SUBMISSION_AI_HISTORY('test-id')).toBe('/task-submissions/test-id/ai-history');
+    expect(API_ENDPOINTS.TASK_SUBMISSION_AI_HISTORY('test-id')).toBe(
+      '/task-submissions/test-id/ai-history',
+    );
   });
 
   it('37. TASK_AI_TREND endpoint is defined', async () => {
@@ -575,7 +607,7 @@ describe('Phase 7D — Error and authorization states', () => {
     const { container } = render(
       <Wrapper>
         <EmployeeAiFeedbackSection submissionId={null} taskId="task-001" />
-      </Wrapper>
+      </Wrapper>,
     );
     // Should render nothing (returns null)
     expect(container.firstChild).toBeNull();

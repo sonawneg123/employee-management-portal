@@ -214,11 +214,7 @@ export default function AiAssistantChat() {
 
         {messages.length > 0 && (
           <Tooltip title="Clear conversation">
-            <IconButton
-              size="small"
-              onClick={handleClear}
-              aria-label="Clear conversation"
-            >
+            <IconButton size="small" onClick={handleClear} aria-label="Clear conversation">
               <DeleteSweepRoundedIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -344,18 +340,14 @@ export default function AiAssistantChat() {
                 px: 1.5,
                 py: 1,
                 maxWidth: '80%',
-                bgcolor:
-                  msg.role === 'user' ? 'primary.main' : 'action.hover',
+                bgcolor: msg.role === 'user' ? 'primary.main' : 'action.hover',
                 color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
                 borderRadius: 2,
                 borderTopRightRadius: msg.role === 'user' ? 0 : 2,
                 borderTopLeftRadius: msg.role === 'assistant' ? 0 : 2,
               }}
             >
-              <Typography
-                variant="body2"
-                sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
-              >
+              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                 {msg.text}
               </Typography>
             </Paper>
@@ -396,11 +388,7 @@ export default function AiAssistantChat() {
       {error && (
         <>
           <Divider />
-          <Alert
-            severity="error"
-            onClose={() => setError('')}
-            sx={{ borderRadius: 0, px: 2 }}
-          >
+          <Alert severity="error" onClose={() => setError('')} sx={{ borderRadius: 0, px: 2 }}>
             {error}
           </Alert>
         </>
@@ -449,11 +437,7 @@ export default function AiAssistantChat() {
               aria-label="Send message"
               sx={{ mb: input.length > MAX_MESSAGE_LENGTH ? 3 : 0 }}
             >
-              {loading ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                <SendRoundedIcon />
-              )}
+              {loading ? <CircularProgress size={20} color="inherit" /> : <SendRoundedIcon />}
             </IconButton>
           </span>
         </Tooltip>

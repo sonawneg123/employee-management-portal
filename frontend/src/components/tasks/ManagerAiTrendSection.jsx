@@ -50,7 +50,9 @@ import { useAiScoreTrend, useAiTaskInsights } from '@/hooks/useTaskAiReviewHooks
 function formatDate(isoString) {
   if (!isoString) return '—';
   return new Date(isoString).toLocaleDateString(undefined, {
-    month: 'short', day: 'numeric', year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -111,16 +113,18 @@ function ScoreTrendViz({ scoreHistory, hasTrendData }) {
                   py: 0.5,
                   minWidth: 40,
                   textAlign: 'center',
-                  bgcolor: point.overallScore >= 75
-                    ? 'success.50'
-                    : point.overallScore >= 50
-                      ? 'warning.50'
-                      : 'error.50',
-                  borderColor: point.overallScore >= 75
-                    ? 'success.light'
-                    : point.overallScore >= 50
-                      ? 'warning.light'
-                      : 'error.light',
+                  bgcolor:
+                    point.overallScore >= 75
+                      ? 'success.50'
+                      : point.overallScore >= 50
+                        ? 'warning.50'
+                        : 'error.50',
+                  borderColor:
+                    point.overallScore >= 75
+                      ? 'success.light'
+                      : point.overallScore >= 50
+                        ? 'warning.light'
+                        : 'error.light',
                   cursor: 'default',
                 }}
               >
@@ -130,7 +134,9 @@ function ScoreTrendViz({ scoreHistory, hasTrendData }) {
               </Paper>
             </Tooltip>
             {idx < scoreHistory.length - 1 && (
-              <Typography variant="caption" color="text.secondary">→</Typography>
+              <Typography variant="caption" color="text.secondary">
+                →
+              </Typography>
             )}
           </React.Fragment>
         ))}
@@ -167,7 +173,9 @@ function ScoreSummaryCard({ trend }) {
 
       {trend.previousScore != null && (
         <>
-          <Typography variant="h5" color="text.disabled" sx={{ alignSelf: 'center' }}>→</Typography>
+          <Typography variant="h5" color="text.disabled" sx={{ alignSelf: 'center' }}>
+            →
+          </Typography>
           <Box data-testid="previous-score">
             <Typography variant="caption" color="text.secondary" display="block">
               Previous
@@ -185,7 +193,8 @@ function ScoreSummaryCard({ trend }) {
             Change
           </Typography>
           <Typography variant="h5" fontWeight={700} color={changeColor}>
-            {trend.latestScoreChange > 0 ? '+' : ''}{trend.latestScoreChange}
+            {trend.latestScoreChange > 0 ? '+' : ''}
+            {trend.latestScoreChange}
           </Typography>
         </Box>
       )}
@@ -205,15 +214,11 @@ function ScoreSummaryCard({ trend }) {
 export default function ManagerAiTrendSection({ taskId }) {
   const [showInsights, setShowInsights] = useState(false);
 
-  const {
-    data: trend,
-    isLoading: isTrendLoading,
-  } = useAiScoreTrend(taskId);
+  const { data: trend, isLoading: isTrendLoading } = useAiScoreTrend(taskId);
 
-  const {
-    data: insights,
-    isLoading: isInsightsLoading,
-  } = useAiTaskInsights(taskId, { enabled: Boolean(taskId) && showInsights });
+  const { data: insights, isLoading: isInsightsLoading } = useAiTaskInsights(taskId, {
+    enabled: Boolean(taskId) && showInsights,
+  });
 
   if (!taskId) return null;
 
@@ -254,10 +259,7 @@ export default function ManagerAiTrendSection({ taskId }) {
             <ScoreSummaryCard trend={trend} />
 
             {/* Inline visualization */}
-            <ScoreTrendViz
-              scoreHistory={trend.scoreHistory}
-              hasTrendData={trend.hasTrendData}
-            />
+            <ScoreTrendViz scoreHistory={trend.scoreHistory} hasTrendData={trend.hasTrendData} />
 
             {/* Advisory notice */}
             <Alert
@@ -267,8 +269,8 @@ export default function ManagerAiTrendSection({ taskId }) {
               sx={{ mt: 2, py: 0.5 }}
             >
               <Typography variant="caption">
-                AI evaluation is advisory. Manager decisions always take precedence.
-                Failed evaluations are excluded from trend calculations.
+                AI evaluation is advisory. Manager decisions always take precedence. Failed
+                evaluations are excluded from trend calculations.
               </Typography>
             </Alert>
 
@@ -291,7 +293,11 @@ export default function ManagerAiTrendSection({ taskId }) {
                     '&:hover': { textDecoration: 'underline' },
                   }}
                 >
-                  {showInsights ? <ExpandLessRoundedIcon fontSize="small" /> : <ExpandMoreRoundedIcon fontSize="small" />}
+                  {showInsights ? (
+                    <ExpandLessRoundedIcon fontSize="small" />
+                  ) : (
+                    <ExpandMoreRoundedIcon fontSize="small" />
+                  )}
                   <Typography variant="body2" fontWeight={600}>
                     {showInsights ? 'Hide AI Insights' : 'Show AI Insights'}
                   </Typography>
@@ -306,7 +312,13 @@ export default function ManagerAiTrendSection({ taskId }) {
                         {/* Common issues */}
                         {insights.commonIssues?.length > 0 && (
                           <Box>
-                            <Typography variant="caption" color="text.secondary" fontWeight={600} gutterBottom display="block">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              fontWeight={600}
+                              gutterBottom
+                              display="block"
+                            >
                               Common Issues
                             </Typography>
                             <List dense disablePadding>
@@ -328,14 +340,23 @@ export default function ManagerAiTrendSection({ taskId }) {
                         {/* Most recent strengths */}
                         {insights.mostRecentStrengths?.length > 0 && (
                           <Box>
-                            <Typography variant="caption" color="text.secondary" fontWeight={600} gutterBottom display="block">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              fontWeight={600}
+                              gutterBottom
+                              display="block"
+                            >
                               Most Recent Strengths
                             </Typography>
                             <List dense disablePadding>
                               {insights.mostRecentStrengths.map((s, i) => (
                                 <ListItem key={i} disableGutters sx={{ py: 0.25 }}>
                                   <ListItemIcon sx={{ minWidth: 20 }}>
-                                    <CheckCircleOutlineRoundedIcon fontSize="small" color="success" />
+                                    <CheckCircleOutlineRoundedIcon
+                                      fontSize="small"
+                                      color="success"
+                                    />
                                   </ListItemIcon>
                                   <ListItemText
                                     primary={s}
@@ -350,9 +371,20 @@ export default function ManagerAiTrendSection({ taskId }) {
                         {/* Most recent suggestions */}
                         {insights.mostRecentSuggestions?.length > 0 && (
                           <Box>
-                            <Typography variant="caption" color="text.secondary" fontWeight={600} gutterBottom display="block">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              fontWeight={600}
+                              gutterBottom
+                              display="block"
+                            >
                               AI Improvement Suggestions
-                              <Typography component="span" variant="caption" color="text.disabled" sx={{ ml: 1 }}>
+                              <Typography
+                                component="span"
+                                variant="caption"
+                                color="text.disabled"
+                                sx={{ ml: 1 }}
+                              >
                                 (advisory — not mandatory requirements)
                               </Typography>
                             </Typography>
@@ -373,8 +405,9 @@ export default function ManagerAiTrendSection({ taskId }) {
                         )}
 
                         <Typography variant="caption" color="text.secondary">
-                          Based on {insights.completedEvaluations} completed AI evaluation{insights.completedEvaluations !== 1 ? 's' : ''}.
-                          Average score: {insights.averageScore != null ? `${insights.averageScore}%` : '—'}
+                          Based on {insights.completedEvaluations} completed AI evaluation
+                          {insights.completedEvaluations !== 1 ? 's' : ''}. Average score:{' '}
+                          {insights.averageScore != null ? `${insights.averageScore}%` : '—'}
                         </Typography>
                       </Stack>
                     )}

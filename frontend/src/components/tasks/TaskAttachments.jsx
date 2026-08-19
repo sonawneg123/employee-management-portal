@@ -25,7 +25,11 @@ import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import UploadFileRoundedIcon from '@mui/icons-material/UploadFileRounded';
 
-import { useTaskAttachments, useUploadTaskAttachment, useDeleteTaskAttachment } from '@/hooks/useTaskHooks';
+import {
+  useTaskAttachments,
+  useUploadTaskAttachment,
+  useDeleteTaskAttachment,
+} from '@/hooks/useTaskHooks';
 import { downloadTaskAttachment } from '@/services/taskApi';
 
 /**
@@ -85,7 +89,10 @@ export default function TaskAttachments({ taskId, isManager = false }) {
     try {
       await uploadMutation.mutateAsync({ taskId, file });
     } catch (err) {
-      setUploadError(err?.response?.data?.detail ?? 'Upload failed. Ensure the file is PDF, CSV, DOCX, or TXT and under 10 MB.');
+      setUploadError(
+        err?.response?.data?.detail ??
+          'Upload failed. Ensure the file is PDF, CSV, DOCX, or TXT and under 10 MB.',
+      );
     }
   };
 
@@ -110,7 +117,13 @@ export default function TaskAttachments({ taskId, isManager = false }) {
   return (
     <Card variant="outlined">
       <CardContent>
-        <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ mb: 2 }}
+        >
           <Stack direction="row" spacing={1} alignItems="center">
             <AttachFileRoundedIcon fontSize="small" color="action" />
             <Typography variant="subtitle1" fontWeight={600}>
@@ -121,7 +134,13 @@ export default function TaskAttachments({ taskId, isManager = false }) {
             <Button
               size="small"
               variant="outlined"
-              startIcon={uploadMutation.isPending ? <CircularProgress size={14} /> : <UploadFileRoundedIcon />}
+              startIcon={
+                uploadMutation.isPending ? (
+                  <CircularProgress size={14} />
+                ) : (
+                  <UploadFileRoundedIcon />
+                )
+              }
               onClick={handleUploadClick}
               disabled={uploadMutation.isPending}
             >
@@ -157,9 +176,7 @@ export default function TaskAttachments({ taskId, isManager = false }) {
           </Box>
         )}
 
-        {isError && (
-          <Alert severity="error">Failed to load attachments.</Alert>
-        )}
+        {isError && <Alert severity="error">Failed to load attachments.</Alert>}
 
         {!isLoading && !isError && (!attachments || attachments.length === 0) && (
           <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
@@ -187,9 +204,11 @@ export default function TaskAttachments({ taskId, isManager = false }) {
                           onClick={() => handleDownload(att)}
                           disabled={downloadingId === att.id}
                         >
-                          {downloadingId === att.id
-                            ? <CircularProgress size={16} />
-                            : <DownloadRoundedIcon fontSize="small" />}
+                          {downloadingId === att.id ? (
+                            <CircularProgress size={16} />
+                          ) : (
+                            <DownloadRoundedIcon fontSize="small" />
+                          )}
                         </IconButton>
                       </span>
                     </Tooltip>

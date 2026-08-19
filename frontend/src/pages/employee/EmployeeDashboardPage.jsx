@@ -2,6 +2,7 @@
  * @fileoverview EmployeeDashboardPage — self-service dashboard for ROLE_EMPLOYEE users.
  *
  * Shows the employee's own data only:
+ * - Greeting welcome card
  * - Profile summary: name, department, job title, joining date
  * - Quick actions: Apply for Leave, View My Attendance
  * - Upcoming / pending leave requests
@@ -27,12 +28,14 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
 import EventNoteIcon from '@mui/icons-material/EventNote';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import ApartmentIcon from '@mui/icons-material/Apartment';
-import WorkIcon from '@mui/icons-material/Work';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
+import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
+import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
+import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
+import TaskRoundedIcon from '@mui/icons-material/TaskRounded';
+import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
 
 import { getProfile } from '@/services/profileApi';
 import { ROUTES } from '@/constants/routes';
@@ -60,18 +63,29 @@ function ProfileSummaryCard({ profile, isLoading }) {
   return (
     <Card sx={{ height: '100%' }}>
       <CardContent sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
           {isLoading ? (
-            <Skeleton variant="circular" width={56} height={56} />
+            <Skeleton variant="circular" width={60} height={60} />
           ) : (
-            <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main', fontSize: '1.25rem' }}>
-              {initials}
+            <Avatar
+              src={profile?.profilePhotoUrl}
+              sx={{
+                width: 60,
+                height: 60,
+                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                flexShrink: 0,
+              }}
+            >
+              {!profile?.profilePhotoUrl && initials}
             </Avatar>
           )}
           <Box sx={{ minWidth: 0 }}>
             {isLoading ? (
               <>
-                <Skeleton variant="text" width={140} height={28} />
+                <Skeleton variant="text" width={140} height={26} />
                 <Skeleton variant="text" width={100} />
               </>
             ) : (
@@ -83,30 +97,65 @@ function ProfileSummaryCard({ profile, isLoading }) {
                   label={profile?.status ?? 'ACTIVE'}
                   color={statusColor}
                   size="small"
-                  sx={{ fontWeight: 600, mt: 0.25 }}
+                  sx={{ fontWeight: 600, mt: 0.25, height: 22 }}
                 />
               </>
             )}
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+        {/* Profile fields */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {[
-            { Icon: WorkIcon, label: 'Job Title', value: profile?.jobTitle },
-            { Icon: ApartmentIcon, label: 'Department', value: profile?.departmentName },
-            { Icon: PersonIcon, label: 'Employee ID', value: profile?.employeeCode },
-            { Icon: CalendarTodayIcon, label: 'Joined', value: profile?.dateOfJoining },
-          ].map(({ Icon, label, value }) => (
-            <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-              <Icon sx={{ fontSize: 18, color: 'text.secondary', flexShrink: 0 }} />
-              <Box>
+            {
+              Icon: WorkRoundedIcon,
+              label: 'Job Title',
+              value: profile?.jobTitle,
+              color: '#4F46E5',
+            },
+            {
+              Icon: ApartmentRoundedIcon,
+              label: 'Department',
+              value: profile?.departmentName,
+              color: '#7C3AED',
+            },
+            {
+              Icon: BadgeRoundedIcon,
+              label: 'Employee ID',
+              value: profile?.employeeCode,
+              color: '#10B981',
+            },
+            {
+              Icon: CalendarTodayRoundedIcon,
+              label: 'Joined',
+              value: profile?.dateOfJoining,
+              color: '#F59E0B',
+            },
+          ].map(({ Icon, label, value, color }) => (
+            <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: '10px',
+                  bgcolor: `${color}14`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+                aria-hidden="true"
+              >
+                <Icon sx={{ fontSize: 17, color }} />
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
                 <Typography variant="caption" color="text.secondary" display="block">
                   {label}
                 </Typography>
                 {isLoading ? (
                   <Skeleton variant="text" width={120} />
                 ) : (
-                  <Typography variant="body2" fontWeight={500}>
+                  <Typography variant="body2" fontWeight={600} noWrap>
                     {value ?? '—'}
                   </Typography>
                 )}
@@ -124,35 +173,70 @@ function ProfileSummaryCard({ profile, isLoading }) {
 /**
  * Compact set of employee quick-action buttons.
  *
- * @param {{ onApplyLeave: () => void, onViewAttendance: () => void }} props
+ * @param {{ onApplyLeave: () => void, onViewAttendance: () => void, onViewTasks: () => void, onViewReviews: () => void }} props
  * @returns {JSX.Element}
  */
-function EmployeeQuickActions({ onApplyLeave, onViewAttendance }) {
+function EmployeeQuickActions({ onApplyLeave, onViewAttendance, onViewTasks, onViewReviews }) {
+  const actions = [
+    {
+      label: 'Apply for Leave',
+      icon: <EventNoteIcon sx={{ fontSize: 18 }} />,
+      onClick: onApplyLeave,
+      variant: 'contained',
+      sx: {
+        background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+        color: '#fff',
+        '&:hover': { background: 'linear-gradient(135deg, #4338CA, #6D28D9)' },
+      },
+    },
+    {
+      label: 'My Attendance',
+      icon: <AccessTimeIcon sx={{ fontSize: 18 }} />,
+      onClick: onViewAttendance,
+      variant: 'outlined',
+      sx: {},
+    },
+    {
+      label: 'My Tasks',
+      icon: <TaskRoundedIcon sx={{ fontSize: 18 }} />,
+      onClick: onViewTasks,
+      variant: 'outlined',
+      sx: {},
+    },
+    {
+      label: 'My Reviews',
+      icon: <AssessmentRoundedIcon sx={{ fontSize: 18 }} />,
+      onClick: onViewReviews,
+      variant: 'outlined',
+      sx: {},
+    },
+  ];
+
   return (
     <Card>
       <CardContent sx={{ p: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 2, letterSpacing: '-0.01em' }}>
           Quick Actions
         </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            startIcon={<EventNoteIcon />}
-            onClick={onApplyLeave}
-            fullWidth
-            size="small"
-          >
-            Apply for Leave
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<AccessTimeIcon />}
-            onClick={onViewAttendance}
-            fullWidth
-            size="small"
-          >
-            View My Attendance
-          </Button>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
+          {actions.map(({ label, icon, onClick, variant, sx }) => (
+            <Button
+              key={label}
+              variant={variant}
+              startIcon={icon}
+              onClick={onClick}
+              fullWidth
+              size="small"
+              sx={{
+                justifyContent: 'flex-start',
+                py: 1,
+                borderRadius: '10px',
+                ...sx,
+              }}
+            >
+              {label}
+            </Button>
+          ))}
         </Box>
       </CardContent>
     </Card>
@@ -192,7 +276,7 @@ export default function EmployeeDashboardPage() {
         <WelcomeCard />
 
         {profileError && (
-          <Alert severity="warning" sx={{ mb: 2 }}>
+          <Alert severity="warning" sx={{ mb: 3, borderRadius: '12px' }}>
             Could not load your profile information.
           </Alert>
         )}
@@ -200,11 +284,13 @@ export default function EmployeeDashboardPage() {
         <Grid container spacing={3}>
           {/* Left column — profile + quick actions */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <ProfileSummaryCard profile={profile} isLoading={profileLoading} />
               <EmployeeQuickActions
                 onApplyLeave={() => navigate(ROUTES.EMPLOYEE_LEAVES)}
                 onViewAttendance={() => navigate(ROUTES.EMPLOYEE_ATTENDANCE)}
+                onViewTasks={() => navigate(ROUTES.EMPLOYEE_TASKS)}
+                onViewReviews={() => navigate(ROUTES.EMPLOYEE_REVIEWS)}
               />
             </Box>
           </Grid>

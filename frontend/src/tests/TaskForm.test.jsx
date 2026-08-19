@@ -28,7 +28,12 @@ function Wrapper({ children }) {
   );
 }
 
-function ControlledForm({ onSubmit = vi.fn(), onCancel = vi.fn(), errors = {}, isSubmitting = false }) {
+function ControlledForm({
+  onSubmit = vi.fn(),
+  onCancel = vi.fn(),
+  errors = {},
+  isSubmitting = false,
+}) {
   const [values, setValues] = useState({
     title: '',
     description: '',
@@ -102,8 +107,6 @@ describe('TaskForm', () => {
     render(<ControlledForm />);
     // Open dropdown
     fireEvent.mouseDown(screen.getByRole('combobox', { name: /assign to/i }));
-    await waitFor(() =>
-      expect(screen.getByText('Jane Doe (EMP-001)')).toBeInTheDocument()
-    );
+    await waitFor(() => expect(screen.getByText('Jane Doe (EMP-001)')).toBeInTheDocument());
   });
 });

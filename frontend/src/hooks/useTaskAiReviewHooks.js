@@ -53,7 +53,7 @@ export function useLatestAiReview(submissionId, opts = {}) {
   return useQuery({
     queryKey: aiReviewKeys.latestForSubmission(submissionId),
     queryFn: () => getLatestAiReview(submissionId),
-    enabled: Boolean(submissionId) && (opts.enabled !== false),
+    enabled: Boolean(submissionId) && opts.enabled !== false,
     staleTime: 8_000,
     // Poll while in-flight to detect completion quickly.
     // Also poll when there is no review yet (404) so the UI discovers the
@@ -87,7 +87,7 @@ export function useAllAiReviews(submissionId, opts = {}) {
   return useQuery({
     queryKey: aiReviewKeys.allForSubmission(submissionId),
     queryFn: () => getAllAiReviews(submissionId),
-    enabled: Boolean(submissionId) && (opts.enabled !== false),
+    enabled: Boolean(submissionId) && opts.enabled !== false,
     staleTime: 15_000,
     retry: (failureCount, error) => {
       if (error?.response?.status === 404) return false;
@@ -140,7 +140,7 @@ export function useEmployeeAiFeedback(submissionId, opts = {}) {
   return useQuery({
     queryKey: aiReviewKeys.employeeFeedback(submissionId),
     queryFn: () => getEmployeeAiFeedback(submissionId),
-    enabled: Boolean(submissionId) && (opts.enabled !== false),
+    enabled: Boolean(submissionId) && opts.enabled !== false,
     staleTime: 8_000,
     // Poll while PENDING/PROCESSING or 404 (awaiting auto-trigger)
     refetchInterval: (query) => {
@@ -170,7 +170,7 @@ export function useEmployeeAiHistory(submissionId, opts = {}) {
   return useQuery({
     queryKey: aiReviewKeys.employeeHistory(submissionId),
     queryFn: () => getEmployeeAiHistory(submissionId),
-    enabled: Boolean(submissionId) && (opts.enabled !== false),
+    enabled: Boolean(submissionId) && opts.enabled !== false,
     staleTime: 15_000,
     retry: (failureCount, error) => {
       if (error?.response?.status === 404) return false;
@@ -191,7 +191,7 @@ export function useAiScoreTrend(taskId, opts = {}) {
   return useQuery({
     queryKey: aiReviewKeys.scoreTrend(taskId),
     queryFn: () => getAiScoreTrend(taskId),
-    enabled: Boolean(taskId) && (opts.enabled !== false),
+    enabled: Boolean(taskId) && opts.enabled !== false,
     staleTime: 30_000,
     retry: 1,
   });
@@ -209,7 +209,7 @@ export function useAiTaskInsights(taskId, opts = {}) {
   return useQuery({
     queryKey: aiReviewKeys.taskInsights(taskId),
     queryFn: () => getAiTaskInsights(taskId),
-    enabled: Boolean(taskId) && (opts.enabled !== false),
+    enabled: Boolean(taskId) && opts.enabled !== false,
     staleTime: 60_000,
     retry: 1,
   });

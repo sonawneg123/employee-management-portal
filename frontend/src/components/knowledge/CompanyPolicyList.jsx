@@ -37,19 +37,12 @@ import { ROLES } from '@/constants/roles';
  */
 function StatusChip({ status }) {
   const map = {
-    ACTIVE:     { color: 'success', label: 'Active' },
+    ACTIVE: { color: 'success', label: 'Active' },
     PROCESSING: { color: 'warning', label: 'Processing' },
-    ERROR:      { color: 'error',   label: 'Error' },
+    ERROR: { color: 'error', label: 'Error' },
   };
   const { color, label } = map[status] ?? { color: 'default', label: status };
-  return (
-    <Chip
-      label={label}
-      color={color}
-      size="small"
-      aria-label={`Document status: ${label}`}
-    />
-  );
+  return <Chip label={label} color={color} size="small" aria-label={`Document status: ${label}`} />;
 }
 
 /**
@@ -67,8 +60,8 @@ export default function CompanyPolicyList({ documents, loading, error, onRefresh
   const { hasAnyRole } = useAuth();
   const isAdmin = hasAnyRole([ROLES.ADMIN]);
 
-  const [deletingId, setDeletingId]     = useState(null);
-  const [deleteError, setDeleteError]   = useState('');
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
 
   const handleDelete = async (id, title) => {
     if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) return;
@@ -98,11 +91,7 @@ export default function CompanyPolicyList({ documents, loading, error, onRefresh
               disabled={loading}
               aria-label="Refresh document list"
             >
-              {loading ? (
-                <CircularProgress size={18} />
-              ) : (
-                <RefreshRoundedIcon fontSize="small" />
-              )}
+              {loading ? <CircularProgress size={18} /> : <RefreshRoundedIcon fontSize="small" />}
             </IconButton>
           </span>
         </Tooltip>
@@ -139,11 +128,23 @@ export default function CompanyPolicyList({ documents, loading, error, onRefresh
           <Table size="small" aria-label="Company policy documents table">
             <TableHead>
               <TableRow>
-                <TableCell><strong>Title</strong></TableCell>
-                <TableCell><strong>Source Type</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
-                <TableCell><strong>Created</strong></TableCell>
-                {isAdmin && <TableCell align="right"><strong>Actions</strong></TableCell>}
+                <TableCell>
+                  <strong>Title</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Source Type</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Status</strong>
+                </TableCell>
+                <TableCell>
+                  <strong>Created</strong>
+                </TableCell>
+                {isAdmin && (
+                  <TableCell align="right">
+                    <strong>Actions</strong>
+                  </TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>

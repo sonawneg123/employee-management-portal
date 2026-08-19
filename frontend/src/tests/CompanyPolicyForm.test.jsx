@@ -42,7 +42,7 @@ import CompanyPolicyForm from '@/components/knowledge/CompanyPolicyForm';
 // ── Mock knowledgeApi ─────────────────────────────────────────────────────────
 vi.mock('@/services/knowledgeApi', () => ({
   ingestDocument: vi.fn(),
-  listDocuments:  vi.fn(),
+  listDocuments: vi.fn(),
   deleteDocument: vi.fn(),
 }));
 import { ingestDocument } from '@/services/knowledgeApi';
@@ -62,18 +62,18 @@ function renderForm(props = {}) {
   return { ...result, user };
 }
 
-const SAMPLE_TITLE   = 'Employee Attendance Policy';
+const SAMPLE_TITLE = 'Employee Attendance Policy';
 const SAMPLE_CONTENT = 'Employees must record attendance daily through the portal.';
 
 /** The built response returned by the mock API */
 const MOCK_DOC = {
-  id:         'doc-uuid-1',
-  title:      SAMPLE_TITLE,
+  id: 'doc-uuid-1',
+  title: SAMPLE_TITLE,
   sourceType: 'POLICY',
-  status:     'ACTIVE',
-  createdAt:  '2025-01-01T00:00:00',
-  updatedAt:  '2025-01-01T00:00:00',
-  createdBy:  'admin@company.com',
+  status: 'ACTIVE',
+  createdAt: '2025-01-01T00:00:00',
+  updatedAt: '2025-01-01T00:00:00',
+  createdBy: 'admin@company.com',
 };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -133,8 +133,12 @@ describe('CompanyPolicyForm', () => {
 
     it('submit button is enabled when both title and content are filled', () => {
       renderForm();
-      fireEvent.change(screen.getByLabelText(/document title/i),   { target: { value: SAMPLE_TITLE } });
-      fireEvent.change(screen.getByLabelText(/document content/i), { target: { value: SAMPLE_CONTENT } });
+      fireEvent.change(screen.getByLabelText(/document title/i), {
+        target: { value: SAMPLE_TITLE },
+      });
+      fireEvent.change(screen.getByLabelText(/document content/i), {
+        target: { value: SAMPLE_CONTENT },
+      });
       expect(screen.getByRole('button', { name: /submit document/i })).not.toBeDisabled();
     });
 
@@ -166,8 +170,10 @@ describe('CompanyPolicyForm', () => {
   describe('Submission', () => {
     /** Helper: fill both fields via fireEvent.change and re-render synchronously. */
     function fillForm(titleVal = SAMPLE_TITLE, contentVal = SAMPLE_CONTENT) {
-      fireEvent.change(screen.getByLabelText(/document title/i),   { target: { value: titleVal } });
-      fireEvent.change(screen.getByLabelText(/document content/i), { target: { value: contentVal } });
+      fireEvent.change(screen.getByLabelText(/document title/i), { target: { value: titleVal } });
+      fireEvent.change(screen.getByLabelText(/document content/i), {
+        target: { value: contentVal },
+      });
     }
 
     it('calls ingestDocument with the exact title and content', async () => {
@@ -178,7 +184,7 @@ describe('CompanyPolicyForm', () => {
 
       await waitFor(() => {
         expect(ingestDocument).toHaveBeenCalledWith({
-          title:   SAMPLE_TITLE,
+          title: SAMPLE_TITLE,
           content: SAMPLE_CONTENT,
         });
       });
@@ -192,7 +198,7 @@ describe('CompanyPolicyForm', () => {
 
       await waitFor(() => {
         expect(ingestDocument).toHaveBeenCalledWith({
-          title:   SAMPLE_TITLE,
+          title: SAMPLE_TITLE,
           content: SAMPLE_CONTENT,
         });
       });
@@ -237,7 +243,7 @@ describe('CompanyPolicyForm', () => {
     it('clears the form fields after successful submission', async () => {
       ingestDocument.mockResolvedValue(MOCK_DOC);
       renderForm();
-      const titleInput   = screen.getByLabelText(/document title/i);
+      const titleInput = screen.getByLabelText(/document title/i);
       const contentInput = screen.getByLabelText(/document content/i);
       fillForm();
       fireEvent.click(screen.getByRole('button', { name: /submit document/i }));
@@ -259,9 +265,7 @@ describe('CompanyPolicyForm', () => {
       fireEvent.click(screen.getByRole('button', { name: /submit document/i }));
 
       await waitFor(() => {
-        expect(
-          screen.getByRole('alert', { name: /submission error/i }),
-        ).toBeInTheDocument();
+        expect(screen.getByRole('alert', { name: /submission error/i })).toBeInTheDocument();
       });
     });
 
@@ -272,9 +276,9 @@ describe('CompanyPolicyForm', () => {
       fireEvent.click(screen.getByRole('button', { name: /submit document/i }));
 
       await waitFor(() => {
-        expect(
-          screen.getByRole('alert', { name: /submission error/i }),
-        ).toHaveTextContent(/unable to reach the server/i);
+        expect(screen.getByRole('alert', { name: /submission error/i })).toHaveTextContent(
+          /unable to reach the server/i,
+        );
       });
     });
 
@@ -285,9 +289,9 @@ describe('CompanyPolicyForm', () => {
       fireEvent.click(screen.getByRole('button', { name: /submit document/i }));
 
       await waitFor(() => {
-        expect(
-          screen.getByRole('alert', { name: /submission error/i }),
-        ).toHaveTextContent(/permission/i);
+        expect(screen.getByRole('alert', { name: /submission error/i })).toHaveTextContent(
+          /permission/i,
+        );
       });
     });
 
@@ -311,8 +315,12 @@ describe('CompanyPolicyForm', () => {
   describe('Clear button', () => {
     it('clears the title and content fields when clicked', () => {
       renderForm();
-      fireEvent.change(screen.getByLabelText(/document title/i),   { target: { value: SAMPLE_TITLE } });
-      fireEvent.change(screen.getByLabelText(/document content/i), { target: { value: SAMPLE_CONTENT } });
+      fireEvent.change(screen.getByLabelText(/document title/i), {
+        target: { value: SAMPLE_TITLE },
+      });
+      fireEvent.change(screen.getByLabelText(/document content/i), {
+        target: { value: SAMPLE_CONTENT },
+      });
       fireEvent.click(screen.getByRole('button', { name: /reset form/i }));
 
       expect(screen.getByLabelText(/document title/i)).toHaveValue('');
@@ -322,8 +330,12 @@ describe('CompanyPolicyForm', () => {
     it('dismisses the success banner when clear is clicked', async () => {
       ingestDocument.mockResolvedValue(MOCK_DOC);
       renderForm();
-      fireEvent.change(screen.getByLabelText(/document title/i),   { target: { value: SAMPLE_TITLE } });
-      fireEvent.change(screen.getByLabelText(/document content/i), { target: { value: SAMPLE_CONTENT } });
+      fireEvent.change(screen.getByLabelText(/document title/i), {
+        target: { value: SAMPLE_TITLE },
+      });
+      fireEvent.change(screen.getByLabelText(/document content/i), {
+        target: { value: SAMPLE_CONTENT },
+      });
       fireEvent.click(screen.getByRole('button', { name: /submit document/i }));
 
       await waitFor(() =>

@@ -59,8 +59,11 @@ import { useEmployeeAiFeedback, useEmployeeAiHistory } from '@/hooks/useTaskAiRe
 function formatDate(isoString) {
   if (!isoString) return '—';
   return new Date(isoString).toLocaleString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 }
 
@@ -75,8 +78,12 @@ function ScoreBar({ label, value, color = 'primary' }) {
   return (
     <Box sx={{ mb: 1.5 }}>
       <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-        <Typography variant="caption" color="text.secondary">{label}</Typography>
-        <Typography variant="caption" fontWeight={700}>{pct}%</Typography>
+        <Typography variant="caption" color="text.secondary">
+          {label}
+        </Typography>
+        <Typography variant="caption" fontWeight={700}>
+          {pct}%
+        </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"
@@ -90,10 +97,22 @@ function ScoreBar({ label, value, color = 'primary' }) {
 
 function AiStatusChip({ status }) {
   const configs = {
-    PENDING: { label: 'In Queue', color: 'default', icon: <HourglassEmptyRoundedIcon fontSize="small" /> },
+    PENDING: {
+      label: 'In Queue',
+      color: 'default',
+      icon: <HourglassEmptyRoundedIcon fontSize="small" />,
+    },
     PROCESSING: { label: 'Generating…', color: 'info', icon: <CircularProgress size={12} /> },
-    COMPLETED: { label: 'Completed', color: 'success', icon: <CheckCircleOutlineRoundedIcon fontSize="small" /> },
-    FAILED: { label: 'Unavailable', color: 'error', icon: <ErrorOutlineRoundedIcon fontSize="small" /> },
+    COMPLETED: {
+      label: 'Completed',
+      color: 'success',
+      icon: <CheckCircleOutlineRoundedIcon fontSize="small" />,
+    },
+    FAILED: {
+      label: 'Unavailable',
+      color: 'error',
+      icon: <ErrorOutlineRoundedIcon fontSize="small" />,
+    },
   };
   const cfg = configs[status] || configs.PENDING;
   return <Chip icon={cfg.icon} label={cfg.label} color={cfg.color} size="small" />;
@@ -151,7 +170,9 @@ function AiFeedbackHistoryTable({ history, onSelect, selectedId }) {
                   transition: 'background 0.1s',
                 }}
               >
-                <Box component="td" sx={{ p: '4px 8px' }}>{history.length - idx}</Box>
+                <Box component="td" sx={{ p: '4px 8px' }}>
+                  {history.length - idx}
+                </Box>
                 <Box component="td" sx={{ p: '4px 8px' }}>
                   {item.evaluatedAt ? formatDate(item.evaluatedAt) : formatDate(item.requestedAt)}
                 </Box>
@@ -180,7 +201,9 @@ function CompletedFeedback({ feedback }) {
       {/* Scores */}
       {(feedback.overallScore != null || feedback.workQualityScore != null) && (
         <Box>
-          <Typography variant="subtitle2" gutterBottom>Scores</Typography>
+          <Typography variant="subtitle2" gutterBottom>
+            Scores
+          </Typography>
           <ScoreBar label="Overall Score" value={feedback.overallScore} />
           <ScoreBar label="Work Quality" value={feedback.workQualityScore} />
           <ScoreBar label="Completeness" value={feedback.completenessScore} />
@@ -195,7 +218,9 @@ function CompletedFeedback({ feedback }) {
       {/* Summary */}
       {feedback.summary && (
         <Box>
-          <Typography variant="subtitle2" gutterBottom>AI Assessment</Typography>
+          <Typography variant="subtitle2" gutterBottom>
+            AI Assessment
+          </Typography>
           <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
             {feedback.summary}
           </Typography>
@@ -206,7 +231,10 @@ function CompletedFeedback({ feedback }) {
       {feedback.strengths?.length > 0 && (
         <Box>
           <Typography variant="subtitle2" gutterBottom sx={{ color: 'success.main' }}>
-            <CheckCircleOutlineRoundedIcon fontSize="small" sx={{ mr: 0.5, verticalAlign: 'middle' }} />
+            <CheckCircleOutlineRoundedIcon
+              fontSize="small"
+              sx={{ mr: 0.5, verticalAlign: 'middle' }}
+            />
             Strengths
           </Typography>
           <List dense disablePadding>
@@ -215,10 +243,7 @@ function CompletedFeedback({ feedback }) {
                 <ListItemIcon sx={{ minWidth: 24 }}>
                   <CheckCircleOutlineRoundedIcon fontSize="small" color="success" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={s}
-                  primaryTypographyProps={{ variant: 'body2' }}
-                />
+                <ListItemText primary={s} primaryTypographyProps={{ variant: 'body2' }} />
               </ListItem>
             ))}
           </List>
@@ -238,10 +263,7 @@ function CompletedFeedback({ feedback }) {
                 <ListItemIcon sx={{ minWidth: 24 }}>
                   <TrendingUpRoundedIcon fontSize="small" color="warning" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={a}
-                  primaryTypographyProps={{ variant: 'body2' }}
-                />
+                <ListItemText primary={a} primaryTypographyProps={{ variant: 'body2' }} />
               </ListItem>
             ))}
           </List>
@@ -261,10 +283,7 @@ function CompletedFeedback({ feedback }) {
                 <ListItemIcon sx={{ minWidth: 24 }}>
                   <LightbulbOutlinedIcon fontSize="small" color="info" />
                 </ListItemIcon>
-                <ListItemText
-                  primary={s}
-                  primaryTypographyProps={{ variant: 'body2' }}
-                />
+                <ListItemText primary={s} primaryTypographyProps={{ variant: 'body2' }} />
               </ListItem>
             ))}
           </List>
@@ -303,7 +322,11 @@ function CompletedFeedback({ feedback }) {
               '&:hover': { color: 'text.primary' },
             }}
           >
-            {showExplanation ? <ExpandLessRoundedIcon fontSize="small" /> : <ExpandMoreRoundedIcon fontSize="small" />}
+            {showExplanation ? (
+              <ExpandLessRoundedIcon fontSize="small" />
+            ) : (
+              <ExpandMoreRoundedIcon fontSize="small" />
+            )}
             <Typography variant="caption">How was this evaluated?</Typography>
           </Box>
           <Collapse in={showExplanation}>
@@ -347,13 +370,11 @@ export default function EmployeeAiFeedbackSection({ submissionId, taskId }) {
     error: feedbackError,
   } = useEmployeeAiFeedback(submissionId);
 
-  const {
-    data: history,
-  } = useEmployeeAiHistory(submissionId, { enabled: Boolean(submissionId) });
+  const { data: history } = useEmployeeAiHistory(submissionId, { enabled: Boolean(submissionId) });
 
   // When user selects a history item, show that item's feedback
   const selectedHistoryFeedback = selectedHistoryId
-    ? history?.find((h) => h.id === selectedHistoryId) ?? null
+    ? (history?.find((h) => h.id === selectedHistoryId) ?? null)
     : null;
 
   const displayedFeedback = selectedHistoryFeedback ?? latestFeedback;
@@ -406,18 +427,31 @@ export default function EmployeeAiFeedbackSection({ submissionId, taskId }) {
 
         {/* Pending */}
         {displayedFeedback?.status === 'PENDING' && (
-          <Alert severity="info" icon={<HourglassEmptyRoundedIcon />} data-testid="ai-feedback-pending">
-            <Typography variant="body2" fontWeight={600}>AI evaluation in queue</Typography>
+          <Alert
+            severity="info"
+            icon={<HourglassEmptyRoundedIcon />}
+            data-testid="ai-feedback-pending"
+          >
+            <Typography variant="body2" fontWeight={600}>
+              AI evaluation in queue
+            </Typography>
             <Typography variant="body2">
-              Your submission is being queued for AI analysis. Results will appear here automatically.
+              Your submission is being queued for AI analysis. Results will appear here
+              automatically.
             </Typography>
           </Alert>
         )}
 
         {/* Processing */}
         {displayedFeedback?.status === 'PROCESSING' && (
-          <Alert severity="info" icon={<CircularProgress size={16} />} data-testid="ai-feedback-processing">
-            <Typography variant="body2" fontWeight={600}>AI evaluation in progress</Typography>
+          <Alert
+            severity="info"
+            icon={<CircularProgress size={16} />}
+            data-testid="ai-feedback-processing"
+          >
+            <Typography variant="body2" fontWeight={600}>
+              AI evaluation in progress
+            </Typography>
             <Typography variant="body2">
               The AI is evaluating your submission. This usually takes under a minute.
             </Typography>
@@ -432,7 +466,9 @@ export default function EmployeeAiFeedbackSection({ submissionId, taskId }) {
         {/* Failed */}
         {displayedFeedback?.status === 'FAILED' && (
           <Alert severity="warning" data-testid="ai-feedback-failed">
-            <Typography variant="body2" fontWeight={600}>AI evaluation unavailable</Typography>
+            <Typography variant="body2" fontWeight={600}>
+              AI evaluation unavailable
+            </Typography>
             <Typography variant="body2">
               The AI evaluation could not be completed at this time. Your manager has been notified.
             </Typography>

@@ -41,7 +41,9 @@ export function getLeaveColumns() {
           <EmployeeAvatar
             firstName={(row.employeeName ?? '').split(' ')[0]}
             lastName={(row.employeeName ?? '').split(' ').slice(1).join(' ')}
-            profilePhotoUrl={row.employeeId ? `/api/employees/${row.employeeId}/profile-photo` : null}
+            profilePhotoUrl={
+              row.employeeId ? `/api/employees/${row.employeeId}/profile-photo` : null
+            }
             size={32}
             tooltip={false}
           />

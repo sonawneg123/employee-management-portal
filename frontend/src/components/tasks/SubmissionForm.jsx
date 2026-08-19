@@ -206,8 +206,8 @@ export default function SubmissionForm({
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {isResubmit
-            ? 'Address the manager\'s feedback and resubmit your work.'
-            : 'Describe the work you\'ve completed so the manager can review it.'}
+            ? "Address the manager's feedback and resubmit your work."
+            : "Describe the work you've completed so the manager can review it."}
         </Typography>
 
         <Box component="form" onSubmit={handleSubmit}>
@@ -222,7 +222,8 @@ export default function SubmissionForm({
             value={submissionNotes}
             onChange={(e) => {
               setSubmissionNotes(e.target.value);
-              if (errors.submissionNotes) setErrors((prev) => ({ ...prev, submissionNotes: undefined }));
+              if (errors.submissionNotes)
+                setErrors((prev) => ({ ...prev, submissionNotes: undefined }));
             }}
             error={Boolean(errors.submissionNotes)}
             helperText={errors.submissionNotes}
@@ -264,8 +265,7 @@ export default function SubmissionForm({
           {hasExistingAttachment && !selectedFile && (
             <Alert severity="info" sx={{ mb: 1.5 }} icon={<InsertDriveFileRoundedIcon />}>
               <Typography variant="body2">
-                Current attachment:{' '}
-                <strong>{existingSubmission.attachmentOriginalName}</strong>
+                Current attachment: <strong>{existingSubmission.attachmentOriginalName}</strong>
                 {existingSubmission.attachmentSizeBytes != null && (
                   <> ({formatBytes(existingSubmission.attachmentSizeBytes)})</>
                 )}
@@ -312,7 +312,9 @@ export default function SubmissionForm({
               onClick={() => fileInputRef.current?.click()}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click();
+              }}
               aria-label="File upload drop zone"
               sx={{
                 border: '2px dashed',
@@ -357,7 +359,11 @@ export default function SubmissionForm({
           {isSubmitting && selectedFile && (
             <Box sx={{ mt: 1, mb: 1 }}>
               <LinearProgress />
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ mt: 0.5, display: 'block' }}
+              >
                 Uploading…
               </Typography>
             </Box>
@@ -372,18 +378,20 @@ export default function SubmissionForm({
               color="primary"
               disabled={isSubmitting || Boolean(fileError)}
               startIcon={
-                isSubmitting
-                  ? <CircularProgress size={16} color="inherit" />
-                  : isResubmit
-                  ? <RefreshRoundedIcon />
-                  : <SendRoundedIcon />
+                isSubmitting ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : isResubmit ? (
+                  <RefreshRoundedIcon />
+                ) : (
+                  <SendRoundedIcon />
+                )
               }
             >
               {isSubmitting
                 ? 'Submitting…'
                 : isResubmit
-                ? 'Resubmit for Review'
-                : 'Submit for Review'}
+                  ? 'Resubmit for Review'
+                  : 'Submit for Review'}
             </Button>
 
             {selectedFile && !isSubmitting && (

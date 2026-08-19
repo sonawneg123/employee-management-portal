@@ -44,11 +44,7 @@ vi.mock('@/hooks/useTaskAiReviewHooks', () => ({
   useRunAiReview: vi.fn(),
 }));
 
-import {
-  useLatestAiReview,
-  useAllAiReviews,
-  useRunAiReview,
-} from '@/hooks/useTaskAiReviewHooks';
+import { useLatestAiReview, useAllAiReviews, useRunAiReview } from '@/hooks/useTaskAiReviewHooks';
 
 // ── Test helpers ──────────────────────────────────────────────────────────────
 
@@ -58,9 +54,7 @@ function Wrapper({ children }) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return (
     <ThemeProvider theme={theme}>
-      <QueryClientProvider client={qc}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
     </ThemeProvider>
   );
 }
@@ -90,8 +84,18 @@ const STRUCTURED_JSON = JSON.stringify({
   overallAssessment: 'Overall good submission.',
   managerSummary: 'The employee completed the login page with email/password validation.',
   requirements: [
-    { requirement: 'Login form UI', status: 'COMPLETED', evidence: 'Implemented', suggestion: null },
-    { requirement: 'API integration', status: 'PARTIALLY_COMPLETED', evidence: 'Partial', suggestion: 'Complete the auth API call.' },
+    {
+      requirement: 'Login form UI',
+      status: 'COMPLETED',
+      evidence: 'Implemented',
+      suggestion: null,
+    },
+    {
+      requirement: 'API integration',
+      status: 'PARTIALLY_COMPLETED',
+      evidence: 'Partial',
+      suggestion: 'Complete the auth API call.',
+    },
   ],
   completedItems: ['Login form UI', 'Responsive layout'],
   missingItems: ['Error handling for 401'],
@@ -416,7 +420,9 @@ describe('TaskAiEvaluationSection — suggested changes', () => {
 
   it('lists each suggestion with ordinal prefix', () => {
     renderSection({ taskId: 'task-1', submission: MOCK_SUBMISSION });
-    expect(screen.getByText(/1\. complete the authentication api integration/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/1\. complete the authentication api integration/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/2\. add a loading state/i)).toBeInTheDocument();
   });
 });

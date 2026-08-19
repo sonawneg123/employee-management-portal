@@ -70,21 +70,21 @@ function relativeTime(isoDate) {
  * @returns {string} colour for the left border
  */
 function notifColor(type) {
-  if (type === 'TASK_ASSIGNED')          return '#4F46E5';
-  if (type === 'TASK_STARTED')           return '#10B981';
-  if (type === 'TASK_UPDATED')           return '#F59E0B';
-  if (type === 'TASK_REASSIGNED')        return '#8B5CF6';
-  if (type === 'TASK_DUE_SOON')          return '#EF4444';
-  if (type === 'TASK_OVERDUE')           return '#DC2626';
-  if (type === 'TASK_SUBMITTED')         return '#0EA5E9';
-  if (type === 'TASK_APPROVED')          return '#10B981';
+  if (type === 'TASK_ASSIGNED') return '#4F46E5';
+  if (type === 'TASK_STARTED') return '#10B981';
+  if (type === 'TASK_UPDATED') return '#F59E0B';
+  if (type === 'TASK_REASSIGNED') return '#8B5CF6';
+  if (type === 'TASK_DUE_SOON') return '#EF4444';
+  if (type === 'TASK_OVERDUE') return '#DC2626';
+  if (type === 'TASK_SUBMITTED') return '#0EA5E9';
+  if (type === 'TASK_APPROVED') return '#10B981';
   if (type === 'TASK_CHANGES_REQUESTED') return '#F97316';
-  if (type === 'TASK_COMMENT')           return '#6366F1';
-  if (type === 'LEAVE_APPROVED')         return '#059669';
-  if (type === 'LEAVE_REJECTED')         return '#DC2626';
-  if (type === 'ROLE_UPDATED')           return '#7C3AED';
-  if (type === 'AI_REVIEW_COMPLETED')    return '#0EA5E9';
-  if (type === 'AI_REVIEW_FAILED')       return '#EF4444';
+  if (type === 'TASK_COMMENT') return '#6366F1';
+  if (type === 'LEAVE_APPROVED') return '#059669';
+  if (type === 'LEAVE_REJECTED') return '#DC2626';
+  if (type === 'ROLE_UPDATED') return '#7C3AED';
+  if (type === 'AI_REVIEW_COMPLETED') return '#0EA5E9';
+  if (type === 'AI_REVIEW_FAILED') return '#EF4444';
   return '#6B7280';
 }
 
@@ -106,14 +106,14 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
   const unreadCount = unreadData?.unreadCount ?? 0;
 
   // Only fetch notification list when panel is open
-  const {
-    data: notifData,
-    isLoading: notifLoading,
-  } = useNotifications({ page: 0, size: 20 }, {
-    enabled: open && Boolean(user),
-    refetchInterval: open ? 30_000 : false,
-    refetchIntervalInBackground: false,
-  });
+  const { data: notifData, isLoading: notifLoading } = useNotifications(
+    { page: 0, size: 20 },
+    {
+      enabled: open && Boolean(user),
+      refetchInterval: open ? 30_000 : false,
+      refetchIntervalInBackground: false,
+    },
+  );
   const notifications = notifData?.content ?? [];
 
   const markRead = useMarkNotificationRead();
@@ -157,11 +157,9 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
   const taskRoute = useCallback(
     (taskId) => {
       if (!taskId) return null;
-      const isEmployee = hasAnyRole([ROLES.EMPLOYEE])
-          && !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
-      return isEmployee
-          ? ROUTES.EMPLOYEE_TASK_DETAIL(taskId)
-          : ROUTES.MANAGER_TASK_DETAIL(taskId);
+      const isEmployee =
+        hasAnyRole([ROLES.EMPLOYEE]) && !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
+      return isEmployee ? ROUTES.EMPLOYEE_TASK_DETAIL(taskId) : ROUTES.MANAGER_TASK_DETAIL(taskId);
     },
     [hasAnyRole],
   );
@@ -178,8 +176,8 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
     (notif) => {
       if (notif.relatedTaskId) return taskRoute(notif.relatedTaskId);
       if (notif.type === 'LEAVE_APPROVED' || notif.type === 'LEAVE_REJECTED') {
-        const isEmployee = hasAnyRole([ROLES.EMPLOYEE])
-            && !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
+        const isEmployee =
+          hasAnyRole([ROLES.EMPLOYEE]) && !hasAnyRole([ROLES.HR, ROLES.MANAGER, ROLES.ADMIN]);
         return isEmployee ? ROUTES.MY_LEAVES : ROUTES.LEAVES;
       }
       if (notif.type === 'ROLE_UPDATED') {
@@ -295,11 +293,7 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
               </Typography>
               {unreadCount > 0 && (
                 <Tooltip title="Mark all as read">
-                  <IconButton
-                    size="small"
-                    onClick={handleMarkAll}
-                    disabled={markAll.isPending}
-                  >
+                  <IconButton size="small" onClick={handleMarkAll} disabled={markAll.isPending}>
                     <DoneAllRoundedIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>

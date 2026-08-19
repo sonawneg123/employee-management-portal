@@ -37,8 +37,12 @@ export default function DashboardHeader({ lastUpdated, isFetching, onRefresh }) 
         <Typography
           variant="h2"
           fontWeight={800}
-          gutterBottom
-          sx={{ letterSpacing: '-0.02em', mb: 0.25 }}
+          sx={{
+            letterSpacing: '-0.03em',
+            mb: 0.25,
+            color: 'text.primary',
+            fontSize: { xs: '1.5rem', sm: '1.75rem' },
+          }}
         >
           Dashboard
         </Typography>
@@ -56,11 +60,11 @@ export default function DashboardHeader({ lastUpdated, isFetching, onRefresh }) 
             display: 'flex',
             alignItems: 'center',
             gap: 0.6,
-            border: '1px solid',
+            border: '1.5px solid',
             borderColor: isFetching ? 'warning.main' : 'success.main',
             borderRadius: '8px',
-            px: 1,
-            py: 0.4,
+            px: 1.25,
+            py: 0.5,
             bgcolor: isFetching ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)',
           }}
           aria-live="polite"
@@ -88,7 +92,7 @@ export default function DashboardHeader({ lastUpdated, isFetching, onRefresh }) 
         </Box>
 
         {/* Refresh button */}
-        <Tooltip title="Refresh data">
+        <Tooltip title="Refresh dashboard data">
           <IconButton
             onClick={onRefresh}
             disabled={isFetching}
@@ -97,16 +101,17 @@ export default function DashboardHeader({ lastUpdated, isFetching, onRefresh }) 
             sx={{
               bgcolor: 'action.hover',
               borderRadius: '8px',
-              width: 34,
-              height: 34,
+              width: 36,
+              height: 36,
               animation: isFetching ? 'spin 1s linear infinite' : 'none',
               '@keyframes spin': {
                 '0%': { transform: 'rotate(0deg)' },
                 '100%': { transform: 'rotate(360deg)' },
               },
+              '&:hover': { bgcolor: 'rgba(79,70,229,0.08)', color: 'primary.main' },
             }}
           >
-            <RefreshRoundedIcon sx={{ fontSize: 17 }} />
+            <RefreshRoundedIcon sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
       </Box>

@@ -63,14 +63,21 @@ describe('taskApi', () => {
   it('updateTask calls PUT /tasks/:id with payload', async () => {
     axiosInstance.put = vi.fn().mockResolvedValue({ data: { ...mockTask, title: 'Updated' } });
     const result = await updateTask('task-1', { title: 'Updated', dueDate: '2025-12-31' });
-    expect(axiosInstance.put).toHaveBeenCalledWith('/tasks/task-1', { title: 'Updated', dueDate: '2025-12-31' });
+    expect(axiosInstance.put).toHaveBeenCalledWith('/tasks/task-1', {
+      title: 'Updated',
+      dueDate: '2025-12-31',
+    });
     expect(result.title).toBe('Updated');
   });
 
   it('updateTaskStatus calls PATCH /tasks/:id/status', async () => {
-    axiosInstance.patch = vi.fn().mockResolvedValue({ data: { ...mockTask, status: 'IN_PROGRESS' } });
+    axiosInstance.patch = vi
+      .fn()
+      .mockResolvedValue({ data: { ...mockTask, status: 'IN_PROGRESS' } });
     const result = await updateTaskStatus('task-1', 'IN_PROGRESS');
-    expect(axiosInstance.patch).toHaveBeenCalledWith('/tasks/task-1/status', { status: 'IN_PROGRESS' });
+    expect(axiosInstance.patch).toHaveBeenCalledWith('/tasks/task-1/status', {
+      status: 'IN_PROGRESS',
+    });
     expect(result.status).toBe('IN_PROGRESS');
   });
 

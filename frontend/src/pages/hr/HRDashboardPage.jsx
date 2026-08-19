@@ -114,6 +114,10 @@ export default function HRDashboardPage() {
             startIcon={<PeopleIcon />}
             onClick={() => navigate(ROUTES.HR_EMPLOYEES)}
             size="small"
+            sx={{
+              background: 'linear-gradient(135deg, #243B7A, #4F46E5)',
+              '&:hover': { background: 'linear-gradient(135deg, #1e3266, #4338CA)' },
+            }}
           >
             Manage Employees
           </Button>
@@ -126,7 +130,7 @@ export default function HRDashboardPage() {
             Departments
           </Button>
           <Button
-            variant="outlined"
+            variant="contained"
             color="warning"
             startIcon={<EventNoteIcon />}
             onClick={() => navigate(ROUTES.HR_LEAVES)}

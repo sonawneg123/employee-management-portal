@@ -82,7 +82,8 @@ export const API_ENDPOINTS = /** @type {const} */ ({
 
   // Task Attachments
   TASK_ATTACHMENTS: (taskId) => `/tasks/${taskId}/attachments`,
-  TASK_ATTACHMENT_DOWNLOAD: (taskId, attachmentId) => `/tasks/${taskId}/attachments/${attachmentId}/download`,
+  TASK_ATTACHMENT_DOWNLOAD: (taskId, attachmentId) =>
+    `/tasks/${taskId}/attachments/${attachmentId}/download`,
   TASK_ATTACHMENT_BY_ID: (taskId, attachmentId) => `/tasks/${taskId}/attachments/${attachmentId}`,
 
   // Task Activities
@@ -102,7 +103,8 @@ export const API_ENDPOINTS = /** @type {const} */ ({
   TASK_SUBMISSIONS_LATEST: (taskId) => `/tasks/${taskId}/submissions/latest`,
   TASK_SUBMISSION_RESUBMIT: (submissionId) => `/task-submissions/${submissionId}/resubmit`,
   TASK_SUBMISSION_APPROVE: (submissionId) => `/task-submissions/${submissionId}/approve`,
-  TASK_SUBMISSION_REQUEST_CHANGES: (submissionId) => `/task-submissions/${submissionId}/request-changes`,
+  TASK_SUBMISSION_REQUEST_CHANGES: (submissionId) =>
+    `/task-submissions/${submissionId}/request-changes`,
   TASK_SUBMISSION_ATTACHMENT: (submissionId) => `/task-submissions/${submissionId}/attachment`,
 
   // AI Task Reviews (Phase 7A/7B)

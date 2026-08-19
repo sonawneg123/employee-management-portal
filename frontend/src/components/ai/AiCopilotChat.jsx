@@ -94,8 +94,7 @@ function ToolsExecutedBadge({ tools }) {
   const [expanded, setExpanded] = useState(false);
   if (!tools || tools.length === 0) return null;
 
-  const formatToolName = (name) =>
-    name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const formatToolName = (name) => name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <Box sx={{ mt: 0.5, mb: 0.5 }}>
@@ -132,10 +131,7 @@ function ToolsExecutedBadge({ tools }) {
  */
 function ConfirmationCard({ message, onConfirm, onDecline, loading }) {
   return (
-    <Card
-      variant="outlined"
-      sx={{ borderColor: 'warning.main', borderWidth: 1.5, mx: 1, my: 0.5 }}
-    >
+    <Card variant="outlined" sx={{ borderColor: 'warning.main', borderWidth: 1.5, mx: 1, my: 0.5 }}>
       <CardContent sx={{ pb: 0.5 }}>
         <Stack direction="row" spacing={1} alignItems="flex-start" mb={1}>
           <WarningAmberIcon sx={{ color: 'warning.main', mt: 0.25, flexShrink: 0 }} />
@@ -156,7 +152,9 @@ function ConfirmationCard({ message, onConfirm, onDecline, loading }) {
           size="small"
           disabled={loading}
           onClick={onConfirm}
-          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : <CheckCircleOutlineIcon />}
+          startIcon={
+            loading ? <CircularProgress size={14} color="inherit" /> : <CheckCircleOutlineIcon />
+          }
         >
           {loading ? 'Processing…' : 'Confirm'}
         </Button>
@@ -186,9 +184,15 @@ function AgentMessageBubble({ msg, onConfirm, onDecline, confirmLoading }) {
       <Box sx={{ display: 'flex', flexDirection: 'row-reverse', alignItems: 'flex-start', gap: 1 }}>
         <Box
           sx={{
-            width: 30, height: 30, borderRadius: '50%',
+            width: 30,
+            height: 30,
+            borderRadius: '50%',
             bgcolor: 'primary.main',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.25,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            mt: 0.25,
           }}
         >
           <PersonRoundedIcon sx={{ fontSize: 16, color: 'primary.contrastText' }} />
@@ -196,9 +200,13 @@ function AgentMessageBubble({ msg, onConfirm, onDecline, confirmLoading }) {
         <Paper
           elevation={0}
           sx={{
-            px: 1.5, py: 1, maxWidth: '80%',
-            bgcolor: 'primary.main', color: 'primary.contrastText',
-            borderRadius: 2, borderTopRightRadius: 0,
+            px: 1.5,
+            py: 1,
+            maxWidth: '80%',
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            borderRadius: 2,
+            borderTopRightRadius: 0,
           }}
         >
           <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -214,9 +222,15 @@ function AgentMessageBubble({ msg, onConfirm, onDecline, confirmLoading }) {
     <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 1 }}>
       <Box
         sx={{
-          width: 30, height: 30, borderRadius: '50%',
+          width: 30,
+          height: 30,
+          borderRadius: '50%',
           bgcolor: 'action.selected',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.25,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          mt: 0.25,
         }}
       >
         <SmartToyRoundedIcon sx={{ fontSize: 16 }} />
@@ -245,10 +259,12 @@ function AgentMessageBubble({ msg, onConfirm, onDecline, confirmLoading }) {
           <Paper
             elevation={0}
             sx={{
-              px: 1.5, py: 1,
+              px: 1.5,
+              py: 1,
               bgcolor: 'action.hover',
               color: 'text.primary',
-              borderRadius: 2, borderTopLeftRadius: 0,
+              borderRadius: 2,
+              borderTopLeftRadius: 0,
             }}
           >
             <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -355,7 +371,11 @@ export default function AiCopilotChat() {
     setMessages((prev) => [
       ...prev,
       { role: 'user', text: 'No, cancel.' },
-      { role: 'assistant', text: 'Understood. The action has been cancelled.', responseType: 'INFORMATION' },
+      {
+        role: 'assistant',
+        text: 'Understood. The action has been cancelled.',
+        responseType: 'INFORMATION',
+      },
     ]);
   };
 
@@ -377,18 +397,28 @@ export default function AiCopilotChat() {
     <Paper
       elevation={0}
       sx={{
-        border: '1px solid', borderColor: 'divider', borderRadius: 2,
-        display: 'flex', flexDirection: 'column',
-        height: { xs: '75vh', sm: '70vh' }, minHeight: 480, maxHeight: 800,
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 2,
+        display: 'flex',
+        flexDirection: 'column',
+        height: { xs: '75vh', sm: '70vh' },
+        minHeight: 480,
+        maxHeight: 800,
         overflow: 'hidden',
       }}
     >
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <Box
         sx={{
-          px: 2, py: 1.5,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper',
+          px: 2,
+          py: 1.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
         }}
       >
         <Stack direction="row" spacing={1} alignItems="center">
@@ -396,7 +426,13 @@ export default function AiCopilotChat() {
           <Typography variant="subtitle1" fontWeight={600}>
             AI Copilot
           </Typography>
-          <Chip label="Phase 7E" size="small" color="primary" variant="outlined" sx={{ fontSize: '0.65rem', height: 18 }} />
+          <Chip
+            label="Phase 7E"
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{ fontSize: '0.65rem', height: 18 }}
+          />
         </Stack>
 
         {messages.length > 0 && (
@@ -410,15 +446,29 @@ export default function AiCopilotChat() {
 
       {/* ── Message list ─────────────────────────────────────────────────── */}
       <Box
-        sx={{ flex: 1, overflowY: 'auto', px: 2, py: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          px: 2,
+          py: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.5,
+        }}
       >
         {/* Empty state */}
         {messages.length === 0 && !loading && (
           <Box
             sx={{
-              flex: 1, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center',
-              color: 'text.secondary', textAlign: 'center', gap: 2, py: 4,
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'text.secondary',
+              textAlign: 'center',
+              gap: 2,
+              py: 4,
             }}
           >
             <SmartToyRoundedIcon sx={{ fontSize: 48, opacity: 0.25 }} />
@@ -427,11 +477,20 @@ export default function AiCopilotChat() {
                 AI Copilot
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Ask me about your team, tasks, leaves, workload, or HR policies.
-                I can look up live data and propose controlled actions.
+                Ask me about your team, tasks, leaves, workload, or HR policies. I can look up live
+                data and propose controlled actions.
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, width: '100%', maxWidth: 480 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1,
+                width: '100%',
+                maxWidth: 480,
+              }}
+            >
               <Typography variant="caption" color="text.disabled" sx={{ mb: 0.5 }}>
                 Try asking:
               </Typography>
@@ -444,9 +503,16 @@ export default function AiCopilotChat() {
                   onClick={() => handleSend(q)}
                   disabled={loading}
                   sx={{
-                    cursor: 'pointer', height: 'auto',
-                    '& .MuiChip-label': { whiteSpace: 'normal', textAlign: 'center', py: 0.75, px: 1 },
-                    maxWidth: '100%', fontSize: '0.75rem',
+                    cursor: 'pointer',
+                    height: 'auto',
+                    '& .MuiChip-label': {
+                      whiteSpace: 'normal',
+                      textAlign: 'center',
+                      py: 0.75,
+                      px: 1,
+                    },
+                    maxWidth: '100%',
+                    fontSize: '0.75rem',
                   }}
                 />
               ))}
@@ -470,8 +536,14 @@ export default function AiCopilotChat() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box
               sx={{
-                width: 30, height: 30, borderRadius: '50%', bgcolor: 'action.selected',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                width: 30,
+                height: 30,
+                borderRadius: '50%',
+                bgcolor: 'action.selected',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
               }}
             >
               <SmartToyRoundedIcon sx={{ fontSize: 16 }} />
@@ -501,7 +573,14 @@ export default function AiCopilotChat() {
       {/* ── Input ────────────────────────────────────────────────────────── */}
       <Divider />
       <Box
-        sx={{ px: 2, py: 1.5, display: 'flex', alignItems: 'flex-end', gap: 1, bgcolor: 'background.paper' }}
+        sx={{
+          px: 2,
+          py: 1.5,
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: 1,
+          bgcolor: 'background.paper',
+        }}
       >
         <TextField
           inputRef={inputRef}
@@ -515,7 +594,11 @@ export default function AiCopilotChat() {
           onKeyDown={handleKeyDown}
           disabled={loading}
           inputProps={{ 'aria-label': 'Message input', maxLength: MAX_MESSAGE_LENGTH + 1 }}
-          helperText={input.length > MAX_MESSAGE_LENGTH ? `Too long (${input.length}/${MAX_MESSAGE_LENGTH})` : undefined}
+          helperText={
+            input.length > MAX_MESSAGE_LENGTH
+              ? `Too long (${input.length}/${MAX_MESSAGE_LENGTH})`
+              : undefined
+          }
           error={input.length > MAX_MESSAGE_LENGTH}
         />
         <Tooltip title={canSend ? 'Send (Enter)' : ''}>

@@ -14,8 +14,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // ── Mock axiosInstance ────────────────────────────────────────────────────────
 vi.mock('@/api/axiosInstance', () => ({
   default: {
-    post:   vi.fn(),
-    get:    vi.fn(),
+    post: vi.fn(),
+    get: vi.fn(),
     delete: vi.fn(),
   },
 }));
@@ -33,7 +33,9 @@ describe('knowledgeApi', () => {
 
   describe('ingestDocument', () => {
     it('POSTs to /ai/rag/documents', async () => {
-      axiosInstance.post.mockResolvedValue({ data: { id: '1', title: 'Policy', status: 'ACTIVE' } });
+      axiosInstance.post.mockResolvedValue({
+        data: { id: '1', title: 'Policy', status: 'ACTIVE' },
+      });
 
       await ingestDocument({ title: 'Policy', content: 'Policy text.' });
 
@@ -47,7 +49,7 @@ describe('knowledgeApi', () => {
 
       const [, body] = axiosInstance.post.mock.calls[0];
       expect(body).toMatchObject({
-        title:   'Leave Policy',
+        title: 'Leave Policy',
         content: 'Leave content here.',
       });
     });
@@ -74,8 +76,8 @@ describe('knowledgeApi', () => {
       axiosInstance.post.mockResolvedValue({ data: { id: '1' } });
 
       await ingestDocument({
-        title:       'Policy',
-        content:     'Body.',
+        title: 'Policy',
+        content: 'Body.',
         description: 'Short summary.',
       });
 

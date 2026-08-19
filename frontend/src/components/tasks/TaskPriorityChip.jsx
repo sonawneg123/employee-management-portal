@@ -8,12 +8,12 @@ import React from 'react';
 import Chip from '@mui/material/Chip';
 
 const PRIORITY_CONFIG = {
-  LOW:      { label: 'Low',    color: 'default',  variant: 'outlined' },
-  MEDIUM:   { label: 'Medium', color: 'info',     variant: 'outlined' },
-  HIGH:     { label: 'High',   color: 'warning',  variant: 'outlined' },
-  URGENT:   { label: 'Urgent', color: 'error',    variant: 'filled'   },
+  LOW: { label: 'Low', color: 'default', variant: 'outlined' },
+  MEDIUM: { label: 'Medium', color: 'info', variant: 'outlined' },
+  HIGH: { label: 'High', color: 'warning', variant: 'outlined' },
+  URGENT: { label: 'Urgent', color: 'error', variant: 'filled' },
   // Backward-compat alias — pre-6C tasks may still carry CRITICAL
-  CRITICAL: { label: 'Critical', color: 'error',  variant: 'outlined' },
+  CRITICAL: { label: 'Critical', color: 'error', variant: 'outlined' },
 };
 
 /**
@@ -23,7 +23,11 @@ const PRIORITY_CONFIG = {
  * @returns {JSX.Element}
  */
 export default function TaskPriorityChip({ priority, size = 'small' }) {
-  const config = PRIORITY_CONFIG[priority] ?? { label: priority, color: 'default', variant: 'outlined' };
+  const config = PRIORITY_CONFIG[priority] ?? {
+    label: priority,
+    color: 'default',
+    variant: 'outlined',
+  };
   return (
     <Chip
       label={config.label}
