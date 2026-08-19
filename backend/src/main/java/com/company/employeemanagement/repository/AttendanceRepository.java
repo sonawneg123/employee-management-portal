@@ -113,4 +113,125 @@ public interface AttendanceRepository extends JpaRepository<Attendance, UUID> {
             @Param("from")   LocalDate from,
             @Param("to")     LocalDate to,
             @Param("status") AttendanceStatus status);
+
+    // ── Analytics aggregation queries ─────────────────────────────────────────
+
+    /**
+     * Counts attendance records by status within a date range, optionally
+     * restricted to a specific department.
+     *
+     * @param from         inclusive start date
+     * @param to           inclusive end date
+     * @param status       the attendance status to count
+     * @param departmentId optional department UUID filter; {@code null} to skip
+     * @return count of matching attendance records
+     */
+    @Query("""
+            SELECT COUNT(a) FROM Attendance a
+            WHERE a.attendanceDate >= :from
+              AND a.attendanceDate <= :to
+              AND a.status = :status
+              AND (:departmentId IS NULL OR a.employee.department.id = :departmentId)
+            """)
+    long countByDateRangeAndStatusAndDepartment(
+            @Param("from")         LocalDate from,
+            @Param("to")           LocalDate to,
+            @Param("status")       AttendanceStatus status,
+            @Param("departmentId") UUID departmentId);
+
+    /**
+     * Counts all attendance records within a date range, optionally
+     * restricted to a department.
+     *
+     * @param from         inclusive start date
+     * @param to           inclusive end date
+     * @param departmentId optional department UUID filter; {@code null} to skip
+     * @return total count of attendance records in the range
+     */
+    @Query("""
+            SELECT COUNT(a) FROM Attendance a
+            WHERE a.attendanceDate >= :from
+              AND a.attendanceDate <= :to
+              AND (:departmentId IS NULL OR a.employee.department.id = :departmentId)
+            """)
+    long countByDateRangeAndDepartment(
+            @Param("from")         LocalDate from,
+            @Param("to")           LocalDate to,
+            @Param("departmentId") UUID departmentId);
+
+    /**
+     * Returns daily attendance counts for analytics, optionally filtered
+     * by employee (for employee-scoped analytics).
+     *
+     * <p>Each element of the result is an {@code Object[]} with:
+     * <ul>
+     *   <li>{@code [0]} — {@link LocalDate} the attendance date</li>
+     *   <li>{@code [1]} — {@code Long} PRESENT count</li>
+     *   <li>{@code [2]} — {@code Long} total records</li>
+     * </ul>
+     *
+     * @param from         inclusive start date
+     * @param to           inclusive end date
+     * @param departmentId optional department UUID filter; {@code null} to skip
+     * @param employeeId   optional employee UUID filter; {@code null} to skip
+     * @return list of {@code [date, presentCount, totalCount]} rows
+     */
+    @Query("""
+            SELECT a.attendanceDate,
+                   SUM(CASE WHEN a.status = com.company.employeemanagement.entity.enums.AttendanceStatus.PRESENT THEN 1 ELSE 0 END),
+                   COUNT(a)
+            FROM Attendance a
+            WHERE a.attendanceDate >= :from
+              AND a.attendanceDate <= :to
+              AND (:departmentId IS NULL OR a.employee.department.id = :departmentId)
+              AND (:employeeId   IS NULL OR a.employee.id            = :employeeId)
+            GROUP BY a.attendanceDate
+            ORDER BY a.attendanceDate ASC
+            """)
+    List<Object[]> countByDateRangeGroupedByDate(
+            @Param("from")         LocalDate from,
+            @Param("to")           LocalDate to,
+            @Param("departmentId") UUID departmentId,
+            @Param("employeeId")   UUID employeeId);
+
+    /**
+     * Counts attendance records by status for a single employee.
+     *
+     * @param employeeId the UUID of the employee
+     * @param from       inclusive start date
+     * @param to         inclusive end date
+     * @param status     the attendance status to count
+     * @return count of matching records
+     */
+    @Query("""
+            SELECT COUNT(a) FROM Attendance a
+            WHERE a.employee.id = :employeeId
+              AND a.attendanceDate >= :from
+              AND a.attendanceDate <= :to
+              AND a.status = :status
+            """)
+    long countByEmployeeIdAndDateRangeAndStatus(
+            @Param("employeeId") UUID employeeId,
+            @Param("from")       LocalDate from,
+            @Param("to")         LocalDate to,
+            @Param("status")     AttendanceStatus status);
+
+    /**
+     * Counts all attendance records for a single employee within a date range.
+     *
+     * @param employeeId the UUID of the employee
+     * @param from       inclusive start date
+     * @param to         inclusive end date
+     * @return total count of attendance records
+     */
+    @Query("""
+            SELECT COUNT(a) FROM Attendance a
+            WHERE a.employee.id = :employeeId
+              AND a.attendanceDate >= :from
+              AND a.attendanceDate <= :to
+            """)
+    long countByEmployeeIdAndDateRange(
+            @Param("employeeId") UUID employeeId,
+            @Param("from")       LocalDate from,
+            @Param("to")         LocalDate to);
 }

@@ -40,7 +40,6 @@ import {
   ListItemText,
   Skeleton,
   Stack,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
@@ -361,7 +360,7 @@ function CompletedFeedback({ feedback }) {
  *   taskId: string | null | undefined,
  * }} props
  */
-export default function EmployeeAiFeedbackSection({ submissionId, taskId }) {
+export default function EmployeeAiFeedbackSection({ submissionId, taskId: _taskId }) {
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
 
   const {

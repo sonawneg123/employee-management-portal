@@ -5,7 +5,7 @@
  * Phase 6C-6E: URGENT priority, category filter, category column in table.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import {

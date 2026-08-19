@@ -17,7 +17,6 @@ import {
   MenuItem,
   Select,
   TextField,
-  Typography,
 } from '@mui/material';
 
 import EmployeeAvailabilitySelector from '@/components/tasks/EmployeeAvailabilitySelector';
@@ -25,6 +24,7 @@ import EmployeeAvailabilitySelector from '@/components/tasks/EmployeeAvailabilit
 const PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
 
 /** Enum values returned by the backend for task category. */
+// eslint-disable-next-line react-refresh/only-export-components
 export const TASK_CATEGORIES = [
   'DEVELOPMENT',
   'TESTING',
@@ -37,6 +37,7 @@ export const TASK_CATEGORIES = [
 ];
 
 /** Display-friendly category label. */
+// eslint-disable-next-line react-refresh/only-export-components
 export function categoryLabel(cat) {
   if (!cat) return '';
   return cat.charAt(0) + cat.slice(1).toLowerCase();

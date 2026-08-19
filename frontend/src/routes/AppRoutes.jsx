@@ -60,10 +60,13 @@ const AiAssistantPage = lazy(() => import('@/pages/ai/AiAssistantPage'));
 // ── Company Policies page (Admin + HR) ────────────────────────────────────────
 const CompanyPoliciesPage = lazy(() => import('@/pages/admin/CompanyPoliciesPage'));
 
+// ── Analytics Dashboard page (Phase 8A) ──────────────────────────────────────
+const AnalyticsDashboardPage = lazy(() => import('@/pages/analytics/AnalyticsDashboardPage'));
+
 // ── Task Management pages ─────────────────────────────────────────────────────
 const ManagerTasksPage = lazy(() => import('@/pages/tasks/ManagerTasksPage'));
 const ManagerTaskDetailPage = lazy(() => import('@/pages/tasks/ManagerTaskDetailPage'));
-const ManagerTaskReviewsPage = lazy(() => import('@/pages/tasks/ManagerTasksPage')); // reuse list page filtered to reviews
+const _ManagerTaskReviewsPage = lazy(() => import('@/pages/tasks/ManagerTasksPage')); // reuse list page filtered to reviews
 const EmployeeTasksPage = lazy(() => import('@/pages/tasks/EmployeeTasksPage'));
 const EmployeeTaskDetailPage = lazy(() => import('@/pages/tasks/EmployeeTaskDetailPage'));
 
@@ -145,6 +148,10 @@ export default function AppRoutes() {
             <Route path={ROUTES.ADMIN_REVIEWS} element={withSuspense(<ReviewsPage />)} />
             <Route path={ROUTES.ADMIN_USERS} element={withSuspense(<AdminUsersPage />)} />
             <Route path={ROUTES.ADMIN_POLICIES} element={withSuspense(<CompanyPoliciesPage />)} />
+            <Route
+              path={ROUTES.ADMIN_ANALYTICS}
+              element={withSuspense(<AnalyticsDashboardPage />)}
+            />
           </Route>
 
           {/* ── HR/Manager routes (/hr/*) ─────────────────────────────── */}
@@ -164,6 +171,7 @@ export default function AppRoutes() {
             <Route path={ROUTES.HR_ATTENDANCE} element={withSuspense(<AttendancePage />)} />
             <Route path={ROUTES.HR_REVIEWS} element={withSuspense(<ReviewsPage />)} />
             <Route path={ROUTES.HR_POLICIES} element={withSuspense(<CompanyPoliciesPage />)} />
+            <Route path={ROUTES.HR_ANALYTICS} element={withSuspense(<AnalyticsDashboardPage />)} />
             <Route path={ROUTES.MANAGER_LEAVES} element={withSuspense(<ManagerLeavePage />)} />
             <Route path={ROUTES.MANAGER_TASKS} element={withSuspense(<ManagerTasksPage />)} />
             <Route
@@ -191,6 +199,10 @@ export default function AppRoutes() {
               path={`${ROUTES.EMPLOYEE_TASKS}/:id`}
               element={withSuspense(<EmployeeTaskDetailPage />)}
             />
+            <Route
+              path={ROUTES.EMPLOYEE_ANALYTICS}
+              element={withSuspense(<AnalyticsDashboardPage />)}
+            />
           </Route>
 
           {/* ── Legacy flat routes (backward compatibility) ───────────── */}
@@ -210,6 +222,8 @@ export default function AppRoutes() {
           <Route path={ROUTES.SETTINGS} element={withSuspense(<SettingsPage />)} />
           {/* ── AI Assistant (all authenticated roles) ─────────────────── */}
           <Route path={ROUTES.AI_ASSISTANT} element={withSuspense(<AiAssistantPage />)} />
+          {/* ── Analytics — shared flat route (redirects handled by role) ── */}
+          <Route path={ROUTES.ANALYTICS} element={withSuspense(<AnalyticsDashboardPage />)} />
         </Route>
       </Route>
 

@@ -154,4 +154,61 @@ public interface TaskAiReviewRepository extends JpaRepository<TaskAiReview, UUID
             WHERE r.status IN :statuses
             """)
     List<TaskAiReview> findAllByStatusIn(@Param("statuses") List<AiReviewStatus> statuses);
+
+    // ── Analytics queries ─────────────────────────────────────────────────────
+
+    /**
+     * Counts AI reviews by status.
+     *
+     * @param status the status to count
+     * @return count of reviews in the given status
+     */
+    long countByStatus(AiReviewStatus status);
+
+    /**
+     * Returns average completion and quality scores for completed AI reviews,
+     * grouped by completion date, for trend computation.
+     *
+     * <p>Each element is {@code Object[] { date (LocalDate), avgCompletionScore (Double),
+     * avgQualityScore (Double), count (Long) }}.
+     *
+     * @param from inclusive start date (completedAt)
+     * @param to   inclusive end date (completedAt)
+     * @return list of [date, avgCompletionScore, avgQualityScore, count] rows
+     */
+    @Query("""
+            SELECT CAST(r.completedAt AS date),
+                   AVG(r.completionScore),
+                   AVG(r.qualityScore),
+                   COUNT(r)
+            FROM TaskAiReview r
+            WHERE r.status = com.company.employeemanagement.entity.enums.AiReviewStatus.COMPLETED
+              AND r.completedAt IS NOT NULL
+              AND CAST(r.completedAt AS date) >= :from
+              AND CAST(r.completedAt AS date) <= :to
+            GROUP BY CAST(r.completedAt AS date)
+            ORDER BY CAST(r.completedAt AS date) ASC
+            """)
+    List<Object[]> findScoreTrendByDateRange(
+            @Param("from") java.time.LocalDate from,
+            @Param("to")   java.time.LocalDate to);
+
+    /**
+     * Computes aggregate average scores across all completed AI reviews.
+     *
+     * <p>Returns a single {@code Object[]} with:
+     * <ul>
+     *   <li>{@code [0]} — average completion score ({@code Double})</li>
+     *   <li>{@code [1]} — average quality score ({@code Double})</li>
+     *   <li>{@code [2]} — count of completed reviews ({@code Long})</li>
+     * </ul>
+     *
+     * @return aggregated stats, or single row with nulls if no data
+     */
+    @Query("""
+            SELECT AVG(r.completionScore), AVG(r.qualityScore), COUNT(r)
+            FROM TaskAiReview r
+            WHERE r.status = com.company.employeemanagement.entity.enums.AiReviewStatus.COMPLETED
+            """)
+    Object[] findAggregateScores();
 }

@@ -79,7 +79,7 @@ function formatBytes(bytes) {
  * }} props
  */
 export default function SubmissionForm({
-  taskId,
+  taskId: _taskId,
   existingSubmission,
   isResubmit = false,
   onSubmit,

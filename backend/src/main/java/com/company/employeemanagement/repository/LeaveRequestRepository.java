@@ -217,4 +217,87 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, UUID
             ORDER BY lr.createdAt DESC
             """)
     Page<LeaveRequest> findRecentWithEmployee(Pageable pageable);
+
+    // ── Analytics aggregation queries ─────────────────────────────────────────
+
+    /**
+     * Counts leave requests by status within a creation date range, optionally
+     * restricted to a department or employee.
+     *
+     * @param from         inclusive start date (createdAt)
+     * @param to           inclusive end date (createdAt)
+     * @param status       the status to count; pass {@code null} to count all statuses
+     * @param departmentId optional department filter; {@code null} to skip
+     * @param employeeId   optional employee filter; {@code null} to skip
+     * @return count of matching leave requests
+     */
+    @Query("""
+            SELECT COUNT(lr) FROM LeaveRequest lr
+            WHERE CAST(lr.createdAt AS date) >= :from
+              AND CAST(lr.createdAt AS date) <= :to
+              AND (:status       IS NULL OR lr.status      = :status)
+              AND (:departmentId IS NULL OR lr.employee.department.id = :departmentId)
+              AND (:employeeId   IS NULL OR lr.employee.id = :employeeId)
+            """)
+    long countByDateRangeAndFilters(
+            @Param("from")         LocalDate from,
+            @Param("to")           LocalDate to,
+            @Param("status")       LeaveStatus status,
+            @Param("departmentId") UUID departmentId,
+            @Param("employeeId")   UUID employeeId);
+
+    /**
+     * Returns leave request counts grouped by leave type within a date range,
+     * optionally restricted by department or employee.
+     *
+     * <p>Each element is {@code Object[] { leaveType (LeaveType), count (Long) }}.
+     *
+     * @param from         inclusive start date
+     * @param to           inclusive end date
+     * @param departmentId optional department filter; {@code null} to skip
+     * @param employeeId   optional employee filter; {@code null} to skip
+     * @return list of [leaveType, count] pairs
+     */
+    @Query("""
+            SELECT lr.leaveType, COUNT(lr) FROM LeaveRequest lr
+            WHERE CAST(lr.createdAt AS date) >= :from
+              AND CAST(lr.createdAt AS date) <= :to
+              AND (:departmentId IS NULL OR lr.employee.department.id = :departmentId)
+              AND (:employeeId   IS NULL OR lr.employee.id = :employeeId)
+            GROUP BY lr.leaveType
+            """)
+    List<Object[]> countGroupByLeaveType(
+            @Param("from")         LocalDate from,
+            @Param("to")           LocalDate to,
+            @Param("departmentId") UUID departmentId,
+            @Param("employeeId")   UUID employeeId);
+
+    /**
+     * Returns monthly leave request counts (total and approved) for trend data.
+     *
+     * <p>Each element is {@code Object[] { yearMonth (String "YYYY-MM"), total (Long), approved (Long) }}.
+     *
+     * @param from         inclusive start date
+     * @param to           inclusive end date
+     * @param departmentId optional department filter; {@code null} to skip
+     * @param employeeId   optional employee filter; {@code null} to skip
+     * @return list of [yearMonth, total, approved] rows
+     */
+    @Query("""
+            SELECT FUNCTION('DATE_FORMAT', lr.createdAt, '%Y-%m'),
+                   COUNT(lr),
+                   SUM(CASE WHEN lr.status = com.company.employeemanagement.entity.enums.LeaveStatus.APPROVED THEN 1 ELSE 0 END)
+            FROM LeaveRequest lr
+            WHERE CAST(lr.createdAt AS date) >= :from
+              AND CAST(lr.createdAt AS date) <= :to
+              AND (:departmentId IS NULL OR lr.employee.department.id = :departmentId)
+              AND (:employeeId   IS NULL OR lr.employee.id = :employeeId)
+            GROUP BY FUNCTION('DATE_FORMAT', lr.createdAt, '%Y-%m')
+            ORDER BY FUNCTION('DATE_FORMAT', lr.createdAt, '%Y-%m') ASC
+            """)
+    List<Object[]> countMonthlyTrend(
+            @Param("from")         LocalDate from,
+            @Param("to")           LocalDate to,
+            @Param("departmentId") UUID departmentId,
+            @Param("employeeId")   UUID employeeId);
 }

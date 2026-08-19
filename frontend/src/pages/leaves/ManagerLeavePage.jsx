@@ -22,7 +22,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import {
   Alert,
   Box,
@@ -37,7 +36,6 @@ import HowToRegRoundedIcon from '@mui/icons-material/HowToRegRounded';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/constants/roles';
 import { ROUTES } from '@/constants/routes';
-import { getProfile } from '@/services/profileApi';
 import {
   LEAVE_DEFAULT_PAGE_SIZE,
   LEAVE_DEFAULT_SORT,

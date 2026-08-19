@@ -43,6 +43,7 @@ import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import TaskRoundedIcon from '@mui/icons-material/TaskRounded';
 import HowToRegRoundedIcon from '@mui/icons-material/HowToRegRounded';
+import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 
 import { ROUTES } from '@/constants/routes';
 import { ROLES } from '@/constants/roles';
@@ -114,6 +115,13 @@ const NAV_ITEMS = [
     label: 'Company Policies',
     path: ROUTES.ADMIN_POLICIES,
     icon: <AutoStoriesRoundedIcon />,
+    allowedRoles: [ROLES.ADMIN],
+    section: 'management',
+  },
+  {
+    label: 'Analytics',
+    path: ROUTES.ADMIN_ANALYTICS,
+    icon: <BarChartRoundedIcon />,
     allowedRoles: [ROLES.ADMIN],
     section: 'management',
   },
@@ -189,6 +197,13 @@ const NAV_ITEMS = [
     allowedRoles: [ROLES.HR],
     section: 'management',
   },
+  {
+    label: 'Analytics',
+    path: ROUTES.HR_ANALYTICS,
+    icon: <BarChartRoundedIcon />,
+    allowedRoles: [ROLES.HR, ROLES.MANAGER],
+    section: 'management',
+  },
 
   // ── Employee ──────────────────────────────────────────────────────────────
   {
@@ -223,6 +238,13 @@ const NAV_ITEMS = [
     label: 'My Tasks',
     path: ROUTES.EMPLOYEE_TASKS,
     icon: <TaskRoundedIcon />,
+    allowedRoles: [ROLES.EMPLOYEE],
+    section: 'main',
+  },
+  {
+    label: 'My Analytics',
+    path: ROUTES.EMPLOYEE_ANALYTICS,
+    icon: <BarChartRoundedIcon />,
     allowedRoles: [ROLES.EMPLOYEE],
     section: 'main',
   },

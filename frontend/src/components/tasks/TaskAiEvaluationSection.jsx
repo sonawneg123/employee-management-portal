@@ -519,7 +519,7 @@ function EvaluationHistoryTable({ reviews, onSelectReview, selectedReviewId }) {
  *   onRunComplete?: (review: import('../../services/taskAiReviewApi').TaskAiReviewResponse) => void,
  * }} props
  */
-export default function TaskAiEvaluationSection({ taskId, submission, onRunComplete }) {
+export default function TaskAiEvaluationSection({ taskId: _taskId, submission, onRunComplete }) {
   const submissionId = submission?.id ?? null;
 
   // ── Latest review ──────────────────────────────────────────────────────────
@@ -530,7 +530,7 @@ export default function TaskAiEvaluationSection({ taskId, submission, onRunCompl
   } = useLatestAiReview(submissionId, { enabled: Boolean(submissionId) });
 
   // ── History ────────────────────────────────────────────────────────────────
-  const { data: allReviews, isLoading: isLoadingHistory } = useAllAiReviews(submissionId, {
+  const { data: allReviews } = useAllAiReviews(submissionId, {
     enabled: Boolean(submissionId),
   });
 
@@ -582,7 +582,7 @@ export default function TaskAiEvaluationSection({ taskId, submission, onRunCompl
     latestReview?.status === 'PENDING' ||
     latestReview?.status === 'PROCESSING';
 
-  const hasCompleted = latestReview?.status === 'COMPLETED';
+  const _hasCompleted = latestReview?.status === 'COMPLETED';
   const hasFailed = latestReview?.status === 'FAILED';
   const hasExisting = Boolean(latestReview);
 

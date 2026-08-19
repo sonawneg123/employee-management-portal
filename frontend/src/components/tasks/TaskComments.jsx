@@ -31,7 +31,7 @@ import EmployeeAvatar from '@/components/employees/EmployeeAvatar';
  * @param {string} name
  * @returns {string}
  */
-function initials(name) {
+function _initials(name) {
   if (!name) return '?';
   return name
     .split(' ')

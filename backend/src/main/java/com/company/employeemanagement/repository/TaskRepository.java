@@ -220,4 +220,65 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
             GROUP BY t.assignedEmployee.id
             """)
     List<Object[]> countActiveTasksGroupByEmployee();
+
+    // ── Analytics queries ─────────────────────────────────────────────────────
+
+    /**
+     * Counts tasks by status, optionally filtered by department or employee.
+     *
+     * @param status       the status to count
+     * @param departmentId optional department filter; {@code null} to skip
+     * @param employeeId   optional employee (assignee) filter; {@code null} to skip
+     * @return count of matching tasks
+     */
+    @Query("""
+            SELECT COUNT(t) FROM Task t
+            WHERE t.status = :status
+              AND (:departmentId IS NULL OR t.assignedEmployee.department.id = :departmentId)
+              AND (:employeeId   IS NULL OR t.assignedEmployee.id = :employeeId)
+            """)
+    long countByStatusAndFilters(
+            @Param("status")       TaskStatus status,
+            @Param("departmentId") UUID departmentId,
+            @Param("employeeId")   UUID employeeId);
+
+    /**
+     * Counts all tasks optionally filtered by department or employee.
+     *
+     * @param departmentId optional department filter; {@code null} to skip
+     * @param employeeId   optional employee filter; {@code null} to skip
+     * @return count of matching tasks
+     */
+    @Query("""
+            SELECT COUNT(t) FROM Task t
+            WHERE (:departmentId IS NULL OR t.assignedEmployee.department.id = :departmentId)
+              AND (:employeeId   IS NULL OR t.assignedEmployee.id = :employeeId)
+            """)
+    long countByFilters(
+            @Param("departmentId") UUID departmentId,
+            @Param("employeeId")   UUID employeeId);
+
+    /**
+     * Counts overdue tasks (not in terminal status, past due date) filtered
+     * by department or employee.
+     *
+     * @param statuses     terminal statuses to exclude
+     * @param today        current date
+     * @param departmentId optional department filter; {@code null} to skip
+     * @param employeeId   optional employee filter; {@code null} to skip
+     * @return count of overdue tasks
+     */
+    @Query("""
+            SELECT COUNT(t) FROM Task t
+            WHERE t.status NOT IN :statuses
+              AND t.dueDate IS NOT NULL
+              AND t.dueDate < :today
+              AND (:departmentId IS NULL OR t.assignedEmployee.department.id = :departmentId)
+              AND (:employeeId   IS NULL OR t.assignedEmployee.id = :employeeId)
+            """)
+    long countOverdueByFilters(
+            @Param("statuses")     List<TaskStatus> statuses,
+            @Param("today")        LocalDate today,
+            @Param("departmentId") UUID departmentId,
+            @Param("employeeId")   UUID employeeId);
 }

@@ -126,7 +126,6 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
   // We skip the very first load (prevCount === null) to avoid playing on page load.
   // When there are new notifications, play the appropriate sound based on the newest type.
   const prevCountRef = useRef(null);
-  const prevNotifIdsRef = useRef(null);
   useEffect(() => {
     if (prevCountRef.current === null) {
       prevCountRef.current = unreadCount;
@@ -138,7 +137,8 @@ export default function NotificationBell({ iconColor = '#94A3B8' }) {
       playSoundForType(latestType);
     }
     prevCountRef.current = unreadCount;
-  }, [unreadCount, playSoundForType, notifications]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unreadCount, playSoundForType]);
 
   const handleOpen = useCallback((event) => {
     setAnchorEl((prev) => (prev ? null : event.currentTarget));

@@ -95,7 +95,7 @@ export function useResubmit() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ submissionId, payload, file }) => resubmit(submissionId, payload, file ?? null),
-    onSuccess: (data) => {
+    onSuccess: (_data) => {
       queryClient.invalidateQueries({ queryKey: taskKeys.all });
       queryClient.invalidateQueries({ queryKey: submissionKeys.all });
     },

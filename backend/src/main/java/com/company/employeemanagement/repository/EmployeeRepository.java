@@ -243,4 +243,52 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>,
      */
     @Query("SELECT e.status, COUNT(e) FROM Employee e GROUP BY e.status")
     List<Object[]> countGroupByStatus();
+
+    // ── Analytics queries ─────────────────────────────────────────────────────
+
+    /**
+     * Counts employees by status, optionally restricted to a department.
+     *
+     * @param status       the status to count
+     * @param departmentId optional department filter; {@code null} to skip
+     * @return count of matching employees
+     */
+    @Query("""
+            SELECT COUNT(e) FROM Employee e
+            WHERE e.status = :status
+              AND (:departmentId IS NULL OR e.department.id = :departmentId)
+            """)
+    long countByStatusAndDepartment(
+            @Param("status")       EmployeeStatus status,
+            @Param("departmentId") UUID departmentId);
+
+    /**
+     * Counts all employees, optionally restricted to a department.
+     *
+     * @param departmentId optional department filter; {@code null} to skip
+     * @return count of matching employees
+     */
+    @Query("""
+            SELECT COUNT(e) FROM Employee e
+            WHERE (:departmentId IS NULL OR e.department.id = :departmentId)
+            """)
+    long countByDepartment(@Param("departmentId") UUID departmentId);
+
+    /**
+     * Returns all departments with their employee counts.
+     *
+     * <p>Each element is {@code Object[] { departmentId (UUID), name (String),
+     * code (String), total (Long), active (Long) }}.
+     *
+     * @return list of [departmentId, name, code, total, active] rows
+     */
+    @Query("""
+            SELECT e.department.id, e.department.name, e.department.code,
+                   COUNT(e),
+                   SUM(CASE WHEN e.status = com.company.employeemanagement.entity.enums.EmployeeStatus.ACTIVE THEN 1 ELSE 0 END)
+            FROM Employee e
+            GROUP BY e.department.id, e.department.name, e.department.code
+            ORDER BY COUNT(e) DESC
+            """)
+    List<Object[]> findDepartmentHeadcounts();
 }

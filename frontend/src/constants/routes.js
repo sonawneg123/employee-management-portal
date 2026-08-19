@@ -83,6 +83,12 @@ export const ROUTES = /** @type {const} */ ({
   ADMIN_TASKS: '/admin/tasks',
   ADMIN_TASK_DETAIL: (id) => `/admin/tasks/${id}`,
 
+  // ── Analytics Dashboard (Phase 8A) ──────────────────────────────────────
+  ANALYTICS: '/analytics',
+  ADMIN_ANALYTICS: '/admin/analytics',
+  HR_ANALYTICS: '/hr/analytics',
+  EMPLOYEE_ANALYTICS: '/employee/analytics',
+
   // ── Fallback ─────────────────────────────────────────────────────
   NOT_FOUND: '/404',
   ACCESS_DENIED: '/403',

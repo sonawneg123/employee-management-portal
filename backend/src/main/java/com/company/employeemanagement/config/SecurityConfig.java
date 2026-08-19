@@ -128,6 +128,15 @@ public class SecurityConfig {
                                 .hasAnyRole("ADMIN", "HR", "MANAGER")
                         .requestMatchers(HttpMethod.DELETE, "/reviews/**")
                                 .hasRole("ADMIN")
+                        // ── Analytics endpoints (Phase 8A) ───────────────────
+                        // Performance and department endpoints — privileged only
+                        .requestMatchers(HttpMethod.GET,
+                                "/analytics/performance", "/analytics/departments")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER")
+                        // All other analytics endpoints — all authenticated roles
+                        // (IDOR scoping enforced at the controller layer)
+                        .requestMatchers(HttpMethod.GET, "/analytics/**")
+                                .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")
                         // ── Dashboard endpoints (all authenticated roles) ──
                         .requestMatchers(HttpMethod.GET, "/dashboard/**")
                                 .hasAnyRole("ADMIN", "HR", "MANAGER", "EMPLOYEE")

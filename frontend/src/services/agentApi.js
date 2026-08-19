@@ -5,7 +5,7 @@
  */
 
 import axiosInstance from '@/api/axiosInstance';
-import { API_BASE_URL, API_ENDPOINTS } from '@/constants/api';
+import { API_ENDPOINTS } from '@/constants/api';
 
 /**
  * Sends a message to the Agentic AI Copilot and returns the structured response.

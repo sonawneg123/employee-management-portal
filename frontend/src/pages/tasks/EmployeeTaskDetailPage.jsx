@@ -20,7 +20,6 @@ import {
   Grid,
   IconButton,
   Snackbar,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
@@ -67,7 +66,7 @@ export default function EmployeeTaskDetailPage() {
 
   // Fetch the latest submission when the task has been submitted or is completed
   const hasSubmission = task && ['SUBMITTED', 'COMPLETED', 'IN_PROGRESS'].includes(task.status);
-  const { data: latestSubmission, isLoading: isLoadingSubmission } = useLatestSubmission(id, {
+  const { data: latestSubmission } = useLatestSubmission(id, {
     enabled: Boolean(id) && hasSubmission,
   });
 
