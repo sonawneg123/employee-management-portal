@@ -1,26 +1,29 @@
 /**
  * @fileoverview AuthLayout — premium split-screen authentication layout.
  *
- * LEFT  (desktop): brand panel with gradient, feature bullets, animated accents.
- * RIGHT (all):     form panel with card content.
+ * LEFT  (desktop): deep navy brand panel with gold accents, feature bullets, atmospheric blur.
+ * RIGHT (all):     warm cream form panel with rounded card.
  *
  * Responsive: single column on mobile (form only, logo top).
+ * Premium SaaS HR product aesthetic.
  */
 
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Box, Grid, Typography, useMediaQuery, useTheme } from '@mui/material';
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+import EventAvailableRoundedIcon from '@mui/icons-material/EventAvailableRounded';
+import AssessmentRoundedIcon from '@mui/icons-material/AssessmentRounded';
+import AdminPanelSettingsRoundedIcon from '@mui/icons-material/AdminPanelSettingsRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 
 /** @type {{ icon: JSX.Element, label: string }[]} */
 const FEATURES = [
-  { icon: <PeopleAltIcon fontSize="small" />, label: 'Centralised employee management' },
-  { icon: <EventAvailableIcon fontSize="small" />, label: 'Leave & attendance tracking' },
-  { icon: <AssessmentIcon fontSize="small" />, label: 'Performance reviews & ratings' },
-  { icon: <AdminPanelSettingsIcon fontSize="small" />, label: 'Role-based access control' },
+  { icon: <PeopleAltRoundedIcon fontSize="small" />, label: 'Centralised employee management' },
+  { icon: <EventAvailableRoundedIcon fontSize="small" />, label: 'Leave & attendance tracking' },
+  { icon: <AssessmentRoundedIcon fontSize="small" />, label: 'Performance reviews & ratings' },
+  { icon: <AdminPanelSettingsRoundedIcon fontSize="small" />, label: 'Role-based access control' },
+  { icon: <AutoAwesomeRoundedIcon fontSize="small" />, label: 'Agentic AI Copilot' },
 ];
 
 /**
@@ -36,13 +39,15 @@ const FEATURES = [
 export default function AuthLayout({ children, title, subtitle }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // isDark intentionally read via theme in sx callbacks
+  const isDark = theme.palette.mode === 'dark';
 
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        bgcolor: 'background.default',
+        background: isDark
+          ? 'radial-gradient(ellipse at 10% 20%, rgba(26,35,66,0.8) 0%, transparent 60%), radial-gradient(ellipse at 90% 80%, rgba(20,28,55,0.6) 0%, transparent 60%), #0C1220'
+          : 'radial-gradient(ellipse at 10% 0%, rgba(210,215,255,0.2) 0%, transparent 50%), radial-gradient(ellipse at 90% 100%, rgba(255,240,200,0.3) 0%, transparent 50%), #F5F0E8',
         display: 'flex',
       }}
     >
@@ -52,7 +57,7 @@ export default function AuthLayout({ children, title, subtitle }) {
           <Grid
             size={5}
             sx={{
-              background: 'linear-gradient(145deg, #243B7A 0%, #4F46E5 50%, #7C3AED 100%)',
+              background: 'linear-gradient(155deg, #0F1628 0%, #1A2342 45%, #2D3A6B 100%)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -61,17 +66,17 @@ export default function AuthLayout({ children, title, subtitle }) {
               overflow: 'hidden',
             }}
           >
-            {/* Decorative blobs */}
+            {/* Decorative atmospheric blobs */}
             <Box
               aria-hidden="true"
               sx={{
                 position: 'absolute',
-                width: 340,
-                height: 340,
+                width: 400,
+                height: 400,
                 borderRadius: '50%',
-                background: 'rgba(255,255,255,0.05)',
-                top: -80,
-                right: -80,
+                background: 'radial-gradient(circle, rgba(245,197,24,0.08) 0%, transparent 70%)',
+                top: -100,
+                right: -100,
                 pointerEvents: 'none',
               }}
             />
@@ -79,12 +84,28 @@ export default function AuthLayout({ children, title, subtitle }) {
               aria-hidden="true"
               sx={{
                 position: 'absolute',
-                width: 220,
-                height: 220,
+                width: 280,
+                height: 280,
                 borderRadius: '50%',
-                background: 'rgba(255,255,255,0.04)',
-                bottom: -60,
-                left: -60,
+                background: 'radial-gradient(circle, rgba(79,106,181,0.2) 0%, transparent 70%)',
+                bottom: -80,
+                left: -80,
+                pointerEvents: 'none',
+              }}
+            />
+            {/* Top right decorative dot grid */}
+            <Box
+              aria-hidden="true"
+              sx={{
+                position: 'absolute',
+                top: 40,
+                right: 40,
+                width: 80,
+                height: 80,
+                opacity: 0.15,
+                backgroundImage:
+                  'radial-gradient(circle, rgba(245,197,24,0.8) 1px, transparent 1px)',
+                backgroundSize: '12px 12px',
                 pointerEvents: 'none',
               }}
             />
@@ -103,17 +124,18 @@ export default function AuthLayout({ children, title, subtitle }) {
             >
               <Box
                 sx={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '9px',
-                  bgcolor: 'rgba(255,255,255,0.2)',
+                  width: 40,
+                  height: 40,
+                  borderRadius: '11px',
+                  background: 'linear-gradient(135deg, #F5C518, #C49A00)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backdropFilter: 'blur(4px)',
+                  flexShrink: 0,
+                  boxShadow: '0 4px 16px rgba(245,197,24,0.4)',
                 }}
               >
-                <PeopleAltIcon sx={{ color: '#fff', fontSize: 20 }} />
+                <PeopleAltRoundedIcon sx={{ color: '#1A2342', fontSize: 22 }} />
               </Box>
               <Typography
                 variant="h6"
@@ -131,7 +153,7 @@ export default function AuthLayout({ children, title, subtitle }) {
               sx={{
                 color: '#fff',
                 mb: 1.5,
-                lineHeight: 1.2,
+                lineHeight: 1.15,
                 letterSpacing: '-0.025em',
               }}
             >
@@ -142,10 +164,10 @@ export default function AuthLayout({ children, title, subtitle }) {
               <Typography
                 variant="body1"
                 sx={{
-                  color: 'rgba(255,255,255,0.75)',
+                  color: 'rgba(255,255,255,0.65)',
                   mb: 5,
                   maxWidth: 340,
-                  lineHeight: 1.65,
+                  lineHeight: 1.7,
                 }}
               >
                 {subtitle}
@@ -161,11 +183,12 @@ export default function AuthLayout({ children, title, subtitle }) {
                       width: 34,
                       height: 34,
                       borderRadius: '9px',
-                      bgcolor: 'rgba(255,255,255,0.15)',
+                      bgcolor: 'rgba(245,197,24,0.12)',
+                      border: '1px solid rgba(245,197,24,0.2)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#fff',
+                      color: '#F5C518',
                       flexShrink: 0,
                     }}
                   >
@@ -173,7 +196,7 @@ export default function AuthLayout({ children, title, subtitle }) {
                   </Box>
                   <Typography
                     variant="body2"
-                    sx={{ color: 'rgba(255,255,255,0.88)', fontWeight: 500 }}
+                    sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}
                   >
                     {label}
                   </Typography>
@@ -210,21 +233,22 @@ export default function AuthLayout({ children, title, subtitle }) {
             >
               <Box
                 sx={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: '8px',
-                  bgcolor: 'primary.main',
+                  width: 36,
+                  height: 36,
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #F5C518, #C49A00)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  boxShadow: '0 4px 12px rgba(245,197,24,0.35)',
                 }}
               >
-                <PeopleAltIcon sx={{ color: '#fff', fontSize: 18 }} />
+                <PeopleAltRoundedIcon sx={{ color: '#1A2342', fontSize: 20 }} />
               </Box>
               <Typography
                 variant="h6"
                 fontWeight={800}
-                sx={{ color: 'text.primary', letterSpacing: '-0.02em' }}
+                sx={{ color: isDark ? '#F0EDE6' : '#1A2342', letterSpacing: '-0.02em' }}
               >
                 PeopleCore HR
               </Typography>

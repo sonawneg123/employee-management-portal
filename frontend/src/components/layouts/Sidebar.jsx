@@ -1,8 +1,9 @@
 /**
- * @fileoverview Sidebar — modern light navigation drawer for PeopleCore HR.
+ * @fileoverview Sidebar — premium SaaS navigation drawer for PeopleCore HR.
  *
- * White sidebar with indigo active state and subtle dividers.
- * Role-aware navigation — each role sees only its own routes.
+ * Deep navy sidebar with pill-shaped active items and gold accent.
+ * Inspired by premium SaaS HR product navigation.
+ * Role-aware — each role sees only its own routes.
  * Supports: permanent (desktop), temporary (mobile drawer), collapsed icon-only state.
  *
  * Role → routes mapping:
@@ -38,7 +39,7 @@ import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
-import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import AutoStoriesRoundedIcon from '@mui/icons-material/AutoStoriesRounded';
 import TaskRoundedIcon from '@mui/icons-material/TaskRounded';
 import HowToRegRoundedIcon from '@mui/icons-material/HowToRegRounded';
@@ -230,9 +231,9 @@ const NAV_ITEMS = [
 /** @type {NavItem[]} */
 const ACCOUNT_ITEMS = [
   {
-    label: 'AI Assistant',
+    label: 'AI Copilot',
     path: ROUTES.AI_ASSISTANT,
-    icon: <SmartToyRoundedIcon />,
+    icon: <AutoAwesomeRoundedIcon />,
     section: 'ai',
   },
   { label: 'My Profile', path: ROUTES.PROFILE, icon: <PersonRoundedIcon />, section: 'account' },
@@ -301,15 +302,14 @@ export default function Sidebar({
   // Effective width based on collapsed state (only for permanent variant)
   const effectiveWidth = variant === 'permanent' && collapsed ? collapsedWidth : width;
 
-  // Theme-aware colours
-  const bg = isDark ? '#111827' : '#FFFFFF';
-  const border = isDark ? 'rgba(241,245,249,0.08)' : '#E5E7EB';
-  const activeBg = isDark ? 'rgba(79,70,229,0.18)' : '#EEF2FF';
-  const activeColor = isDark ? '#818CF8' : '#4F46E5';
-  const hoverBg = isDark ? 'rgba(241,245,249,0.06)' : 'rgba(79,70,229,0.05)';
-  const textColor = isDark ? 'rgba(226,232,240,0.9)' : '#374151';
-  const textMuted = isDark ? 'rgba(148,163,184,0.8)' : '#9CA3AF';
-  const sectionLabelColor = isDark ? 'rgba(148,163,184,0.6)' : '#9CA3AF';
+  // Premium SaaS nav colours — deep navy sidebar
+  const bg = isDark ? '#0C1220' : '#1A2342';
+  const activeBg = isDark ? 'rgba(245,197,24,0.15)' : 'rgba(245,197,24,0.15)';
+  const activeColor = '#F5C518';
+  const hoverBg = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.08)';
+  const textColor = isDark ? 'rgba(240,237,230,0.75)' : 'rgba(255,255,255,0.75)';
+  const sectionLabelColor = isDark ? 'rgba(240,237,230,0.35)' : 'rgba(255,255,255,0.35)';
+  const borderColor = isDark ? 'rgba(240,237,230,0.07)' : 'rgba(255,255,255,0.1)';
 
   /**
    * Renders a single nav list item.
@@ -322,6 +322,8 @@ export default function Sidebar({
       location.pathname === item.path ||
       (item.path !== '/' && location.pathname.startsWith(item.path));
 
+    const isAiItem = item.path === ROUTES.AI_ASSISTANT;
+
     const btn = (
       <ListItemButton
         component={NavLink}
@@ -329,33 +331,37 @@ export default function Sidebar({
         onClick={variant === 'temporary' ? onClose : undefined}
         selected={isActive}
         sx={{
-          borderRadius: '10px',
+          borderRadius: '12px',
           mx: 1,
-          px: collapsed ? 1 : 1.5,
-          py: 0.9,
+          px: collapsed ? 1.25 : 1.5,
+          py: 1,
           minHeight: 40,
           justifyContent: collapsed ? 'center' : 'flex-start',
           bgcolor: isActive ? activeBg : 'transparent',
-          color: isActive ? activeColor : textColor,
+          color: isActive ? activeColor : isAiItem ? 'rgba(245,197,24,0.6)' : textColor,
+          border: isActive ? `1px solid rgba(245,197,24,0.25)` : '1px solid transparent',
           '&:hover': {
             bgcolor: isActive ? activeBg : hoverBg,
-            color: isActive ? activeColor : isDark ? '#F1F5F9' : '#111827',
+            color: isActive ? activeColor : '#FFFFFF',
+            border: isActive
+              ? '1px solid rgba(245,197,24,0.25)'
+              : '1px solid rgba(255,255,255,0.1)',
           },
           '&.Mui-selected': {
             bgcolor: activeBg,
             '&:hover': { bgcolor: activeBg },
           },
-          transition: 'all 0.15s ease',
+          transition: 'all 0.16s ease',
         }}
         aria-label={item.label}
         aria-current={isActive ? 'page' : undefined}
       >
         <ListItemIcon
           sx={{
-            minWidth: collapsed ? 0 : 36,
+            minWidth: collapsed ? 0 : 34,
             color: 'inherit',
             justifyContent: 'center',
-            '& svg': { fontSize: 20 },
+            '& svg': { fontSize: 18 },
           }}
         >
           {item.icon}
@@ -364,9 +370,10 @@ export default function Sidebar({
           <ListItemText
             primary={item.label}
             primaryTypographyProps={{
-              fontSize: '0.875rem',
+              fontSize: '0.85rem',
               fontWeight: isActive ? 600 : 500,
               noWrap: true,
+              letterSpacing: '0.005em',
             }}
           />
         )}
@@ -377,9 +384,12 @@ export default function Sidebar({
               width: 7,
               height: 7,
               borderRadius: '50%',
-              bgcolor: isCheckedOut ? 'success.main' : 'warning.main',
+              bgcolor: isCheckedOut ? '#10B981' : '#F59E0B',
               flexShrink: 0,
               mr: 0.5,
+              boxShadow: isCheckedOut
+                ? '0 0 6px rgba(16,185,129,0.6)'
+                : '0 0 6px rgba(245,158,11,0.6)',
             }}
             aria-hidden="true"
           />
@@ -408,9 +418,8 @@ export default function Sidebar({
         display: 'flex',
         flexDirection: 'column',
         bgcolor: bg,
-        borderRight: `1px solid ${border}`,
         overflow: 'hidden',
-        transition: 'width 0.25s ease',
+        transition: 'width 0.28s cubic-bezier(0.4,0,0.2,1)',
       }}
     >
       {/* ── Brand ──────────────────────────────────────────────────────── */}
@@ -422,27 +431,28 @@ export default function Sidebar({
           display: 'flex',
           alignItems: 'center',
           gap: collapsed ? 0 : 1.25,
-          borderBottom: `1px solid ${border}`,
+          borderBottom: `1px solid ${borderColor}`,
           justifyContent: collapsed ? 'center' : 'flex-start',
-          transition: 'padding 0.25s ease',
-          minHeight: 64,
+          transition: 'padding 0.28s ease',
+          minHeight: 68,
         }}
       >
+        {/* Logo mark */}
         <Box
           sx={{
             width: 34,
             height: 34,
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+            background: 'linear-gradient(135deg, #F5C518, #C49A00)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(79,70,229,0.35)',
+            boxShadow: '0 4px 12px rgba(245,197,24,0.4)',
           }}
           aria-hidden="true"
         >
-          <PeopleAltIcon sx={{ color: '#fff', fontSize: 18 }} />
+          <PeopleAltIcon sx={{ color: '#1A2342', fontSize: 18 }} />
         </Box>
         {!collapsed && (
           <Box sx={{ minWidth: 0 }}>
@@ -451,7 +461,7 @@ export default function Sidebar({
               fontWeight={800}
               noWrap
               sx={{
-                color: isDark ? '#F1F5F9' : '#111827',
+                color: '#FFFFFF',
                 letterSpacing: '-0.02em',
                 lineHeight: 1.2,
                 fontSize: '0.9375rem',
@@ -459,7 +469,10 @@ export default function Sidebar({
             >
               PeopleCore HR
             </Typography>
-            <Typography variant="caption" sx={{ color: textMuted, fontSize: '0.675rem' }}>
+            <Typography
+              variant="caption"
+              sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.675rem' }}
+            >
               Management Portal
             </Typography>
           </Box>
@@ -477,8 +490,8 @@ export default function Sidebar({
               mb: 0.5,
               display: 'block',
               color: sectionLabelColor,
-              fontSize: '0.625rem',
-              letterSpacing: '0.1em',
+              fontSize: '0.6rem',
+              letterSpacing: '0.12em',
               lineHeight: 2,
             }}
           >
@@ -499,8 +512,8 @@ export default function Sidebar({
                   mb: 0.5,
                   display: 'block',
                   color: sectionLabelColor,
-                  fontSize: '0.625rem',
-                  letterSpacing: '0.1em',
+                  fontSize: '0.6rem',
+                  letterSpacing: '0.12em',
                   lineHeight: 2,
                 }}
               >
@@ -522,8 +535,8 @@ export default function Sidebar({
               mb: 0.5,
               display: 'block',
               color: sectionLabelColor,
-              fontSize: '0.625rem',
-              letterSpacing: '0.1em',
+              fontSize: '0.6rem',
+              letterSpacing: '0.12em',
               lineHeight: 2,
             }}
           >
@@ -537,7 +550,7 @@ export default function Sidebar({
       {/* ── User info + collapse toggle ──────────────────────────────────── */}
       <Box
         sx={{
-          borderTop: `1px solid ${border}`,
+          borderTop: `1px solid ${borderColor}`,
           p: collapsed ? 1 : 1.5,
           display: 'flex',
           alignItems: 'center',
@@ -552,10 +565,11 @@ export default function Sidebar({
               sx={{
                 width: 32,
                 height: 32,
-                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                background: 'linear-gradient(135deg, #2D3A6B, #4F6AB5)',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 flexShrink: 0,
+                border: '2px solid rgba(245,197,24,0.3)',
               }}
             >
               {!user.profilePhotoUrl && initials}
@@ -565,14 +579,14 @@ export default function Sidebar({
                 variant="caption"
                 fontWeight={700}
                 noWrap
-                sx={{ display: 'block', color: isDark ? '#F1F5F9' : '#111827', lineHeight: 1.3 }}
+                sx={{ display: 'block', color: '#FFFFFF', lineHeight: 1.3 }}
               >
                 {user.firstName} {user.lastName}
               </Typography>
               <Typography
                 variant="caption"
                 noWrap
-                sx={{ color: textMuted, fontSize: '0.65rem', display: 'block' }}
+                sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.65rem', display: 'block' }}
               >
                 {roleLabel(user?.roles)}
               </Typography>
@@ -597,12 +611,15 @@ export default function Sidebar({
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
-                bgcolor: hoverBg,
-                color: textMuted,
+                bgcolor: 'rgba(255,255,255,0.08)',
+                color: 'rgba(255,255,255,0.5)',
                 flexShrink: 0,
                 transition: 'all 0.15s ease',
-                '&:hover': { bgcolor: activeBg, color: activeColor },
-                '&:focus-visible': { outline: `2px solid ${activeColor}`, outlineOffset: 2 },
+                '&:hover': {
+                  bgcolor: 'rgba(245,197,24,0.15)',
+                  color: '#F5C518',
+                },
+                '&:focus-visible': { outline: `2px solid #F5C518`, outlineOffset: 2 },
               }}
             >
               {collapsed ? (
@@ -627,13 +644,14 @@ export default function Sidebar({
         sx: {
           width: effectiveWidth,
           border: 'none',
+          bgcolor: bg,
           boxShadow:
             variant === 'temporary'
               ? isDark
-                ? '4px 0 24px rgba(0,0,0,0.5)'
-                : '4px 0 24px rgba(0,0,0,0.1)'
-              : 'none',
-          transition: 'width 0.25s ease',
+                ? '4px 0 32px rgba(0,0,0,0.7)'
+                : '4px 0 32px rgba(26,35,66,0.5)'
+              : '2px 0 16px rgba(0,0,0,0.15)',
+          transition: 'width 0.28s cubic-bezier(0.4,0,0.2,1)',
           overflow: 'hidden',
         },
       }}

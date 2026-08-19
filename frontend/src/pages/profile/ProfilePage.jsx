@@ -425,7 +425,7 @@ export default function ProfilePage() {
       });
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       setEditMode(false);
-      showSnack('success', 'Profile updated successfully 🎉');
+      showSnack('success', 'Profile updated successfully');
     },
     onError: (err) => showSnack('error', err?.message ?? 'Failed to update profile.'),
   });

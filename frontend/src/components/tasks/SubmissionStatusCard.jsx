@@ -208,7 +208,7 @@ export default function SubmissionStatusCard({ submission }) {
                 <AttachFileRoundedIcon color="action" />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" fontWeight={600} noWrap>
-                    📎 {submission.attachmentOriginalName || 'attachment'}
+                    {submission.attachmentOriginalName || 'attachment'}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {submission.attachmentMimeType && (

@@ -396,9 +396,33 @@ export default function AdminUsersPage() {
               ) : users.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
-                    <Box>
-                      <Typography variant="body1" color="text.secondary" sx={{ mb: 0.5 }}>
-                        👥 No user accounts found
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 1.5,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: '12px',
+                          bgcolor: 'action.hover',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <PeopleRoundedIcon sx={{ fontSize: 24, color: 'text.disabled' }} />
+                      </Box>
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        sx={{ mb: 0.5, fontWeight: 600 }}
+                      >
+                        No user accounts found
                       </Typography>
                       <Typography variant="caption" color="text.disabled">
                         User accounts will appear here once created.

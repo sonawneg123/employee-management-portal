@@ -45,7 +45,7 @@ export default function RegisterPage({ defaultRole }) {
       </Helmet>
 
       <AuthLayout
-        title="Join your team 🚀"
+        title="Join your team"
         subtitle="Create an account to access your employee dashboard, leave requests, and performance reviews."
       >
         <AuthCard title={copy.title} description={copy.description}>

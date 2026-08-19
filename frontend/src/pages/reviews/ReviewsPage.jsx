@@ -161,7 +161,7 @@ export default function ReviewsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reviews'] });
       setFormOpen(false);
-      showSnack('Review created successfully. 🎉');
+      showSnack('Review created successfully.');
     },
     onError: (err) => handleMutationError(err),
   });
@@ -553,8 +553,16 @@ export default function ReviewsPage() {
         fullWidth
         PaperProps={{ sx: { borderRadius: '16px' } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-          {editTarget ? '✏️ Edit Review' : '⭐ New Performance Review'}
+        <DialogTitle sx={{ fontWeight: 700, pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          {editTarget ? (
+            <>
+              <EditIcon sx={{ fontSize: 20, color: 'primary.main' }} /> Edit Review
+            </>
+          ) : (
+            <>
+              <StarRoundedIcon sx={{ fontSize: 20, color: '#F5C518' }} /> New Performance Review
+            </>
+          )}
         </DialogTitle>
         <DialogContent
           sx={{ pt: '16px !important', display: 'flex', flexDirection: 'column', gap: 1 }}

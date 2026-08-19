@@ -38,7 +38,7 @@ export function createAppTheme(mode) {
     palette,
     typography,
     breakpoints,
-    shape: { borderRadius: 12 },
+    shape: { borderRadius: 14 },
     spacing: 8,
     components: getComponentOverrides(mode),
   });

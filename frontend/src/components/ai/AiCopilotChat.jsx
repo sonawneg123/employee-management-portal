@@ -28,24 +28,17 @@ import {
   Card,
   CardContent,
   CardActions,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Collapse,
 } from '@mui/material';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 import SmartToyRoundedIcon from '@mui/icons-material/SmartToyRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import BuildIcon from '@mui/icons-material/Build';
-import RecommendIcon from '@mui/icons-material/Recommend';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
+import BuildRoundedIcon from '@mui/icons-material/BuildRounded';
+import RecommendRoundedIcon from '@mui/icons-material/RecommendRounded';
+import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import TaskAltRoundedIcon from '@mui/icons-material/TaskAltRounded';
 import { sendAgentMessage } from '@/services/agentApi';
 
 /** @typedef {'INFORMATION'|'RECOMMENDATION'|'ACTION_PROPOSAL'|'ACTION_COMPLETED'|'ERROR'} ResponseType */
@@ -75,15 +68,15 @@ const SUGGESTED_QUESTIONS = [
 function getResponseStyle(responseType) {
   switch (responseType) {
     case 'RECOMMENDATION':
-      return { color: '#7c5cd8', icon: <RecommendIcon fontSize="small" /> };
+      return { color: '#7c5cd8', icon: <RecommendRoundedIcon fontSize="small" /> };
     case 'ACTION_PROPOSAL':
-      return { color: '#ed6c02', icon: <WarningAmberIcon fontSize="small" /> };
+      return { color: '#ed6c02', icon: <WarningAmberRoundedIcon fontSize="small" /> };
     case 'ACTION_COMPLETED':
-      return { color: '#2e7d32', icon: <TaskAltIcon fontSize="small" /> };
+      return { color: '#2e7d32', icon: <TaskAltRoundedIcon fontSize="small" /> };
     case 'ERROR':
-      return { color: '#d32f2f', icon: <WarningAmberIcon fontSize="small" /> };
+      return { color: '#d32f2f', icon: <WarningAmberRoundedIcon fontSize="small" /> };
     default: // INFORMATION
-      return { color: '#3b82d4', icon: <InfoOutlinedIcon fontSize="small" /> };
+      return { color: '#3b82d4', icon: <InfoRoundedIcon fontSize="small" /> };
   }
 }
 
@@ -99,7 +92,7 @@ function ToolsExecutedBadge({ tools }) {
   return (
     <Box sx={{ mt: 0.5, mb: 0.5 }}>
       <Stack direction="row" spacing={0.5} alignItems="center" flexWrap="wrap">
-        <BuildIcon sx={{ fontSize: 12, color: 'text.disabled' }} />
+        <BuildRoundedIcon sx={{ fontSize: 12, color: 'text.disabled' }} />
         <Typography variant="caption" color="text.disabled">
           Tools used:
         </Typography>
@@ -134,7 +127,7 @@ function ConfirmationCard({ message, onConfirm, onDecline, loading }) {
     <Card variant="outlined" sx={{ borderColor: 'warning.main', borderWidth: 1.5, mx: 1, my: 0.5 }}>
       <CardContent sx={{ pb: 0.5 }}>
         <Stack direction="row" spacing={1} alignItems="flex-start" mb={1}>
-          <WarningAmberIcon sx={{ color: 'warning.main', mt: 0.25, flexShrink: 0 }} />
+          <WarningAmberRoundedIcon sx={{ color: 'warning.main', mt: 0.25, flexShrink: 0 }} />
           <Box>
             <Typography variant="subtitle2" fontWeight={700} color="warning.dark">
               Action Requires Confirmation
@@ -153,7 +146,11 @@ function ConfirmationCard({ message, onConfirm, onDecline, loading }) {
           disabled={loading}
           onClick={onConfirm}
           startIcon={
-            loading ? <CircularProgress size={14} color="inherit" /> : <CheckCircleOutlineIcon />
+            loading ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : (
+              <CheckCircleOutlineRoundedIcon />
+            )
           }
         >
           {loading ? 'Processing…' : 'Confirm'}
@@ -427,7 +424,7 @@ export default function AiCopilotChat() {
             AI Copilot
           </Typography>
           <Chip
-            label="Phase 7E"
+            label="Agentic"
             size="small"
             color="primary"
             variant="outlined"
@@ -548,12 +545,43 @@ export default function AiCopilotChat() {
             >
               <SmartToyRoundedIcon sx={{ fontSize: 16 }} />
             </Box>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <CircularProgress size={14} />
-              <Typography variant="caption" color="text.secondary">
-                {loadingStatus || 'AI Copilot is working…'}
-              </Typography>
-            </Stack>
+            <Paper
+              elevation={0}
+              sx={{
+                px: 1.5,
+                py: 0.875,
+                bgcolor: 'action.hover',
+                borderRadius: 2,
+                borderTopLeftRadius: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              {[0, 1, 2].map((i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: 'text.disabled',
+                    animation: 'typingDot 1.2s ease-in-out infinite',
+                    animationDelay: `${i * 0.18}s`,
+                    '@keyframes typingDot': {
+                      '0%, 80%, 100%': { transform: 'scale(1)', opacity: 0.4 },
+                      '40%': { transform: 'scale(1.3)', opacity: 1 },
+                    },
+                    '@media (prefers-reduced-motion: reduce)': { animation: 'none', opacity: 0.6 },
+                  }}
+                />
+              ))}
+              {loadingStatus && (
+                <Typography variant="caption" color="text.disabled" sx={{ ml: 0.5 }}>
+                  {loadingStatus}
+                </Typography>
+              )}
+            </Paper>
           </Box>
         )}
 

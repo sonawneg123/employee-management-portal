@@ -172,7 +172,7 @@ export default function LeaveDetailsPage() {
                 aria-label="Approve"
                 sx={{ borderRadius: '8px', fontWeight: 600 }}
               >
-                Approve ✅
+                Approve
               </Button>
             )}
             {canApprove && isPending && (

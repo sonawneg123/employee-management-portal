@@ -198,8 +198,16 @@ function AttendanceDialog({ open, mode, defaultValues, isSubmitting, onSubmit, o
       fullWidth
       PaperProps={{ sx: { borderRadius: '16px' } }}
     >
-      <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-        {mode === 'create' ? '📋 Mark Attendance' : '✏️ Edit Attendance'}
+      <DialogTitle sx={{ fontWeight: 700, pb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+        {mode === 'create' ? (
+          <>
+            <EventNoteRoundedIcon sx={{ fontSize: 20, color: 'primary.main' }} /> Mark Attendance
+          </>
+        ) : (
+          <>
+            <EditRoundedIcon sx={{ fontSize: 20, color: 'primary.main' }} /> Edit Attendance
+          </>
+        )}
       </DialogTitle>
       <DialogContent
         sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '16px !important' }}
@@ -799,9 +807,19 @@ export default function AttendancePage() {
                         gap: 1.5,
                       }}
                     >
-                      <Typography fontSize="2.5rem" role="img" aria-label="clock">
-                        ⏰
-                      </Typography>
+                      <Box
+                        sx={{
+                          width: 52,
+                          height: 52,
+                          borderRadius: '14px',
+                          bgcolor: 'action.hover',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <AccessTimeRoundedIcon sx={{ fontSize: 26, color: 'text.disabled' }} />
+                      </Box>
                       <Typography variant="h6" fontWeight={700} color="text.secondary">
                         No attendance records
                       </Typography>

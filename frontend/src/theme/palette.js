@@ -1,30 +1,29 @@
 /**
  * @fileoverview Material UI palette definitions for light and dark modes.
  *
- * Brand identity: Indigo/Navy (#243B7A, #4F46E5) as primary.
- * Dashboard background: soft lavender (#F1F2FF) in light mode.
- * Status colours follow semantic conventions: emerald = success,
- * amber = warning, red = error.
+ * Brand identity: Deep navy (#1A2342) as primary, warm cream background,
+ * gold/amber accent (#F5C518) for CTAs and highlights.
+ * Premium SaaS HR product colour system.
  */
 
 /**
- * Light-mode palette.
+ * Light-mode palette — warm cream, deep navy, gold accent.
  *
  * @type {import('@mui/material').ThemeOptions['palette']}
  */
 export const lightPalette = {
   mode: 'light',
   primary: {
-    main: '#4F46E5',
-    light: '#818CF8',
-    dark: '#243B7A',
+    main: '#1A2342',
+    light: '#2D3A6B',
+    dark: '#0F1628',
     contrastText: '#ffffff',
   },
   secondary: {
-    main: '#7C3AED',
-    light: '#A78BFA',
-    dark: '#5B21B6',
-    contrastText: '#ffffff',
+    main: '#F5C518',
+    light: '#FFD966',
+    dark: '#C49A00',
+    contrastText: '#1A2342',
   },
   error: {
     main: '#EF4444',
@@ -47,35 +46,35 @@ export const lightPalette = {
     dark: '#059669',
   },
   background: {
-    default: '#F1F2FF',
+    default: '#F5F0E8',
     paper: '#FFFFFF',
   },
   text: {
-    primary: '#111827',
+    primary: '#1A2342',
     secondary: '#6B7280',
     disabled: '#9CA3AF',
   },
-  divider: '#E5E7EB',
+  divider: '#E8E3D8',
 };
 
 /**
- * Dark-mode palette.
+ * Dark-mode palette — deep navy tones, cream accent, gold highlights.
  *
  * @type {import('@mui/material').ThemeOptions['palette']}
  */
 export const darkPalette = {
   mode: 'dark',
   primary: {
-    main: '#818CF8',
-    light: '#A5B4FC',
-    dark: '#4F46E5',
-    contrastText: '#ffffff',
+    main: '#8B9FD4',
+    light: '#B0C0E8',
+    dark: '#4F6AB5',
+    contrastText: '#0F1628',
   },
   secondary: {
-    main: '#A78BFA',
-    light: '#C4B5FD',
-    dark: '#7C3AED',
-    contrastText: '#ffffff',
+    main: '#F5C518',
+    light: '#FFD966',
+    dark: '#C49A00',
+    contrastText: '#1A2342',
   },
   error: {
     main: '#F87171',
@@ -98,13 +97,13 @@ export const darkPalette = {
     dark: '#10B981',
   },
   background: {
-    default: '#0A0F1E',
-    paper: '#111827',
+    default: '#0C1220',
+    paper: '#131C2E',
   },
   text: {
-    primary: '#F1F5F9',
+    primary: '#F0EDE6',
     secondary: '#94A3B8',
     disabled: '#475569',
   },
-  divider: 'rgba(241,245,249,0.08)',
+  divider: 'rgba(240,237,230,0.08)',
 };

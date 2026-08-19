@@ -124,7 +124,7 @@ export default function MyLeavesPage() {
           </Box>
           <Box>
             <Typography variant="h2" fontWeight={800} sx={{ letterSpacing: '-0.02em' }}>
-              My Leaves 🌴
+              My Leaves
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Your leave requests and balance

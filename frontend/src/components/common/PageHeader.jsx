@@ -1,12 +1,13 @@
 /**
- * @fileoverview PageHeader — reusable modern page heading component.
+ * @fileoverview PageHeader — reusable premium page heading component.
  *
  * Renders a consistent page title, subtitle, and optional action slot
  * used across all main content pages in PeopleCore HR.
+ * Premium SaaS design — navy + gold accent.
  */
 
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 
 /**
  * Standardised page header block.
@@ -16,10 +17,14 @@ import { Box, Typography } from '@mui/material';
  *   subtitle?: string,
  *   action?:   React.ReactNode,
  *   icon?:     React.ReactNode,
+ *   emoji?:    string,
  * }} props
  * @returns {JSX.Element}
  */
 export default function PageHeader({ title, subtitle, action, icon, emoji }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Box
       sx={{
@@ -35,16 +40,16 @@ export default function PageHeader({ title, subtitle, action, icon, emoji }) {
         {icon && (
           <Box
             sx={{
-              width: 44,
-              height: 44,
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, rgba(79,70,229,0.12), rgba(124,58,237,0.08))',
-              border: '1px solid rgba(79,70,229,0.15)',
+              width: 46,
+              height: 46,
+              borderRadius: '14px',
+              background: isDark ? 'rgba(245,197,24,0.12)' : 'rgba(26,35,66,0.06)',
+              border: `1px solid ${isDark ? 'rgba(245,197,24,0.2)' : 'rgba(26,35,66,0.1)'}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              color: 'primary.main',
+              color: isDark ? '#F5C518' : '#1A2342',
             }}
             aria-hidden="true"
           >
@@ -60,6 +65,7 @@ export default function PageHeader({ title, subtitle, action, icon, emoji }) {
               mb: subtitle ? 0.25 : 0,
               lineHeight: 1.2,
               fontSize: { xs: '1.5rem', sm: '1.75rem' },
+              color: isDark ? '#F0EDE6' : '#1A2342',
             }}
           >
             {emoji && (
@@ -70,7 +76,10 @@ export default function PageHeader({ title, subtitle, action, icon, emoji }) {
             {title}
           </Typography>
           {subtitle && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{ color: isDark ? 'rgba(240,237,230,0.5)' : '#9CA3AF' }}
+            >
               {subtitle}
             </Typography>
           )}

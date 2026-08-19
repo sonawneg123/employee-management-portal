@@ -13,10 +13,10 @@ import React, { useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Box, Button, Grid } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import PeopleIcon from '@mui/icons-material/People';
-import ApartmentIcon from '@mui/icons-material/Apartment';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import EventNoteRoundedIcon from '@mui/icons-material/EventNoteRounded';
+import PeopleRoundedIcon from '@mui/icons-material/PeopleRounded';
+import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
 
 import { useDashboardSummary, useRefreshAllDashboard } from '@/hooks/useDashboard';
 import { ROUTES } from '@/constants/routes';
@@ -74,7 +74,7 @@ export default function HRDashboardPage() {
               <Button
                 color="inherit"
                 size="small"
-                startIcon={<RefreshIcon />}
+                startIcon={<RefreshRoundedIcon />}
                 onClick={refreshSummary}
               >
                 Retry
@@ -111,7 +111,7 @@ export default function HRDashboardPage() {
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 3 }}>
           <Button
             variant="contained"
-            startIcon={<PeopleIcon />}
+            startIcon={<PeopleRoundedIcon />}
             onClick={() => navigate(ROUTES.HR_EMPLOYEES)}
             size="small"
             sx={{
@@ -123,7 +123,7 @@ export default function HRDashboardPage() {
           </Button>
           <Button
             variant="outlined"
-            startIcon={<ApartmentIcon />}
+            startIcon={<ApartmentRoundedIcon />}
             onClick={() => navigate(ROUTES.HR_DEPARTMENTS)}
             size="small"
           >
@@ -132,7 +132,7 @@ export default function HRDashboardPage() {
           <Button
             variant="contained"
             color="warning"
-            startIcon={<EventNoteIcon />}
+            startIcon={<EventNoteRoundedIcon />}
             onClick={() => navigate(ROUTES.HR_LEAVES)}
             size="small"
           >

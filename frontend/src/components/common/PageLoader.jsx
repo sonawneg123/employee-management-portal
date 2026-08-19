@@ -4,6 +4,7 @@
  * Used as the Suspense fallback while a lazy route chunk is being downloaded.
  * Unlike {@link LoadingScreen}, this is positioned within the content area
  * rather than as a fixed overlay.
+ * Premium SaaS design with gold spinner.
  */
 
 import React from 'react';
@@ -25,7 +26,28 @@ export default function PageLoader() {
         width: '100%',
       }}
     >
-      <CircularProgress size={40} thickness={4} />
+      <Box sx={{ position: 'relative' }}>
+        <CircularProgress
+          size={40}
+          thickness={3}
+          sx={{
+            color: 'rgba(26,35,66,0.1)',
+            '& .MuiCircularProgress-circle': { strokeLinecap: 'round' },
+          }}
+          variant="determinate"
+          value={100}
+        />
+        <CircularProgress
+          size={40}
+          thickness={3}
+          sx={{
+            color: '#F5C518',
+            position: 'absolute',
+            left: 0,
+            '& .MuiCircularProgress-circle': { strokeLinecap: 'round' },
+          }}
+        />
+      </Box>
     </Box>
   );
 }

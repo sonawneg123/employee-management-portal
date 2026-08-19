@@ -26,6 +26,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
@@ -82,8 +83,15 @@ export default function SubmissionReview({
   return (
     <Card variant="outlined" sx={{ mb: 3, borderColor: 'warning.main', borderWidth: 2 }}>
       <CardContent>
-        <Typography variant="subtitle1" fontWeight={700} gutterBottom color="warning.dark">
-          📋 Submission Awaiting Review
+        <Typography
+          variant="subtitle1"
+          fontWeight={700}
+          gutterBottom
+          color="warning.dark"
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}
+        >
+          <AssignmentRoundedIcon sx={{ fontSize: 18 }} />
+          Submission Awaiting Review
         </Typography>
 
         <Divider sx={{ mb: 2 }} />
@@ -171,7 +179,7 @@ export default function SubmissionReview({
               <AttachFileRoundedIcon color="info" />
               <Box sx={{ flex: 1, minWidth: 0 }}>
                 <Typography variant="body2" fontWeight={600} noWrap>
-                  📎 {submission.attachmentOriginalName || 'attachment'}
+                  {submission.attachmentOriginalName || 'attachment'}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {submission.attachmentMimeType && (

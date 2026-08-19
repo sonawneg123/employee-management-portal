@@ -108,7 +108,7 @@ export default function DashboardHeader({ lastUpdated, isFetching, onRefresh }) 
                 '0%': { transform: 'rotate(0deg)' },
                 '100%': { transform: 'rotate(360deg)' },
               },
-              '&:hover': { bgcolor: 'rgba(79,70,229,0.08)', color: 'primary.main' },
+              '&:hover': { bgcolor: 'rgba(26,35,66,0.07)', color: 'primary.main' },
             }}
           >
             <RefreshRoundedIcon sx={{ fontSize: 18 }} />

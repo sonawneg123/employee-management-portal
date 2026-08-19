@@ -41,7 +41,7 @@ export default function LoginPage({ targetRole }) {
       </Helmet>
 
       <AuthLayout
-        title="Welcome back 👋"
+        title="Welcome back"
         subtitle="Sign in to manage your workforce, track attendance, and review performance all in one place."
       >
         <AuthCard title={pageTitle} description={cardDescription}>

@@ -46,10 +46,17 @@ export default function StatisticsCards() {
 
   return (
     <Grid container spacing={3} sx={{ mb: 3 }}>
-      {stats.map(({ key, value, trend, trendLabel }) => {
+      {stats.map(({ key, value, trend, trendLabel }, index) => {
         const meta = STAT_CARD_META[key];
         return (
-          <Grid key={key} size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Grid
+            key={key}
+            size={{ xs: 12, sm: 6, lg: 3 }}
+            sx={{
+              animation: `fadeUp 0.28s ease-out ${0.06 + index * 0.05}s both`,
+              '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+            }}
+          >
             <SummaryCard
               label={meta.label}
               value={value}

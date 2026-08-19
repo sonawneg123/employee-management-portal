@@ -133,14 +133,14 @@ export function downloadCsv(csvContent, filename = 'employees.csv') {
  */
 export function avatarColorFromName(name) {
   const COLORS = [
-    '#1976d2',
-    '#7c3aed',
-    '#2e7d32',
-    '#ed6c02',
-    '#0288d1',
-    '#c62828',
-    '#00796b',
-    '#f57f17',
+    '#1A2342',
+    '#2D3A6B',
+    '#10B981',
+    '#C49A00',
+    '#3B82F6',
+    '#EF4444',
+    '#059669',
+    '#4F6AB5',
   ];
   if (!name) return COLORS[0];
   const code = name.charCodeAt(0) % COLORS.length;

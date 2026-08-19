@@ -1,9 +1,10 @@
 /**
- * @fileoverview WelcomeCard — personalised greeting banner.
+ * @fileoverview WelcomeCard — premium personalised greeting banner.
  *
+ * Deep navy background with gold accents, atmospheric design.
  * Greets the authenticated user by first name with a time-appropriate salutation,
  * displays today's date, and shows a role badge.
- * Uses a rich indigo/navy gradient banner design.
+ * Premium SaaS HR product aesthetic.
  */
 
 import React, { useMemo } from 'react';
@@ -15,7 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { ROLES } from '@/constants/roles';
 
 /**
- * @returns {{ greeting: string, icon: React.ElementType }}
+ * @returns {{ greeting: string, Icon: React.ElementType }}
  */
 function getGreetingInfo() {
   const h = new Date().getHours();
@@ -32,41 +33,41 @@ function getRoleMeta(roles) {
   if (!roles?.length)
     return {
       label: 'User',
-      bg: 'rgba(255,255,255,0.15)',
+      bg: 'rgba(255,255,255,0.12)',
       color: '#fff',
-      border: 'rgba(255,255,255,0.3)',
+      border: 'rgba(255,255,255,0.25)',
     };
   if (roles.includes(ROLES.ADMIN))
     return {
       label: 'Administrator',
       bg: 'rgba(239,68,68,0.2)',
       color: '#FECACA',
-      border: 'rgba(239,68,68,0.4)',
+      border: 'rgba(239,68,68,0.35)',
     };
   if (roles.includes(ROLES.HR))
     return {
       label: 'HR Manager',
-      bg: 'rgba(255,255,255,0.18)',
-      color: '#fff',
-      border: 'rgba(255,255,255,0.35)',
+      bg: 'rgba(245,197,24,0.18)',
+      color: '#F5C518',
+      border: 'rgba(245,197,24,0.35)',
     };
   if (roles.includes(ROLES.MANAGER))
     return {
       label: 'Manager',
-      bg: 'rgba(16,185,129,0.2)',
-      color: '#A7F3D0',
-      border: 'rgba(16,185,129,0.4)',
+      bg: 'rgba(16,185,129,0.18)',
+      color: '#6EE7B7',
+      border: 'rgba(16,185,129,0.35)',
     };
   return {
     label: 'Employee',
-    bg: 'rgba(245,158,11,0.2)',
-    color: '#FDE68A',
-    border: 'rgba(245,158,11,0.4)',
+    bg: 'rgba(255,255,255,0.12)',
+    color: 'rgba(255,255,255,0.9)',
+    border: 'rgba(255,255,255,0.25)',
   };
 }
 
 /**
- * Dashboard welcome banner with gradient background.
+ * Dashboard welcome banner — deep navy with gold accents.
  *
  * @returns {JSX.Element}
  */
@@ -86,11 +87,8 @@ export default function WelcomeCard() {
     <Box
       sx={{
         mb: 3,
-        borderRadius: '20px',
-        background: (theme) =>
-          theme.palette.mode === 'dark'
-            ? 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%)'
-            : 'linear-gradient(135deg, #243B7A 0%, #4F46E5 60%, #7C3AED 100%)',
+        borderRadius: '24px',
+        background: 'linear-gradient(135deg, #0F1628 0%, #1A2342 50%, #2D3A6B 100%)',
         p: { xs: 3, sm: 3.5 },
         display: 'flex',
         alignItems: 'center',
@@ -99,31 +97,30 @@ export default function WelcomeCard() {
         gap: 2,
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: (theme) =>
-          theme.palette.mode === 'dark'
-            ? '0 8px 32px rgba(79,70,229,0.3)'
-            : '0 8px 32px rgba(36,59,122,0.25)',
-        // Decorative circles
+        boxShadow: '0 8px 40px rgba(26,35,66,0.35)',
+        animation: 'fadeUp 0.28s ease-out both',
+        '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+        // Atmospheric glow
         '&::before': {
           content: '""',
           position: 'absolute',
-          top: -40,
-          right: -40,
-          width: 160,
-          height: 160,
+          top: -60,
+          right: -60,
+          width: 200,
+          height: 200,
           borderRadius: '50%',
-          background: 'rgba(255,255,255,0.06)',
+          background: 'radial-gradient(circle, rgba(245,197,24,0.12) 0%, transparent 70%)',
           pointerEvents: 'none',
         },
         '&::after': {
           content: '""',
           position: 'absolute',
-          bottom: -60,
-          right: 80,
-          width: 220,
-          height: 220,
+          bottom: -80,
+          left: 40,
+          width: 260,
+          height: 260,
           borderRadius: '50%',
-          background: 'rgba(255,255,255,0.04)',
+          background: 'radial-gradient(circle, rgba(79,106,181,0.15) 0%, transparent 70%)',
           pointerEvents: 'none',
         },
       }}
@@ -133,10 +130,11 @@ export default function WelcomeCard() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.75 }}>
           <Box
             sx={{
-              width: 36,
-              height: 36,
-              borderRadius: '10px',
-              bgcolor: 'rgba(255,255,255,0.15)',
+              width: 40,
+              height: 40,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, rgba(245,197,24,0.25), rgba(245,197,24,0.1))',
+              border: '1px solid rgba(245,197,24,0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -144,7 +142,7 @@ export default function WelcomeCard() {
             }}
             aria-hidden="true"
           >
-            <Icon sx={{ color: '#FCD34D', fontSize: 20 }} />
+            <Icon sx={{ color: '#F5C518', fontSize: 20 }} />
           </Box>
           <Typography
             variant="h4"
@@ -159,7 +157,7 @@ export default function WelcomeCard() {
             {greeting}, {user?.firstName ?? 'there'}!
           </Typography>
         </Box>
-        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)', pl: 0.25 }}>
+        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.55)', pl: 0.5 }}>
           {today}
         </Typography>
       </Box>
@@ -176,7 +174,8 @@ export default function WelcomeCard() {
           border: `1px solid ${roleMeta.border}`,
           position: 'relative',
           zIndex: 1,
-          backdropFilter: 'blur(4px)',
+          backdropFilter: 'blur(8px)',
+          letterSpacing: '0.02em',
         }}
         aria-label={`Your role: ${roleMeta.label}`}
       />

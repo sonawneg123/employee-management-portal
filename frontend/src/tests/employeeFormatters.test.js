@@ -127,7 +127,7 @@ describe('avatarColorFromName', () => {
   });
 
   it('returns a default colour for null/undefined', () => {
-    expect(avatarColorFromName(null)).toBe('#1976d2');
+    expect(avatarColorFromName(null)).toBe('#1A2342');
   });
 });
 

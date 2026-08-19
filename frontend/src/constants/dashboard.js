@@ -48,14 +48,14 @@ export const DASHBOARD_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
  * @type {string[]}
  */
 export const CHART_COLORS = [
-  '#4F46E5',
-  '#7C3AED',
+  '#1A2342',
+  '#F5C518',
   '#10B981',
-  '#F59E0B',
   '#3B82F6',
   '#EF4444',
+  '#2D3A6B',
   '#06B6D4',
-  '#8B5CF6',
+  '#4F6AB5',
 ];
 
 /**
@@ -122,14 +122,14 @@ export const ACTIVITY_TYPE_META = {
 export const STAT_CARD_META = {
   totalEmployees: {
     label: 'Total Employees',
-    color: 'rgba(79,70,229,0.1)',
-    iconColor: '#4F46E5',
+    color: 'rgba(26,35,66,0.1)',
+    iconColor: '#1A2342',
     Icon: PeopleIcon,
   },
   totalDepartments: {
     label: 'Departments',
-    color: 'rgba(124,58,237,0.1)',
-    iconColor: '#7C3AED',
+    color: 'rgba(245,197,24,0.12)',
+    iconColor: '#C49A00',
     Icon: ApartmentIcon,
   },
   pendingLeaves: {

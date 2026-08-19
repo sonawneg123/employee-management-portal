@@ -15,6 +15,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Paper,
+  Stack,
   Typography,
   TextField,
   IconButton,
@@ -22,7 +23,6 @@ import {
   Alert,
   Tooltip,
   Divider,
-  Stack,
   Chip,
 } from '@mui/material';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -371,12 +371,55 @@ export default function AiAssistantChat() {
             >
               <SmartToyRoundedIcon sx={{ fontSize: 16 }} />
             </Box>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <CircularProgress size={14} />
-              <Typography variant="caption" color="text.secondary">
+            <Paper
+              elevation={0}
+              aria-label="AI Assistant is thinking…"
+              role="status"
+              sx={{
+                px: 1.5,
+                py: 0.875,
+                bgcolor: 'action.hover',
+                borderRadius: 2,
+                borderTopLeftRadius: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+              }}
+            >
+              {/* Visually hidden but accessible label */}
+              <Typography
+                variant="srOnly"
+                sx={{
+                  position: 'absolute',
+                  width: 1,
+                  height: 1,
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  clip: 'rect(0,0,0,0)',
+                }}
+              >
                 AI Assistant is thinking…
               </Typography>
-            </Stack>
+              {[0, 1, 2].map((i) => (
+                <Box
+                  key={i}
+                  aria-hidden="true"
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: 'text.disabled',
+                    animation: 'typingDot 1.2s ease-in-out infinite',
+                    animationDelay: `${i * 0.18}s`,
+                    '@keyframes typingDot': {
+                      '0%, 80%, 100%': { transform: 'scale(1)', opacity: 0.4 },
+                      '40%': { transform: 'scale(1.3)', opacity: 1 },
+                    },
+                    '@media (prefers-reduced-motion: reduce)': { animation: 'none', opacity: 0.6 },
+                  }}
+                />
+              ))}
+            </Paper>
           </Box>
         )}
 

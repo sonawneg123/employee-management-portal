@@ -28,8 +28,8 @@ import {
   Skeleton,
   Typography,
 } from '@mui/material';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import EventNoteRoundedIcon from '@mui/icons-material/EventNoteRounded';
+import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
 import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
 import CalendarTodayRoundedIcon from '@mui/icons-material/CalendarTodayRounded';
@@ -180,7 +180,7 @@ function EmployeeQuickActions({ onApplyLeave, onViewAttendance, onViewTasks, onV
   const actions = [
     {
       label: 'Apply for Leave',
-      icon: <EventNoteIcon sx={{ fontSize: 18 }} />,
+      icon: <EventNoteRoundedIcon sx={{ fontSize: 18 }} />,
       onClick: onApplyLeave,
       variant: 'contained',
       sx: {
@@ -191,7 +191,7 @@ function EmployeeQuickActions({ onApplyLeave, onViewAttendance, onViewTasks, onV
     },
     {
       label: 'My Attendance',
-      icon: <AccessTimeIcon sx={{ fontSize: 18 }} />,
+      icon: <AccessTimeRoundedIcon sx={{ fontSize: 18 }} />,
       onClick: onViewAttendance,
       variant: 'outlined',
       sx: {},

@@ -1,5 +1,8 @@
 /**
- * @fileoverview Topbar — modern fixed application bar for PeopleCore HR.
+ * @fileoverview Topbar — premium fixed application bar for PeopleCore HR.
+ *
+ * Warm cream / white background with deep navy text and gold accents.
+ * Premium SaaS style — clean and spacious.
  *
  * Features:
  * - Mobile hamburger toggle
@@ -7,9 +10,7 @@
  * - Notification bell
  * - Dark/light mode toggle
  * - User avatar with name + role
- * - Dropdown menu (profile, logout)
- *
- * Phase 6G: Avatar shows profile photo and auto-updates via AuthContext.
+ * - Dropdown menu (profile, settings, logout)
  */
 
 import React, { useState } from 'react';
@@ -36,6 +37,7 @@ import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeMode } from '@/theme/ThemeContext';
@@ -64,14 +66,18 @@ function getRoleChipColor(roles) {
   if (roles.includes(ROLES.ADMIN))
     return { bg: 'rgba(239,68,68,0.08)', color: '#DC2626', border: 'rgba(239,68,68,0.2)' };
   if (roles.includes(ROLES.HR))
-    return { bg: 'rgba(79,70,229,0.08)', color: '#4F46E5', border: 'rgba(79,70,229,0.2)' };
+    return {
+      bg: 'rgba(26,35,66,0.08)',
+      color: '#1A2342',
+      border: 'rgba(26,35,66,0.2)',
+    };
   if (roles.includes(ROLES.MANAGER))
     return { bg: 'rgba(16,185,129,0.08)', color: '#059669', border: 'rgba(16,185,129,0.2)' };
-  return { bg: 'rgba(245,158,11,0.08)', color: '#D97706', border: 'rgba(245,158,11,0.2)' };
+  return { bg: 'rgba(245,197,24,0.12)', color: '#92700A', border: 'rgba(245,197,24,0.3)' };
 }
 
 /**
- * Modern top application bar.
+ * Modern top application bar — premium SaaS style.
  *
  * @param {{
  *   onMenuClick:      () => void,
@@ -116,8 +122,30 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
   const roleLabel = getRoleChipLabel(user?.roles);
   const roleChipColor = getRoleChipColor(user?.roles);
 
-  const topbarBg = isDark ? '#111827' : '#FFFFFF';
-  const topbarBorder = isDark ? 'rgba(241,245,249,0.08)' : '#E5E7EB';
+  // Premium SaaS topbar: warm white / cream background
+  const topbarBg = isDark ? '#0C1220' : '#FFFFFF';
+  const topbarBorder = isDark ? 'rgba(240,237,230,0.07)' : '#EBE6DA';
+  const iconBtnSx = {
+    color: isDark ? 'rgba(240,237,230,0.6)' : '#6B7280',
+    bgcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(26,35,66,0.04)',
+    borderRadius: '10px',
+    width: 36,
+    height: 36,
+    '&:hover': {
+      bgcolor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(26,35,66,0.08)',
+      color: isDark ? '#F0EDE6' : '#1A2342',
+      transform: 'scale(1.05)',
+    },
+    '&:active': {
+      transform: 'scale(0.95)',
+    },
+    transition: 'all 0.15s ease',
+    '@media (prefers-reduced-motion: reduce)': {
+      transition: 'none',
+      '&:hover': { transform: 'none' },
+      '&:active': { transform: 'none' },
+    },
+  };
 
   return (
     <AppBar
@@ -129,8 +157,10 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
         bgcolor: topbarBg,
         borderBottom: `1px solid ${topbarBorder}`,
         color: 'text.primary',
-        backdropFilter: 'blur(8px)',
-        transition: 'margin-left 0.25s ease, width 0.25s ease',
+        backdropFilter: 'blur(12px)',
+        transition:
+          'margin-left 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1)',
+        boxShadow: isDark ? '0 1px 0 rgba(240,237,230,0.07)' : '0 1px 0 rgba(235,230,218,0.8)',
       }}
     >
       <Toolbar
@@ -147,11 +177,7 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
           sx={{
             display: { md: 'none' },
             mr: 0.5,
-            color: 'text.secondary',
-            bgcolor: 'action.hover',
-            borderRadius: '8px',
-            width: 36,
-            height: 36,
+            ...iconBtnSx,
           }}
           aria-label="Toggle navigation"
         >
@@ -166,19 +192,19 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
                 width: 28,
                 height: 28,
                 borderRadius: '8px',
-                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                background: 'linear-gradient(135deg, #F5C518, #C49A00)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
               aria-hidden="true"
             >
-              <PersonRoundedIcon sx={{ color: '#fff', fontSize: 15 }} />
+              <PeopleAltIcon sx={{ color: '#1A2342', fontSize: 15 }} />
             </Box>
             <Typography
               variant="body2"
               fontWeight={800}
-              sx={{ color: isDark ? '#F1F5F9' : '#111827', letterSpacing: '-0.02em' }}
+              sx={{ color: isDark ? '#F0EDE6' : '#1A2342', letterSpacing: '-0.02em' }}
             >
               PeopleCore HR
             </Typography>
@@ -198,14 +224,7 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
             <IconButton
               onClick={toggleMode}
               size="small"
-              sx={{
-                color: 'text.secondary',
-                bgcolor: 'action.hover',
-                borderRadius: '8px',
-                width: 36,
-                height: 36,
-                '&:hover': { bgcolor: 'action.selected', color: 'primary.main' },
-              }}
+              sx={iconBtnSx}
               aria-label="Toggle colour mode"
             >
               {mode === 'dark' ? (
@@ -225,20 +244,28 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
               gap: 1,
               ml: 0.25,
               cursor: 'pointer',
-              borderRadius: '10px',
+              borderRadius: '12px',
               px: 1.25,
               py: 0.75,
               border: '1.5px solid',
               borderColor: menuOpen
-                ? 'primary.main'
+                ? isDark
+                  ? '#4F6AB5'
+                  : '#1A2342'
                 : isDark
-                  ? 'rgba(241,245,249,0.12)'
-                  : '#E5E7EB',
-              bgcolor: isDark ? 'rgba(255,255,255,0.04)' : '#F9FAFB',
+                  ? 'rgba(240,237,230,0.1)'
+                  : '#E8E3D8',
+              bgcolor: isDark
+                ? menuOpen
+                  ? 'rgba(26,35,66,0.4)'
+                  : 'rgba(255,255,255,0.04)'
+                : menuOpen
+                  ? 'rgba(26,35,66,0.04)'
+                  : '#FAF7F0',
               transition: 'all 0.15s ease',
               '&:hover': {
-                borderColor: 'primary.main',
-                bgcolor: isDark ? 'rgba(79,70,229,0.1)' : '#EEF2FF',
+                borderColor: isDark ? '#4F6AB5' : '#1A2342',
+                bgcolor: isDark ? 'rgba(26,35,66,0.3)' : 'rgba(26,35,66,0.04)',
               },
             }}
             role="button"
@@ -251,10 +278,11 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
               sx={{
                 width: 30,
                 height: 30,
-                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                background: 'linear-gradient(135deg, #1A2342, #2D3A6B)',
                 fontSize: '0.7rem',
                 fontWeight: 700,
                 flexShrink: 0,
+                border: '1.5px solid rgba(245,197,24,0.35)',
               }}
             >
               {!profilePhotoUrl && initials}
@@ -265,7 +293,12 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
                   variant="caption"
                   fontWeight={700}
                   noWrap
-                  sx={{ display: 'block', lineHeight: 1.2, color: isDark ? '#F1F5F9' : '#111827' }}
+                  sx={{
+                    display: 'block',
+                    lineHeight: 1.2,
+                    color: isDark ? '#F0EDE6' : '#1A2342',
+                    fontSize: '0.8rem',
+                  }}
                 >
                   {user?.firstName} {user?.lastName}
                 </Typography>
@@ -300,7 +333,12 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           PaperProps={{
             elevation: 2,
-            sx: { minWidth: 240, mt: 1.5, overflow: 'visible' },
+            sx: {
+              minWidth: 240,
+              mt: 1.5,
+              overflow: 'visible',
+              bgcolor: isDark ? '#131C2E' : '#FFFFFF',
+            },
           }}
         >
           {user && (
@@ -311,16 +349,22 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
                   sx={{
                     width: 42,
                     height: 42,
-                    background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                    background: 'linear-gradient(135deg, #1A2342, #2D3A6B)',
                     fontSize: '0.9rem',
                     fontWeight: 700,
                     flexShrink: 0,
+                    border: '2px solid rgba(245,197,24,0.3)',
                   }}
                 >
                   {!profilePhotoUrl && initials}
                 </Avatar>
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography variant="body2" fontWeight={700} noWrap>
+                  <Typography
+                    variant="body2"
+                    fontWeight={700}
+                    noWrap
+                    sx={{ color: isDark ? '#F0EDE6' : '#1A2342' }}
+                  >
                     {user.firstName} {user.lastName}
                   </Typography>
                   <Typography
@@ -349,9 +393,9 @@ export default function Topbar({ onMenuClick, sidebarWidth }) {
             </Box>
           )}
 
-          <Divider sx={{ my: 0.5 }} />
+          <Divider />
 
-          <MenuItem onClick={handleProfileClick} sx={{ gap: 1.5 }}>
+          <MenuItem onClick={handleProfileClick} sx={{ gap: 1.5, mt: 0.5 }}>
             <PersonRoundedIcon fontSize="small" sx={{ color: 'text.secondary' }} />
             <Typography variant="body2" fontWeight={500}>
               My Profile

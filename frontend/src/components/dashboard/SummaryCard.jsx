@@ -3,20 +3,21 @@
  *
  * Displays a single numeric metric with icon, trend delta, and subtle hover animation.
  * Uses a colored icon container and clean typography hierarchy.
+ * Premium SaaS design — navy, cream, gold accent.
  */
 
 import React from 'react';
-import { Box, Card, CardContent, Skeleton, Typography } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
+import { Box, Card, CardContent, Skeleton, Typography, useTheme } from '@mui/material';
+import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
+import TrendingDownRoundedIcon from '@mui/icons-material/TrendingDownRounded';
+import TrendingFlatRoundedIcon from '@mui/icons-material/TrendingFlatRounded';
 import { formatCompactNumber, formatTrend, trendColor } from '@/utils/dashboardFormatters';
 
 /** @param {{ change: number }} props */
 function TrendIcon({ change }) {
-  if (change > 0) return <TrendingUpIcon sx={{ fontSize: 12 }} />;
-  if (change < 0) return <TrendingDownIcon sx={{ fontSize: 12 }} />;
-  return <TrendingFlatIcon sx={{ fontSize: 12 }} />;
+  if (change > 0) return <TrendingUpRoundedIcon sx={{ fontSize: 11 }} />;
+  if (change < 0) return <TrendingDownRoundedIcon sx={{ fontSize: 11 }} />;
+  return <TrendingFlatRoundedIcon sx={{ fontSize: 11 }} />;
 }
 
 /**
@@ -32,7 +33,7 @@ function TrendIcon({ change }) {
  */
 
 /**
- * Single KPI stat card.
+ * Single KPI stat card — premium SaaS style.
  *
  * @param {SummaryCardProps} props
  * @returns {JSX.Element}
@@ -47,6 +48,9 @@ export default function SummaryCard({
   trendLabel = 'this month',
   loading = false,
 }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   if (loading) {
     return (
       <Card sx={{ height: '100%' }}>
@@ -59,11 +63,11 @@ export default function SummaryCard({
               mb: 2.5,
             }}
           >
-            <Skeleton variant="rounded" width={52} height={52} sx={{ borderRadius: '14px' }} />
-            <Skeleton variant="rounded" width={54} height={22} sx={{ borderRadius: '6px' }} />
+            <Skeleton variant="rounded" width={52} height={52} sx={{ borderRadius: '16px' }} />
+            <Skeleton variant="rounded" width={54} height={22} sx={{ borderRadius: '8px' }} />
           </Box>
-          <Skeleton variant="text" width="50%" height={44} sx={{ mb: 0.5 }} />
-          <Skeleton variant="text" width="70%" height={20} />
+          <Skeleton variant="text" width="45%" height={48} sx={{ mb: 0.5 }} />
+          <Skeleton variant="text" width="65%" height={20} />
         </CardContent>
       </Card>
     );
@@ -77,11 +81,12 @@ export default function SummaryCard({
         height: '100%',
         transition: 'box-shadow 0.2s ease, transform 0.2s ease',
         '&:hover': {
-          boxShadow: (theme) =>
-            theme.palette.mode === 'dark'
-              ? '0 12px 40px rgba(0,0,0,0.5)'
-              : '0 12px 40px rgba(0,0,0,0.1)',
+          boxShadow: isDark ? '0 16px 48px rgba(0,0,0,0.55)' : '0 12px 44px rgba(26,35,66,0.12)',
           transform: 'translateY(-3px)',
+        },
+        '@media (prefers-reduced-motion: reduce)': {
+          transition: 'none',
+          '&:hover': { transform: 'none' },
         },
       }}
     >
@@ -95,16 +100,18 @@ export default function SummaryCard({
             mb: 2.5,
           }}
         >
+          {/* Icon container — rounded square */}
           <Box
             sx={{
               width: 52,
               height: 52,
-              borderRadius: '14px',
+              borderRadius: '16px',
               bgcolor: iconBg,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
+              boxShadow: `0 4px 12px ${iconBg}`,
             }}
             aria-hidden="true"
           >
@@ -118,15 +125,16 @@ export default function SummaryCard({
                 alignItems: 'center',
                 gap: 0.4,
                 color: trendClr,
-                bgcolor: `${trendClr}18`,
-                borderRadius: '6px',
+                bgcolor: `${trendClr}14`,
+                borderRadius: '8px',
                 px: 0.85,
                 py: 0.4,
+                border: `1px solid ${trendClr}22`,
               }}
               aria-label={`Trend: ${formatTrend(trend)} ${trendLabel}`}
             >
               <TrendIcon change={trend} />
-              <Typography variant="caption" fontWeight={700} sx={{ fontSize: '0.7rem' }}>
+              <Typography variant="caption" fontWeight={700} sx={{ fontSize: '0.68rem' }}>
                 {formatTrend(trend)}
               </Typography>
             </Box>
@@ -142,18 +150,30 @@ export default function SummaryCard({
             mb: 0.5,
             letterSpacing: '-0.03em',
             fontSize: { xs: '1.75rem', sm: '2rem' },
+            color: isDark ? '#F0EDE6' : '#1A2342',
           }}
           aria-label={`${label}: ${value}`}
         >
           {formatCompactNumber(value)}
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" fontWeight={500}>
+        <Typography
+          variant="body2"
+          fontWeight={500}
+          sx={{ color: isDark ? 'rgba(240,237,230,0.55)' : '#7A7468' }}
+        >
           {label}
         </Typography>
 
         {trend != null && (
-          <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 0.75 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              display: 'block',
+              mt: 0.75,
+              color: isDark ? 'rgba(240,237,230,0.35)' : '#9CA3AF',
+            }}
+          >
             {trend >= 0 ? '+' : ''}
             {trend} {trendLabel}
           </Typography>

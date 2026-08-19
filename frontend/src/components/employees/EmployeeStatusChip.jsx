@@ -36,10 +36,10 @@ const STATUS_STYLES = {
   },
   ON_LEAVE: {
     label: 'On Leave',
-    color: '#4F46E5',
-    bg: 'rgba(79,70,229,0.1)',
-    border: 'rgba(79,70,229,0.25)',
-    dot: '#818CF8',
+    color: '#2D3A6B',
+    bg: 'rgba(26,35,66,0.1)',
+    border: 'rgba(26,35,66,0.2)',
+    dot: '#4F6AB5',
   },
   TERMINATED: {
     label: 'Terminated',

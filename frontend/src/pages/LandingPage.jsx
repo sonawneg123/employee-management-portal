@@ -482,13 +482,13 @@ export default function LandingPage() {
                     width: 30,
                     height: 30,
                     borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                    background: 'linear-gradient(135deg, #F5C518, #C49A00)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  <PeopleAltIcon sx={{ color: '#fff', fontSize: 17 }} />
+                  <PeopleAltIcon sx={{ color: '#1A2342', fontSize: 17 }} />
                 </Box>
                 <Typography
                   variant="body1"
@@ -542,10 +542,10 @@ export default function LandingPage() {
                     size="small"
                     sx={{
                       mb: 2.5,
-                      bgcolor: 'rgba(79,70,229,0.1)',
-                      color: 'primary.main',
+                      bgcolor: 'rgba(245,197,24,0.12)',
+                      color: '#92700A',
                       fontWeight: 700,
-                      border: '1px solid rgba(79,70,229,0.2)',
+                      border: '1px solid rgba(245,197,24,0.3)',
                     }}
                   />
                   <Typography

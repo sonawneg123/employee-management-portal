@@ -3,10 +3,20 @@
  *
  * Wraps dashboard widgets with a consistent card header, optional refresh,
  * and children content area. Used throughout dashboard and management pages.
+ * Premium SaaS design — clean, spacious, navy + gold accent.
  */
 
 import React from 'react';
-import { Box, Card, CardContent, Divider, IconButton, Tooltip, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  IconButton,
+  Tooltip,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
 
 /**
@@ -39,6 +49,9 @@ export default function SectionCard({
   sx,
   contentSx,
 }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', ...sx }}>
       {/* Header */}
@@ -57,15 +70,22 @@ export default function SectionCard({
           <Typography
             variant="h5"
             fontWeight={700}
-            sx={{ letterSpacing: '-0.01em', lineHeight: 1.3 }}
+            sx={{
+              letterSpacing: '-0.01em',
+              lineHeight: 1.3,
+              color: isDark ? '#F0EDE6' : '#1A2342',
+            }}
           >
             {title}
           </Typography>
           {subtitle && (
             <Typography
               variant="caption"
-              color="text.secondary"
-              sx={{ mt: 0.25, display: 'block' }}
+              sx={{
+                mt: 0.25,
+                display: 'block',
+                color: isDark ? 'rgba(240,237,230,0.45)' : '#9CA3AF',
+              }}
             >
               {subtitle}
             </Typography>
@@ -81,19 +101,24 @@ export default function SectionCard({
                 onClick={onRefresh}
                 aria-label={`Refresh ${title}`}
                 sx={{
-                  bgcolor: 'action.hover',
+                  bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(26,35,66,0.04)',
                   borderRadius: '8px',
                   width: 30,
                   height: 30,
+                  color: isDark ? 'rgba(240,237,230,0.5)' : '#9CA3AF',
                   animation: isFetching ? 'spin 1s linear infinite' : 'none',
                   '@keyframes spin': {
                     '0%': { transform: 'rotate(0deg)' },
                     '100%': { transform: 'rotate(360deg)' },
                   },
-                  '&:hover': { bgcolor: 'rgba(79,70,229,0.08)', color: 'primary.main' },
+                  '&:hover': {
+                    bgcolor: isDark ? 'rgba(245,197,24,0.12)' : 'rgba(26,35,66,0.07)',
+                    color: isDark ? '#F5C518' : '#1A2342',
+                  },
+                  transition: 'all 0.15s ease',
                 }}
               >
-                <RefreshRoundedIcon sx={{ fontSize: 15 }} />
+                <RefreshRoundedIcon sx={{ fontSize: 14 }} />
               </IconButton>
             </Tooltip>
           )}
